@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">CineTime</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_theaters">Mes cinémas</string>
+    <string name="ui_add_theater">Ajouter un cinéma</string>
+
+</resources>
