@@ -48,6 +48,15 @@ public class TheatersActivity extends ListActivity {
 			}
 		});
 		
+		search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				return searchButton.performClick();
+			}
+		
+		});
+		
 
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 
