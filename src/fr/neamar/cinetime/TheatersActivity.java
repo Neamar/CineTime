@@ -1,22 +1,19 @@
 package fr.neamar.cinetime;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import fr.neamar.cinetime.api.APIHelper;
@@ -44,8 +41,23 @@ public class TheatersActivity extends ListActivity {
 
 			@Override
 			public void onClick(View v) {
-				if(!search.getText().toString().equals(""))
+				if (!search.getText().toString().equals(""))
 					new LoadTheatersTask().execute(search.getText().toString());
+			}
+		});
+
+		getListView().setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+
+				String code = ((TheaterAdapter) parent.getAdapter()).theaters
+						.get(position).code;
+
+				Intent intent = new Intent(view.getContext(), MoviesActivity.class);
+				intent.putExtra("code", code);
+				startActivity(intent);
 			}
 		});
 	}
@@ -68,19 +80,18 @@ public class TheatersActivity extends ListActivity {
 
 			JSONArray jsonResults = APIHelper.findTheater(queries[0]);
 
-			for(int i = 0; i < jsonResults.length(); i++)
-			{
+			for (int i = 0; i < jsonResults.length(); i++) {
 				JSONObject jsonTheater;
 				try {
 					jsonTheater = jsonResults.getJSONObject(i);
-				
+
 					Theater theater = new Theater();
 					theater.code = jsonTheater.getString("code");
 					theater.title = jsonTheater.getString("name");
 					theater.location = jsonTheater.getString("address");
-					
+
 					resultsList.add(theater);
-					
+
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}

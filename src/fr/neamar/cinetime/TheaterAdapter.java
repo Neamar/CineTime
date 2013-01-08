@@ -17,7 +17,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 	/**
 	 * Array list containing all the theaters currently displayed
 	 */
-	private ArrayList<Theater> theaters = new ArrayList<Theater>();
+	public ArrayList<Theater> theaters = new ArrayList<Theater>();
 
 	public TheaterAdapter(Context context, int textViewResourceId,
 			ArrayList<Theater> theaters) {
