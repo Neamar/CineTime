@@ -42,7 +42,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 		TextView theaterName = (TextView) v.findViewById(R.id.listitem_theater_name);
 		TextView theaterLocation = (TextView) v.findViewById(R.id.listitem_theater_location);
 
-		theaterName.setText(theater.name);
+		theaterName.setText(theater.title);
 		theaterLocation.setText(theater.location);
 		
 		return v;

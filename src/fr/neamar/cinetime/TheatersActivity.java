@@ -1,5 +1,6 @@
 package fr.neamar.cinetime;
 
+import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
 import java.util.ArrayList;
 
@@ -15,17 +16,9 @@ public class TheatersActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_theaters);
 		
-		ArrayList<Theater> theaters = new ArrayList<Theater>();
-		Theater theater = new Theater();
-		theater.name = "UGC Confluence";
-		theater.location = "Centre commercial La Part-Dieu Niveau 2 et 4";
-		theaters.add(theater);
+		//DBHelper.insertFavorite(this, "P0005", "UGC Astoria", "31, cours Vitton");
 		
-		theater = new Theater();
-		theater.name = "UGC Cinécité";
-		theater.location = "117, cours Emile-Zola";
-		theaters.add(theater);
-		
+		ArrayList<Theater> theaters = DBHelper.getFavorites(this);
 		TheaterAdapter adapter = new TheaterAdapter(this, R.layout.listitem_theater, theaters);
 		setListAdapter(adapter);
 	}
