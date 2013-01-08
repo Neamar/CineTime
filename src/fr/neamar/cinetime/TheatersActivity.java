@@ -1,13 +1,27 @@
 package fr.neamar.cinetime;
 
-import fr.neamar.cinetime.db.DBHelper;
-import fr.neamar.cinetime.objects.Theater;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Menu;
-import android.widget.ListView;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import fr.neamar.cinetime.api.APIHelper;
+import fr.neamar.cinetime.db.DBHelper;
+import fr.neamar.cinetime.objects.Theater;
 
 public class TheatersActivity extends ListActivity {
 
@@ -15,17 +29,73 @@ public class TheatersActivity extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_theaters);
-		
-		//DBHelper.insertFavorite(this, "P0005", "UGC Astoria", "31, cours Vitton");
-		
+
+		// DBHelper.insertFavorite(this, "P0005", "UGC Astoria",
+		// "31, cours Vitton");
+
 		ArrayList<Theater> theaters = DBHelper.getFavorites(this);
-		TheaterAdapter adapter = new TheaterAdapter(this, R.layout.listitem_theater, theaters);
+		TheaterAdapter adapter = new TheaterAdapter(this,
+				R.layout.listitem_theater, theaters);
 		setListAdapter(adapter);
+
+		final EditText search = (EditText) findViewById(R.id.theaters_search);
+		ImageButton searchButton = (ImageButton) findViewById(R.id.theaters_search_button);
+		searchButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if(!search.getText().toString().equals(""))
+					new LoadTheatersTask().execute(search.getText().toString());
+			}
+		});
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_theaters, menu);
-		return true;
+	private class LoadTheatersTask extends
+			AsyncTask<String, Void, ArrayList<Theater>> {
+		private final ProgressDialog dialog = new ProgressDialog(
+				TheatersActivity.this);
+
+		@Override
+		protected void onPreExecute() {
+			this.dialog.setMessage("Recherche en cours...");
+			this.dialog.show();
+
+		}
+
+		@Override
+		protected ArrayList<Theater> doInBackground(String... queries) {
+			ArrayList<Theater> resultsList = new ArrayList<Theater>();
+
+			JSONArray jsonResults = APIHelper.findTheater(queries[0]);
+
+			for(int i = 0; i < jsonResults.length(); i++)
+			{
+				JSONObject jsonTheater;
+				try {
+					jsonTheater = jsonResults.getJSONObject(i);
+				
+					Theater theater = new Theater();
+					theater.code = jsonTheater.getString("code");
+					theater.title = jsonTheater.getString("name");
+					theater.location = jsonTheater.getString("address");
+					
+					resultsList.add(theater);
+					
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+
+			return resultsList;
+
+		}
+
+		@Override
+		protected void onPostExecute(ArrayList<Theater> resultsList) {
+			if (this.dialog.isShowing())
+				this.dialog.dismiss();
+			setListAdapter(new TheaterAdapter(TheatersActivity.this,
+					R.layout.listitem_theater, resultsList));
+		}
 	}
 }
