@@ -1,45 +1,33 @@
 package fr.neamar.cinetime;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.text.InputType;
-import android.view.Menu;
-import android.widget.EditText;
+import fr.neamar.cinetime.objects.Theater;
+import java.util.ArrayList;
 
-public class TheatersActivity extends Activity {
+import android.app.ListActivity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.widget.ListView;
+
+public class TheatersActivity extends ListActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_theaters);
-
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle(getString(R.string.ui_add_theater_title));
-		alert.setMessage(getString(R.string.ui_add_theater_desc));
-
-		// Set an EditText view to get user input
-		final EditText input = new EditText(this);
-		input.setInputType(InputType.TYPE_CLASS_NUMBER);
-		alert.setView(input);
-
-		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				String value = input.getText().toString();
-				// Do something with value!
-			}
-		});
-
-		alert.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// Canceled.
-					}
-				});
-
-		alert.show();
+		
+		ArrayList<Theater> theaters = new ArrayList<Theater>();
+		Theater theater = new Theater();
+		theater.name = "UGC Confluence";
+		theater.location = "Centre commercial La Part-Dieu Niveau 2 et 4";
+		theaters.add(theater);
+		
+		theater = new Theater();
+		theater.name = "UGC Cinécité";
+		theater.location = "117, cours Emile-Zola";
+		theaters.add(theater);
+		
+		TheaterAdapter adapter = new TheaterAdapter(this, R.layout.listitem_theater, theaters);
+		setListAdapter(adapter);
 	}
 
 	@Override
