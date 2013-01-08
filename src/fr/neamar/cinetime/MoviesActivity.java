@@ -6,30 +6,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.objects.Movie;
 
 public class MoviesActivity extends ListActivity {
-	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_movies);
 
 		new LoadMoviesTask().execute(getIntent().getStringExtra("code"));
-		
+
 		setTitle("Séances " + getIntent().getStringExtra("title"));
-		
-		//if(Build.VERSION.SDK_INT >=11)
-			//getActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
 	private class LoadMoviesTask extends
@@ -54,22 +47,31 @@ public class MoviesActivity extends ListActivity {
 				JSONObject jsonMovie, jsonShow;
 				try {
 					jsonMovie = jsonResults.getJSONObject(i);
-					jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject("movie");
+					jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject(
+							"movie");
 
 					Movie movie = new Movie();
 					movie.title = jsonShow.getString("title");
 					movie.duration = jsonShow.getInt("runtime");
 					movie.duration = jsonShow.getInt("runtime");
-					movie.pressRating = jsonShow.getJSONObject("statistics").getString("pressRating");
-					movie.userRating = jsonShow.getJSONObject("statistics").getString("userRating");
+					movie.pressRating = jsonShow.getJSONObject("statistics")
+							.getString("pressRating");
+					movie.userRating = jsonShow.getJSONObject("statistics")
+							.getString("userRating");
 					movie.display = jsonMovie.getString("display");
-					movie.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original").equals("true");
-					movie.is3D = jsonMovie.getJSONObject("screenFormat").getString("$").equals("3D");
-
+					movie.isOriginalLanguage = jsonMovie
+							.getJSONObject("version").getString("original")
+							.equals("true");
+					if(jsonMovie.has("screenFormat"))
+						movie.is3D = jsonMovie.getJSONObject("screenFormat")
+								.getString("$").equals("3D");
+					else
+						movie.is3D = false;
+					
 					resultsList.add(movie);
 
 				} catch (JSONException e) {
-					Log.e("wtf",e.getMessage());
+					Log.e("wtf", e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -85,17 +87,5 @@ public class MoviesActivity extends ListActivity {
 			setListAdapter(new MovieAdapter(MoviesActivity.this,
 					R.layout.listitem_theater, resultsList));
 		}
-	}
-	
-	public boolean onOptionsItemSelected(MenuItem item) 
-	{
-		switch (item.getItemId())
-		{
-			case android.R.id.home:
-				onBackPressed();
-				break;
-		}
-		
-		return true;
 	}
 }
