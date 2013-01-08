@@ -54,10 +54,13 @@ public class MoviesActivity extends ListActivity {
 					movie.title = jsonShow.getString("title");
 					movie.duration = jsonShow.getInt("runtime");
 					movie.duration = jsonShow.getInt("runtime");
-					movie.pressRating = jsonShow.getJSONObject("statistics")
-							.getString("pressRating");
-					movie.userRating = jsonShow.getJSONObject("statistics")
-							.getString("userRating");
+					if(jsonShow.has("statistics"))
+					{
+						movie.pressRating = jsonShow.getJSONObject("statistics")
+								.getString("pressRating");
+						movie.userRating = jsonShow.getJSONObject("statistics")
+								.getString("userRating");
+					}
 					movie.display = jsonMovie.getString("display");
 					movie.isOriginalLanguage = jsonMovie
 							.getJSONObject("version").getString("original")
@@ -65,8 +68,6 @@ public class MoviesActivity extends ListActivity {
 					if(jsonMovie.has("screenFormat"))
 						movie.is3D = jsonMovie.getJSONObject("screenFormat")
 								.getString("$").equals("3D");
-					else
-						movie.is3D = false;
 					
 					resultsList.add(movie);
 

@@ -2,57 +2,69 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="horizontal" >
 
-    <TextView
-        android:id="@+id/listitem_movie_title"
+    <ImageView
+        android:id="@+id/imageView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Movie name"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/stub" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical" >
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/listitem_movie_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Movie name"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1.00"
-            android:orientation="vertical" >
+            android:gravity="center_vertical" >
 
-            <ProgressBar
-                android:id="@+id/listitem_movie_pressrating"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:max="500" />
+                android:layout_weight="1.00"
+                android:orientation="vertical" >
 
-            <ProgressBar
-                android:id="@+id/listitem_movie_userrating"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
+                <ProgressBar
+                    android:id="@+id/listitem_movie_pressrating"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="500" />
+
+                <ProgressBar
+                    android:id="@+id/listitem_movie_userrating"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="500" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/listitem_movie_extra"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:max="500" />
-
+                android:layout_weight="1.00"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="3D" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/listitem_movie_extra"
-            android:layout_width="fill_parent"
+            android:id="@+id/listitem_movie_display"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1.00"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="3D" />
-
+            android:text="Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/listitem_movie_display"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </LinearLayout>

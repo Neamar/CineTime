@@ -5,10 +5,10 @@ import android.util.Log;
 public class Movie {
 	public String title;
 	public int duration;
-	public String pressRating;
-	public String userRating;
+	public String pressRating = "0";
+	public String userRating = "0";
 	public Boolean isOriginalLanguage;
-	public Boolean is3D;
+	public Boolean is3D = false;
 	
 	public String display;
 	
