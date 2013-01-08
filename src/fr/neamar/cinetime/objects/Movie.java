@@ -1,5 +1,7 @@
 package fr.neamar.cinetime.objects;
 
+import android.util.Log;
+
 public class Movie {
 	public String title;
 	public int duration;
@@ -23,6 +25,26 @@ public class Movie {
 		
 		// "(film à ..)"
 		optimisedDisplay = optimisedDisplay.replaceAll(" \\([^\\)]+\\)", "");
+		
+		//Same display each day ?
+		String[] days = optimisedDisplay.replaceAll(".+ : ", "").split("\r\n");
+		Boolean isSimilar = true;
+		String firstOne = days[0];
+		for(int i = 1; i < days.length; i++)
+		{
+			if(!firstOne.equals(days[i]))
+			{
+				isSimilar = false;
+				break;
+			}
+		}
+		
+		if(isSimilar)
+		{
+			optimisedDisplay = "T.L.J : " + days[0];
+		}
+		
+		
 		return optimisedDisplay;
 	}
 }

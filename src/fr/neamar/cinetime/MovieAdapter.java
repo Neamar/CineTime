@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import fr.neamar.cinetime.objects.Movie;
 
@@ -40,16 +41,16 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		Movie movie = movies.get(position);
 
 		TextView movieTitle = (TextView) v.findViewById(R.id.listitem_movie_title);
-		TextView movieDuration = (TextView) v.findViewById(R.id.listitem_movie_duration);
-		TextView moviePressRating = (TextView) v.findViewById(R.id.listitem_movie_pressrating);
-		TextView movieUserRating = (TextView) v.findViewById(R.id.listitem_movie_userrating);
+		TextView movieExtra = (TextView) v.findViewById(R.id.listitem_movie_extra);
+		ProgressBar moviePressRating = (ProgressBar) v.findViewById(R.id.listitem_movie_pressrating);
+		ProgressBar movieUserRating = (ProgressBar) v.findViewById(R.id.listitem_movie_userrating);
 		TextView movieDisplay = (TextView) v.findViewById(R.id.listitem_movie_display);
 
 		movieTitle.setText(movie.title);
 		
-		movieDuration.setText(movie.getDuration());
-		moviePressRating.setText(movie.pressRating);
-		movieUserRating.setText(movie.userRating);
+		movieExtra.setText(movie.getDuration() + " " + (movie.isOriginalLanguage?"VO":"") + " " + (movie.is3D?"3D":""));
+		moviePressRating.setProgress((int) (Float.parseFloat(movie.pressRating) * 100));
+		movieUserRating.setProgress((int) (Float.parseFloat(movie.userRating) * 100));
 		movieDisplay.setText(movie.getDisplay());
 		
 		return v;

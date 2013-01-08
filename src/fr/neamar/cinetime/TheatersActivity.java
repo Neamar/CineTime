@@ -11,11 +11,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
@@ -36,7 +38,7 @@ public class TheatersActivity extends ListActivity {
 		setListAdapter(adapter);
 
 		final EditText search = (EditText) findViewById(R.id.theaters_search);
-		ImageButton searchButton = (ImageButton) findViewById(R.id.theaters_search_button);
+		final ImageButton searchButton = (ImageButton) findViewById(R.id.theaters_search_button);
 		searchButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -45,6 +47,7 @@ public class TheatersActivity extends ListActivity {
 					new LoadTheatersTask().execute(search.getText().toString());
 			}
 		});
+		
 
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 
@@ -54,15 +57,20 @@ public class TheatersActivity extends ListActivity {
 
 				String code = ((TheaterAdapter) parent.getAdapter()).theaters
 						.get(position).code;
+				
+				String title = ((TheaterAdapter) parent.getAdapter()).theaters
+						.get(position).title;
 
 				Intent intent = new Intent(view.getContext(), MoviesActivity.class);
 				intent.putExtra("code", code);
+				intent.putExtra("title", title);
 				startActivity(intent);
 			}
 		});
 		
 		Intent intent = new Intent(this, MoviesActivity.class);
 		intent.putExtra("code", "P0671");
+		intent.putExtra("title", "UGC Astoria");
 		startActivity(intent);
 	}
 

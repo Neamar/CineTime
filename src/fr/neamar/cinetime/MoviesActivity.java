@@ -21,6 +21,8 @@ public class MoviesActivity extends ListActivity {
 		setContentView(R.layout.activity_movies);
 
 		new LoadMoviesTask().execute(getIntent().getStringExtra("code"));
+		
+		setTitle("Séances " + getIntent().getStringExtra("title"));
 	}
 
 	private class LoadMoviesTask extends
@@ -54,6 +56,8 @@ public class MoviesActivity extends ListActivity {
 					movie.pressRating = jsonShow.getJSONObject("statistics").getString("pressRating");
 					movie.userRating = jsonShow.getJSONObject("statistics").getString("userRating");
 					movie.display = jsonMovie.getString("display");
+					movie.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original").equals("true");
+					movie.is3D = jsonMovie.getJSONObject("screenFormat").getString("$").equals("3D");
 
 					resultsList.add(movie);
 

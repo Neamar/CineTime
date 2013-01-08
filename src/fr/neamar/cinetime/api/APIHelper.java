@@ -3,6 +3,8 @@ package fr.neamar.cinetime.api;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -61,7 +63,11 @@ public class APIHelper {
 	
 	public static JSONArray findMovies(String code)
 	{
-		String url = getBaseUrl("showtimelist") + "&theaters=" + code + "&format=json";
+		Calendar date = Calendar.getInstance();
+		String today = date.get(Calendar.YEAR) + "-" + String.format("%02d", date.get(Calendar.MONTH) + 1) + "-" + String.format("%02d", date.get(Calendar.DAY_OF_MONTH));
+
+		Log.e("wtf", today);
+		String url = getBaseUrl("showtimelist") + "&theaters=" + code + "&date=2013-01-08&format=json";
 
 		try {
 			// Create a new HTTP Client

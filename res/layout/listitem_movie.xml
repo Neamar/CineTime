@@ -11,44 +11,42 @@
         android:text="Movie name"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:stretchColumns="*" >
+        android:gravity="center_vertical" >
 
-        <TableRow
-            android:id="@+id/tableRow1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.00"
+            android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/listitem_movie_duration"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="2h05."
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-
-            <TextView
+            <ProgressBar
                 android:id="@+id/listitem_movie_pressrating"
-                android:layout_width="wrap_content"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="3/5"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:max="500" />
 
-            <TextView
+            <ProgressBar
                 android:id="@+id/listitem_movie_userrating"
-                android:layout_width="wrap_content"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="2/5"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:max="500" />
 
-        </TableRow>
-    </TableLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/listitem_movie_extra"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.00"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="3D" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/listitem_movie_display"
