@@ -15,11 +15,15 @@ import android.util.Log;
 import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
-	public static final String BASE_URL = "http://api.allocine.fr/rest/v3/search?partner=YW5kcm9pZC12M3M";
+
+	protected static String getBaseUrl(String page)
+	{
+		return "http://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
+	}
 	
 	public static JSONArray findTheater(String query)
 	{
-		String url = BASE_URL + "&filter=theater&q=" + query.replace("&", "") + "&format=json";
+		String url = getBaseUrl("search") + "&filter=theater&q=" + query.replace("&", "") + "&format=json";
 
 		try {
 			// Create a new HTTP Client
@@ -44,6 +48,44 @@ public class APIHelper {
 			
 			if(feed.getInt("totalResults") > 0)
 				return feed.getJSONArray("theater");
+			else
+				return new JSONArray();
+			
+		} catch (Exception e) {
+			Log.e("wtf", e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return new JSONArray();
+	}
+	
+	public static JSONArray findMovies(String code)
+	{
+		String url = getBaseUrl("showtimelist") + "&theaters=" + code + "&format=json";
+
+		try {
+			// Create a new HTTP Client
+			DefaultHttpClient defaultClient = new DefaultHttpClient();
+			// Setup the get request
+			HttpGet httpGetRequest = new HttpGet(url);
+
+			// Execute the request in the client
+			HttpResponse httpResponse = defaultClient
+					.execute(httpGetRequest);
+			
+			// Grab the response
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(httpResponse.getEntity()
+							.getContent(), "UTF-8"));
+			String json = reader.readLine();
+
+			// Instantiate a JSON object from the request response
+			JSONObject jsonObject = new JSONObject(json);
+			
+			JSONObject feed = jsonObject.getJSONObject("feed");
+			
+			if(feed.getInt("totalResults") > 0)
+				return feed.getJSONArray("theaterShowtimes").getJSONObject(0).getJSONArray("movieShowtimes");
 			else
 				return new JSONArray();
 			

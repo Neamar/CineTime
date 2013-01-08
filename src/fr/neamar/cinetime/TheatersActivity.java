@@ -60,6 +60,10 @@ public class TheatersActivity extends ListActivity {
 				startActivity(intent);
 			}
 		});
+		
+		Intent intent = new Intent(this, MoviesActivity.class);
+		intent.putExtra("code", "P0671");
+		startActivity(intent);
 	}
 
 	private class LoadTheatersTask extends
