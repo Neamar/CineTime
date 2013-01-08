@@ -66,8 +66,7 @@ public class APIHelper {
 		Calendar date = Calendar.getInstance();
 		String today = date.get(Calendar.YEAR) + "-" + String.format("%02d", date.get(Calendar.MONTH) + 1) + "-" + String.format("%02d", date.get(Calendar.DAY_OF_MONTH));
 
-		Log.e("wtf", today);
-		String url = getBaseUrl("showtimelist") + "&theaters=" + code + "&date=2013-01-08&format=json";
+		String url = getBaseUrl("showtimelist") + "&theaters=" + code + "&date=" + today + "&format=json";
 
 		try {
 			// Create a new HTTP Client

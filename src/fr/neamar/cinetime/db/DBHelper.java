@@ -10,7 +10,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class DBHelper {
-
+	protected static ArrayList<String> favCodes = new ArrayList<String>();
+	
 	private static SQLiteDatabase getDatabase(Context context) {
 		DB db = new DB(context);
 		return db.getReadableDatabase();
@@ -32,6 +33,8 @@ public class DBHelper {
 		values.put("location", location);
 		db.insert("favorites", null, values);
 		db.close();
+		
+		favCodes.add(code);
 	}
 
 	/**
@@ -44,6 +47,8 @@ public class DBHelper {
 	public static ArrayList<Theater> getFavorites(Context context) {
 		SQLiteDatabase db = getDatabase(context);
 
+		favCodes = new ArrayList<String>();
+		
 		// Cursor query (boolean distinct, String table, String[] columns,
 		// String selection, String[] selectionArgs, String groupBy, String
 		// having, String orderBy, String limit)
@@ -62,11 +67,25 @@ public class DBHelper {
 			entry.location = cursor.getString(2);
 
 			favorites.add(entry);
+			favCodes.add(entry.code);
 			cursor.moveToNext();
 		}
 		cursor.close();
 		db.close();
 
 		return favorites;
+	}
+	
+	public static void removeFavorite(Context context, String code) {
+		SQLiteDatabase db = getDatabase(context);
+
+		db.delete("favorites", "code = ?", new String[]{code});
+		
+		favCodes.remove(code);
+	}
+	
+	public static boolean isFavorite(String code)
+	{
+		return favCodes.contains(code);
 	}
 }

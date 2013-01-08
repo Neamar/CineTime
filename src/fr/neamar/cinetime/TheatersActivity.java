@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.db.DBHelper;
@@ -29,22 +30,13 @@ public class TheatersActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_theaters);
 
-		// DBHelper.insertFavorite(this, "P0005", "UGC Astoria",
-		// "31, cours Vitton");
-
-		ArrayList<Theater> theaters = DBHelper.getFavorites(this);
-		TheaterAdapter adapter = new TheaterAdapter(this,
-				R.layout.listitem_theater, theaters);
-		setListAdapter(adapter);
-
 		final EditText search = (EditText) findViewById(R.id.theaters_search);
 		final ImageButton searchButton = (ImageButton) findViewById(R.id.theaters_search_button);
 		searchButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				if (!search.getText().toString().equals(""))
-					new LoadTheatersTask().execute(search.getText().toString());
+				new LoadTheatersTask().execute(search.getText().toString().trim());
 			}
 		});
 		
@@ -77,10 +69,13 @@ public class TheatersActivity extends ListActivity {
 			}
 		});
 		
-		Intent intent = new Intent(this, MoviesActivity.class);
+		//Display favorites :
+		searchButton.performClick();
+		
+		/*Intent intent = new Intent(this, MoviesActivity.class);
 		intent.putExtra("code", "P0671");
 		intent.putExtra("title", "UGC Astoria");
-		startActivity(intent);
+		startActivity(intent);*/
 	}
 
 	private class LoadTheatersTask extends
@@ -97,6 +92,11 @@ public class TheatersActivity extends ListActivity {
 
 		@Override
 		protected ArrayList<Theater> doInBackground(String... queries) {
+			if(queries[0].equals(""))
+			{
+				return DBHelper.getFavorites(TheatersActivity.this);
+			}
+			
 			ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
 			JSONArray jsonResults = APIHelper.findTheater(queries[0]);
