@@ -33,6 +33,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		imageLoader = new ImageLoader(ac.getApplicationContext());
 	}
 
+	@Override
 	public int getCount() {
 		return movies.size();
 	}

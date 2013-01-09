@@ -1,4 +1,5 @@
 package fr.neamar.cinetime.ui;
+
 //Credits goes to com.fedorvlasov.lazylist
 // https://github.com/thest1/LazyList
 
@@ -176,6 +177,7 @@ public class ImageLoader {
 			photoToLoad = p;
 		}
 
+		@Override
 		public void run() {
 			if (imageViewReused(photoToLoad))
 				return;

@@ -35,19 +35,19 @@ public class TheatersActivity extends ListActivity {
 
 			@Override
 			public void onClick(View v) {
-				new LoadTheatersTask().execute(search.getText().toString().trim());
+				new LoadTheatersTask().execute(search.getText().toString()
+						.trim());
 			}
 		});
-		
+
 		search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId,
 					KeyEvent event) {
 				return searchButton.performClick();
 			}
-		
+
 		});
-		
 
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 
@@ -57,24 +57,26 @@ public class TheatersActivity extends ListActivity {
 
 				String code = ((TheaterAdapter) parent.getAdapter()).theaters
 						.get(position).code;
-				
+
 				String title = ((TheaterAdapter) parent.getAdapter()).theaters
 						.get(position).title;
 
-				Intent intent = new Intent(view.getContext(), MoviesActivity.class);
+				Intent intent = new Intent(view.getContext(),
+						MoviesActivity.class);
 				intent.putExtra("code", code);
 				intent.putExtra("title", title);
 				startActivity(intent);
 			}
 		});
-		
-		//Display favorites :
+
+		// Display favorites :
 		searchButton.performClick();
-		
-		/*Intent intent = new Intent(this, MoviesActivity.class);
-		intent.putExtra("code", "P0671");
-		intent.putExtra("title", "UGC Astoria");
-		startActivity(intent);*/
+
+		/*
+		 * Intent intent = new Intent(this, MoviesActivity.class);
+		 * intent.putExtra("code", "P0671"); intent.putExtra("title",
+		 * "UGC Astoria"); startActivity(intent);
+		 */
 	}
 
 	private class LoadTheatersTask extends
@@ -91,11 +93,10 @@ public class TheatersActivity extends ListActivity {
 
 		@Override
 		protected ArrayList<Theater> doInBackground(String... queries) {
-			if(queries[0].equals(""))
-			{
+			if (queries[0].equals("")) {
 				return DBHelper.getFavorites(TheatersActivity.this);
 			}
-			
+
 			ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
 			JSONArray jsonResults = APIHelper.findTheater(queries[0]);

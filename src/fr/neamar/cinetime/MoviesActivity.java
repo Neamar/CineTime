@@ -14,7 +14,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import fr.neamar.cinetime.api.APIHelper;
@@ -22,7 +21,7 @@ import fr.neamar.cinetime.objects.Movie;
 
 public class MoviesActivity extends ListActivity {
 	public ArrayList<Movie> movies = new ArrayList<Movie>();
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -37,7 +36,9 @@ public class MoviesActivity extends ListActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Uri uriUrl = Uri.parse("http://www.allocine.fr/film/fichefilm_gen_cfilm=" + movies.get(position).code + ".html");
+				Uri uriUrl = Uri
+						.parse("http://www.allocine.fr/film/fichefilm_gen_cfilm="
+								+ movies.get(position).code + ".html");
 				Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
 				startActivity(launchBrowser);
 			}

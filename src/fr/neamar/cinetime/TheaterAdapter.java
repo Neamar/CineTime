@@ -16,7 +16,7 @@ import fr.neamar.cinetime.objects.Theater;
 public class TheaterAdapter extends ArrayAdapter<Theater> {
 
 	private Context context;
-	
+
 	/**
 	 * Array list containing all the theaters currently displayed
 	 */
@@ -34,39 +34,42 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = convertView;
 
-		if(v == null)
-		{
-			LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		if (v == null) {
+			LayoutInflater vi = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = vi.inflate(R.layout.listitem_theater, null);
 		}
-		
+
 		final Theater theater = theaters.get(position);
 
-		TextView theaterName = (TextView) v.findViewById(R.id.listitem_theater_name);
-		TextView theaterLocation = (TextView) v.findViewById(R.id.listitem_theater_location);
+		TextView theaterName = (TextView) v
+				.findViewById(R.id.listitem_theater_name);
+		TextView theaterLocation = (TextView) v
+				.findViewById(R.id.listitem_theater_location);
 
-		final CheckBox fav = (CheckBox) v.findViewById(R.id.listitem_theater_fav);
+		final CheckBox fav = (CheckBox) v
+				.findViewById(R.id.listitem_theater_fav);
 		fav.setChecked(DBHelper.isFavorite(theater.code));
-		fav.setOnClickListener( new View.OnClickListener() {
-			
+		fav.setOnClickListener(new View.OnClickListener() {
+
 			@Override
 			public void onClick(View v) {
-				if (fav.isChecked())
-				{
-					DBHelper.insertFavorite(v.getContext(), theater.code, theater.title, theater.location);
-					Toast.makeText(getContext(), "Cinéma ajouté aux favoris", Toast.LENGTH_SHORT).show();
-				}
-				else
-				{
+				if (fav.isChecked()) {
+					DBHelper.insertFavorite(v.getContext(), theater.code,
+							theater.title, theater.location);
+					Toast.makeText(getContext(), "Cinéma ajouté aux favoris",
+							Toast.LENGTH_SHORT).show();
+				} else {
 					DBHelper.removeFavorite(v.getContext(), theater.code);
-					Toast.makeText(getContext(), "Cinéma retiré des favoris", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getContext(), "Cinéma retiré des favoris",
+							Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
-	
+
 		theaterName.setText(theater.title);
 		theaterLocation.setText(theater.location);
-		
+
 		return v;
 	}
 }
