@@ -1,9 +1,9 @@
 package fr.neamar.cinetime.objects;
 
-import android.util.Log;
 
 public class Movie {
 	public String title;
+	public String poster;
 	public int duration;
 	public String pressRating = "0";
 	public String userRating = "0";

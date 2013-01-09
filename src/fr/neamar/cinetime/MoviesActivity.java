@@ -52,6 +52,7 @@ public class MoviesActivity extends ListActivity {
 
 					Movie movie = new Movie();
 					movie.title = jsonShow.getString("title");
+					movie.poster = "http://images.allocine.fr/r_120_500" + jsonShow.getJSONObject("poster").getString("path");
 					movie.duration = jsonShow.getInt("runtime");
 					movie.duration = jsonShow.getInt("runtime");
 					if(jsonShow.has("statistics"))

@@ -1,6 +1,7 @@
 package fr.neamar.cinetime.ui;
 
 import java.io.File;
+
 import android.content.Context;
 
 public class FileCache {

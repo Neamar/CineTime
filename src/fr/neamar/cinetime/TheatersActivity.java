@@ -17,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.db.DBHelper;

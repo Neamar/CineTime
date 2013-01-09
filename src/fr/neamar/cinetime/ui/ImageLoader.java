@@ -17,13 +17,12 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import fr.neamar.cinetime.R;
-import fr.neamar.cinetime.R.drawable;
-import android.os.Handler;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.widget.ImageView;
+import fr.neamar.cinetime.R;
 
 public class ImageLoader {
 

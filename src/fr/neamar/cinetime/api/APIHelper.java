@@ -2,9 +2,7 @@ package fr.neamar.cinetime.api;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,8 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.util.Log;
-
-import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
 

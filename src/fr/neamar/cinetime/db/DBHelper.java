@@ -2,12 +2,11 @@ package fr.neamar.cinetime.db;
 
 import java.util.ArrayList;
 
-import fr.neamar.cinetime.objects.Theater;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import fr.neamar.cinetime.objects.Theater;
 
 public class DBHelper {
 	protected static ArrayList<String> favCodes = new ArrayList<String>();
