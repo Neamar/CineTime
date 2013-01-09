@@ -2,6 +2,8 @@ package fr.neamar.cinetime.objects;
 
 
 public class Movie {
+	public String code;
+	
 	public String title;
 	public String poster;
 	public int duration;
@@ -26,6 +28,9 @@ public class Movie {
 		// "(film à ..)"
 		optimisedDisplay = optimisedDisplay.replaceAll(" \\([^\\)]+\\)", "");
 		
+		// "15:30, "
+		optimisedDisplay = optimisedDisplay.replaceAll(",", "");
+		
 		//Same display each day ?
 		String[] days = optimisedDisplay.replaceAll(".+ : ", "").split("\r\n");
 		Boolean isSimilar = true;
@@ -39,7 +44,7 @@ public class Movie {
 			}
 		}
 		
-		if(isSimilar)
+		if(isSimilar && days.length == 7)
 		{
 			optimisedDisplay = "T.L.J : " + days[0];
 		}
