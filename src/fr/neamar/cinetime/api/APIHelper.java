@@ -2,6 +2,8 @@ package fr.neamar.cinetime.api;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Calendar;
 
 import org.apache.http.HttpResponse;
@@ -20,8 +22,14 @@ public class APIHelper {
 	}
 
 	public static JSONArray findTheater(String query) {
-		String url = getBaseUrl("search") + "&filter=theater&q="
-				+ query.replace("&", "") + "&format=json";
+		String url;
+		try {
+			url = getBaseUrl("search") + "&filter=theater&q="
+					+ URLEncoder.encode(query, "UTF-8") + "&format=json";
+		} catch (UnsupportedEncodingException e1) {
+			url = getBaseUrl("search") + "&filter=theater&q="
+					+ query + "&format=json";
+		}
 
 		try {
 			// Create a new HTTP Client

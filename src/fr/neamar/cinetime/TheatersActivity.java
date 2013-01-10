@@ -8,11 +8,13 @@ import org.json.JSONObject;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -35,6 +37,9 @@ public class TheatersActivity extends ListActivity {
 
 			@Override
 			public void onClick(View v) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
+
 				new LoadTheatersTask().execute(search.getText().toString()
 						.trim());
 			}
@@ -71,12 +76,6 @@ public class TheatersActivity extends ListActivity {
 
 		// Display favorites :
 		searchButton.performClick();
-
-		/*
-		 * Intent intent = new Intent(this, MoviesActivity.class);
-		 * intent.putExtra("code", "P0671"); intent.putExtra("title",
-		 * "UGC Astoria"); startActivity(intent);
-		 */
 	}
 
 	private class LoadTheatersTask extends
