@@ -82,53 +82,7 @@ public class MoviesActivity extends ListActivity {
 
 		@Override
 		protected ArrayList<Movie> doInBackground(String... queries) {
-			ArrayList<Movie> resultsList = new ArrayList<Movie>();
-
-			JSONArray jsonResults = APIHelper.findMovies(queries[0]);
-
-			for (int i = 0; i < jsonResults.length(); i++) {
-				JSONObject jsonMovie, jsonShow;
-
-				try {
-					jsonMovie = jsonResults.getJSONObject(i);
-					jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject(
-							"movie");
-
-					Movie movie = new Movie();
-					movie.code = jsonShow.getString("code");
-					movie.title = jsonShow.getString("title");
-					movie.poster = "http://images.allocine.fr/r_120_500"
-							+ jsonShow.getJSONObject("poster")
-									.getString("path");
-					movie.duration = jsonShow.getInt("runtime");
-					movie.duration = jsonShow.getInt("runtime");
-					if (jsonShow.has("statistics")) {
-						if (jsonShow.getJSONObject("statistics").has(
-								"pressRating"))
-							movie.pressRating = jsonShow.getJSONObject(
-									"statistics").getString("pressRating");
-						if (jsonShow.getJSONObject("statistics").has(
-								"userRating"))
-							movie.userRating = jsonShow.getJSONObject(
-									"statistics").getString("userRating");
-					}
-					movie.display = jsonMovie.getString("display");
-					movie.isOriginalLanguage = jsonMovie
-							.getJSONObject("version").getString("original")
-							.equals("true");
-					if (jsonMovie.has("screenFormat"))
-						movie.is3D = jsonMovie.getJSONObject("screenFormat")
-								.getString("$").equals("3D");
-
-					resultsList.add(movie);
-
-				} catch (JSONException e) {
-					Log.e("wtf", e.getMessage());
-					e.printStackTrace();
-				}
-			}
-
-			return resultsList;
+			return APIHelper.findMoviesFromTheater(queries[0]);
 		}
 
 		@Override
