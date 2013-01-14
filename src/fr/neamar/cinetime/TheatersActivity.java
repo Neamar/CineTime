@@ -26,29 +26,33 @@ import fr.neamar.cinetime.objects.Theater;
 
 public class TheatersActivity extends ListActivity {
 
+	public EditText searchText;
+	public ImageButton searchButton;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_theaters);
+		setTitle(R.string.title_activity_theaters);
 
-		final EditText search = (EditText) findViewById(R.id.theaters_search);
-		final ImageButton searchButton = (ImageButton) findViewById(R.id.theaters_search_button);
+		searchText = (EditText) findViewById(R.id.theaters_search);
+		searchButton = (ImageButton) findViewById(R.id.theaters_search_button);
+		
 		searchButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
-
-				new LoadTheatersTask().execute(search.getText().toString()
-						.trim());
+				searchForTheater(searchText.getText().toString().trim());
 			}
 		});
 
-		search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+		// When searching from keyboard
+		searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId,
 					KeyEvent event) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
 				return searchButton.performClick();
 			}
 
@@ -76,6 +80,26 @@ public class TheatersActivity extends ListActivity {
 
 		// Display favorites :
 		searchButton.performClick();
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		//When pressing back, if a query is entered redisplay favorites. 
+		//Else perform default back action.
+		if(searchText.getText().toString().equals(""))
+		{
+			super.onBackPressed();
+		}
+		else
+		{
+			searchText.setText("");
+			searchButton.performClick();
+		}
+	}
+
+	private void searchForTheater(String query) {
+		new LoadTheatersTask().execute(query);
 	}
 
 	private class LoadTheatersTask extends

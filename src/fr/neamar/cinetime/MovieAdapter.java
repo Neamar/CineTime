@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,13 +66,15 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
 		movieTitle.setText(movie.title);
 
-		movieExtra.setText(movie.getDuration() + " "
-				+ (movie.isOriginalLanguage ? "VO" : "") + " "
-				+ (movie.is3D ? "3D" : ""));
+		String description = movie.getDuration(); 
+		description += (movie.isOriginalLanguage ? " <i>VO</i>" : "");
+		description += (movie.is3D ? " <strong>3D</strong>" : "");
+		
+		movieExtra.setText(Html.fromHtml(description));
 		moviePressRating
-				.setProgress((int) (Float.parseFloat(movie.pressRating) * 100));
+				.setProgress((int) (Float.parseFloat(movie.pressRating) * 10));
 		movieUserRating
-				.setProgress((int) (Float.parseFloat(movie.userRating) * 100));
+				.setProgress((int) (Float.parseFloat(movie.userRating) * 10));
 		movieDisplay.setText(movie.getDisplay());
 
 		imageLoader.DisplayImage(movie.poster, moviePoster);

@@ -34,19 +34,28 @@
                 android:layout_weight="1.00"
                 android:orientation="vertical" >
 
-                <ProgressBar
+                <RatingBar
                     android:id="@+id/listitem_movie_pressrating"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:max="500" />
+                    android:contentDescription="Note presse"
+                    android:isIndicator="true"
+                    android:max="5"
+                    android:rating="3.1"
+                    android:stepSize="0.1" />
 
-                <ProgressBar
+                <RatingBar
                     android:id="@+id/listitem_movie_userrating"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:max="500" />
+                    android:contentDescription="Note presse"
+                    android:isIndicator="true"
+                    android:max="10"
+                    android:rating="3.1"
+                    android:stepSize=".1" />
+
             </LinearLayout>
 
             <TextView
