@@ -119,29 +119,7 @@ public class TheatersActivity extends ListActivity {
 				return DBHelper.getFavorites(TheatersActivity.this);
 			}
 
-			ArrayList<Theater> resultsList = new ArrayList<Theater>();
-
-			JSONArray jsonResults = APIHelper.findTheater(queries[0]);
-
-			for (int i = 0; i < jsonResults.length(); i++) {
-				JSONObject jsonTheater;
-				try {
-					jsonTheater = jsonResults.getJSONObject(i);
-
-					Theater theater = new Theater();
-					theater.code = jsonTheater.getString("code");
-					theater.title = jsonTheater.getString("name");
-					theater.location = jsonTheater.getString("address");
-
-					resultsList.add(theater);
-
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-
-			return resultsList;
-
+			return APIHelper.findTheaters(queries[0]);
 		}
 
 		@Override
