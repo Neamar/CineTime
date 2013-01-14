@@ -111,7 +111,6 @@ public class TheatersActivity extends ListActivity {
 		protected void onPreExecute() {
 			this.dialog.setMessage("Recherche en cours...");
 			this.dialog.show();
-
 		}
 
 		@Override
