@@ -119,7 +119,7 @@ public class TheatersActivity extends ListActivity {
 				return DBHelper.getFavorites(TheatersActivity.this);
 			}
 
-			return APIHelper.findTheaters(queries[0]);
+			return (new APIHelper()).findTheaters(queries[0]);
 		}
 
 		@Override

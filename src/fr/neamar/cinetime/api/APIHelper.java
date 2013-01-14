@@ -26,7 +26,7 @@ public class APIHelper {
 	 * @param page
 	 * @return
 	 */
-	protected static String getBaseUrl(String page) {
+	protected String getBaseUrl(String page) {
 		return "http://api.allocine.fr/rest/v3/" + page
 				+ "?partner=YW5kcm9pZC12M3M";
 	}
@@ -37,7 +37,7 @@ public class APIHelper {
 	 * @param url
 	 * @return
 	 */
-	protected static String downloadUrl(String url) {
+	protected String downloadUrl(String url) {
 		try {
 			// Create a new HTTP Client
 			DefaultHttpClient defaultClient = new DefaultHttpClient();
@@ -59,7 +59,7 @@ public class APIHelper {
 
 	}
 
-	protected static JSONArray downloadTheatersList(String query) {
+	protected JSONArray downloadTheatersList(String query) {
 		String url;
 		try {
 			url = getBaseUrl("search") + "&filter=theater&q="
@@ -87,7 +87,7 @@ public class APIHelper {
 		}
 	}
 
-	public static JSONArray downloadMoviesList(String code) {
+	public JSONArray downloadMoviesList(String code) {
 		String url = getBaseUrl("showtimelist") + "&theaters=" + code
 				+ "&format=json";
 
@@ -110,7 +110,7 @@ public class APIHelper {
 		}
 	}
 
-	public static ArrayList<Theater> findTheaters(String query) {
+	public ArrayList<Theater> findTheaters(String query) {
 
 		ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
@@ -135,7 +135,7 @@ public class APIHelper {
 		return resultsList;
 	}
 
-	public static ArrayList<Movie> findMoviesFromTheater(String code) {
+	public ArrayList<Movie> findMoviesFromTheater(String code) {
 		ArrayList<Movie> resultsList = new ArrayList<Movie>();
 
 		JSONArray jsonResults = downloadMoviesList(code);

@@ -82,7 +82,7 @@ public class MoviesActivity extends ListActivity {
 
 		@Override
 		protected ArrayList<Movie> doInBackground(String... queries) {
-			return APIHelper.findMoviesFromTheater(queries[0]);
+			return (new APIHelper()).findMoviesFromTheater(queries[0]);
 		}
 
 		@Override
