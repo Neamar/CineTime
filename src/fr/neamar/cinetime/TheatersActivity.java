@@ -2,10 +2,6 @@ package fr.neamar.cinetime;
 
 import java.util.ArrayList;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -28,7 +24,7 @@ public class TheatersActivity extends ListActivity {
 
 	public EditText searchText;
 	public ImageButton searchButton;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -37,7 +33,7 @@ public class TheatersActivity extends ListActivity {
 
 		searchText = (EditText) findViewById(R.id.theaters_search);
 		searchButton = (ImageButton) findViewById(R.id.theaters_search_button);
-		
+
 		searchButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -47,16 +43,18 @@ public class TheatersActivity extends ListActivity {
 		});
 
 		// When searching from keyboard
-		searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId,
-					KeyEvent event) {
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
-				return searchButton.performClick();
-			}
+		searchText
+				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+					@Override
+					public boolean onEditorAction(TextView v, int actionId,
+							KeyEvent event) {
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(
+								searchText.getWindowToken(), 0);
+						return searchButton.performClick();
+					}
 
-		});
+				});
 
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 
@@ -83,16 +81,12 @@ public class TheatersActivity extends ListActivity {
 	}
 
 	@Override
-	public void onBackPressed()
-	{
-		//When pressing back, if a query is entered redisplay favorites. 
-		//Else perform default back action.
-		if(searchText.getText().toString().equals(""))
-		{
+	public void onBackPressed() {
+		// When pressing back, if a query is entered redisplay favorites.
+		// Else perform default back action.
+		if (searchText.getText().toString().equals("")) {
 			super.onBackPressed();
-		}
-		else
-		{
+		} else {
 			searchText.setText("");
 			searchButton.performClick();
 		}

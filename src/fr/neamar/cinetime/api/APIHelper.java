@@ -16,8 +16,6 @@ import org.json.JSONObject;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
-import android.util.Log;
-
 public class APIHelper {
 
 	/**
@@ -156,7 +154,8 @@ public class APIHelper {
 				movie.duration = jsonShow.getInt("runtime");
 				movie.duration = jsonShow.getInt("runtime");
 				if (jsonShow.has("statistics")) {
-					JSONObject jsonStatistics = jsonShow.getJSONObject("statistics");
+					JSONObject jsonStatistics = jsonShow
+							.getJSONObject("statistics");
 					if (jsonStatistics.has("pressRating"))
 						movie.pressRating = jsonStatistics
 								.getString("pressRating");
@@ -174,7 +173,9 @@ public class APIHelper {
 				resultsList.add(movie);
 
 			} catch (JSONException e) {
-				throw new RuntimeException("An error occured while loading datas for " + code + ": " + e.getMessage());
+				throw new RuntimeException(
+						"An error occured while loading datas for " + code
+								+ ": " + e.getMessage());
 			}
 		}
 

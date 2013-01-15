@@ -2,10 +2,6 @@ package fr.neamar.cinetime;
 
 import java.util.ArrayList;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.TargetApi;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -14,7 +10,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -47,24 +42,22 @@ public class MoviesActivity extends ListActivity {
 				startActivity(launchBrowser);
 			}
 		});
-		
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-		{
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setHomeButtonEnabled(true);
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if(item.getItemId() == android.R.id.home)
-		{
+		if (item.getItemId() == android.R.id.home) {
 			Intent i = new Intent(this, TheatersActivity.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			return true;
 		}
-		
+
 		return super.onOptionsItemSelected(item);
 	}
 
