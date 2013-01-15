@@ -80,7 +80,8 @@ public class DBHelper {
 		SQLiteDatabase db = getDatabase(context);
 
 		db.delete("favorites", "code = ?", new String[] { code });
-
+		db.close();
+		
 		favCodes.remove(code);
 	}
 

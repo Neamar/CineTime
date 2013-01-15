@@ -35,14 +35,23 @@ public class MoviesActivity extends ListActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Uri uriUrl = Uri
-						.parse("http://www.allocine.fr/film/fichefilm_gen_cfilm="
-								+ movies.get(position).code + ".html");
-				Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
-				startActivity(launchBrowser);
+				Movie selection = movies.get(position);
+
+				Intent details = new Intent(view.getContext(),
+						DetailsActivity.class);
+				details.putExtra("code", selection.code);
+				details.putExtra("title", selection.title);
+				details.putExtra("poster", selection.poster);
+				details.putExtra("duration", selection.duration);
+				details.putExtra("pressRating", selection.pressRating);
+				details.putExtra("userRating", selection.userRating);
+				details.putExtra("display", selection.display);
+
+				startActivity(details);
 			}
 		});
 
+		// Title in action bar brings back one level
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setHomeButtonEnabled(true);
 			getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -51,6 +60,7 @@ public class MoviesActivity extends ListActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		// Click on title in actionbar
 		if (item.getItemId() == android.R.id.home) {
 			Intent i = new Intent(this, TheatersActivity.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -75,7 +85,8 @@ public class MoviesActivity extends ListActivity {
 
 		@Override
 		protected ArrayList<Movie> doInBackground(String... queries) {
-			return (new APIHelper(MoviesActivity.this)).findMoviesFromTheater(queries[0]);
+			return (new APIHelper(MoviesActivity.this))
+					.findMoviesFromTheater(queries[0]);
 		}
 
 		@Override

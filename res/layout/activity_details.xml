@@ -25,20 +25,28 @@
                 android:id="@+id/details_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Movie name"
+                android:text="Le Hobbit : un voyage inattendu"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
                 android:id="@+id/details_cast"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Directed by..."
+                android:text="Par Peter Jackson, avec Ian McKellen, Martin Freeman, Richard Armitage, Ken Stott, Graham McTavish"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <TextView
+                android:id="@+id/details_genre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fantastique, Aventure"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
         </LinearLayout>
     </LinearLayout>
 
     <TextView
-        android:id="@+id/listitem_movie_display"
+        android:id="@+id/details_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10"
@@ -58,7 +66,7 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="A personal journey going very wrong. Description and details."
+        android:text="Les aventures de Bilbon Sacquet, entraîné dans une quête héroïque pour reprendre le Royaume perdu des nains d’Erebor, conquis longtemps auparavant par le dragon Smaug."
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </LinearLayout>
