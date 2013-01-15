@@ -13,11 +13,20 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.widget.Toast;
+
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
 
+	protected Activity parent;
+	public APIHelper(Activity parent)
+	{
+		this.parent = parent;
+	}
+	
 	/**
 	 * Retrieve base URL.
 	 * 
@@ -50,7 +59,8 @@ public class APIHelper {
 					httpResponse.getEntity().getContent(), "UTF-8"));
 			return reader.readLine();
 		} catch (Exception e) {
-
+			Toast.makeText(parent, "Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.", Toast.LENGTH_SHORT).show();
+			parent.finish();
 		}
 
 		return "";
@@ -81,7 +91,8 @@ public class APIHelper {
 				return new JSONArray();
 
 		} catch (JSONException e) {
-			throw new RuntimeException("Unable to download theaters list.");
+			//throw new RuntimeException("Unable to download theaters list.");
+			return new JSONArray();
 		}
 	}
 
@@ -104,7 +115,8 @@ public class APIHelper {
 				return new JSONArray();
 
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to download movies list.");
+			//throw new RuntimeException("Unable to download movies list.");
+			return new JSONArray();
 		}
 	}
 
