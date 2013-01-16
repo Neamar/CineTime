@@ -55,10 +55,8 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 				.findViewById(R.id.listitem_movie_title);
 		TextView movieExtra = (TextView) v
 				.findViewById(R.id.listitem_movie_extra);
-		ProgressBar moviePressRating = (ProgressBar) v
-				.findViewById(R.id.listitem_movie_pressrating);
-		ProgressBar movieUserRating = (ProgressBar) v
-				.findViewById(R.id.listitem_movie_userrating);
+		ProgressBar movieRating = (ProgressBar) v
+				.findViewById(R.id.listitem_movie_rating);
 		TextView movieDisplay = (TextView) v
 				.findViewById(R.id.listitem_movie_display);
 		ImageView moviePoster = (ImageView) v
@@ -71,10 +69,18 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		description += (movie.is3D ? " <strong>3D</strong>" : "");
 
 		movieExtra.setText(Html.fromHtml(description));
-		moviePressRating
-				.setProgress((int) (Float.parseFloat(movie.pressRating) * 10));
-		movieUserRating
-				.setProgress((int) (Float.parseFloat(movie.userRating) * 10));
+		
+		int rating = movie.getRating();
+		if(rating > 0)
+		{
+			movieRating.setVisibility(View.VISIBLE);
+			movieRating.setProgress(movie.getRating());
+		}
+		else
+		{
+			movieRating.setVisibility(View.INVISIBLE);
+		}
+			
 		movieDisplay.setText(movie.getDisplay());
 
 		imageLoader.DisplayImage(movie.poster, moviePoster);

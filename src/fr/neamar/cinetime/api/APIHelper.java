@@ -22,11 +22,11 @@ import fr.neamar.cinetime.objects.Theater;
 public class APIHelper {
 
 	protected Activity parent;
-	public APIHelper(Activity parent)
-	{
+
+	public APIHelper(Activity parent) {
 		this.parent = parent;
 	}
-	
+
 	/**
 	 * Retrieve base URL.
 	 * 
@@ -59,7 +59,10 @@ public class APIHelper {
 					httpResponse.getEntity().getContent(), "UTF-8"));
 			return reader.readLine();
 		} catch (Exception e) {
-			Toast.makeText(parent, "Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(
+					parent,
+					"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+					Toast.LENGTH_SHORT).show();
 			parent.finish();
 		}
 
@@ -91,7 +94,7 @@ public class APIHelper {
 				return new JSONArray();
 
 		} catch (JSONException e) {
-			//throw new RuntimeException("Unable to download theaters list.");
+			// throw new RuntimeException("Unable to download theaters list.");
 			return new JSONArray();
 		}
 	}
@@ -115,7 +118,7 @@ public class APIHelper {
 				return new JSONArray();
 
 		} catch (Exception e) {
-			//throw new RuntimeException("Unable to download movies list.");
+			// throw new RuntimeException("Unable to download movies list.");
 			return new JSONArray();
 		}
 	}
@@ -164,17 +167,35 @@ public class APIHelper {
 				movie.poster = "http://images.allocine.fr/r_120_500"
 						+ jsonShow.getJSONObject("poster").getString("path");
 				movie.duration = jsonShow.getInt("runtime");
-				movie.duration = jsonShow.getInt("runtime");
+
 				if (jsonShow.has("statistics")) {
 					JSONObject jsonStatistics = jsonShow
 							.getJSONObject("statistics");
 					if (jsonStatistics.has("pressRating"))
 						movie.pressRating = jsonStatistics
 								.getString("pressRating");
-					if (jsonShow.getJSONObject("statistics").has("userRating"))
+					if (jsonStatistics.has("userRating"))
 						movie.userRating = jsonStatistics
 								.getString("userRating");
 				}
+
+				if (jsonShow.has("castingShort")) {
+					JSONObject jsonCasting = jsonShow
+							.getJSONObject("castingShort");
+					if (jsonCasting.has("directors"))
+						movie.directors = jsonCasting.getString("directors");
+					if (jsonCasting.has("actors"))
+						movie.actors = jsonCasting.getString("actors");
+				}
+
+				if (jsonShow.has("genre")) {
+					JSONArray jsonGenres = jsonShow.getJSONArray("genre");
+					movie.genres = jsonGenres.getJSONObject(0).getString("$").toLowerCase();
+					for (int j = 1; j < jsonGenres.length(); j++) {
+						movie.genres += ", " + jsonGenres.getJSONObject(j).getString("$").toLowerCase();
+					}
+				}
+
 				movie.display = jsonMovie.getString("display");
 				movie.isOriginalLanguage = jsonMovie.getJSONObject("version")
 						.getString("original").equals("true");

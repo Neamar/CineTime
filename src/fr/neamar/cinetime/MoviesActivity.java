@@ -41,6 +41,9 @@ public class MoviesActivity extends ListActivity {
 						DetailsActivity.class);
 				details.putExtra("code", selection.code);
 				details.putExtra("title", selection.title);
+				details.putExtra("directors", selection.directors);
+				details.putExtra("actors", selection.actors);
+				details.putExtra("genres", selection.genres);
 				details.putExtra("poster", selection.poster);
 				details.putExtra("duration", selection.duration);
 				details.putExtra("pressRating", selection.pressRating);
@@ -62,9 +65,7 @@ public class MoviesActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Click on title in actionbar
 		if (item.getItemId() == android.R.id.home) {
-			Intent i = new Intent(this, TheatersActivity.class);
-			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
+			finish();
 			return true;
 		}
 

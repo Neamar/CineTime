@@ -1,36 +1,92 @@
 package fr.neamar.cinetime;
 
 import fr.neamar.cinetime.objects.Movie;
+import fr.neamar.cinetime.ui.ImageLoader;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
+import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class DetailsActivity extends Activity {
 	protected Movie displayedMovie = new Movie();
-	
+	public ImageLoader imageLoader;
+
+	@TargetApi(14)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_details);
-		
-		//Build movie using current informations
+
+		imageLoader = new ImageLoader(getApplicationContext());
+
+		// Build movie using current informations
 		displayedMovie.code = getIntent().getStringExtra("code");
 		displayedMovie.title = getIntent().getStringExtra("title");
+		displayedMovie.directors = getIntent().getStringExtra("directors");
+		displayedMovie.actors = getIntent().getStringExtra("actors");
+		displayedMovie.genres = getIntent().getStringExtra("genres");
 		displayedMovie.poster = getIntent().getStringExtra("poster");
 		displayedMovie.duration = getIntent().getIntExtra("duration", 0);
 		displayedMovie.pressRating = getIntent().getStringExtra("pressRating");
 		displayedMovie.userRating = getIntent().getStringExtra("userRating");
 		displayedMovie.display = getIntent().getStringExtra("display");
-		
+
 		updateUI();
+		
+		// Title in action bar brings back one level
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			getActionBar().setHomeButtonEnabled(true);
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+		}
 	}
 	
-	public void updateUI()
-	{
-		TextView title = ((TextView) findViewById(R.id.details_title));
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Click on title in actionbar
+		if (item.getItemId() == android.R.id.home) {
+			finish();
+			return true;
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
+
+	public void updateUI() {
+		setTitle(displayedMovie.title);
+
+		TextView title = (TextView) findViewById(R.id.details_title);
 		title.setText(displayedMovie.title);
-		
-		TextView display = ((TextView) findViewById(R.id.details_display));
-		display.setText(displayedMovie.display);
+
+		String extraString = "";
+		extraString += "<strong>Durée</strong> : "
+				+ displayedMovie.getDuration() + "<br />";
+
+		if (!displayedMovie.directors.equals(""))
+			extraString += "<strong>Directeur</strong> : "
+					+ displayedMovie.directors + "<br />";
+		if (!displayedMovie.actors.equals(""))
+			extraString += "<strong>Acteurs</strong> : "
+					+ displayedMovie.actors + "<br />";
+		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
+
+		TextView extra = (TextView) findViewById(R.id.details_extra);
+		extra.setText(Html.fromHtml(extraString));
+
+		TextView display = (TextView) findViewById(R.id.details_display);
+		display.setText(displayedMovie.getDisplay());
+
+		ImageView poster = (ImageView) findViewById(R.id.details_poster);
+		imageLoader.DisplayImage(displayedMovie.poster, poster);
+
+		ProgressBar pressRating = (ProgressBar) findViewById(R.id.details_pressrating);
+		pressRating.setProgress(displayedMovie.getPressRating());
+
+		ProgressBar userRating = (ProgressBar) findViewById(R.id.details_userrating);
+		userRating.setProgress(displayedMovie.getUserRating());
 	}
 }
