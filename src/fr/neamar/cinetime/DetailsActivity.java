@@ -1,16 +1,19 @@
 package fr.neamar.cinetime;
 
-import fr.neamar.cinetime.objects.Movie;
-import fr.neamar.cinetime.ui.ImageLoader;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import fr.neamar.cinetime.api.APIHelper;
+import fr.neamar.cinetime.objects.Movie;
+import fr.neamar.cinetime.ui.ImageLoader;
 
 public class DetailsActivity extends Activity {
 	protected Movie displayedMovie = new Movie();
@@ -37,14 +40,16 @@ public class DetailsActivity extends Activity {
 		displayedMovie.display = getIntent().getStringExtra("display");
 
 		updateUI();
-		
+
+		(new LoadMovieTask()).execute(displayedMovie.code);
+
 		// Title in action bar brings back one level
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setHomeButtonEnabled(true);
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Click on title in actionbar
@@ -78,7 +83,11 @@ public class DetailsActivity extends Activity {
 		extra.setText(Html.fromHtml(extraString));
 
 		TextView display = (TextView) findViewById(R.id.details_display);
-		display.setText(displayedMovie.getDisplay());
+		display.setText(Html.fromHtml(displayedMovie.getDisplay()));
+
+		TextView synopsis = (TextView) findViewById(R.id.details_synopsis);
+		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..."
+				: Html.fromHtml(displayedMovie.synopsis));
 
 		ImageView poster = (ImageView) findViewById(R.id.details_poster);
 		imageLoader.DisplayImage(displayedMovie.poster, poster);
@@ -88,5 +97,19 @@ public class DetailsActivity extends Activity {
 
 		ProgressBar userRating = (ProgressBar) findViewById(R.id.details_userrating);
 		userRating.setProgress(displayedMovie.getUserRating());
+	}
+
+	private class LoadMovieTask extends AsyncTask<String, Void, Movie> {
+		@Override
+		protected Movie doInBackground(String... queries) {
+			return (new APIHelper(DetailsActivity.this))
+					.findMovie(displayedMovie);
+		}
+
+		@Override
+		protected void onPostExecute(Movie resultsList) {
+			displayedMovie = resultsList;
+			updateUI();
+		}
 	}
 }

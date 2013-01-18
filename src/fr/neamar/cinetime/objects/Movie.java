@@ -1,6 +1,6 @@
 package fr.neamar.cinetime.objects;
 
-import java.util.ArrayList;
+import java.util.Calendar;
 
 public class Movie {
 	public String code;
@@ -10,11 +10,12 @@ public class Movie {
 	public String directors = "";
 	public String actors = "";
 	public String genres = "";
+	public String synopsis = "";
 	public int duration;
-	
+
 	public String pressRating = "0";
 	public String userRating = "0";
-	
+
 	public Boolean isOriginalLanguage;
 	public Boolean is3D = false;
 
@@ -50,31 +51,47 @@ public class Movie {
 		}
 
 		if (isSimilar && days.length == 7) {
-			optimisedDisplay = "T.L.J : " + days[0];
+			optimisedDisplay = "TLJ : " + days[0] + "";
+		} else {
+			
+			//Lowlight every days but today.
+			String today = Integer.toString((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
+			days = optimisedDisplay.split("\r\n");
+			optimisedDisplay = "";
+			for (int i = 0; i < days.length; i++) {
+				if (!days[i].contains(" " + today + " :")) {
+					optimisedDisplay += "<font color=\"silver\">" + days[i] + "</font><br>";
+				}
+				else
+				{
+					optimisedDisplay += days[i] + "<br>";
+				}
+			}
+			
+			//Remove final <br>
+			optimisedDisplay = optimisedDisplay.substring(0, optimisedDisplay.length()-5);
 		}
 
 		return optimisedDisplay;
 	}
-	
-	public int getPressRating()
-	{
+
+	public int getPressRating() {
 		return (int) (Float.parseFloat(pressRating) * 10);
 	}
-	
-	public int getUserRating()
-	{
+
+	public int getUserRating() {
 		return (int) (Float.parseFloat(userRating) * 10);
 	}
-	
-	public int getRating()
-	{
-		if(!pressRating.equals("0") && !userRating.equals("0"))
-			return (int) ((Float.parseFloat(pressRating) * 10) + (Float.parseFloat(userRating) * 10)) / 2;
-		else if(pressRating.equals("0") && !userRating.equals("0"))
+
+	public int getRating() {
+		if (!pressRating.equals("0") && !userRating.equals("0"))
+			return (int) ((Float.parseFloat(pressRating) * 10) + (Float
+					.parseFloat(userRating) * 10)) / 2;
+		else if (pressRating.equals("0") && !userRating.equals("0"))
 			return getUserRating();
-		else if(!pressRating.equals("0") && userRating.equals("0"))
+		else if (!pressRating.equals("0") && userRating.equals("0"))
 			return getPressRating();
-		
+
 		return 0;
 	}
 }

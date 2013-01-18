@@ -14,8 +14,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.util.Log;
 import android.widget.Toast;
-
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
@@ -99,7 +99,7 @@ public class APIHelper {
 		}
 	}
 
-	public JSONArray downloadMoviesList(String code) {
+	protected JSONArray downloadMoviesList(String code) {
 		String url = getBaseUrl("showtimelist") + "&theaters=" + code
 				+ "&format=json";
 
@@ -148,6 +148,24 @@ public class APIHelper {
 		return resultsList;
 	}
 
+	protected JSONObject downloadMovie(String code) {
+		String url = getBaseUrl("movie") + "&code=" + code
+				+ "&profile=small&format=json";
+
+		try {
+			String json = downloadUrl(url);
+
+			// Instantiate a JSON object from the request response
+			JSONObject jsonObject = new JSONObject(json);
+
+			return jsonObject.getJSONObject("movie");
+
+		} catch (Exception e) {
+			// throw new RuntimeException("Unable to download movies list.");
+			return new JSONObject();
+		}
+	}
+
 	public ArrayList<Movie> findMoviesFromTheater(String code) {
 		ArrayList<Movie> resultsList = new ArrayList<Movie>();
 
@@ -171,28 +189,27 @@ public class APIHelper {
 				if (jsonShow.has("statistics")) {
 					JSONObject jsonStatistics = jsonShow
 							.getJSONObject("statistics");
-					if (jsonStatistics.has("pressRating"))
-						movie.pressRating = jsonStatistics
-								.getString("pressRating");
-					if (jsonStatistics.has("userRating"))
-						movie.userRating = jsonStatistics
-								.getString("userRating");
+					movie.pressRating = jsonStatistics.optString("pressRating",
+							"0");
+					movie.userRating = jsonStatistics.optString("userRating",
+							"0");
 				}
 
 				if (jsonShow.has("castingShort")) {
 					JSONObject jsonCasting = jsonShow
 							.getJSONObject("castingShort");
-					if (jsonCasting.has("directors"))
-						movie.directors = jsonCasting.getString("directors");
-					if (jsonCasting.has("actors"))
-						movie.actors = jsonCasting.getString("actors");
+					movie.directors = jsonCasting.optString("directors", "");
+					movie.actors = jsonCasting.optString("actors", "");
 				}
 
 				if (jsonShow.has("genre")) {
 					JSONArray jsonGenres = jsonShow.getJSONArray("genre");
-					movie.genres = jsonGenres.getJSONObject(0).getString("$").toLowerCase();
+					movie.genres = jsonGenres.getJSONObject(0).getString("$")
+							.toLowerCase();
 					for (int j = 1; j < jsonGenres.length(); j++) {
-						movie.genres += ", " + jsonGenres.getJSONObject(j).getString("$").toLowerCase();
+						movie.genres += ", "
+								+ jsonGenres.getJSONObject(j).getString("$")
+										.toLowerCase();
 					}
 				}
 
@@ -213,5 +230,11 @@ public class APIHelper {
 		}
 
 		return resultsList;
+	}
+
+	public Movie findMovie(Movie movie) {
+		JSONObject jsonMovie = downloadMovie(movie.code);
+		movie.synopsis = jsonMovie.optString("synopsisShort", "");
+		return movie;
 	}
 }

@@ -2,19 +2,28 @@ package fr.neamar.cinetime.ui;
 
 import java.io.File;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 
 public class FileCache {
 
 	private File cacheDir;
 
+	@TargetApi(8)
 	public FileCache(Context context) {
 		// Find the dir to save cached images
 		if (android.os.Environment.getExternalStorageState().equals(
 				android.os.Environment.MEDIA_MOUNTED))
-			cacheDir = new File(
-					android.os.Environment.getExternalStorageDirectory(),
-					"LazyList");
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+				cacheDir = new File(
+						 context.getExternalFilesDir(null),
+						"poster");
+			} else {
+				cacheDir = new File(
+						android.os.Environment.getExternalStorageDirectory(),
+						"fr.neamar.cinetime");
+			}
 		else
 			cacheDir = context.getCacheDir();
 		if (!cacheDir.exists())

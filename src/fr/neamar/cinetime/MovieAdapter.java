@@ -81,7 +81,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 			movieRating.setVisibility(View.INVISIBLE);
 		}
 			
-		movieDisplay.setText(movie.getDisplay());
+		movieDisplay.setText(Html.fromHtml(movie.getDisplay()));
 
 		imageLoader.DisplayImage(movie.poster, moviePoster);
 
