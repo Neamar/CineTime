@@ -2,6 +2,8 @@ package fr.neamar.cinetime.objects;
 
 import java.util.Calendar;
 
+import android.util.Log;
+
 public class Movie {
 	public String code;
 
@@ -22,16 +24,14 @@ public class Movie {
 	public String display;
 
 	public String getDuration() {
-		return (duration / 3600) + "h"
-				+ String.format("%02d", (duration / 60) % 60);
+		return (duration / 3600) + "h" + String.format("%02d", (duration / 60) % 60);
 	}
 
 	public String getDisplay() {
 		String optimisedDisplay = display;
 		// "Séances du"
 		optimisedDisplay = optimisedDisplay.replaceAll(
-				"Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-z]+ 20[0-9]{2} :",
-				"$1 $2 :");
+				"Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-zéû]+ 20[0-9]{2} :", "$1 $2 :");
 
 		// "(film à ..)"
 		optimisedDisplay = optimisedDisplay.replaceAll(" \\([^\\)]+\\)", "");
@@ -51,29 +51,54 @@ public class Movie {
 		}
 
 		if (isSimilar && days.length == 7) {
-			optimisedDisplay = "TLJ : " + days[0] + "";
+			optimisedDisplay = lowlightHour("TLJ : " + days[0]) + "";
 		} else {
-
 			// Lowlight every days but today.
-			String today = Integer.toString((Calendar.getInstance()
-					.get(Calendar.DAY_OF_MONTH)));
+			String today = Integer.toString((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
 			days = optimisedDisplay.split("\r\n");
 			optimisedDisplay = "";
 			for (int i = 0; i < days.length; i++) {
 				if (!days[i].contains(" " + today + " :")) {
-					optimisedDisplay += "<font color=\"silver\">" + days[i]
-							+ "</font><br>";
+					optimisedDisplay += lowlightDay(days[i]) + "<br>";
 				} else {
-					optimisedDisplay += days[i] + "<br>";
+					optimisedDisplay += lowlightHour(days[i]) + "<br>";
 				}
 			}
 
 			// Remove final <br>
-			optimisedDisplay = optimisedDisplay.substring(0,
-					optimisedDisplay.length() - 5);
+			optimisedDisplay = optimisedDisplay.substring(0, optimisedDisplay.length() - 5);
 		}
 
 		return optimisedDisplay;
+	}
+
+	protected String lowlightDay(String day) {
+		return "<font color=\"silver\">" + day + "</font>";
+	}
+
+	protected String lowlightHour(String day) {
+		// Today : lowlight display in the past hours
+		Calendar now = Calendar.getInstance();
+		int current_hour = now.get(Calendar.HOUR_OF_DAY);
+		int current_minute = now.get(Calendar.MINUTE);
+
+		String[] hours = day.replaceAll(".+ : ", "").split(" ");
+
+		String nextVisibleDisplay = "$"; // By default, last one.
+		for (int j = 0; j < hours.length; j++) {
+			String[] parts = hours[j].split(":");
+			int hour = Integer.parseInt(parts[0]);
+			int minute = Integer.parseInt(parts[1]);
+			if (hour > current_hour || (hour == current_hour && minute > current_minute)) {
+				nextVisibleDisplay = hours[j];
+				break;
+			}
+		}
+
+		Log.e("wtf", title + " " + nextVisibleDisplay);
+
+		return day.replaceAll("(.+ :)(.+)(" + nextVisibleDisplay + ")",
+				"<font color=\"blue\">$1</font><font color=\"silver\">$2</font>$3");
 	}
 
 	public int getPressRating() {
@@ -86,8 +111,7 @@ public class Movie {
 
 	public int getRating() {
 		if (!pressRating.equals("0") && !userRating.equals("0"))
-			return (int) ((Float.parseFloat(pressRating) * 10) + (Float
-					.parseFloat(userRating) * 10)) / 2;
+			return (int) ((Float.parseFloat(pressRating) * 10) + (Float.parseFloat(userRating) * 10)) / 2;
 		else if (pressRating.equals("0") && !userRating.equals("0"))
 			return getUserRating();
 		else if (!pressRating.equals("0") && userRating.equals("0"))
@@ -97,7 +121,6 @@ public class Movie {
 	}
 
 	public String getDisplayDetails() {
-		return (isOriginalLanguage ? " <i>VO</i>" : "")
-				+ (is3D ? " <strong>3D</strong>" : "");
+		return (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "");
 	}
 }
