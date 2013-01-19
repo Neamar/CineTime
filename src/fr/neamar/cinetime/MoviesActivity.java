@@ -38,6 +38,8 @@ public class MoviesActivity extends ListActivity {
 
 				Intent details = new Intent(view.getContext(),
 						DetailsActivity.class);
+				details.putExtra("theater", getIntent().getStringExtra("title"));
+				
 				details.putExtra("code", selection.code);
 				details.putExtra("title", selection.title);
 				details.putExtra("directors", selection.directors);
@@ -48,6 +50,8 @@ public class MoviesActivity extends ListActivity {
 				details.putExtra("pressRating", selection.pressRating);
 				details.putExtra("userRating", selection.userRating);
 				details.putExtra("display", selection.display);
+				details.putExtra("is3D", selection.is3D);
+				details.putExtra("isOriginalLanguage", selection.isOriginalLanguage);
 
 				startActivity(details);
 			}

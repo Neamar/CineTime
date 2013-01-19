@@ -53,23 +53,24 @@ public class Movie {
 		if (isSimilar && days.length == 7) {
 			optimisedDisplay = "TLJ : " + days[0] + "";
 		} else {
-			
-			//Lowlight every days but today.
-			String today = Integer.toString((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
+
+			// Lowlight every days but today.
+			String today = Integer.toString((Calendar.getInstance()
+					.get(Calendar.DAY_OF_MONTH)));
 			days = optimisedDisplay.split("\r\n");
 			optimisedDisplay = "";
 			for (int i = 0; i < days.length; i++) {
 				if (!days[i].contains(" " + today + " :")) {
-					optimisedDisplay += "<font color=\"silver\">" + days[i] + "</font><br>";
-				}
-				else
-				{
+					optimisedDisplay += "<font color=\"silver\">" + days[i]
+							+ "</font><br>";
+				} else {
 					optimisedDisplay += days[i] + "<br>";
 				}
 			}
-			
-			//Remove final <br>
-			optimisedDisplay = optimisedDisplay.substring(0, optimisedDisplay.length()-5);
+
+			// Remove final <br>
+			optimisedDisplay = optimisedDisplay.substring(0,
+					optimisedDisplay.length() - 5);
 		}
 
 		return optimisedDisplay;
@@ -93,5 +94,10 @@ public class Movie {
 			return getPressRating();
 
 		return 0;
+	}
+
+	public String getDisplayDetails() {
+		return (isOriginalLanguage ? " <i>VO</i>" : "")
+				+ (is3D ? " <strong>3D</strong>" : "");
 	}
 }

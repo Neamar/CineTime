@@ -65,8 +65,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		movieTitle.setText(movie.title);
 
 		String description = movie.getDuration();
-		description += (movie.isOriginalLanguage ? " <i>VO</i>" : "");
-		description += (movie.is3D ? " <strong>3D</strong>" : "");
+		description += movie.getDisplayDetails();
 
 		movieExtra.setText(Html.fromHtml(description));
 		

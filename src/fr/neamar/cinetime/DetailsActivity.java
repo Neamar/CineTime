@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -17,6 +16,7 @@ import fr.neamar.cinetime.ui.ImageLoader;
 
 public class DetailsActivity extends Activity {
 	protected Movie displayedMovie = new Movie();
+	protected String theater = "";
 	public ImageLoader imageLoader;
 
 	@TargetApi(14)
@@ -28,7 +28,8 @@ public class DetailsActivity extends Activity {
 		imageLoader = new ImageLoader(getApplicationContext());
 
 		// Build movie using current informations
-		displayedMovie.code = getIntent().getStringExtra("code");
+		theater = getIntent().getStringExtra("theater");
+		
 		displayedMovie.title = getIntent().getStringExtra("title");
 		displayedMovie.directors = getIntent().getStringExtra("directors");
 		displayedMovie.actors = getIntent().getStringExtra("actors");
@@ -38,6 +39,8 @@ public class DetailsActivity extends Activity {
 		displayedMovie.pressRating = getIntent().getStringExtra("pressRating");
 		displayedMovie.userRating = getIntent().getStringExtra("userRating");
 		displayedMovie.display = getIntent().getStringExtra("display");
+		displayedMovie.is3D = getIntent().getBooleanExtra("is3D", false);
+		displayedMovie.isOriginalLanguage = getIntent().getBooleanExtra("isOriginalLanguage", false);
 
 		updateUI();
 
@@ -83,7 +86,7 @@ public class DetailsActivity extends Activity {
 		extra.setText(Html.fromHtml(extraString));
 
 		TextView display = (TextView) findViewById(R.id.details_display);
-		display.setText(Html.fromHtml(displayedMovie.getDisplay()));
+		display.setText(Html.fromHtml("<strong>" + theater + "</strong>" + displayedMovie.getDisplayDetails() + "<br>" + displayedMovie.getDisplay()));
 
 		TextView synopsis = (TextView) findViewById(R.id.details_synopsis);
 		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..."
