@@ -95,10 +95,8 @@ public class Movie {
 			}
 		}
 
-		Log.e("wtf", title + " " + nextVisibleDisplay);
-
 		return day.replaceAll("(.+ :)(.+)(" + nextVisibleDisplay + ")",
-				"<font color=\"blue\">$1</font><font color=\"silver\">$2</font>$3");
+				"<strong>$1</strong><font color=\"#9A9A9A\">$2</font>$3");
 	}
 
 	public int getPressRating() {

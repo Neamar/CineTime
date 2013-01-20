@@ -30,6 +30,7 @@ public class DetailsActivity extends Activity {
 		// Build movie using current informations
 		theater = getIntent().getStringExtra("theater");
 		
+		displayedMovie.code = getIntent().getStringExtra("code");
 		displayedMovie.title = getIntent().getStringExtra("title");
 		displayedMovie.directors = getIntent().getStringExtra("directors");
 		displayedMovie.actors = getIntent().getStringExtra("actors");
