@@ -69,8 +69,7 @@ public class ImageLoader {
 		try {
 			Bitmap bitmap = null;
 			URL imageUrl = new URL(url);
-			HttpURLConnection conn = (HttpURLConnection) imageUrl
-					.openConnection();
+			HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
 			conn.setConnectTimeout(30000);
 			conn.setReadTimeout(30000);
 			conn.setInstanceFollowRedirects(true);
@@ -103,8 +102,7 @@ public class ImageLoader {
 			int width_tmp = o.outWidth, height_tmp = o.outHeight;
 			int scale = 1;
 			while (true) {
-				if (width_tmp / 2 < REQUIRED_SIZE
-						|| height_tmp / 2 < REQUIRED_SIZE)
+				if (width_tmp / 2 < REQUIRED_SIZE || height_tmp / 2 < REQUIRED_SIZE)
 					break;
 				width_tmp /= 2;
 				height_tmp /= 2;

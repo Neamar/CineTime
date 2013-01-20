@@ -22,8 +22,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 	 */
 	public ArrayList<Theater> theaters = new ArrayList<Theater>();
 
-	public TheaterAdapter(Context context, int textViewResourceId,
-			ArrayList<Theater> theaters) {
+	public TheaterAdapter(Context context, int textViewResourceId, ArrayList<Theater> theaters) {
 		super(context, textViewResourceId, theaters);
 
 		this.context = context;
@@ -42,27 +41,24 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 
 		final Theater theater = theaters.get(position);
 
-		TextView theaterName = (TextView) v
-				.findViewById(R.id.listitem_theater_name);
-		TextView theaterLocation = (TextView) v
-				.findViewById(R.id.listitem_theater_location);
+		TextView theaterName = (TextView) v.findViewById(R.id.listitem_theater_name);
+		TextView theaterLocation = (TextView) v.findViewById(R.id.listitem_theater_location);
 
-		final CheckBox fav = (CheckBox) v
-				.findViewById(R.id.listitem_theater_fav);
+		final CheckBox fav = (CheckBox) v.findViewById(R.id.listitem_theater_fav);
 		fav.setChecked(DBHelper.isFavorite(theater.code));
 		fav.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				if (fav.isChecked()) {
-					DBHelper.insertFavorite(v.getContext(), theater.code,
-							theater.title, theater.location);
-					Toast.makeText(getContext(), "Cinéma ajouté aux favoris",
-							Toast.LENGTH_SHORT).show();
+					DBHelper.insertFavorite(v.getContext(), theater.code, theater.title,
+							theater.location);
+					Toast.makeText(getContext(), "Cinéma ajouté aux favoris", Toast.LENGTH_SHORT)
+							.show();
 				} else {
 					DBHelper.removeFavorite(v.getContext(), theater.code);
-					Toast.makeText(getContext(), "Cinéma retiré des favoris",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(getContext(), "Cinéma retiré des favoris", Toast.LENGTH_SHORT)
+							.show();
 				}
 			}
 		});

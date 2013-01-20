@@ -32,14 +32,12 @@ public class MoviesActivity extends ListActivity {
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Movie selection = movies.get(position);
 
-				Intent details = new Intent(view.getContext(),
-						DetailsActivity.class);
+				Intent details = new Intent(view.getContext(), DetailsActivity.class);
 				details.putExtra("theater", getIntent().getStringExtra("title"));
-				
+
 				details.putExtra("code", selection.code);
 				details.putExtra("title", selection.title);
 				details.putExtra("directors", selection.directors);
@@ -75,10 +73,8 @@ public class MoviesActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private class LoadMoviesTask extends
-			AsyncTask<String, Void, ArrayList<Movie>> {
-		private final ProgressDialog dialog = new ProgressDialog(
-				MoviesActivity.this);
+	private class LoadMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
+		private final ProgressDialog dialog = new ProgressDialog(MoviesActivity.this);
 
 		@Override
 		protected void onPreExecute() {
@@ -89,8 +85,7 @@ public class MoviesActivity extends ListActivity {
 
 		@Override
 		protected ArrayList<Movie> doInBackground(String... queries) {
-			return (new APIHelper(MoviesActivity.this))
-					.findMoviesFromTheater(queries[0]);
+			return (new APIHelper(MoviesActivity.this)).findMoviesFromTheater(queries[0]);
 		}
 
 		@Override
@@ -98,8 +93,8 @@ public class MoviesActivity extends ListActivity {
 			if (this.dialog.isShowing())
 				this.dialog.dismiss();
 			movies = resultsList;
-			setListAdapter(new MovieAdapter(MoviesActivity.this,
-					R.layout.listitem_theater, resultsList));
+			setListAdapter(new MovieAdapter(MoviesActivity.this, R.layout.listitem_theater,
+					resultsList));
 		}
 	}
 }

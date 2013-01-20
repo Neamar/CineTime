@@ -14,7 +14,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.util.Log;
 import android.widget.Toast;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
@@ -34,8 +33,7 @@ public class APIHelper {
 	 * @return
 	 */
 	protected String getBaseUrl(String page) {
-		return "http://api.allocine.fr/rest/v3/" + page
-				+ "?partner=YW5kcm9pZC12M3M";
+		return "http://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
 	}
 
 	/**
@@ -55,8 +53,8 @@ public class APIHelper {
 			HttpResponse httpResponse = defaultClient.execute(httpGetRequest);
 
 			// Grab the response
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					httpResponse.getEntity().getContent(), "UTF-8"));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse
+					.getEntity().getContent(), "UTF-8"));
 			return reader.readLine();
 		} catch (Exception e) {
 			Toast.makeText(
@@ -73,11 +71,10 @@ public class APIHelper {
 	protected JSONArray downloadTheatersList(String query) {
 		String url;
 		try {
-			url = getBaseUrl("search") + "&filter=theater&q="
-					+ URLEncoder.encode(query, "UTF-8") + "&format=json";
-		} catch (UnsupportedEncodingException e1) {
-			url = getBaseUrl("search") + "&filter=theater&q=" + query
+			url = getBaseUrl("search") + "&filter=theater&q=" + URLEncoder.encode(query, "UTF-8")
 					+ "&format=json";
+		} catch (UnsupportedEncodingException e1) {
+			url = getBaseUrl("search") + "&filter=theater&q=" + query + "&format=json";
 		}
 
 		try {
@@ -100,8 +97,7 @@ public class APIHelper {
 	}
 
 	protected JSONArray downloadMoviesList(String code) {
-		String url = getBaseUrl("showtimelist") + "&theaters=" + code
-				+ "&format=json";
+		String url = getBaseUrl("showtimelist") + "&theaters=" + code + "&format=json";
 
 		try {
 			String json = downloadUrl(url);
@@ -149,8 +145,7 @@ public class APIHelper {
 	}
 
 	protected JSONObject downloadMovie(String code) {
-		String url = getBaseUrl("movie") + "&code=" + code
-				+ "&profile=small&format=json";
+		String url = getBaseUrl("movie") + "&code=" + code + "&profile=small&format=json";
 
 		try {
 			String json = downloadUrl(url);
@@ -176,8 +171,7 @@ public class APIHelper {
 
 			try {
 				jsonMovie = jsonResults.getJSONObject(i);
-				jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject(
-						"movie");
+				jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject("movie");
 
 				Movie movie = new Movie();
 				movie.code = jsonShow.getString("code");
@@ -187,45 +181,38 @@ public class APIHelper {
 				movie.duration = jsonShow.getInt("runtime");
 
 				if (jsonShow.has("statistics")) {
-					JSONObject jsonStatistics = jsonShow
-							.getJSONObject("statistics");
-					movie.pressRating = jsonStatistics.optString("pressRating",
-							"0");
-					movie.userRating = jsonStatistics.optString("userRating",
-							"0");
+					JSONObject jsonStatistics = jsonShow.getJSONObject("statistics");
+					movie.pressRating = jsonStatistics.optString("pressRating", "0");
+					movie.userRating = jsonStatistics.optString("userRating", "0");
 				}
 
 				if (jsonShow.has("castingShort")) {
-					JSONObject jsonCasting = jsonShow
-							.getJSONObject("castingShort");
+					JSONObject jsonCasting = jsonShow.getJSONObject("castingShort");
 					movie.directors = jsonCasting.optString("directors", "");
 					movie.actors = jsonCasting.optString("actors", "");
 				}
 
 				if (jsonShow.has("genre")) {
 					JSONArray jsonGenres = jsonShow.getJSONArray("genre");
-					movie.genres = jsonGenres.getJSONObject(0).getString("$")
-							.toLowerCase();
+					movie.genres = jsonGenres.getJSONObject(0).getString("$").toLowerCase();
 					for (int j = 1; j < jsonGenres.length(); j++) {
 						movie.genres += ", "
-								+ jsonGenres.getJSONObject(j).getString("$")
-										.toLowerCase();
+								+ jsonGenres.getJSONObject(j).getString("$").toLowerCase();
 					}
 				}
 
 				movie.display = jsonMovie.getString("display");
-				movie.isOriginalLanguage = jsonMovie.getJSONObject("version")
-						.getString("original").equals("true");
+				movie.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original")
+						.equals("true");
 				if (jsonMovie.has("screenFormat"))
-					movie.is3D = jsonMovie.getJSONObject("screenFormat")
-							.getString("$").equals("3D");
+					movie.is3D = jsonMovie.getJSONObject("screenFormat").getString("$")
+							.equals("3D");
 
 				resultsList.add(movie);
 
 			} catch (JSONException e) {
-				throw new RuntimeException(
-						"An error occured while loading datas for " + code
-								+ ": " + e.getMessage());
+				throw new RuntimeException("An error occured while loading datas for " + code
+						+ ": " + e.getMessage());
 			}
 		}
 

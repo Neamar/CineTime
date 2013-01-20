@@ -43,33 +43,26 @@ public class TheatersActivity extends ListActivity {
 		});
 
 		// When searching from keyboard
-		searchText
-				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-					@Override
-					public boolean onEditorAction(TextView v, int actionId,
-							KeyEvent event) {
-						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(
-								searchText.getWindowToken(), 0);
-						return searchButton.performClick();
-					}
+		searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
+				return searchButton.performClick();
+			}
 
-				});
+		});
 
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-				String code = ((TheaterAdapter) parent.getAdapter()).theaters
-						.get(position).code;
+				String code = ((TheaterAdapter) parent.getAdapter()).theaters.get(position).code;
 
-				String title = ((TheaterAdapter) parent.getAdapter()).theaters
-						.get(position).title;
+				String title = ((TheaterAdapter) parent.getAdapter()).theaters.get(position).title;
 
-				Intent intent = new Intent(view.getContext(),
-						MoviesActivity.class);
+				Intent intent = new Intent(view.getContext(), MoviesActivity.class);
 				intent.putExtra("code", code);
 				intent.putExtra("title", title);
 				startActivity(intent);
@@ -96,10 +89,8 @@ public class TheatersActivity extends ListActivity {
 		new LoadTheatersTask().execute(query);
 	}
 
-	private class LoadTheatersTask extends
-			AsyncTask<String, Void, ArrayList<Theater>> {
-		private final ProgressDialog dialog = new ProgressDialog(
-				TheatersActivity.this);
+	private class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
+		private final ProgressDialog dialog = new ProgressDialog(TheatersActivity.this);
 
 		@Override
 		protected void onPreExecute() {
@@ -120,8 +111,8 @@ public class TheatersActivity extends ListActivity {
 		protected void onPostExecute(ArrayList<Theater> resultsList) {
 			if (this.dialog.isShowing())
 				this.dialog.dismiss();
-			setListAdapter(new TheaterAdapter(TheatersActivity.this,
-					R.layout.listitem_theater, resultsList));
+			setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater,
+					resultsList));
 		}
 	}
 }

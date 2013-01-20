@@ -25,8 +25,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 	 */
 	public ArrayList<Movie> movies = new ArrayList<Movie>();
 
-	public MovieAdapter(Activity ac, int textViewResourceId,
-			ArrayList<Movie> movies) {
+	public MovieAdapter(Activity ac, int textViewResourceId, ArrayList<Movie> movies) {
 		super(ac, textViewResourceId, movies);
 
 		this.context = ac;
@@ -51,16 +50,11 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
 		Movie movie = movies.get(position);
 
-		TextView movieTitle = (TextView) v
-				.findViewById(R.id.listitem_movie_title);
-		TextView movieExtra = (TextView) v
-				.findViewById(R.id.listitem_movie_extra);
-		ProgressBar movieRating = (ProgressBar) v
-				.findViewById(R.id.listitem_movie_rating);
-		TextView movieDisplay = (TextView) v
-				.findViewById(R.id.listitem_movie_display);
-		ImageView moviePoster = (ImageView) v
-				.findViewById(R.id.listitem_movie_poster);
+		TextView movieTitle = (TextView) v.findViewById(R.id.listitem_movie_title);
+		TextView movieExtra = (TextView) v.findViewById(R.id.listitem_movie_extra);
+		ProgressBar movieRating = (ProgressBar) v.findViewById(R.id.listitem_movie_rating);
+		TextView movieDisplay = (TextView) v.findViewById(R.id.listitem_movie_display);
+		ImageView moviePoster = (ImageView) v.findViewById(R.id.listitem_movie_poster);
 
 		movieTitle.setText(movie.title);
 
@@ -68,18 +62,15 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		description += movie.getDisplayDetails();
 
 		movieExtra.setText(Html.fromHtml(description));
-		
+
 		int rating = movie.getRating();
-		if(rating > 0)
-		{
+		if (rating > 0) {
 			movieRating.setVisibility(View.VISIBLE);
 			movieRating.setProgress(movie.getRating());
-		}
-		else
-		{
+		} else {
 			movieRating.setVisibility(View.INVISIBLE);
 		}
-			
+
 		movieDisplay.setText(Html.fromHtml(movie.getDisplay()));
 
 		imageLoader.DisplayImage(movie.poster, moviePoster);

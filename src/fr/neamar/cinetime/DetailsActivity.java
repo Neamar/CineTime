@@ -29,7 +29,7 @@ public class DetailsActivity extends Activity {
 
 		// Build movie using current informations
 		theater = getIntent().getStringExtra("theater");
-		
+
 		displayedMovie.code = getIntent().getStringExtra("code");
 		displayedMovie.title = getIntent().getStringExtra("title");
 		displayedMovie.directors = getIntent().getStringExtra("directors");
@@ -41,7 +41,8 @@ public class DetailsActivity extends Activity {
 		displayedMovie.userRating = getIntent().getStringExtra("userRating");
 		displayedMovie.display = getIntent().getStringExtra("display");
 		displayedMovie.is3D = getIntent().getBooleanExtra("is3D", false);
-		displayedMovie.isOriginalLanguage = getIntent().getBooleanExtra("isOriginalLanguage", false);
+		displayedMovie.isOriginalLanguage = getIntent()
+				.getBooleanExtra("isOriginalLanguage", false);
 
 		updateUI();
 
@@ -72,26 +73,24 @@ public class DetailsActivity extends Activity {
 		title.setText(displayedMovie.title);
 
 		String extraString = "";
-		extraString += "<strong>Durée</strong> : "
-				+ displayedMovie.getDuration() + "<br />";
+		extraString += "<strong>Durée</strong> : " + displayedMovie.getDuration() + "<br />";
 
 		if (!displayedMovie.directors.equals(""))
-			extraString += "<strong>Directeur</strong> : "
-					+ displayedMovie.directors + "<br />";
+			extraString += "<strong>Directeur</strong> : " + displayedMovie.directors + "<br />";
 		if (!displayedMovie.actors.equals(""))
-			extraString += "<strong>Acteurs</strong> : "
-					+ displayedMovie.actors + "<br />";
+			extraString += "<strong>Acteurs</strong> : " + displayedMovie.actors + "<br />";
 		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
 
 		TextView extra = (TextView) findViewById(R.id.details_extra);
 		extra.setText(Html.fromHtml(extraString));
 
 		TextView display = (TextView) findViewById(R.id.details_display);
-		display.setText(Html.fromHtml("<strong>" + theater + "</strong>" + displayedMovie.getDisplayDetails() + "<br>" + displayedMovie.getDisplay()));
+		display.setText(Html.fromHtml("<strong>" + theater + "</strong>"
+				+ displayedMovie.getDisplayDetails() + "<br>" + displayedMovie.getDisplay()));
 
 		TextView synopsis = (TextView) findViewById(R.id.details_synopsis);
-		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..."
-				: Html.fromHtml(displayedMovie.synopsis));
+		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html
+				.fromHtml(displayedMovie.synopsis));
 
 		ImageView poster = (ImageView) findViewById(R.id.details_poster);
 		imageLoader.DisplayImage(displayedMovie.poster, poster);
@@ -106,8 +105,7 @@ public class DetailsActivity extends Activity {
 	private class LoadMovieTask extends AsyncTask<String, Void, Movie> {
 		@Override
 		protected Movie doInBackground(String... queries) {
-			return (new APIHelper(DetailsActivity.this))
-					.findMovie(displayedMovie);
+			return (new APIHelper(DetailsActivity.this)).findMovie(displayedMovie);
 		}
 
 		@Override

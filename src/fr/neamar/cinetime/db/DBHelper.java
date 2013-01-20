@@ -23,8 +23,7 @@ public class DBHelper {
 	 * @param query
 	 * @param record
 	 */
-	public static void insertFavorite(Context context, String code,
-			String title, String location) {
+	public static void insertFavorite(Context context, String code, String title, String location) {
 		SQLiteDatabase db = getDatabase(context);
 
 		ContentValues values = new ContentValues();
@@ -52,9 +51,8 @@ public class DBHelper {
 		// Cursor query (boolean distinct, String table, String[] columns,
 		// String selection, String[] selectionArgs, String groupBy, String
 		// having, String orderBy, String limit)
-		Cursor cursor = db
-				.query(true, "favorites", new String[] { "code", "title",
-						"location" }, null, null, null, null, "_id DESC", "20");
+		Cursor cursor = db.query(true, "favorites", new String[] { "code", "title", "location" },
+				null, null, null, null, "_id DESC", "20");
 
 		ArrayList<Theater> favorites = new ArrayList<Theater>();
 
@@ -81,7 +79,7 @@ public class DBHelper {
 
 		db.delete("favorites", "code = ?", new String[] { code });
 		db.close();
-		
+
 		favCodes.remove(code);
 	}
 

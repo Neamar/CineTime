@@ -16,12 +16,9 @@ public class FileCache {
 		if (android.os.Environment.getExternalStorageState().equals(
 				android.os.Environment.MEDIA_MOUNTED))
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-				cacheDir = new File(
-						 context.getExternalFilesDir(null),
-						"poster");
+				cacheDir = new File(context.getExternalFilesDir(null), "poster");
 			} else {
-				cacheDir = new File(
-						android.os.Environment.getExternalStorageDirectory(),
+				cacheDir = new File(android.os.Environment.getExternalStorageDirectory(),
 						"fr.neamar.cinetime");
 			}
 		else

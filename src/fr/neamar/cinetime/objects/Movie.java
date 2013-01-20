@@ -2,8 +2,6 @@ package fr.neamar.cinetime.objects;
 
 import java.util.Calendar;
 
-import android.util.Log;
-
 public class Movie {
 	public String code;
 
