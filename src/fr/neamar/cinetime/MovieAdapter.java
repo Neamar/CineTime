@@ -73,7 +73,10 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
 		movieDisplay.setText(Html.fromHtml(movie.getDisplay()));
 
-		imageLoader.DisplayImage(movie.poster, moviePoster);
+		if(movie.poster != null)
+			imageLoader.DisplayImage(movie.poster, moviePoster);
+		else
+			moviePoster.setImageResource(R.drawable.stub);
 
 		return v;
 	}

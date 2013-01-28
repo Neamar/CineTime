@@ -2,11 +2,13 @@ package fr.neamar.cinetime.objects;
 
 import java.util.Calendar;
 
+import android.text.Html;
+
 public class Movie {
 	public String code;
 
 	public String title;
-	public String poster;
+	public String poster = null;
 	public String directors = "";
 	public String actors = "";
 	public String genres = "";
@@ -22,7 +24,10 @@ public class Movie {
 	public String display;
 
 	public String getDuration() {
-		return (duration / 3600) + "h" + String.format("%02d", (duration / 60) % 60);
+		if(duration > 0)
+			return (duration / 3600) + "h" + String.format("%02d", (duration / 60) % 60);
+		else
+			return "NC";
 	}
 
 	public String getDisplay() {
@@ -118,5 +123,26 @@ public class Movie {
 
 	public String getDisplayDetails() {
 		return (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "");
+	}
+
+	/**
+	 * Generate a short text to be shared.
+	 * Needs the theater this instance refers to.
+	 * 
+	 * @param theater
+	 * @return
+	 */
+	public String getSharingText(String theater) {
+		String sharingText = "";
+		sharingText += this.title + " (" + getDuration() + ")\r\n";
+		
+		if(!this.synopsis.equals(""))
+			sharingText += this.synopsis + "\r\n\r\n";
+		
+		String htmlDisplayDetails = "<strong>" + theater + "</strong>"
+				+ this.getDisplayDetails() + " :<br>" + this.getDisplay();
+		
+		sharingText += Html.fromHtml(htmlDisplayDetails).toString();
+		return sharingText;
 	}
 }

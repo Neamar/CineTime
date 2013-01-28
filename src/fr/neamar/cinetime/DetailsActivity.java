@@ -2,10 +2,13 @@ package fr.neamar.cinetime;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -56,17 +59,37 @@ public class DetailsActivity extends Activity {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Click on title in actionbar
-		if (item.getItemId() == android.R.id.home) {
-			finish();
-			return true;
-		}
-
-		return super.onOptionsItemSelected(item);
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.activity_details, menu);
+		return true;
 	}
 
-	public void updateUI() {
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Click on title in actionbar
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			return true;
+		case R.id.menu_share:
+			shareMovie();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	protected void shareMovie()
+	{
+		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+		sharingIntent.setType("text/plain");
+		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, displayedMovie.getSharingText(theater));
+		
+		startActivity(Intent.createChooser(sharingIntent, "Partager le film..."));
+	}
+
+	protected void updateUI() {
 		setTitle(displayedMovie.title);
 
 		TextView title = (TextView) findViewById(R.id.details_title);
@@ -92,8 +115,10 @@ public class DetailsActivity extends Activity {
 		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html
 				.fromHtml(displayedMovie.synopsis));
 
-		ImageView poster = (ImageView) findViewById(R.id.details_poster);
-		imageLoader.DisplayImage(displayedMovie.poster, poster);
+		if (displayedMovie.poster != null) {
+			ImageView poster = (ImageView) findViewById(R.id.details_poster);
+			imageLoader.DisplayImage(displayedMovie.poster, poster);
+		}
 
 		ProgressBar pressRating = (ProgressBar) findViewById(R.id.details_pressrating);
 		pressRating.setProgress(displayedMovie.getPressRating());
