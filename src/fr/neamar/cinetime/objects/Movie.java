@@ -59,7 +59,7 @@ public class Movie {
 				if (!days[i].contains(" " + today + " :")) {
 					optimisedDisplay += lowlightDay(days[i]) + "<br>";
 				} else {
-					optimisedDisplay += lowlightHour(days[i]) + "<br>";
+					optimisedDisplay += lowlightHour(days[i]) + " <br>"; //Space required to fixing trimming bug.
 				}
 			}
 

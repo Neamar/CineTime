@@ -8,4 +8,5 @@
     <string name="ui_add_theater">Ajouter un cinéma</string>
     <string name="ui_add_theater_title">Ajouter un cinéma aux favoris</string>
     <string name="ui_add_theater_desc">Entrez le code postal du cinéma.</string>
+    <string name="content_description_poster">Movie poster</string>
 </resources>

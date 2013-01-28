@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <LinearLayout
@@ -19,7 +19,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/stub" />
+                android:src="@drawable/stub" android:contentDescription="@string/content_description_poster"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -46,7 +46,6 @@
             android:id="@+id/separator"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_above="@+id/searchEditText"
             android:background="@android:color/darker_gray" />
 
         <TableLayout
@@ -107,8 +106,7 @@
             android:id="@+id/separator2"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_above="@+id/searchEditText"
-            android:background="@android:color/darker_gray" />
+            android:layout_above="@+id/searchEditText"/>
 
         <TextView
             android:id="@+id/details_display"
@@ -121,8 +119,7 @@
             android:id="@+id/separator3"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_above="@+id/searchEditText"
-            android:background="@android:color/darker_gray" />
+            android:layout_above="@+id/searchEditText"/>
 
         <TextView
             android:id="@+id/details_synopsis"
