@@ -26,14 +26,13 @@ public class Movie {
 	public String display;
 
 	public String getDuration() {
-		if(duration > 0)
+		if (duration > 0)
 			return (duration / 3600) + "h" + String.format("%02d", (duration / 60) % 60);
 		else
 			return "NC";
 	}
-	
-	public String getShortCertificate()
-	{
+
+	public String getShortCertificate() {
 		switch (this.certificate) {
 		case 14004:
 			return "-18";
@@ -73,18 +72,29 @@ public class Movie {
 			}
 		}
 
+		String today = Integer.toString((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
+
 		if (isSimilar && days.length == 7) {
-			optimisedDisplay = lowlightHour("TLJ : " + days[0]) + "";
+			if (!optimisedDisplay.contains(" " + today + " :")) {
+				optimisedDisplay = lowlightHour("Semaine prochaine<br>TLJ : " + days[0]) + "";
+			} else {
+				optimisedDisplay = lowlightHour("TLJ : " + days[0]) + "";
+			}
 		} else {
 			// Lowlight every days but today.
-			String today = Integer.toString((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
+
 			days = optimisedDisplay.split("\r\n");
 			optimisedDisplay = "";
 			for (int i = 0; i < days.length; i++) {
 				if (!days[i].contains(" " + today + " :")) {
 					optimisedDisplay += lowlightDay(days[i]) + "<br>";
 				} else {
-					optimisedDisplay += lowlightHour(days[i]) + " <br>"; //Space required to fixing trimming bug.
+					optimisedDisplay += lowlightHour(days[i]) + " <br>"; // Space
+																			// required
+																			// to
+																			// fixing
+																			// trimming
+																			// bug.
 				}
 			}
 
@@ -142,12 +152,15 @@ public class Movie {
 	}
 
 	public String getDisplayDetails() {
-		return (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (certificate != 0 ? " <font color=\"#8B0000\">" + getShortCertificate() + "</font>" : "");
+		return (isOriginalLanguage ? " <i>VO</i>" : "")
+				+ (is3D ? " <strong>3D</strong>" : "")
+				+ (certificate != 0 ? " <font color=\"#8B0000\">" + getShortCertificate()
+						+ "</font>" : "");
 	}
 
 	/**
-	 * Generate a short text to be shared.
-	 * Needs the theater this instance refers to.
+	 * Generate a short text to be shared. Needs the theater this instance
+	 * refers to.
 	 * 
 	 * @param theater
 	 * @return
@@ -155,13 +168,13 @@ public class Movie {
 	public String getSharingText(String theater) {
 		String sharingText = "";
 		sharingText += this.title + " (" + getDuration() + ")\r\n";
-		
-		if(!this.synopsis.equals(""))
+
+		if (!this.synopsis.equals(""))
 			sharingText += this.synopsis + "\r\n\r\n";
-		
-		String htmlDisplayDetails = "<strong>" + theater + "</strong>"
-				+ this.getDisplayDetails() + " :<br>" + this.getDisplay();
-		
+
+		String htmlDisplayDetails = "<strong>" + theater + "</strong>" + this.getDisplayDetails()
+				+ " :<br>" + this.getDisplay();
+
 		sharingText += Html.fromHtml(htmlDisplayDetails).toString();
 		return sharingText;
 	}
