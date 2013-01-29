@@ -42,6 +42,14 @@
             </LinearLayout>
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/details_certificate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Déconseillé au moins de 10 ans."
+            android:textColor="#C09853" />
+
         <View
             android:id="@+id/separator"
             android:layout_width="match_parent"

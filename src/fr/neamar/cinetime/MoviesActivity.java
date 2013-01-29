@@ -43,6 +43,7 @@ public class MoviesActivity extends ListActivity {
 				details.putExtra("directors", selection.directors);
 				details.putExtra("actors", selection.actors);
 				details.putExtra("genres", selection.genres);
+				details.putExtra("certificateString", selection.certificateString);
 				details.putExtra("poster", selection.poster);
 				details.putExtra("duration", selection.duration);
 				details.putExtra("pressRating", selection.pressRating);

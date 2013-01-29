@@ -10,6 +10,7 @@ import android.text.Html;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -38,6 +39,7 @@ public class DetailsActivity extends Activity {
 		displayedMovie.directors = getIntent().getStringExtra("directors");
 		displayedMovie.actors = getIntent().getStringExtra("actors");
 		displayedMovie.genres = getIntent().getStringExtra("genres");
+		displayedMovie.certificateString = getIntent().getStringExtra("certificateString");
 		displayedMovie.poster = getIntent().getStringExtra("poster");
 		displayedMovie.duration = getIntent().getIntExtra("duration", 0);
 		displayedMovie.pressRating = getIntent().getStringExtra("pressRating");
@@ -79,13 +81,13 @@ public class DetailsActivity extends Activity {
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	
-	protected void shareMovie()
-	{
+
+	protected void shareMovie() {
 		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
 		sharingIntent.setType("text/plain");
-		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, displayedMovie.getSharingText(theater));
-		
+		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT,
+				displayedMovie.getSharingText(theater));
+
 		startActivity(Intent.createChooser(sharingIntent, "Partager le film..."));
 	}
 
@@ -106,6 +108,12 @@ public class DetailsActivity extends Activity {
 
 		TextView extra = (TextView) findViewById(R.id.details_extra);
 		extra.setText(Html.fromHtml(extraString));
+
+		TextView certificate = (TextView) findViewById(R.id.details_certificate);
+		if (displayedMovie.certificateString.equals(""))
+			certificate.setVisibility(View.GONE);
+		else
+			certificate.setText(displayedMovie.certificateString);
 
 		TextView display = (TextView) findViewById(R.id.details_display);
 		display.setText(Html.fromHtml("<strong>" + theater + "</strong>"

@@ -187,6 +187,12 @@ public class APIHelper {
 					movie.pressRating = jsonStatistics.optString("pressRating", "0");
 					movie.userRating = jsonStatistics.optString("userRating", "0");
 				}
+				
+				if (jsonShow.has("movieCertificate")) {
+					JSONObject jsonCertificate = jsonShow.getJSONObject("movieCertificate").getJSONObject("certificate");
+					movie.certificate = jsonCertificate.getInt("code");
+					movie.certificateString = jsonCertificate.optString("$", "");
+				}
 
 				if (jsonShow.has("castingShort")) {
 					JSONObject jsonCasting = jsonShow.getJSONObject("castingShort");

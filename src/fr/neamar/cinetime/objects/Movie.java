@@ -14,6 +14,8 @@ public class Movie {
 	public String genres = "";
 	public String synopsis = "";
 	public int duration;
+	public int certificate = 0;
+	public String certificateString = "";
 
 	public String pressRating = "0";
 	public String userRating = "0";
@@ -28,6 +30,24 @@ public class Movie {
 			return (duration / 3600) + "h" + String.format("%02d", (duration / 60) % 60);
 		else
 			return "NC";
+	}
+	
+	public String getShortCertificate()
+	{
+		switch (this.certificate) {
+		case 14004:
+			return "-18";
+		case 14002:
+			return "-16";
+		case 14001:
+			return "-12";
+		case 14031:
+			return "-10";
+		case 14035:
+			return "!";
+		default:
+			return "";
+		}
 	}
 
 	public String getDisplay() {
@@ -122,7 +142,7 @@ public class Movie {
 	}
 
 	public String getDisplayDetails() {
-		return (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "");
+		return (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (certificate != 0 ? " <font color=\"#8B0000\">" + getShortCertificate() + "</font>" : "");
 	}
 
 	/**
