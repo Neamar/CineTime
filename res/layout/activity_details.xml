@@ -19,7 +19,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/stub" android:contentDescription="@string/content_description_poster"/>
+                android:contentDescription="@string/content_description_poster"
+                android:src="@drawable/stub" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -50,11 +51,12 @@
             android:text="Déconseillé au moins de 10 ans."
             android:textColor="#C09853" />
 
-        <View
-            android:id="@+id/separator"
+        <TextView
+            android:id="@+id/details_section_review"
+            style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray" />
+            android:layout_height="wrap_content"
+            android:text="Notes" />
 
         <TableLayout
             android:id="@+id/details_ratings"
@@ -110,11 +112,12 @@
             </TableRow>
         </TableLayout>
 
-        <View
-            android:id="@+id/separator2"
+        <TextView
+            android:id="@+id/details_section_display"
+            style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_above="@+id/searchEditText"/>
+            android:layout_height="wrap_content"
+            android:text="Horaires" />
 
         <TextView
             android:id="@+id/details_display"
@@ -123,11 +126,12 @@
             android:text="Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <View
-            android:id="@+id/separator3"
+        <TextView
+            android:id="@+id/details_section_synopsis"
+            style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_above="@+id/searchEditText"/>
+            android:layout_height="wrap_content"
+            android:text="Synopsis" />
 
         <TextView
             android:id="@+id/details_synopsis"
