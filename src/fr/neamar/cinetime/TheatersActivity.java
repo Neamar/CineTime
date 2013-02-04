@@ -6,6 +6,7 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -69,6 +71,19 @@ public class TheatersActivity extends ListActivity {
 			}
 		});
 
+		getListView().setLongClickable(true);
+		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				// TODO Auto-generated method stub
+
+				String uri = "geo:0,0?q="+ ((TheaterAdapter) parent.getAdapter()).theaters.get(position).location;
+				startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
+
+				return true;
+			}
+		});
+
 		// Display favorites :
 		searchButton.performClick();
 	}
@@ -113,6 +128,8 @@ public class TheatersActivity extends ListActivity {
 				this.dialog.dismiss();
 			setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater,
 					resultsList));
+			
+			((TextView) getListView().getEmptyView()).setText("Aucun résultat pour cette recherche.");
 		}
 	}
 }
