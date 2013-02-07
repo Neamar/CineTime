@@ -91,8 +91,13 @@ public class MoviesActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(ArrayList<Movie> resultsList) {
-			if (this.dialog.isShowing())
-				this.dialog.dismiss();
+			if (this.dialog.isShowing()) {
+				try {
+					this.dialog.dismiss();
+				} catch (IllegalArgumentException e) {
+				}
+			}
+
 			movies = resultsList;
 			setListAdapter(new MovieAdapter(MoviesActivity.this, R.layout.listitem_theater,
 					resultsList));

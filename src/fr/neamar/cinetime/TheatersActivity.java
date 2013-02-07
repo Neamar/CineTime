@@ -77,7 +77,8 @@ public class TheatersActivity extends ListActivity {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				// TODO Auto-generated method stub
 
-				String uri = "geo:0,0?q="+ ((TheaterAdapter) parent.getAdapter()).theaters.get(position).location;
+				String uri = "geo:0,0?q="
+						+ ((TheaterAdapter) parent.getAdapter()).theaters.get(position).location;
 				startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
 
 				return true;
@@ -124,12 +125,17 @@ public class TheatersActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(ArrayList<Theater> resultsList) {
-			if (this.dialog.isShowing())
-				this.dialog.dismiss();
+			if (this.dialog.isShowing()) {
+				try {
+					this.dialog.dismiss();
+				} catch (IllegalArgumentException e) {
+				}
+			}
 			setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater,
 					resultsList));
-			
-			((TextView) getListView().getEmptyView()).setText("Aucun résultat pour cette recherche.");
+
+			((TextView) getListView().getEmptyView())
+					.setText("Aucun résultat pour cette recherche.");
 		}
 	}
 }
