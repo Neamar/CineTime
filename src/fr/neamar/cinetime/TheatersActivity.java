@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -107,7 +108,8 @@ public class TheatersActivity extends ListActivity {
 
 	private class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
 		private final ProgressDialog dialog = new ProgressDialog(TheatersActivity.this);
-
+		private Boolean isLoadingFavorites = false;
+		
 		@Override
 		protected void onPreExecute() {
 			this.dialog.setMessage("Recherche en cours...");
@@ -117,6 +119,7 @@ public class TheatersActivity extends ListActivity {
 		@Override
 		protected ArrayList<Theater> doInBackground(String... queries) {
 			if (queries[0].equals("")) {
+				isLoadingFavorites = true;
 				return DBHelper.getFavorites(TheatersActivity.this);
 			}
 
@@ -131,11 +134,15 @@ public class TheatersActivity extends ListActivity {
 				} catch (IllegalArgumentException e) {
 				}
 			}
+			
 			setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater,
 					resultsList));
-
-			((TextView) getListView().getEmptyView())
-					.setText("Aucun résultat pour cette recherche.");
+			
+			if(!isLoadingFavorites)
+			{
+				((TextView) getListView().getEmptyView())
+				.setText("Aucun résultat pour cette recherche.");
+			}
 		}
 	}
 }
