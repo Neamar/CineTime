@@ -101,8 +101,10 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		dialog.dismiss();
-		dialog = null;
+		if(dialog != null){
+			dialog.dismiss();
+			dialog = null;
+		}	
 		mCallbacks = sDummyCallbacks;
 	}
 
@@ -174,9 +176,8 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 			if(dialog != null){
 				if (dialog.isShowing())
 					dialog.dismiss();
-			}else {
-				dialogPending = false;
 			}
+			dialogPending = false;
 			fragment.onLoadOver(resultsList);	
 		}
 	}
