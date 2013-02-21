@@ -1,0 +1,3 @@
+<resources>
+     <item type="layout" name="listitem_movie">@layout/listitem_movie_narrow</item>
+</resources>

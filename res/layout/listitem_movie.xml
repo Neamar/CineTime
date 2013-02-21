@@ -10,12 +10,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/content_description_poster"
-        android:src="@drawable/stub" />
+        android:src="@drawable/stub" 
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:padding="5dp" >
 
         <TextView
             android:id="@+id/listitem_movie_title"

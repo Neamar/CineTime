@@ -1,63 +1,41 @@
 package fr.neamar.cinetime;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import fr.neamar.cinetime.api.APIHelper;
-import fr.neamar.cinetime.objects.Movie;
-import fr.neamar.cinetime.ui.ImageLoader;
+import fr.neamar.cinetime.fragments.DetailsFragment;
+import fr.neamar.cinetime.fragments.MoviesFragment;
 
-public class DetailsActivity extends Activity {
-	protected Movie displayedMovie = new Movie();
-	protected String theater = "";
-	public ImageLoader imageLoader;
-
+public class DetailsActivity extends FragmentActivity implements MoviesFragment.Callbacks {
+	
+	DetailsFragment detailsFragment;
+	
 	@TargetApi(14)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_details);
-
-		imageLoader = new ImageLoader(getApplicationContext());
-
-		// Build movie using current informations
-		theater = getIntent().getStringExtra("theater");
-
-		displayedMovie.code = getIntent().getStringExtra("code");
-		displayedMovie.title = getIntent().getStringExtra("title");
-		displayedMovie.directors = getIntent().getStringExtra("directors");
-		displayedMovie.actors = getIntent().getStringExtra("actors");
-		displayedMovie.genres = getIntent().getStringExtra("genres");
-		displayedMovie.certificateString = getIntent().getStringExtra("certificateString");
-		displayedMovie.poster = getIntent().getStringExtra("poster");
-		displayedMovie.duration = getIntent().getIntExtra("duration", 0);
-		displayedMovie.pressRating = getIntent().getStringExtra("pressRating");
-		displayedMovie.userRating = getIntent().getStringExtra("userRating");
-		displayedMovie.display = getIntent().getStringExtra("display");
-		displayedMovie.is3D = getIntent().getBooleanExtra("is3D", false);
-		displayedMovie.isOriginalLanguage = getIntent()
-				.getBooleanExtra("isOriginalLanguage", false);
-
-		updateUI();
-
-		(new LoadMovieTask()).execute(displayedMovie.code);
-
 		// Title in action bar brings back one level
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setHomeButtonEnabled(true);
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
+		if (savedInstanceState == null) {
+            Bundle arguments = new Bundle();
+            //FileCodeMirrorFragment fragment = new FileCodeMirrorFragment();
+            DetailsFragment fragment = new DetailsFragment();
+            arguments.putInt(DetailsFragment.ARG_ITEM_ID, getIntent().getIntExtra(DetailsFragment.ARG_ITEM_ID, -1));
+            arguments.putString(DetailsFragment.ARG_THEATER_NAME, getIntent().getStringExtra(DetailsFragment.ARG_THEATER_NAME));
+            fragment.setArguments(arguments);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.file_detail_container, fragment)
+                    .commit();
+        }
 	}
 
 	@Override
@@ -75,76 +53,23 @@ public class DetailsActivity extends Activity {
 			finish();
 			return true;
 		case R.id.menu_share:
-			shareMovie();
+			detailsFragment.shareMovie();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
 
-	protected void shareMovie() {
-		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-		sharingIntent.setType("text/plain");
-		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT,
-				displayedMovie.getSharingText(theater));
-
-		startActivity(Intent.createChooser(sharingIntent, "Partager le film..."));
+	@Override
+	public void onItemSelected(int position) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	protected void updateUI() {
-		setTitle(displayedMovie.title);
-
-		TextView title = (TextView) findViewById(R.id.details_title);
-		title.setText(displayedMovie.title);
-
-		String extraString = "";
-		extraString += "<strong>Durée</strong> : " + displayedMovie.getDuration() + "<br />";
-
-		if (!displayedMovie.directors.equals(""))
-			extraString += "<strong>Directeur</strong> : " + displayedMovie.directors + "<br />";
-		if (!displayedMovie.actors.equals(""))
-			extraString += "<strong>Acteurs</strong> : " + displayedMovie.actors + "<br />";
-		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
-
-		TextView extra = (TextView) findViewById(R.id.details_extra);
-		extra.setText(Html.fromHtml(extraString));
-
-		TextView certificate = (TextView) findViewById(R.id.details_certificate);
-		if (displayedMovie.certificateString.equals(""))
-			certificate.setVisibility(View.GONE);
-		else
-			certificate.setText(displayedMovie.certificateString);
-
-		TextView display = (TextView) findViewById(R.id.details_display);
-		display.setText(Html.fromHtml("<strong>" + theater + "</strong>"
-				+ displayedMovie.getDisplayDetails() + "<br>" + displayedMovie.getDisplay()));
-
-		TextView synopsis = (TextView) findViewById(R.id.details_synopsis);
-		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html
-				.fromHtml(displayedMovie.synopsis));
-
-		if (displayedMovie.poster != null) {
-			ImageView poster = (ImageView) findViewById(R.id.details_poster);
-			imageLoader.DisplayImage(displayedMovie.poster, poster);
-		}
-
-		ProgressBar pressRating = (ProgressBar) findViewById(R.id.details_pressrating);
-		pressRating.setProgress(displayedMovie.getPressRating());
-
-		ProgressBar userRating = (ProgressBar) findViewById(R.id.details_userrating);
-		userRating.setProgress(displayedMovie.getUserRating());
+	@Override
+	public void setFragment(Fragment fragment) {
+		detailsFragment = (DetailsFragment) fragment;
 	}
 
-	private class LoadMovieTask extends AsyncTask<String, Void, Movie> {
-		@Override
-		protected Movie doInBackground(String... queries) {
-			return (new APIHelper(DetailsActivity.this)).findMovie(displayedMovie);
-		}
-
-		@Override
-		protected void onPostExecute(Movie resultsList) {
-			displayedMovie = resultsList;
-			updateUI();
-		}
-	}
+	
 }

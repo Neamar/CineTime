@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -20,10 +19,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import fr.neamar.cinetime.api.APIHelper;
+import fr.neamar.cinetime.callbacks.TaskTheaterCallbacks;
 import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
 
-public class TheatersActivity extends ListActivity {
+public class TheatersActivity extends ListActivity implements TaskTheaterCallbacks{
 
 	public EditText searchText;
 	public ImageButton searchButton;
@@ -67,7 +67,7 @@ public class TheatersActivity extends ListActivity {
 
 				Intent intent = new Intent(view.getContext(), MoviesActivity.class);
 				intent.putExtra("code", code);
-				intent.putExtra("title", title);
+				intent.putExtra("theater", title);
 				startActivity(intent);
 			}
 		});
@@ -135,14 +135,20 @@ public class TheatersActivity extends ListActivity {
 				}
 			}
 			
-			setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater,
-					resultsList));
-			
 			if(!isLoadingFavorites)
 			{
 				((TextView) getListView().getEmptyView())
 				.setText("Aucun résultat pour cette recherche.");
 			}
+			if (this.dialog.isShowing())
+				this.dialog.dismiss();
+			TheatersActivity.this.onLoadOver(resultsList);
 		}
+	}
+
+	@Override
+	public void onLoadOver(ArrayList<Theater> theaters) {
+		setListAdapter(new TheaterAdapter(TheatersActivity.this,
+				R.layout.listitem_theater, theaters));
 	}
 }

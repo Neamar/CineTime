@@ -2,7 +2,6 @@ package fr.neamar.cinetime;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.Context;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -25,9 +24,9 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 	 */
 	public ArrayList<Movie> movies = new ArrayList<Movie>();
 
-	public MovieAdapter(Activity ac, int textViewResourceId, ArrayList<Movie> movies) {
+	public MovieAdapter(Context ac, int textViewResourceId,
+			ArrayList<Movie> movies) {
 		super(ac, textViewResourceId, movies);
-
 		this.context = ac;
 		this.movies = movies;
 		imageLoader = new ImageLoader(ac.getApplicationContext());

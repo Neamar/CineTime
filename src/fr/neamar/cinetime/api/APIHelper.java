@@ -13,17 +13,25 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
+import android.content.Context;
 import android.widget.Toast;
+import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
+import fr.neamar.cinetime.callbacks.TaskTheaterCallbacks;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
 
-	protected Activity parent;
+	protected TaskMoviesCallbacks fragmentM;
+	protected TaskTheaterCallbacks fragmentT;
+	protected Context ctx;
 
-	public APIHelper(Activity parent) {
-		this.parent = parent;
+	public APIHelper(TaskMoviesCallbacks fragment) {
+		this.fragmentM = fragment;
+	}
+	
+	public APIHelper(TaskTheaterCallbacks fragment) {
+		this.fragmentT = fragment;
 	}
 
 	/**
@@ -58,10 +66,14 @@ public class APIHelper {
 			return reader.readLine();
 		} catch (Exception e) {
 			Toast.makeText(
-					parent,
+					ctx,
 					"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
 					Toast.LENGTH_SHORT).show();
-			parent.finish();
+			if(fragmentT != null){
+				fragmentT.finish();
+			}else {
+				fragmentM.finish();
+			}
 		}
 
 		return "";
@@ -215,7 +227,6 @@ public class APIHelper {
 				if (jsonMovie.has("screenFormat"))
 					movie.is3D = jsonMovie.getJSONObject("screenFormat").getString("$")
 							.equals("3D");
-
 				resultsList.add(movie);
 
 			} catch (JSONException e) {
