@@ -24,8 +24,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 	 */
 	public ArrayList<Movie> movies = new ArrayList<Movie>();
 
-	public MovieAdapter(Context ac, int textViewResourceId,
-			ArrayList<Movie> movies) {
+	public MovieAdapter(Context ac, int textViewResourceId, ArrayList<Movie> movies) {
 		super(ac, textViewResourceId, movies);
 		this.context = ac;
 		this.movies = movies;
@@ -72,7 +71,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
 		movieDisplay.setText(Html.fromHtml(movie.getDisplay()));
 
-		if(movie.poster != null)
+		if (movie.poster != null)
 			imageLoader.DisplayImage(movie.poster, moviePoster);
 		else
 			moviePoster.setImageResource(R.drawable.stub);

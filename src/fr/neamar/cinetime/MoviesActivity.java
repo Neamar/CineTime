@@ -13,8 +13,7 @@ import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
-public class MoviesActivity extends FragmentActivity implements
-		MoviesFragment.Callbacks {
+public class MoviesActivity extends FragmentActivity implements MoviesFragment.Callbacks {
 
 	private boolean mTwoPane;
 	private MoviesFragment moviesFragment;
@@ -30,14 +29,12 @@ public class MoviesActivity extends FragmentActivity implements
 		mTwoPane = getResources().getBoolean(R.bool.mTwoPane);
 		theater = getIntent().getStringExtra("theater");
 		setTitle("Séances " + getIntent().getStringExtra("theater"));
-		if(detailsFragment == null){
-			getSupportFragmentManager()
-			.beginTransaction()
-			.replace(R.id.file_detail_container,
-					new DetailsEmptyFragment()).commit();
-		}else {
+		if (detailsFragment == null) {
 			getSupportFragmentManager().beginTransaction()
-			.replace(R.id.file_detail_container, detailsFragment).commit();
+					.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
+		} else {
+			getSupportFragmentManager().beginTransaction()
+					.replace(R.id.file_detail_container, detailsFragment).commit();
 		}
 		// Title in action bar brings back one level
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -63,10 +60,8 @@ public class MoviesActivity extends FragmentActivity implements
 		super.onResume();
 		if (shareItem != null) {
 			if (detailsFragment == null) {
-				getSupportFragmentManager()
-				.beginTransaction()
-				.replace(R.id.file_detail_container,
-						new DetailsEmptyFragment()).commit();
+				getSupportFragmentManager().beginTransaction()
+						.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 				shareItem.setEnabled(false);
 			} else {
 				shareItem.setEnabled(true);
@@ -95,7 +90,7 @@ public class MoviesActivity extends FragmentActivity implements
 			this.moviesFragment = (MoviesFragment) fragment;
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
-			if(shareItem != null){
+			if (shareItem != null) {
 				shareItem.setEnabled(true);
 			}
 		}
@@ -104,10 +99,8 @@ public class MoviesActivity extends FragmentActivity implements
 	@Override
 	public void onBackPressed() {
 		if (detailsFragment != null) {
-			getSupportFragmentManager()
-					.beginTransaction()
-					.replace(R.id.file_detail_container,
-							new DetailsEmptyFragment()).commit();
+			getSupportFragmentManager().beginTransaction()
+					.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 			detailsFragment = null;
 			shareItem.setEnabled(false);
 			setTitle("Séances " + getIntent().getStringExtra("theater"));

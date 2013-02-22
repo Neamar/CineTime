@@ -19,7 +19,7 @@ import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
 import fr.neamar.cinetime.objects.Movie;
 
-public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
+public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks {
 
 	private static final String STATE_ACTIVATED_POSITION = "activated_position";
 	static public ArrayList<Movie> movies;
@@ -30,7 +30,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 	private boolean toFinish = false;
 	private boolean dialogPending = false;
 	private ProgressDialog dialog;
-	
+
 	public interface Callbacks {
 
 		public void onItemSelected(int position);
@@ -51,19 +51,16 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 	@Override
 	public void onResume() {
 		super.onResume();
-		if(movies == null && mTask == null){
+		if (movies == null && mTask == null) {
 			mTask = new LoadMoviesTask(this);
 			mTask.execute(getActivity().getIntent().getStringExtra("code"));
 		}
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		if (savedInstanceState != null
-				&& savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
-			setActivatedPosition(savedInstanceState
-					.getInt(STATE_ACTIVATED_POSITION));
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		if (savedInstanceState != null && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+			setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
 		}
 		return inflater.inflate(R.layout.fragment_movies, container, false);
 	}
@@ -72,7 +69,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setRetainInstance(true);
-		if(movies == null && mTask == null){
+		if (movies == null && mTask == null) {
 			mTask = new LoadMoviesTask(this);
 			mTask.execute(getActivity().getIntent().getStringExtra("code"));
 		}
@@ -82,16 +79,15 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		if (!(activity instanceof Callbacks)) {
-			throw new IllegalStateException(
-					"Activity must implement fragment's callbacks.");
+			throw new IllegalStateException("Activity must implement fragment's callbacks.");
 		}
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
 		if (toFinish) {
-        	getActivity().finish();
-        	toFinish = false;
-        }
-		if(dialogPending){
+			getActivity().finish();
+			toFinish = false;
+		}
+		if (dialogPending) {
 			dialog = new ProgressDialog(activity);
 			dialog.setMessage("Chargement des séances en cours...");
 			dialog.show();
@@ -101,16 +97,15 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		if(dialog != null){
+		if (dialog != null) {
 			dialog.dismiss();
 			dialog = null;
-		}	
+		}
 		mCallbacks = sDummyCallbacks;
 	}
 
 	@Override
-	public void onListItemClick(ListView listView, View view, int position,
-			long id) {
+	public void onListItemClick(ListView listView, View view, int position, long id) {
 		super.onListItemClick(listView, view, position, id);
 		mCallbacks.onItemSelected(position);
 	}
@@ -125,8 +120,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 
 	public void setActivateOnItemClick(boolean activateOnItemClick) {
 		getListView().setChoiceMode(
-				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE
-						: ListView.CHOICE_MODE_NONE);
+				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE : ListView.CHOICE_MODE_NONE);
 	}
 
 	public void setActivatedPosition(int position) {
@@ -142,16 +136,15 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 	public void finish() {
 		if (getActivity() != null) {
 			getActivity().finish();
-		}else {
+		} else {
 			toFinish = true;
 		}
 	}
 
-	private class LoadMoviesTask extends
-			AsyncTask<String, Void, ArrayList<Movie>> {
+	private class LoadMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
 		private MoviesFragment fragment;
 		private Context ctx;
-		
+
 		public LoadMoviesTask(MoviesFragment fragment) {
 			super();
 			this.fragment = fragment;
@@ -173,20 +166,20 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks{
 
 		@Override
 		protected void onPostExecute(ArrayList<Movie> resultsList) {
-			if(dialog != null){
+			if (dialog != null) {
 				if (dialog.isShowing())
 					dialog.dismiss();
 			}
 			dialogPending = false;
-			fragment.onLoadOver(resultsList);	
+			fragment.onLoadOver(resultsList);
 		}
 	}
 
 	static public ArrayList<Movie> getMovies() {
 		return movies;
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		movies.clear();
 		movies = null;
 	}

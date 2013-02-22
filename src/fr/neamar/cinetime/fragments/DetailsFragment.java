@@ -21,63 +21,62 @@ import fr.neamar.cinetime.fragments.MoviesFragment.Callbacks;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.ui.ImageLoader;
 
-public class DetailsFragment extends Fragment implements TaskMoviesCallbacks{
+public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
-    public static final String ARG_ITEM_ID = "item_id";
-    public static final String ARG_THEATER_NAME = "theater_name";
-    protected Movie displayedMovie;
+	public static final String ARG_ITEM_ID = "item_id";
+	public static final String ARG_THEATER_NAME = "theater_name";
+	protected Movie displayedMovie;
 
-    private Callbacks mCallbacks = sDummyCallbacks;
-    
-    private int idItem;
-    private TextView title;
-    private TextView extra;
-    private TextView display;
-    private ImageView poster;
-    private TextView certificate;
-    private TextView synopsis;
-    private ProgressBar pressRating;
-    private ProgressBar userRating;
-    public ImageLoader imageLoader;
-    protected String theater = "";
-    private LoadMovieTask mTask;
-    private boolean titleToSet = false;
-    private boolean toFinish = false;
-    
-    public DetailsFragment() {
-    }
+	private Callbacks mCallbacks = sDummyCallbacks;
 
-    private static Callbacks sDummyCallbacks = new Callbacks() {
-        @Override
-        public void onItemSelected(int position) {
-        }
+	private int idItem;
+	private TextView title;
+	private TextView extra;
+	private TextView display;
+	private ImageView poster;
+	private TextView certificate;
+	private TextView synopsis;
+	private ProgressBar pressRating;
+	private ProgressBar userRating;
+	public ImageLoader imageLoader;
+	protected String theater = "";
+	private LoadMovieTask mTask;
+	private boolean titleToSet = false;
+	private boolean toFinish = false;
+
+	public DetailsFragment() {
+	}
+
+	private static Callbacks sDummyCallbacks = new Callbacks() {
+		@Override
+		public void onItemSelected(int position) {
+		}
 
 		@Override
-		public void setFragment(Fragment fragment) {		
+		public void setFragment(Fragment fragment) {
 		}
-    };
+	};
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        this.setRetainInstance(true);
-    }
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		this.setRetainInstance(true);
+	}
 
-    @Override
+	@Override
 	public void onResume() {
 		super.onResume();
-		if(displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null){
+		if (displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null) {
 			mTask = new LoadMovieTask();
 			mTask.execute(displayedMovie.code);
 		}
 	}
 
 	@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-    	View view =  inflater.inflate(R.layout.fragment_details, container, false);
-    	title = (TextView) view.findViewById(R.id.details_title);
-    	extra = (TextView) view.findViewById(R.id.details_extra);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.fragment_details, container, false);
+		title = (TextView) view.findViewById(R.id.details_title);
+		extra = (TextView) view.findViewById(R.id.details_extra);
 		display = (TextView) view.findViewById(R.id.details_display);
 		poster = (ImageView) view.findViewById(R.id.details_poster);
 		pressRating = (ProgressBar) view.findViewById(R.id.details_pressrating);
@@ -85,35 +84,34 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks{
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
 		imageLoader = new ImageLoader(getActivity().getApplicationContext());
-        updateUI();
-        return view;
-    }
-	
+		updateUI();
+		return view;
+	}
+
 	@Override
-    public void onDetach() {
-        super.onDetach();
-        mCallbacks = sDummyCallbacks;
-    }
-	
+	public void onDetach() {
+		super.onDetach();
+		mCallbacks = sDummyCallbacks;
+	}
+
 	@Override
-    public void onAttach(Activity activity) {
+	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		if (!(activity instanceof Callbacks)) {
-			throw new IllegalStateException(
-					"Activity must implement fragment's callbacks.");
+			throw new IllegalStateException("Activity must implement fragment's callbacks.");
 		}
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
-        if (titleToSet){
-        	getActivity().setTitle(displayedMovie.title);
-        	titleToSet = false;
-        }
-        if (toFinish) {
-        	getActivity().finish();
-        	toFinish = false;
-        }
-    }
-	
+		if (titleToSet) {
+			getActivity().setTitle(displayedMovie.title);
+			titleToSet = false;
+		}
+		if (toFinish) {
+			getActivity().finish();
+			toFinish = false;
+		}
+	}
+
 	public void shareMovie() {
 		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
 		sharingIntent.setType("text/plain");
@@ -122,20 +120,17 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks{
 
 		startActivity(Intent.createChooser(sharingIntent, "Partager le film..."));
 	}
-	
+
 	public void updateUI() {
 		title.setText(displayedMovie.title);
 
 		String extraString = "";
-		extraString += "<strong>Durée</strong> : "
-				+ displayedMovie.getDuration() + "<br />";
+		extraString += "<strong>Durée</strong> : " + displayedMovie.getDuration() + "<br />";
 
 		if (!displayedMovie.directors.equals(""))
-			extraString += "<strong>Directeur</strong> : "
-					+ displayedMovie.directors + "<br />";
+			extraString += "<strong>Directeur</strong> : " + displayedMovie.directors + "<br />";
 		if (!displayedMovie.actors.equals(""))
-			extraString += "<strong>Acteurs</strong> : "
-					+ displayedMovie.actors + "<br />";
+			extraString += "<strong>Acteurs</strong> : " + displayedMovie.actors + "<br />";
 		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
 		extra.setText(Html.fromHtml(extraString));
 		display.setText(Html.fromHtml("<strong>" + theater + "</strong>"
@@ -151,13 +146,13 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks{
 		userRating.setProgress(displayedMovie.getUserRating());
 		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html
 				.fromHtml(displayedMovie.synopsis));
-		if(getActivity() != null){
+		if (getActivity() != null) {
 			getActivity().setTitle(displayedMovie.title);
-		}else {
+		} else {
 			titleToSet = true;
 		}
 	}
-	
+
 	private class LoadMovieTask extends AsyncTask<String, Void, Movie> {
 		@Override
 		protected Movie doInBackground(String... queries) {
@@ -178,9 +173,9 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks{
 
 	@Override
 	public void finish() {
-		if(getActivity() != null){
+		if (getActivity() != null) {
 			getActivity().finish();
-		}else {
+		} else {
 			toFinish = true;
 		}
 	}
@@ -188,14 +183,14 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks{
 	@Override
 	public void setArguments(Bundle args) {
 		super.setArguments(args);
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-        	idItem = getArguments().getInt(ARG_ITEM_ID);
-        	displayedMovie = MoviesFragment.getMovies().get(idItem);
-        }
-        if(getArguments().containsKey(ARG_THEATER_NAME)){
-        	theater = getArguments().getString(ARG_THEATER_NAME);
-        }
-        if(displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null){
+		if (getArguments().containsKey(ARG_ITEM_ID)) {
+			idItem = getArguments().getInt(ARG_ITEM_ID);
+			displayedMovie = MoviesFragment.getMovies().get(idItem);
+		}
+		if (getArguments().containsKey(ARG_THEATER_NAME)) {
+			theater = getArguments().getString(ARG_THEATER_NAME);
+		}
+		if (displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null) {
 			mTask = new LoadMovieTask();
 			mTask.execute(displayedMovie.code);
 		}

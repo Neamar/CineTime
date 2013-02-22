@@ -23,7 +23,7 @@ import fr.neamar.cinetime.callbacks.TaskTheaterCallbacks;
 import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
 
-public class TheatersActivity extends ListActivity implements TaskTheaterCallbacks{
+public class TheatersActivity extends ListActivity implements TaskTheaterCallbacks {
 
 	public EditText searchText;
 	public ImageButton searchButton;
@@ -109,7 +109,7 @@ public class TheatersActivity extends ListActivity implements TaskTheaterCallbac
 	private class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
 		private final ProgressDialog dialog = new ProgressDialog(TheatersActivity.this);
 		private Boolean isLoadingFavorites = false;
-		
+
 		@Override
 		protected void onPreExecute() {
 			this.dialog.setMessage("Recherche en cours...");
@@ -134,11 +134,10 @@ public class TheatersActivity extends ListActivity implements TaskTheaterCallbac
 				} catch (IllegalArgumentException e) {
 				}
 			}
-			
-			if(!isLoadingFavorites)
-			{
+
+			if (!isLoadingFavorites) {
 				((TextView) getListView().getEmptyView())
-				.setText("Aucun résultat pour cette recherche.");
+						.setText("Aucun résultat pour cette recherche.");
 			}
 			if (this.dialog.isShowing())
 				this.dialog.dismiss();
@@ -148,7 +147,7 @@ public class TheatersActivity extends ListActivity implements TaskTheaterCallbac
 
 	@Override
 	public void onLoadOver(ArrayList<Theater> theaters) {
-		setListAdapter(new TheaterAdapter(TheatersActivity.this,
-				R.layout.listitem_theater, theaters));
+		setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater,
+				theaters));
 	}
 }

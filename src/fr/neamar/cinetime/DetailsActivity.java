@@ -12,9 +12,9 @@ import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
 public class DetailsActivity extends FragmentActivity implements MoviesFragment.Callbacks {
-	
+
 	DetailsFragment detailsFragment;
-	
+
 	@TargetApi(14)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -26,16 +26,17 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 		if (savedInstanceState == null) {
-            Bundle arguments = new Bundle();
-            //FileCodeMirrorFragment fragment = new FileCodeMirrorFragment();
-            DetailsFragment fragment = new DetailsFragment();
-            arguments.putInt(DetailsFragment.ARG_ITEM_ID, getIntent().getIntExtra(DetailsFragment.ARG_ITEM_ID, -1));
-            arguments.putString(DetailsFragment.ARG_THEATER_NAME, getIntent().getStringExtra(DetailsFragment.ARG_THEATER_NAME));
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.file_detail_container, fragment)
-                    .commit();
-        }
+			Bundle arguments = new Bundle();
+			// FileCodeMirrorFragment fragment = new FileCodeMirrorFragment();
+			DetailsFragment fragment = new DetailsFragment();
+			arguments.putInt(DetailsFragment.ARG_ITEM_ID,
+					getIntent().getIntExtra(DetailsFragment.ARG_ITEM_ID, -1));
+			arguments.putString(DetailsFragment.ARG_THEATER_NAME,
+					getIntent().getStringExtra(DetailsFragment.ARG_THEATER_NAME));
+			fragment.setArguments(arguments);
+			getSupportFragmentManager().beginTransaction()
+					.add(R.id.file_detail_container, fragment).commit();
+		}
 	}
 
 	@Override
@@ -63,7 +64,7 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 	@Override
 	public void onItemSelected(int position) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -71,5 +72,4 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 		detailsFragment = (DetailsFragment) fragment;
 	}
 
-	
 }

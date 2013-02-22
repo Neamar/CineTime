@@ -29,7 +29,7 @@ public class APIHelper {
 	public APIHelper(TaskMoviesCallbacks fragment) {
 		this.fragmentM = fragment;
 	}
-	
+
 	public APIHelper(TaskTheaterCallbacks fragment) {
 		this.fragmentT = fragment;
 	}
@@ -69,9 +69,9 @@ public class APIHelper {
 					ctx,
 					"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
 					Toast.LENGTH_SHORT).show();
-			if(fragmentT != null){
+			if (fragmentT != null) {
 				fragmentT.finish();
-			}else {
+			} else {
 				fragmentM.finish();
 			}
 		}
@@ -199,9 +199,10 @@ public class APIHelper {
 					movie.pressRating = jsonStatistics.optString("pressRating", "0");
 					movie.userRating = jsonStatistics.optString("userRating", "0");
 				}
-				
+
 				if (jsonShow.has("movieCertificate")) {
-					JSONObject jsonCertificate = jsonShow.getJSONObject("movieCertificate").getJSONObject("certificate");
+					JSONObject jsonCertificate = jsonShow.getJSONObject("movieCertificate")
+							.getJSONObject("certificate");
 					movie.certificate = jsonCertificate.getInt("code");
 					movie.certificateString = jsonCertificate.optString("$", "");
 				}
