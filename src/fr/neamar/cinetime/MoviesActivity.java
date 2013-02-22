@@ -30,10 +30,15 @@ public class MoviesActivity extends FragmentActivity implements
 		mTwoPane = getResources().getBoolean(R.bool.mTwoPane);
 		theater = getIntent().getStringExtra("theater");
 		setTitle("Séances " + getIntent().getStringExtra("theater"));
-		getSupportFragmentManager()
-		.beginTransaction()
-		.replace(R.id.file_detail_container,
-				new DetailsEmptyFragment()).commit();
+		if(detailsFragment == null){
+			getSupportFragmentManager()
+			.beginTransaction()
+			.replace(R.id.file_detail_container,
+					new DetailsEmptyFragment()).commit();
+		}else {
+			getSupportFragmentManager().beginTransaction()
+			.replace(R.id.file_detail_container, detailsFragment).commit();
+		}
 		// Title in action bar brings back one level
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setHomeButtonEnabled(true);
@@ -90,7 +95,9 @@ public class MoviesActivity extends FragmentActivity implements
 			this.moviesFragment = (MoviesFragment) fragment;
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
-			shareItem.setEnabled(true);
+			if(shareItem != null){
+				shareItem.setEnabled(true);
+			}
 		}
 	}
 
@@ -116,10 +123,10 @@ public class MoviesActivity extends FragmentActivity implements
 			Bundle arguments = new Bundle();
 			arguments.putInt(DetailsFragment.ARG_ITEM_ID, position);
 			arguments.putString(DetailsFragment.ARG_THEATER_NAME, theater);
-			DetailsFragment fragment = new DetailsFragment();
-			fragment.setArguments(arguments);
+			detailsFragment = new DetailsFragment();
+			detailsFragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction()
-					.replace(R.id.file_detail_container, fragment).commit();
+					.replace(R.id.file_detail_container, detailsFragment).commit();
 		} else {
 			Intent details = new Intent(this, DetailsActivity.class);
 			details.putExtra(DetailsFragment.ARG_ITEM_ID, position);

@@ -15,7 +15,7 @@
         android:id="@+id/infoEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sélectionnez un film pour plus de détails"
+        android:text="Sélectionnez un film pour plus de détails."
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:padding="5dp" />
 
