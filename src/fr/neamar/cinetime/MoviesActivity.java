@@ -6,7 +6,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
@@ -17,6 +20,7 @@ public class MoviesActivity extends FragmentActivity implements
 	private MoviesFragment moviesFragment;
 	private DetailsFragment detailsFragment;
 	private String theater;
+	private MenuItem shareItem;
 
 	@TargetApi(14)
 	@Override
@@ -26,6 +30,10 @@ public class MoviesActivity extends FragmentActivity implements
 		mTwoPane = getResources().getBoolean(R.bool.mTwoPane);
 		theater = getIntent().getStringExtra("theater");
 		setTitle("Séances " + getIntent().getStringExtra("theater"));
+		getSupportFragmentManager()
+		.beginTransaction()
+		.replace(R.id.file_detail_container,
+				new DetailsEmptyFragment()).commit();
 		// Title in action bar brings back one level
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setHomeButtonEnabled(true);
@@ -34,14 +42,46 @@ public class MoviesActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Click on title in actionbar
-		if (item.getItemId() == android.R.id.home) {
-			finish();
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		if (mTwoPane) {
+			inflater.inflate(R.menu.activity_details, menu);
+			shareItem = menu.findItem(R.id.menu_share);
+			shareItem.setEnabled(false);
 			return true;
 		}
+		return false;
+	}
 
-		return super.onOptionsItemSelected(item);
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (shareItem != null) {
+			if (detailsFragment == null) {
+				getSupportFragmentManager()
+				.beginTransaction()
+				.replace(R.id.file_detail_container,
+						new DetailsEmptyFragment()).commit();
+				shareItem.setEnabled(false);
+			} else {
+				shareItem.setEnabled(true);
+			}
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Click on title in actionbar
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			return true;
+		case R.id.menu_share:
+			detailsFragment.shareMovie();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override
@@ -50,15 +90,19 @@ public class MoviesActivity extends FragmentActivity implements
 			this.moviesFragment = (MoviesFragment) fragment;
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
+			shareItem.setEnabled(true);
 		}
 	}
 
 	@Override
 	public void onBackPressed() {
 		if (detailsFragment != null) {
-			getSupportFragmentManager().beginTransaction()
-					.remove(detailsFragment).commit();
+			getSupportFragmentManager()
+					.beginTransaction()
+					.replace(R.id.file_detail_container,
+							new DetailsEmptyFragment()).commit();
 			detailsFragment = null;
+			shareItem.setEnabled(false);
 			setTitle("Séances " + getIntent().getStringExtra("theater"));
 		} else {
 			moviesFragment.clear();
