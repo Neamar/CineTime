@@ -20,14 +20,14 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:contentDescription="@string/content_description_poster"
-                android:src="@drawable/stub"
-                android:padding="5dp" />
+                android:padding="5dp"
+                android:src="@drawable/stub" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" 
-                android:padding="5dp">
+                android:orientation="vertical"
+                android:padding="5dp" >
 
                 <TextView
                     android:id="@+id/details_title"
@@ -58,6 +58,8 @@
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ratings"
+            android:drawablePadding="5dp"
             android:text="Notes" />
 
         <TableLayout
@@ -120,30 +122,34 @@
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/display"
+            android:drawablePadding="5dp"
             android:text="Horaires" />
 
         <TextView
             android:id="@+id/details_display"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="5dp"
             android:text="Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:padding="5dp" />
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
             android:id="@+id/details_section_synopsis"
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/synopsis"
+            android:drawablePadding="5dp"
             android:text="Synopsis" />
 
         <TextView
             android:id="@+id/details_synopsis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="5dp"
             android:text="Les aventures de Bilbon Sacquet, entraîné dans une quête héroïque pour reprendre le Royaume perdu des nains d’Erebor, conquis longtemps auparavant par le dragon Smaug."
-            android:textAppearance="?android:attr/textAppearanceSmall" 
-            android:padding="5dp"/>
+            android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 
 </ScrollView>
