@@ -8,3 +8,5 @@ Vous pourriez utiliser les applications d'UGC ou de Pathé, mais les interfaces 
 Pourquoi perdre son temps ? CineTime vous propose, en direct et en toute simplicité, l'accès aux horaires de tous les cinémas français.
 
 Bons films !
+
+Disponible sur le Play Store : https://play.google.com/store/apps/details?id=fr.neamar.cinetime

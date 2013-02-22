@@ -139,7 +139,7 @@
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ratings"
+            android:drawableLeft="@drawable/synopsis"
             android:drawablePadding="5dp"
             android:text="Synopsis" />
 
