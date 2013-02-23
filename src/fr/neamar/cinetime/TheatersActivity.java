@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -149,5 +150,10 @@ public class TheatersActivity extends ListActivity implements TaskTheaterCallbac
 	public void onLoadOver(ArrayList<Theater> theaters) {
 		setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater,
 				theaters));
+		
+		if(theaters.size() > 0)
+		{
+			getListView().requestFocus();
+		}
 	}
 }
