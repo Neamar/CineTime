@@ -1,6 +1,6 @@
 package fr.neamar.cinetime;
 
-import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,7 +15,7 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 
 	DetailsFragment detailsFragment;
 
-	@TargetApi(14)
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
