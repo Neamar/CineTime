@@ -84,7 +84,9 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
 		imageLoader = new ImageLoader(getActivity().getApplicationContext());
-		updateUI();
+		if(displayedMovie != null){
+			updateUI();
+		}
 		return view;
 	}
 
