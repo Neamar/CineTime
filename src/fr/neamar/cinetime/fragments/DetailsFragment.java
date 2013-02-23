@@ -141,8 +141,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			certificate.setVisibility(View.GONE);
 		else
 			certificate.setText(displayedMovie.certificateString);
-		if (displayedMovie.poster != null) {
-			imageLoader.DisplayImage(displayedMovie.poster, poster);
+		if (displayedMovie.posterHigh != null) {
+			imageLoader.DisplayImage(displayedMovie.posterHigh, poster);
 		}
 		pressRating.setProgress(displayedMovie.getPressRating());
 		userRating.setProgress(displayedMovie.getUserRating());

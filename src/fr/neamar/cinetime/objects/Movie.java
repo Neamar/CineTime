@@ -9,6 +9,7 @@ public class Movie {
 
 	public String title;
 	public String poster = null;
+	public String posterHigh = null;
 	public String directors = "";
 	public String actors = "";
 	public String genres = "";

@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
 import fr.neamar.cinetime.callbacks.TaskTheaterCallbacks;
@@ -189,7 +190,9 @@ public class APIHelper {
 				movie.code = jsonShow.getString("code");
 				movie.title = jsonShow.getString("title");
 				if (jsonShow.has("poster")) {
-					movie.poster = "http://images.allocine.fr/r_120_500"
+					movie.poster = "http://images.allocine.fr/r_150_500"
+							+ jsonShow.getJSONObject("poster").getString("path");
+					movie.posterHigh = "http://images.allocine.fr/r_320_500"
 							+ jsonShow.getJSONObject("poster").getString("path");
 				}
 				movie.duration = jsonShow.optInt("runtime");
