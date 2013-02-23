@@ -58,7 +58,7 @@
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ratings"
+            android:drawableLeft="@drawable/ic_ratings"
             android:drawablePadding="5dp"
             android:text="Notes" />
 
@@ -122,7 +122,7 @@
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/display"
+            android:drawableLeft="@drawable/ic_display"
             android:drawablePadding="5dp"
             android:text="Horaires" />
 
@@ -139,7 +139,7 @@
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/synopsis"
+            android:drawableLeft="@drawable/ic_synopsis"
             android:drawablePadding="5dp"
             android:text="Synopsis" />
 
