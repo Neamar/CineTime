@@ -41,6 +41,8 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		public void onItemSelected(int position, Fragment source);
 
 		public void setFragment(Fragment fragment);
+		
+		public void setIsLoading(Boolean isLoading);
 	}
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
@@ -50,6 +52,11 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 		@Override
 		public void setFragment(Fragment fragment) {
+		}
+		
+		public void setIsLoading(Boolean isLoading)
+		{
+			
 		}
 	};
 
@@ -169,6 +176,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 				//Display cached values
 				try {
 					Log.e("wtf", "Read display datas from cache for " + theaterCode);
+					mCallbacks.setIsLoading(true);
 					ArrayList<Movie> movies = (new APIHelper(fragment)).formatMoviesList(new JSONArray(cache), theaterCode);
 					fragment.updateListView(movies);
 				} catch (JSONException e) {
@@ -215,6 +223,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 		@Override
 		protected void onPostExecute(JSONArray jsonResults) {
+			mCallbacks.setIsLoading(false);
 			if (dialog != null) {
 				if (dialog.isShowing())
 					dialog.dismiss();

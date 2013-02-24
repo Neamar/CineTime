@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Window;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
@@ -19,6 +20,7 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_details);
 		// Title in action bar brings back one level
@@ -72,6 +74,11 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 	@Override
 	public void setFragment(Fragment fragment) {
 		detailsFragment = (DetailsFragment) fragment;
+	}
+
+	@Override
+	public void setIsLoading(Boolean isLoading) {
+		setProgressBarIndeterminateVisibility(isLoading);
 	}
 
 }

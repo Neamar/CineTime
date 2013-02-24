@@ -58,6 +58,10 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		@Override
 		public void setFragment(Fragment fragment) {
 		}
+
+		@Override
+		public void setIsLoading(Boolean isLoading) {
+		}
 	};
 
 	@Override

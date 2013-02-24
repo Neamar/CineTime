@@ -1,6 +1,7 @@
 package fr.neamar.cinetime;
 
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Window;
 import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
@@ -25,11 +27,12 @@ public class MoviesActivity extends FragmentActivity implements
 	@TargetApi(14)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_movies_list);
 		mTwoPane = getResources().getBoolean(R.bool.mTwoPane);
 		theater = getIntent().getStringExtra("theater");
-		setTitle("Séances " + getIntent().getStringExtra("theater"));
+		setTitle(getIntent().getStringExtra("theater"));
 		if (mTwoPane) {
 			if (detailsFragment == null) {
 				getSupportFragmentManager()
@@ -47,6 +50,11 @@ public class MoviesActivity extends FragmentActivity implements
 			getActionBar().setHomeButtonEnabled(true);
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
+	}
+	
+	@Override
+	public void setIsLoading(Boolean isLoading) {
+		setProgressBarIndeterminateVisibility(isLoading);
 	}
 
 	@Override
@@ -119,7 +127,6 @@ public class MoviesActivity extends FragmentActivity implements
 			super.onBackPressed();
 		}
 	}
-
 	@Override
 	public void onItemSelected(int position, Fragment source) {
 		if (source instanceof MoviesFragment) {
@@ -142,5 +149,4 @@ public class MoviesActivity extends FragmentActivity implements
 			startActivity(new Intent(this, PosterViewerActivity.class));
 		}
 	}
-
 }
