@@ -22,12 +22,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
+import android.support.v4.util.LruCache;
+import android.util.Log;
 import android.widget.ImageView;
 import fr.neamar.cinetime.R;
 
 public class ImageLoader {
 
-	MemoryCache memoryCache = new MemoryCache();
+	LruCache<String, Poster> posterCache;
 	FileCache fileCache;
 	private Map<ImageView, String> imageViews = Collections
 			.synchronizedMap(new WeakHashMap<ImageView, String>());
@@ -37,23 +39,38 @@ public class ImageLoader {
 	public ImageLoader(Context context) {
 		fileCache = new FileCache(context);
 		executorService = Executors.newFixedThreadPool(5);
+		int cacheSize = (int) (Runtime.getRuntime().maxMemory()/4);
+		posterCache = new LruCache<String, Poster>(cacheSize){
+			protected int sizeOf(String key, Poster value) {
+		           return value.bmp.getRowBytes() * value.bmp.getHeight();
+			}
+		};
 	}
 
 	final int stub_id = R.drawable.stub;
 
-	public void DisplayImage(String url, ImageView imageView) {
+	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		imageViews.put(imageView, url);
-		Bitmap bitmap = memoryCache.get(url);
-		if (bitmap != null)
-			imageView.setImageBitmap(bitmap);
+		Log.d("Image", url);
+		Poster poster = posterCache.get(url);
+		if (poster != null){
+			imageView.setImageBitmap(poster.bmp);
+			if(poster.levelRequested < levelRequested){
+				poster.levelRequested = levelRequested;
+			}
+			if(poster.level < levelRequested){
+				poster.level++;
+				queuePhoto(poster, url, imageView);
+			}
+		}
 		else {
-			queuePhoto(url, imageView);
+			queuePhoto(new Poster(1, levelRequested, null), url, imageView);
 			imageView.setImageResource(stub_id);
 		}
 	}
 
-	private void queuePhoto(String url, ImageView imageView) {
-		PhotoToLoad p = new PhotoToLoad(url, imageView);
+	private void queuePhoto(Poster poster, String url, ImageView imageView) {
+		PhotoToLoad p = new PhotoToLoad(poster, url, imageView);
 		executorService.submit(new PhotosLoader(p));
 	}
 
@@ -82,7 +99,7 @@ public class ImageLoader {
 		} catch (Throwable ex) {
 			ex.printStackTrace();
 			if (ex instanceof OutOfMemoryError)
-				memoryCache.clear();
+				posterCache.evictAll();
 			return null;
 		}
 	}
@@ -96,9 +113,9 @@ public class ImageLoader {
 			FileInputStream stream1 = new FileInputStream(f);
 			BitmapFactory.decodeStream(stream1, null, o);
 			stream1.close();
-
+			
 			// Find the correct scale value. It should be the power of 2.
-			final int REQUIRED_SIZE = 70;
+			final int REQUIRED_SIZE = 968;
 			int width_tmp = o.outWidth, height_tmp = o.outHeight;
 			int scale = 1;
 			while (true) {
@@ -125,10 +142,12 @@ public class ImageLoader {
 
 	// Task for the queue
 	private class PhotoToLoad {
+		public Poster poster;
 		public String url;
 		public ImageView imageView;
 
-		public PhotoToLoad(String u, ImageView i) {
+		public PhotoToLoad(Poster p, String u, ImageView i) {
+			poster = p;
 			url = u;
 			imageView = i;
 		}
@@ -146,11 +165,16 @@ public class ImageLoader {
 			try {
 				if (imageViewReused(photoToLoad))
 					return;
-				Bitmap bmp = getBitmap(photoToLoad.url);
-				memoryCache.put(photoToLoad.url, bmp);
+				Bitmap oldBmp = photoToLoad.poster.bmp;
+				photoToLoad.poster.bmp = getBitmap(makeUrl(photoToLoad.url, photoToLoad.poster.level));
+				posterCache.put(photoToLoad.url, photoToLoad.poster);
+				if(photoToLoad.poster.continueLoading()){
+					photoToLoad.poster.level++;
+					queuePhoto(photoToLoad.poster, photoToLoad.url, photoToLoad.imageView);
+				}
 				if (imageViewReused(photoToLoad))
 					return;
-				BitmapDisplayer bd = new BitmapDisplayer(bmp, photoToLoad);
+				BitmapDisplayer bd = new BitmapDisplayer(photoToLoad, oldBmp);
 				handler.post(bd);
 			} catch (Throwable th) {
 				th.printStackTrace();
@@ -167,11 +191,11 @@ public class ImageLoader {
 
 	// Used to display bitmap in the UI thread
 	class BitmapDisplayer implements Runnable {
-		Bitmap bitmap;
+		Bitmap oldBmp;
 		PhotoToLoad photoToLoad;
 
-		public BitmapDisplayer(Bitmap b, PhotoToLoad p) {
-			bitmap = b;
+		public BitmapDisplayer(PhotoToLoad p, Bitmap o) {
+			oldBmp = o;
 			photoToLoad = p;
 		}
 
@@ -179,16 +203,38 @@ public class ImageLoader {
 		public void run() {
 			if (imageViewReused(photoToLoad))
 				return;
-			if (bitmap != null)
-				photoToLoad.imageView.setImageBitmap(bitmap);
-			else
+			if (photoToLoad.poster.bmp != null){
+				photoToLoad.imageView.setImageBitmap(photoToLoad.poster.bmp);
+			}else if(oldBmp != null){
+				photoToLoad.imageView.setImageBitmap(oldBmp);
+			}else {
 				photoToLoad.imageView.setImageResource(stub_id);
+			}
 		}
 	}
 
 	public void clearCache() {
-		memoryCache.clear();
+		posterCache.evictAll();
 		fileCache.clear();
+	}
+	
+	private String makeUrl(String baseUrl, int level){
+		String url = null;
+		switch (level) {
+		case 1:
+			url = "http://images.allocine.fr/r_150_500" + baseUrl;
+			break;
+		case 2:
+			url = "http://images.allocine.fr/r_200_666" + baseUrl;
+			break;
+		case 3:
+			url = "http://images.allocine.fr/r_720_2400" + baseUrl;
+			break;
+		default:
+			url = "";
+			break;
+		}
+		return url;
 	}
 
 }

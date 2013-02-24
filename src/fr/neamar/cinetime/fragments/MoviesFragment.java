@@ -33,14 +33,14 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 	public interface Callbacks {
 
-		public void onItemSelected(int position);
+		public void onItemSelected(int position, Fragment source);
 
 		public void setFragment(Fragment fragment);
 	}
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
-		public void onItemSelected(int position) {
+		public void onItemSelected(int position, Fragment source) {
 		}
 
 		@Override
@@ -107,7 +107,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	@Override
 	public void onListItemClick(ListView listView, View view, int position, long id) {
 		super.onListItemClick(listView, view, position, id);
-		mCallbacks.onItemSelected(position);
+		mCallbacks.onItemSelected(position, this);
 	}
 
 	@Override

@@ -10,10 +10,12 @@ import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import fr.neamar.cinetime.CineTimeApplication;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
@@ -25,7 +27,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 	public static final String ARG_ITEM_ID = "item_id";
 	public static final String ARG_THEATER_NAME = "theater_name";
-	protected Movie displayedMovie;
+	static public Movie displayedMovie;
 
 	private Callbacks mCallbacks = sDummyCallbacks;
 
@@ -49,7 +51,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
-		public void onItemSelected(int position) {
+		public void onItemSelected(int position, Fragment source) {
+			
 		}
 
 		@Override
@@ -83,7 +86,6 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		userRating = (ProgressBar) view.findViewById(R.id.details_userrating);
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
-		imageLoader = new ImageLoader(getActivity().getApplicationContext());
 		if (displayedMovie != null) {
 			updateUI();
 		}
@@ -102,6 +104,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		if (!(activity instanceof Callbacks)) {
 			throw new IllegalStateException("Activity must implement fragment's callbacks.");
 		}
+		imageLoader = CineTimeApplication.getImageLoader(getActivity());
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
 		if (titleToSet) {
@@ -142,7 +145,13 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		else
 			certificate.setText(displayedMovie.certificateString);
 		if (displayedMovie.poster != null) {
-			imageLoader.DisplayImage(displayedMovie.poster, poster);
+			imageLoader.DisplayImage(displayedMovie.poster, poster, 2);
+			poster.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mCallbacks.onItemSelected(-1, DetailsFragment.this);
+				}
+			});
 		}
 		pressRating.setProgress(displayedMovie.getPressRating());
 		userRating.setProgress(displayedMovie.getUserRating());

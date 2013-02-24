@@ -189,8 +189,7 @@ public class APIHelper {
 				movie.code = jsonShow.getString("code");
 				movie.title = jsonShow.getString("title");
 				if (jsonShow.has("poster")) {
-					movie.poster = "http://images.allocine.fr/r_120_500"
-							+ jsonShow.getJSONObject("poster").getString("path");
+					movie.poster = jsonShow.getJSONObject("poster").getString("path");
 				}
 				movie.duration = jsonShow.optInt("runtime");
 
