@@ -1,7 +1,6 @@
 package fr.neamar.cinetime;
 
 import android.annotation.TargetApi;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -90,6 +89,7 @@ public class MoviesActivity extends FragmentActivity implements
 		// Click on title in actionbar
 		switch (item.getItemId()) {
 		case android.R.id.home:
+			moviesFragment.clear();
 			finish();
 			return true;
 		case R.id.menu_share:
