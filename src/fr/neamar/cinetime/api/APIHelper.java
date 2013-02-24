@@ -109,7 +109,7 @@ public class APIHelper {
 		}
 	}
 
-	protected JSONArray downloadMoviesList(String theaterCode) {
+	public JSONArray downloadMoviesList(String theaterCode) {
 		String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
 
 		try {
@@ -174,10 +174,8 @@ public class APIHelper {
 		}
 	}
 
-	public ArrayList<Movie> findMoviesFromTheater(String theaterCode) {
+	public ArrayList<Movie> formatMoviesList(JSONArray jsonResults, String theaterCode) {
 		ArrayList<Movie> resultsList = new ArrayList<Movie>();
-
-		JSONArray jsonResults = downloadMoviesList(theaterCode);
 
 		for (int i = 0; i < jsonResults.length(); i++) {
 			JSONObject jsonMovie, jsonShow;

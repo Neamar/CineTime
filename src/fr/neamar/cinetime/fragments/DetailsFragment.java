@@ -178,7 +178,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	}
 
 	@Override
-	public void onLoadOver(ArrayList<Movie> movies) {
+	public void updateListView(ArrayList<Movie> movies) {
 		// TODO Auto-generated method stub
 	}
 
