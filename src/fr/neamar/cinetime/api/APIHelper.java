@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -108,8 +109,8 @@ public class APIHelper {
 		}
 	}
 
-	protected JSONArray downloadMoviesList(String code) {
-		String url = getBaseUrl("showtimelist") + "&theaters=" + code + "&format=json";
+	protected JSONArray downloadMoviesList(String theaterCode) {
+		String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
 
 		try {
 			String json = downloadUrl(url);
@@ -156,8 +157,8 @@ public class APIHelper {
 		return resultsList;
 	}
 
-	protected JSONObject downloadMovie(String code) {
-		String url = getBaseUrl("movie") + "&code=" + code + "&profile=small&format=json";
+	protected JSONObject downloadMovie(String movieCode) {
+		String url = getBaseUrl("movie") + "&code=" + movieCode + "&profile=small&format=json";
 
 		try {
 			String json = downloadUrl(url);
@@ -173,10 +174,10 @@ public class APIHelper {
 		}
 	}
 
-	public ArrayList<Movie> findMoviesFromTheater(String code) {
+	public ArrayList<Movie> findMoviesFromTheater(String theaterCode) {
 		ArrayList<Movie> resultsList = new ArrayList<Movie>();
 
-		JSONArray jsonResults = downloadMoviesList(code);
+		JSONArray jsonResults = downloadMoviesList(theaterCode);
 
 		for (int i = 0; i < jsonResults.length(); i++) {
 			JSONObject jsonMovie, jsonShow;
@@ -214,10 +215,10 @@ public class APIHelper {
 
 				if (jsonShow.has("genre")) {
 					JSONArray jsonGenres = jsonShow.getJSONArray("genre");
-					movie.genres = jsonGenres.getJSONObject(0).getString("$").toLowerCase();
+					movie.genres = jsonGenres.getJSONObject(0).getString("$").toLowerCase(Locale.FRANCE);
 					for (int j = 1; j < jsonGenres.length(); j++) {
 						movie.genres += ", "
-								+ jsonGenres.getJSONObject(j).getString("$").toLowerCase();
+								+ jsonGenres.getJSONObject(j).getString("$").toLowerCase(Locale.FRANCE);
 					}
 				}
 
@@ -230,7 +231,7 @@ public class APIHelper {
 				resultsList.add(movie);
 
 			} catch (JSONException e) {
-				throw new RuntimeException("An error occured while loading datas for " + code
+				throw new RuntimeException("An error occured while loading datas for " + theaterCode
 						+ ": " + e.getMessage());
 			}
 		}
