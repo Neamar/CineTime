@@ -23,13 +23,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.support.v4.util.LruCache;
-import android.util.Log;
 import android.widget.ImageView;
 import fr.neamar.cinetime.R;
 
 public class ImageLoader {
 
 	LruCache<String, Poster> posterCache;
+	final int stub_id = R.drawable.stub;
 	FileCache fileCache;
 	private Map<ImageView, String> imageViews = Collections
 			.synchronizedMap(new WeakHashMap<ImageView, String>());
@@ -42,50 +42,57 @@ public class ImageLoader {
 		int cacheSize = (int) (Runtime.getRuntime().maxMemory()/4);
 		posterCache = new LruCache<String, Poster>(cacheSize){
 			protected int sizeOf(String key, Poster value) {
-		           return value.bmp.getRowBytes() * value.bmp.getHeight();
+		           return value.getBytes();
 			}
 		};
+		Poster.generateStub(context, stub_id);
 	}
-
-	final int stub_id = R.drawable.stub;
 
 	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		imageViews.put(imageView, url);
-		Log.d("Image", url);
 		Poster poster = posterCache.get(url);
 		if (poster != null){
-			imageView.setImageBitmap(poster.bmp);
+			imageView.setImageBitmap(poster.getBmp(levelRequested));
 			if(poster.levelRequested < levelRequested){
 				poster.levelRequested = levelRequested;
 			}
 			if(poster.level < levelRequested){
 				poster.level++;
-				queuePhoto(poster, url, imageView);
+				queuePhoto(poster, url, imageView, levelRequested);
 			}
 		}
 		else {
-			queuePhoto(new Poster(1, levelRequested, null), url, imageView);
-			imageView.setImageResource(stub_id);
+			Poster nPoster = new Poster(1, levelRequested);
+			imageView.setImageBitmap(nPoster.getBmp(levelRequested));
+			queuePhoto(nPoster, url, imageView, levelRequested);
 		}
 	}
 
-	private void queuePhoto(Poster poster, String url, ImageView imageView) {
-		PhotoToLoad p = new PhotoToLoad(poster, url, imageView);
+	private void queuePhoto(Poster poster, String url, ImageView imageView, int levelRequested) {
+		PhotoToLoad p = new PhotoToLoad(poster, url, imageView, levelRequested);
+		executorService.submit(new PhotosLoader(p));
+	}
+	
+	private void queuePhoto(PhotoToLoad p) {
 		executorService.submit(new PhotosLoader(p));
 	}
 
-	private Bitmap getBitmap(String url) {
-		File f = fileCache.getFile(url);
+	private Bitmap getBitmap(String url, Poster poster) {
+		String fullUrl = makeUrl(url, poster.level);
 
-		// from SD cache
-		Bitmap b = decodeFile(f);
-		if (b != null)
-			return b;
+		File f = fileCache.getFile(fullUrl);
+		
+		if(poster.level < 3){
+			// from SD cache
+			Bitmap b = decodeFile(f);
+			if (b != null)
+				return b;
+		}
 
 		// from web
 		try {
 			Bitmap bitmap = null;
-			URL imageUrl = new URL(url);
+			URL imageUrl = new URL(fullUrl);
 			HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
 			conn.setConnectTimeout(30000);
 			conn.setReadTimeout(30000);
@@ -95,6 +102,9 @@ public class ImageLoader {
 			Utils.CopyStream(is, os);
 			os.close();
 			bitmap = decodeFile(f);
+			if (poster.level > 2){
+				f.delete();
+			}
 			return bitmap;
 		} catch (Throwable ex) {
 			ex.printStackTrace();
@@ -107,30 +117,8 @@ public class ImageLoader {
 	// decodes image and scales it to reduce memory consumption
 	private Bitmap decodeFile(File f) {
 		try {
-			// decode image size
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inJustDecodeBounds = true;
-			FileInputStream stream1 = new FileInputStream(f);
-			BitmapFactory.decodeStream(stream1, null, o);
-			stream1.close();
-			
-			// Find the correct scale value. It should be the power of 2.
-			final int REQUIRED_SIZE = 968;
-			int width_tmp = o.outWidth, height_tmp = o.outHeight;
-			int scale = 1;
-			while (true) {
-				if (width_tmp / 2 < REQUIRED_SIZE || height_tmp / 2 < REQUIRED_SIZE)
-					break;
-				width_tmp /= 2;
-				height_tmp /= 2;
-				scale *= 2;
-			}
-
-			// decode with inSampleSize
-			BitmapFactory.Options o2 = new BitmapFactory.Options();
-			o2.inSampleSize = scale;
 			FileInputStream stream2 = new FileInputStream(f);
-			Bitmap bitmap = BitmapFactory.decodeStream(stream2, null, o2);
+			Bitmap bitmap = BitmapFactory.decodeStream(stream2);
 			stream2.close();
 			return bitmap;
 		} catch (FileNotFoundException e) {
@@ -145,11 +133,13 @@ public class ImageLoader {
 		public Poster poster;
 		public String url;
 		public ImageView imageView;
+		public int levelRequested;
 
-		public PhotoToLoad(Poster p, String u, ImageView i) {
+		public PhotoToLoad(Poster p, String u, ImageView i, int l) {
 			poster = p;
 			url = u;
 			imageView = i;
+			levelRequested = l;
 		}
 	}
 
@@ -165,16 +155,15 @@ public class ImageLoader {
 			try {
 				if (imageViewReused(photoToLoad))
 					return;
-				Bitmap oldBmp = photoToLoad.poster.bmp;
-				photoToLoad.poster.bmp = getBitmap(makeUrl(photoToLoad.url, photoToLoad.poster.level));
+				photoToLoad.poster.setCurrentBmp(getBitmap(photoToLoad.url, photoToLoad.poster));
 				posterCache.put(photoToLoad.url, photoToLoad.poster);
 				if(photoToLoad.poster.continueLoading()){
 					photoToLoad.poster.level++;
-					queuePhoto(photoToLoad.poster, photoToLoad.url, photoToLoad.imageView);
+					queuePhoto(photoToLoad);
 				}
 				if (imageViewReused(photoToLoad))
 					return;
-				BitmapDisplayer bd = new BitmapDisplayer(photoToLoad, oldBmp);
+				BitmapDisplayer bd = new BitmapDisplayer(photoToLoad);
 				handler.post(bd);
 			} catch (Throwable th) {
 				th.printStackTrace();
@@ -191,11 +180,9 @@ public class ImageLoader {
 
 	// Used to display bitmap in the UI thread
 	class BitmapDisplayer implements Runnable {
-		Bitmap oldBmp;
 		PhotoToLoad photoToLoad;
 
-		public BitmapDisplayer(PhotoToLoad p, Bitmap o) {
-			oldBmp = o;
+		public BitmapDisplayer(PhotoToLoad p) {
 			photoToLoad = p;
 		}
 
@@ -203,13 +190,7 @@ public class ImageLoader {
 		public void run() {
 			if (imageViewReused(photoToLoad))
 				return;
-			if (photoToLoad.poster.bmp != null){
-				photoToLoad.imageView.setImageBitmap(photoToLoad.poster.bmp);
-			}else if(oldBmp != null){
-				photoToLoad.imageView.setImageBitmap(oldBmp);
-			}else {
-				photoToLoad.imageView.setImageResource(stub_id);
-			}
+			photoToLoad.imageView.setImageBitmap(photoToLoad.poster.getBmp(photoToLoad.levelRequested));
 		}
 	}
 

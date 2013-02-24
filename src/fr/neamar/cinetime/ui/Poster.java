@@ -1,20 +1,113 @@
 package fr.neamar.cinetime.ui;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 
 public class Poster {
 	public int level;
 	public int levelRequested;
-	public Bitmap bmp;
-	
-	public Poster(int level, int levelRequested, Bitmap bmp) {
+	static public Bitmap stub;
+	public Bitmap bmpLow;
+	public Bitmap bmpMed;
+	public Bitmap bmpHigh;
+
+	public Poster(int level, int levelRequested) {
 		super();
 		this.level = level;
 		this.levelRequested = levelRequested;
-		this.bmp = bmp;
 	}
-	
-	public boolean continueLoading(){
+
+	public boolean continueLoading() {
 		return (level < levelRequested);
 	}
+
+	public Bitmap getBmp(int level) {
+		switch (level) {
+		case 1:
+			return Bitmap.createScaledBitmap(getBmpLow(), 150, 200, false);
+		case 2:
+			return Bitmap.createScaledBitmap(getBmpMed(), 200, 267, false);
+		case 3:
+			return getBmpHigh();
+		default:
+			return null;
+		}
+	}
+	
+	private Bitmap getBmpLow(){
+		if(bmpLow != null)
+			return bmpLow;
+		return stub;
+	}
+	
+	private Bitmap getBmpMed(){
+		if(bmpMed != null)
+			return bmpMed;
+		return getBmpLow();
+	}
+	
+	private Bitmap getBmpHigh(){
+		if(bmpHigh != null)
+			return bmpHigh;
+		return getBmpMed();
+	}
+
+	public void setBmp(Bitmap bmp, int level) {
+		switch (level) {
+		case 1:
+			this.bmpLow = bmp;
+			break;
+		case 2:
+			this.bmpMed = bmp;
+			break;
+		case 3:
+			this.bmpHigh = bmp;
+			break;
+		default:
+			break;
+		}
+	}
+
+	public void setCurrentBmp(Bitmap bmp) {
+		switch (level) {
+		case 1:
+			this.bmpLow = bmp;
+			Log.d("Image", "Low: Height: " + bmp.getHeight() + " Width: "+bmp.getWidth());
+			break;
+		case 2:
+			this.bmpMed = bmp;
+			Log.d("Image", "Med: Height: " + bmp.getHeight() + " Width: "+bmp.getWidth());
+			break;
+		case 3:
+			this.bmpHigh = bmp;
+			Log.d("Image", "High: Height: " + bmp.getHeight() + " Width: "+bmp.getWidth());
+			break;
+		default:
+			break;
+		}
+	}
+
+	public int getBytes() {
+		int size = 0;
+		if(bmpLow != null){
+			size += bmpLow.getRowBytes() * bmpLow.getHeight();
+		}
+		if(bmpMed != null){
+			size += bmpMed.getRowBytes() * bmpMed.getHeight();
+		}
+		if(bmpHigh != null){
+			size += bmpHigh.getRowBytes() * bmpHigh.getHeight();
+		}
+		size += Integer.SIZE * 2;
+		return size;
+	}
+
+	static public void generateStub(Context ctx, int stub_id) {
+		Bitmap bitmap = BitmapFactory.decodeResource(ctx.getResources(),
+				stub_id);
+		stub = bitmap;
+	}
+
 }
