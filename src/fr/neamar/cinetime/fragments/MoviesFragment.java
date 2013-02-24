@@ -32,8 +32,9 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	private Callbacks mCallbacks = sDummyCallbacks;
 	private int mActivatedPosition = ListView.INVALID_POSITION;
 	private LoadMoviesTask mTask;
-	private boolean toFinish = false;
-	private boolean dialogPending = false;
+	static private boolean toFinish = false;
+	static private boolean dialogPending = false;
+	static private boolean toUpdate = false;
 	private ProgressDialog dialog;
 
 	public interface Callbacks {
@@ -105,6 +106,10 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			dialog = new ProgressDialog(activity);
 			dialog.setMessage("Chargement des séances en cours...");
 			dialog.show();
+		}
+		if(toUpdate){
+			updateListView(movies);
+			toUpdate = false;
 		}
 	}
 
@@ -251,7 +256,11 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	@Override
 	public void updateListView(ArrayList<Movie> movies) {
 		MoviesFragment.movies = movies;
-		setListAdapter(new MovieAdapter(getActivity(), R.layout.listitem_theater, movies));
+		if(getActivity() != null){
+			setListAdapter(new MovieAdapter(getActivity(), R.layout.listitem_theater, movies));
+		}else {
+			toUpdate = true;
+		}
 		mTask = null;
 	}
 }
