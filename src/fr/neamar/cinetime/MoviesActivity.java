@@ -1,7 +1,6 @@
 package fr.neamar.cinetime;
 
 import android.annotation.TargetApi;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
