@@ -85,9 +85,9 @@ public class APIHelper {
 		String url;
 		try {
 			url = getBaseUrl("search") + "&filter=theater&q=" + URLEncoder.encode(query, "UTF-8")
-					+ "&format=json";
+					+ "&count=100&format=json";
 		} catch (UnsupportedEncodingException e1) {
-			url = getBaseUrl("search") + "&filter=theater&q=" + query + "&format=json";
+			url = getBaseUrl("search") + "&filter=theater&q=" + query + "&count=100&format=json";
 		}
 
 		try {
