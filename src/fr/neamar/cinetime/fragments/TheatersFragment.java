@@ -27,7 +27,8 @@ import fr.neamar.cinetime.callbacks.TaskTheaterCallbacks;
 import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
 
-public class TheatersFragment extends ListFragment implements TaskTheaterCallbacks{
+public class TheatersFragment extends ListFragment implements
+		TaskTheaterCallbacks {
 
 	private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
@@ -39,12 +40,13 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 	public EditText searchText;
 	public ImageButton searchButton;
 	static private Context ctx;
-	static private String query;
+	static private String query = "";
+	static private String previousQuery = "";
 
 	public interface Callbacks {
 
 		public void onItemSelected(int position, Fragment source);
-		
+
 		public void onLongItemSelected(int position, Fragment source);
 
 		public void setFragment(Fragment fragment);
@@ -62,7 +64,7 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 		@Override
 		public void onLongItemSelected(int position, Fragment source) {
 			// TODO Auto-generated method stub
-			
+
 		}
 	};
 
@@ -72,7 +74,8 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 		getListView().setLongClickable(true);
 		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
 
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
 				mCallbacks.onLongItemSelected(position, TheatersFragment.this);
 				return true;
 			}
@@ -89,33 +92,47 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		if (savedInstanceState != null && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
-			setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		if (savedInstanceState != null
+				&& savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+			setActivatedPosition(savedInstanceState
+					.getInt(STATE_ACTIVATED_POSITION));
 		}
-		View root = inflater.inflate(R.layout.fragment_theaters, container, false);
+		View root = inflater.inflate(R.layout.fragment_theaters, container,
+				false);
 
 		searchText = (EditText) root.findViewById(R.id.theaters_search);
-		searchButton = (ImageButton) root.findViewById(R.id.theaters_search_button);
+		searchButton = (ImageButton) root
+				.findViewById(R.id.theaters_search_button);
 
 		searchButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				searchForTheater(searchText.getText().toString().trim());
+				query = searchText.getText().toString().trim();
+				if (!query.equalsIgnoreCase("")) {
+					searchForTheater(query);
+				} else {
+					onLoadOver(DBHelper.getFavorites(ctx));
+				}
 			}
 		});
 
 		// When searching from keyboard
-		searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
-				return searchButton.performClick();
-			}
+		searchText
+				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+					@Override
+					public boolean onEditorAction(TextView v, int actionId,
+							KeyEvent event) {
+						InputMethodManager imm = (InputMethodManager) getActivity()
+								.getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(
+								searchText.getWindowToken(), 0);
+						return searchButton.performClick();
+					}
 
-		});
+				});
 		return root;
 	}
 
@@ -124,16 +141,17 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 		super.onCreate(savedInstanceState);
 		this.setRetainInstance(true);
 	}
-	
-	public ArrayList<Theater> getTheaters(){
-		return ((TheaterAdapter)getListView().getAdapter()).theaters;
+
+	public ArrayList<Theater> getTheaters() {
+		return ((TheaterAdapter) getListView().getAdapter()).theaters;
 	}
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		if (!(activity instanceof Callbacks)) {
-			throw new IllegalStateException("Activity must implement fragment's callbacks.");
+			throw new IllegalStateException(
+					"Activity must implement fragment's callbacks.");
 		}
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
@@ -158,13 +176,17 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 		}
 		mCallbacks = sDummyCallbacks;
 	}
-	
+
 	private void searchForTheater(String query) {
-		new LoadTheatersTask(ctx).execute(query);
+		if (!previousQuery.equalsIgnoreCase(query)) {
+			previousQuery = query;
+			new LoadTheatersTask(ctx).execute(query);
+		}
 	}
 
 	@Override
-	public void onListItemClick(ListView listView, View view, int position, long id) {
+	public void onListItemClick(ListView listView, View view, int position,
+			long id) {
 		super.onListItemClick(listView, view, position, id);
 		mCallbacks.onItemSelected(position, this);
 	}
@@ -179,7 +201,8 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 
 	public void setActivateOnItemClick(boolean activateOnItemClick) {
 		getListView().setChoiceMode(
-				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE : ListView.CHOICE_MODE_NONE);
+				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE
+						: ListView.CHOICE_MODE_NONE);
 	}
 
 	public void setActivatedPosition(int position) {
@@ -190,8 +213,8 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 		}
 		mActivatedPosition = position;
 	}
-	
-	public boolean goBack(){
+
+	public boolean goBack() {
 		// When pressing back, if a query is entered redisplay favorites.
 		// Else perform default back action.
 		if (searchText.getText().toString().equals("")) {
@@ -211,11 +234,12 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 			toFinish = true;
 		}
 	}
-	
-	private class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
+
+	private class LoadTheatersTask extends
+			AsyncTask<String, Void, ArrayList<Theater>> {
 		private Boolean isLoadingFavorites = false;
 		private Context ctx;
-		
+
 		public LoadTheatersTask(Context ctx) {
 			super();
 			this.ctx = ctx;
@@ -236,7 +260,8 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 				return DBHelper.getFavorites(ctx);
 			}
 
-			return (new APIHelper(TheatersFragment.this)).findTheaters(queries[0]);
+			return (new APIHelper(TheatersFragment.this))
+					.findTheaters(queries[0]);
 		}
 
 		@Override
