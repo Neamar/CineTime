@@ -1,6 +1,7 @@
 package fr.neamar.cinetime;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -62,9 +63,10 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 	}
 
 	@Override
-	public void onItemSelected(int position) {
-		// TODO Auto-generated method stub
-
+	public void onItemSelected(int position, Fragment source) {
+		if(source instanceof DetailsFragment){
+			startActivity(new Intent(this, PosterViewerActivity.class));
+		}
 	}
 
 	@Override

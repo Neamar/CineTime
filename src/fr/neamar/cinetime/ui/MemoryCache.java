@@ -6,14 +6,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import android.graphics.Bitmap;
 import android.util.Log;
 
 public class MemoryCache {
 
 	private static final String TAG = "MemoryCache";
-	private Map<String, Bitmap> cache = Collections
-			.synchronizedMap(new LinkedHashMap<String, Bitmap>(10, 1.5f, true));
+	private Map<String, Poster> cache = Collections
+			.synchronizedMap(new LinkedHashMap<String, Poster>(10, 1.5f, true));
 	// Last
 	// argument
 	// true
@@ -33,7 +32,7 @@ public class MemoryCache {
 		Log.i(TAG, "MemoryCache will use up to " + limit / 1024. / 1024. + "MB");
 	}
 
-	public Bitmap get(String id) {
+	public Poster get(String id) {
 		try {
 			if (!cache.containsKey(id))
 				return null;
@@ -46,7 +45,7 @@ public class MemoryCache {
 		}
 	}
 
-	public void put(String id, Bitmap bitmap) {
+	public void put(String id, Poster bitmap) {
 		try {
 			if (cache.containsKey(id))
 				size -= getSizeInBytes(cache.get(id));
@@ -60,7 +59,7 @@ public class MemoryCache {
 
 	private void checkSize() {
 		if (size > limit) {
-			Iterator<Entry<String, Bitmap>> iter = cache.entrySet().iterator();// least
+			Iterator<Entry<String, Poster>> iter = cache.entrySet().iterator();// least
 																				// recently
 																				// accessed
 																				// item
@@ -71,7 +70,7 @@ public class MemoryCache {
 																				// one
 																				// iterated
 			while (iter.hasNext()) {
-				Entry<String, Bitmap> entry = iter.next();
+				Entry<String, Poster> entry = iter.next();
 				size -= getSizeInBytes(entry.getValue());
 				iter.remove();
 				if (size <= limit)
@@ -92,9 +91,9 @@ public class MemoryCache {
 		}
 	}
 
-	long getSizeInBytes(Bitmap bitmap) {
+	long getSizeInBytes(Poster bitmap) {
 		if (bitmap == null)
 			return 0;
-		return bitmap.getRowBytes() * bitmap.getHeight();
+		return bitmap.bmp.getRowBytes() * bitmap.bmp.getHeight();
 	}
 }

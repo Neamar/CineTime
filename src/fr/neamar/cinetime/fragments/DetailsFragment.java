@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -25,7 +26,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 	public static final String ARG_ITEM_ID = "item_id";
 	public static final String ARG_THEATER_NAME = "theater_name";
-	protected Movie displayedMovie;
+	static public Movie displayedMovie;
 
 	private Callbacks mCallbacks = sDummyCallbacks;
 
@@ -49,7 +50,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
-		public void onItemSelected(int position) {
+		public void onItemSelected(int position, Fragment source) {
+			
 		}
 
 		@Override
@@ -141,8 +143,14 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			certificate.setVisibility(View.GONE);
 		else
 			certificate.setText(displayedMovie.certificateString);
-		if (displayedMovie.posterHigh != null) {
-			imageLoader.DisplayImage(displayedMovie.posterHigh, poster);
+		if (displayedMovie.poster != null) {
+			imageLoader.DisplayImage(displayedMovie.poster, poster, 2);
+			poster.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mCallbacks.onItemSelected(-1, DetailsFragment.this);
+				}
+			});
 		}
 		pressRating.setProgress(displayedMovie.getPressRating());
 		userRating.setProgress(displayedMovie.getUserRating());

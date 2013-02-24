@@ -41,19 +41,27 @@ public class ImageLoader {
 
 	final int stub_id = R.drawable.stub;
 
-	public void DisplayImage(String url, ImageView imageView) {
+	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		imageViews.put(imageView, url);
-		Bitmap bitmap = memoryCache.get(url);
-		if (bitmap != null)
-			imageView.setImageBitmap(bitmap);
+		Poster poster = memoryCache.get(url);
+		if (poster != null){
+			imageView.setImageBitmap(poster.bmp);
+			if(levelRequested > poster.levelRequested){
+				poster.levelRequested = levelRequested;
+			}
+			if(poster.level < levelRequested){
+				poster.level++;
+				queuePhoto(poster, url, imageView);
+			}
+		}
 		else {
-			queuePhoto(url, imageView);
+			queuePhoto(new Poster(1, levelRequested, null), url, imageView);
 			imageView.setImageResource(stub_id);
 		}
 	}
 
-	private void queuePhoto(String url, ImageView imageView) {
-		PhotoToLoad p = new PhotoToLoad(url, imageView);
+	private void queuePhoto(Poster poster, String url, ImageView imageView) {
+		PhotoToLoad p = new PhotoToLoad(poster, url, imageView);
 		executorService.submit(new PhotosLoader(p));
 	}
 
@@ -98,7 +106,7 @@ public class ImageLoader {
 			stream1.close();
 			
 			// Find the correct scale value. It should be the power of 2.
-			final int REQUIRED_SIZE = 242;
+			final int REQUIRED_SIZE = 968;
 			int width_tmp = o.outWidth, height_tmp = o.outHeight;
 			int scale = 1;
 			while (true) {
@@ -125,10 +133,12 @@ public class ImageLoader {
 
 	// Task for the queue
 	private class PhotoToLoad {
+		public Poster poster;
 		public String url;
 		public ImageView imageView;
 
-		public PhotoToLoad(String u, ImageView i) {
+		public PhotoToLoad(Poster p, String u, ImageView i) {
+			poster = p;
 			url = u;
 			imageView = i;
 		}
@@ -146,11 +156,15 @@ public class ImageLoader {
 			try {
 				if (imageViewReused(photoToLoad))
 					return;
-				Bitmap bmp = getBitmap(photoToLoad.url);
-				memoryCache.put(photoToLoad.url, bmp);
+				photoToLoad.poster.bmp = getBitmap(makeUrl(photoToLoad.url, photoToLoad.poster.level));
+				memoryCache.put(photoToLoad.url, photoToLoad.poster);
+				if(photoToLoad.poster.continueLoading()){
+					photoToLoad.poster.level++;
+					queuePhoto(photoToLoad.poster, photoToLoad.url, photoToLoad.imageView);
+				}
 				if (imageViewReused(photoToLoad))
 					return;
-				BitmapDisplayer bd = new BitmapDisplayer(bmp, photoToLoad);
+				BitmapDisplayer bd = new BitmapDisplayer(photoToLoad);
 				handler.post(bd);
 			} catch (Throwable th) {
 				th.printStackTrace();
@@ -167,11 +181,9 @@ public class ImageLoader {
 
 	// Used to display bitmap in the UI thread
 	class BitmapDisplayer implements Runnable {
-		Bitmap bitmap;
 		PhotoToLoad photoToLoad;
 
-		public BitmapDisplayer(Bitmap b, PhotoToLoad p) {
-			bitmap = b;
+		public BitmapDisplayer(PhotoToLoad p) {
 			photoToLoad = p;
 		}
 
@@ -179,8 +191,8 @@ public class ImageLoader {
 		public void run() {
 			if (imageViewReused(photoToLoad))
 				return;
-			if (bitmap != null)
-				photoToLoad.imageView.setImageBitmap(bitmap);
+			if (photoToLoad.poster.bmp != null)
+				photoToLoad.imageView.setImageBitmap(photoToLoad.poster.bmp);
 			else
 				photoToLoad.imageView.setImageResource(stub_id);
 		}
@@ -189,6 +201,25 @@ public class ImageLoader {
 	public void clearCache() {
 		memoryCache.clear();
 		fileCache.clear();
+	}
+	
+	private String makeUrl(String baseUrl, int level){
+		String url = null;
+		switch (level) {
+		case 1:
+			url = "http://images.allocine.fr/r_150_500" + baseUrl;
+			break;
+		case 2:
+			url = "http://images.allocine.fr/r_200_666" + baseUrl;
+			break;
+		case 3:
+			url = "http://images.allocine.fr/r_720_2400" + baseUrl;
+			break;
+		default:
+			url = "";
+			break;
+		}
+		return url;
 	}
 
 }
