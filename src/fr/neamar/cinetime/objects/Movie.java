@@ -89,6 +89,7 @@ public class Movie {
 				if (!days[i].contains(" " + today + " :")) {
 					optimisedDisplay += lowlightDay(days[i]) + "<br>";
 				} else {
+					//Note : it isn't "+=", but "=" : we remove past entries.
 					optimisedDisplay = lowlightHour(days[i]) + " <br>"; // Space
 																			// required
 																			// to
