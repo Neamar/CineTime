@@ -18,7 +18,7 @@
         android:id="@+id/listitem_movie_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Movie name"
+        android:text="@string/stub_title"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <LinearLayout
@@ -31,7 +31,7 @@
             style="?android:attr/ratingBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Note"
+            android:contentDescription="@string/content_description_rating"
             android:isIndicator="true"
             android:max="5"
             android:numStars="5"
@@ -40,18 +40,18 @@
 
         <TextView
             android:id="@+id/listitem_movie_extra"
-            android:layout_width="fill_parent"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.00"
             android:gravity="center_horizontal|center_vertical"
-            android:text="3D" />
+            android:text="@string/stub_extra" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/listitem_movie_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10"
+        android:text="@string/stub_display"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </LinearLayout>

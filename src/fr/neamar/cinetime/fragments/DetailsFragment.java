@@ -58,6 +58,10 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		@Override
 		public void setFragment(Fragment fragment) {
 		}
+
+		@Override
+		public void setIsLoading(Boolean isLoading) {
+		}
 	};
 
 	@Override
@@ -178,7 +182,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	}
 
 	@Override
-	public void onLoadOver(ArrayList<Movie> movies) {
+	public void updateListView(ArrayList<Movie> movies) {
 		// TODO Auto-generated method stub
 	}
 
