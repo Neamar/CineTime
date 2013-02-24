@@ -15,7 +15,7 @@ import fr.neamar.cinetime.objects.Theater;
 
 public class TheaterAdapter extends ArrayAdapter<Theater> {
 
-	private Context context;
+	private LayoutInflater inflater;
 
 	/**
 	 * Array list containing all the theaters currently displayed
@@ -25,7 +25,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 	public TheaterAdapter(Context context, int textViewResourceId, ArrayList<Theater> theaters) {
 		super(context, textViewResourceId, theaters);
 
-		this.context = context;
+		this.inflater = LayoutInflater.from(context);
 		this.theaters = theaters;
 	}
 
@@ -34,9 +34,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 		View v = convertView;
 
 		if (v == null) {
-			LayoutInflater vi = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			v = vi.inflate(R.layout.listitem_theater, null);
+			v = inflater.inflate(R.layout.listitem_theater, null);
 		}
 
 		final Theater theater = theaters.get(position);
