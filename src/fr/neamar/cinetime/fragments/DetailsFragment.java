@@ -229,9 +229,5 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		if (getArguments().containsKey(ARG_THEATER_NAME)) {
 			theater = getArguments().getString(ARG_THEATER_NAME);
 		}
-		if (displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null) {
-			mTask = new LoadMovieTask(this);
-			mTask.execute(displayedMovie.code);
-		}
 	}
 }
