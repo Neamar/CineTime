@@ -16,7 +16,7 @@ import fr.neamar.cinetime.db.DBHelper;
 public class CineTimeBackupHelper extends BackupAgentHelper {
 
 	// The name of the SharedPreferences file
-	static final String PREFS = "fr.neamar.cintetime_preferences";
+	static final String PREFS = "synopsis";
 
 	// A key to uniquely identify the set of backup data
 	static final String PREFS_BACKUP_KEY = "prefs";

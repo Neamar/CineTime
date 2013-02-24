@@ -74,15 +74,12 @@ public class Poster {
 		switch (level) {
 		case 1:
 			this.bmpLow = bmp;
-			Log.d("Image", "Low: Height: " + bmp.getHeight() + " Width: "+bmp.getWidth());
 			break;
 		case 2:
 			this.bmpMed = bmp;
-			Log.d("Image", "Med: Height: " + bmp.getHeight() + " Width: "+bmp.getWidth());
 			break;
 		case 3:
 			this.bmpHigh = bmp;
-			Log.d("Image", "High: Height: " + bmp.getHeight() + " Width: "+bmp.getWidth());
 			break;
 		default:
 			break;
