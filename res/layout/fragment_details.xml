@@ -20,8 +20,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:adjustViewBounds="true"
-                android:maxWidth="150dp"
                 android:contentDescription="@string/content_description_poster"
+                android:maxWidth="150dp"
                 android:padding="5dp"
                 android:src="@drawable/stub" />
 
@@ -35,14 +35,14 @@
                     android:id="@+id/details_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Le Hobbit : un voyage inattendu"
+                    android:text="@string/stub_title"
                     android:textAppearance="?android:attr/textAppearanceLarge" />
 
                 <TextView
                     android:id="@+id/details_extra"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Par Peter Jackson, avec Ian McKellen, Martin Freeman, Richard Armitage, Ken Stott, Graham McTavish"
+                    android:text="@string/stub_cast"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
         </LinearLayout>
@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Déconseillé au moins de 10 ans."
+            android:text="@string/stub_certificate"
             android:textColor="#C09853" />
 
         <TextView
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/ic_ratings"
             android:drawablePadding="5dp"
-            android:text="Notes" />
+            android:text="@string/content_title_rating" />
 
         <TableLayout
             android:id="@+id/details_ratings"
@@ -79,7 +79,7 @@
                     android:id="@+id/textView3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Presse :"
+                    android:text="@string/content_rating_press"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <RatingBar
@@ -87,7 +87,7 @@
                     style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:contentDescription="Note presse"
+                    android:contentDescription="@string/content_rating_press"
                     android:isIndicator="true"
                     android:max="5"
                     android:rating="3.1"
@@ -103,7 +103,7 @@
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Utilisateurs :"
+                    android:text="@string/content_rating_user"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <RatingBar
@@ -111,7 +111,7 @@
                     style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:contentDescription="Note presse"
+                    android:contentDescription="@string/content_rating_user"
                     android:isIndicator="true"
                     android:max="10"
                     android:rating="3.1"
@@ -126,14 +126,14 @@
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/ic_display"
             android:drawablePadding="5dp"
-            android:text="Horaires" />
+            android:text="@string/content_title_display" />
 
         <TextView
             android:id="@+id/details_display"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
-            android:text="Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10"
+            android:text="@string/stub_display"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -143,14 +143,14 @@
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/ic_synopsis"
             android:drawablePadding="5dp"
-            android:text="Synopsis" />
+            android:text="@string/content_title_synopsis" />
 
         <TextView
             android:id="@+id/details_synopsis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
-            android:text="Les aventures de Bilbon Sacquet, entraîné dans une quête héroïque pour reprendre le Royaume perdu des nains d’Erebor, conquis longtemps auparavant par le dragon Smaug."
+            android:text="@string/stub_synopsis"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 
