@@ -18,7 +18,7 @@ public class PosterViewerActivity extends Activity{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.poster_viewer);
-		imageLoader = new ImageLoader(this);
+		imageLoader = CineTimeApplication.getImageLoader(this);
 		poster = (ImageView) findViewById(R.id.posterView);
 		setTitle(DetailsFragment.displayedMovie.title);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {

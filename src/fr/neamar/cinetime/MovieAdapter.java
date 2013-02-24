@@ -28,7 +28,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		super(ac, textViewResourceId, movies);
 		this.context = ac;
 		this.movies = movies;
-		imageLoader = new ImageLoader(ac.getApplicationContext());
+		imageLoader = CineTimeApplication.getImageLoader(ac);
 	}
 
 	@Override

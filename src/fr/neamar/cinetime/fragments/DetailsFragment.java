@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import fr.neamar.cinetime.CineTimeApplication;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
@@ -85,7 +86,6 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		userRating = (ProgressBar) view.findViewById(R.id.details_userrating);
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
-		imageLoader = new ImageLoader(getActivity().getApplicationContext());
 		if (displayedMovie != null) {
 			updateUI();
 		}
@@ -104,6 +104,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		if (!(activity instanceof Callbacks)) {
 			throw new IllegalStateException("Activity must implement fragment's callbacks.");
 		}
+		imageLoader = CineTimeApplication.getImageLoader(getActivity());
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
 		if (titleToSet) {

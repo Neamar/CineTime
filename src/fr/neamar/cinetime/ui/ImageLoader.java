@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 import android.widget.ImageView;
 import fr.neamar.cinetime.R;
 
@@ -50,6 +51,7 @@ public class ImageLoader {
 
 	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		imageViews.put(imageView, url);
+		Log.d("Image", url);
 		Poster poster = posterCache.get(url);
 		if (poster != null){
 			imageView.setImageBitmap(poster.bmp);
