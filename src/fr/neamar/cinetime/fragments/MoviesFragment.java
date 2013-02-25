@@ -180,7 +180,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			{
 				//Display cached values
 				try {
-					Log.e("wtf", "Read display datas from cache for " + theaterCode);
+					Log.i("cache-hit", "Getting display datas from cache for " + theaterCode);
 					mCallbacks.setIsLoading(true);
 					ArrayList<Movie> movies = (new APIHelper(fragment)).formatMoviesList(new JSONArray(cache), theaterCode);
 					fragment.updateListView(movies);
@@ -190,6 +190,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			}
 			else
 			{
+				Log.i("cache-miss", "Remote loading first-time datas for " + theaterCode);
 				dialog = new ProgressDialog(ctx);
 				dialog.setMessage("Chargement des séances en cours...");
 				dialog.show();
@@ -209,12 +210,12 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			String newCache = jsonResults.toString();
 			if(oldCache.equals(newCache))
 			{
-				Log.e("wtf", "Remote datas equals local datas; skipping UI update.");
+				Log.i("cache-hit", "Remote datas equals local datas; skipping UI update.");
 				remoteDataHasChangedFromLocalCache = false;
 			}
 			else
 			{
-				Log.e("wtf", "Remote data differs from local datas; updating UI");
+				Log.i("cache-miss", "Remote data differs from local datas; updating UI");
 				//Store in cache for future use
 				SharedPreferences.Editor ed = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).edit();
 				ed.putString(theaterCode, jsonResults.toString());

@@ -2,14 +2,18 @@ package fr.neamar.cinetime.fragments;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.backup.BackupManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -172,27 +176,36 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 	private class LoadMovieTask extends AsyncTask<String, Void, Movie> {
 		private SharedPreferences preferences;
+		private Context ctx;
 		
 		public LoadMovieTask(DetailsFragment fragment) {
 			super();
-			this.preferences = fragment.getActivity().getSharedPreferences("synopsis", Context.MODE_PRIVATE);
+			this.ctx = fragment.getActivity();
+			this.preferences = ctx.getSharedPreferences("synopsis", Context.MODE_PRIVATE);
 		}
 		
 		@Override
+		@SuppressLint("NewApi")
 		protected Movie doInBackground(String... queries) {
 			//Try to read synopsis from cache
 			String movieCode = displayedMovie.code;
 			String cache = preferences.getString(movieCode, "");
 			if(!cache.equals(""))
 			{
+				Log.i("cache-hit", "Getting synopsis from cache for " + movieCode);
 				displayedMovie.synopsis = cache;
 			}
+			else
 			{
+				Log.i("cache-miss", "Remote loading synopsis for " + movieCode);
 				displayedMovie = (new APIHelper(DetailsFragment.this)).findMovie(displayedMovie);
 				String synopsis = displayedMovie.synopsis;
 				SharedPreferences.Editor ed = preferences.edit();
 				ed.putString(movieCode, synopsis);
 				ed.commit();
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+					new BackupManager(ctx).dataChanged();
+				}
 			}
 			
 			return displayedMovie; 
