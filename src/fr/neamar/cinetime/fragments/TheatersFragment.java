@@ -3,15 +3,25 @@ package fr.neamar.cinetime.fragments;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.text.format.Time;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -42,6 +52,8 @@ public class TheatersFragment extends ListFragment implements
 	static private Context ctx;
 	static private String query = "";
 	static private String previousQuery = "";
+	static private String lat = "";
+	static private String lon = "";
 
 	public interface Callbacks {
 
@@ -80,9 +92,11 @@ public class TheatersFragment extends ListFragment implements
 				return true;
 			}
 		});
-		searchText.setText(query);
-		// Display favorites :
-		searchButton.performClick();
+		if (lat.equalsIgnoreCase("") || lon.equalsIgnoreCase("")) {
+			searchText.setText(query);
+			// Display favorites :
+			searchButton.performClick();
+		}
 	}
 
 	@Override
@@ -110,6 +124,8 @@ public class TheatersFragment extends ListFragment implements
 
 			@Override
 			public void onClick(View v) {
+				lat = "";
+				lon = "";
 				query = searchText.getText().toString().trim();
 				if (!query.equalsIgnoreCase("")) {
 					searchForTheater(query);
@@ -118,6 +134,97 @@ public class TheatersFragment extends ListFragment implements
 				}
 			}
 		});
+
+		root.findViewById(R.id.theaters_search_geo_button).setOnClickListener(
+				new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						final LocationManager locationManager = (LocationManager) ctx
+								.getSystemService(Context.LOCATION_SERVICE);
+						final boolean locationEnable = locationManager
+								.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+						if (!locationEnable) {
+							AlertDialog.Builder builder = new AlertDialog.Builder(
+									ctx);
+							Resources res = getResources();
+							builder.setMessage(
+									res.getString(R.string.location_dialog_mess))
+									.setCancelable(true)
+									.setPositiveButton(
+											res.getString(R.string.location_dialog_ok),
+											new DialogInterface.OnClickListener() {
+												public void onClick(
+														DialogInterface dialog,
+														int id) {
+													dialog.cancel();
+													Intent settingsIntent = new Intent(
+															Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+													startActivity(settingsIntent);
+												}
+											})
+									.setNegativeButton(
+											res.getString(R.string.location_dialog_cancel),
+											new DialogInterface.OnClickListener() {
+												public void onClick(
+														DialogInterface dialog,
+														int id) {
+													dialog.cancel();
+												}
+											});
+							builder.create().show();
+						} else {
+							Location oldLocation = locationManager
+									.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+							Time t = new Time();
+							t.setToNow();
+							if (oldLocation == null
+									|| ((oldLocation.getTime() - t
+											.toMillis(true)) > 300000)) {
+								LocationListener listener = new LocationListener() {
+
+									@Override
+									public void onLocationChanged(
+											Location location) {
+										if (location.getAccuracy() < 1000) {
+											new LoadTheatersTask(ctx).execute(
+													String.valueOf(location
+															.getLatitude()),
+													String.valueOf(location
+															.getLongitude()));
+											locationManager.removeUpdates(this);
+										}
+									}
+
+									@Override
+									public void onProviderDisabled(
+											String provider) {
+									}
+
+									@Override
+									public void onProviderEnabled(
+											String provider) {
+									}
+
+									@Override
+									public void onStatusChanged(
+											String provider, int status,
+											Bundle extras) {
+									}
+								};
+								locationManager.requestLocationUpdates(
+										LocationManager.NETWORK_PROVIDER, 1000,
+										10, listener);
+							} else {
+								new LoadTheatersTask(ctx).execute(String
+										.valueOf(oldLocation.getLatitude()),
+										String.valueOf(oldLocation
+												.getLongitude()));
+							}
+						}
+					}
+				});
 
 		// When searching from keyboard
 		searchText
@@ -217,6 +324,13 @@ public class TheatersFragment extends ListFragment implements
 	public boolean goBack() {
 		// When pressing back, if a query is entered redisplay favorites.
 		// Else perform default back action.
+		if (!lat.equalsIgnoreCase("") && !lon.equalsIgnoreCase("")) {
+			lat = "";
+			lon = "";
+			searchText.setText("");
+			searchButton.performClick();
+			return false;
+		}
 		if (searchText.getText().toString().equals("")) {
 			return true;
 		} else {
@@ -247,6 +361,9 @@ public class TheatersFragment extends ListFragment implements
 
 		@Override
 		protected void onPreExecute() {
+			if (dialog != null && dialog.isShowing()) {
+				dialog.dismiss();
+			}
 			dialog = new ProgressDialog(ctx);
 			dialogPending = true;
 			dialog.setMessage("Recherche en cours...");
@@ -255,13 +372,21 @@ public class TheatersFragment extends ListFragment implements
 
 		@Override
 		protected ArrayList<Theater> doInBackground(String... queries) {
-			if (queries[0].equals("")) {
-				isLoadingFavorites = true;
-				return DBHelper.getFavorites(ctx);
-			}
+			if (queries.length == 1) {
+				if (queries[0].equals("")) {
+					isLoadingFavorites = true;
+					return DBHelper.getFavorites(ctx);
+				}
 
-			return (new APIHelper(TheatersFragment.this))
-					.findTheaters(queries[0]);
+				return (new APIHelper(TheatersFragment.this))
+						.findTheaters(queries[0]);
+			} else if (queries.length == 2) {
+				lat = queries[0];
+				lon = queries[1];
+				return (new APIHelper(TheatersFragment.this)).findTheatersGeo(
+						queries[0], queries[1]);
+			}
+			return null;
 		}
 
 		@Override

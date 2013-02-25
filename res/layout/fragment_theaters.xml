@@ -28,6 +28,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_action_search" />
+        <ImageButton
+            android:id="@+id/theaters_search_geo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_search_geo" />
     </LinearLayout>
 
     <ListView

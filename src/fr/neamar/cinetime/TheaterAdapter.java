@@ -1,5 +1,6 @@
 package fr.neamar.cinetime;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -41,6 +42,19 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 
 		TextView theaterName = (TextView) v.findViewById(R.id.listitem_theater_name);
 		TextView theaterLocation = (TextView) v.findViewById(R.id.listitem_theater_location);
+
+		TextView theaterDistance = (TextView) v.findViewById(R.id.listitem_theater_distance);
+		if(theater.distance != -1){
+			if(theater.distance < 1){
+				long dist = Math.round(theater.distance*1000);
+				theaterDistance.setText(" - " + String.valueOf(dist) + "m");
+			}else {
+				theaterDistance.setText(" - " + String.valueOf(new DecimalFormat("#.#").format(theater.distance)) + "km");
+			}
+			theaterDistance.setVisibility(View.VISIBLE);
+		}else{
+			theaterDistance.setVisibility(View.GONE);
+		}
 
 		final CheckBox fav = (CheckBox) v.findViewById(R.id.listitem_theater_fav);
 		fav.setChecked(DBHelper.isFavorite(theater.code));
