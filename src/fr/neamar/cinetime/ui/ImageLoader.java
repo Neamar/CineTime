@@ -19,17 +19,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.support.v4.util.LruCache;
 import android.widget.ImageView;
+import fr.neamar.cinetime.PosterViewerActivity;
 import fr.neamar.cinetime.R;
 
 public class ImageLoader {
 
 	LruCache<String, Poster> posterCache;
 	final int stub_id = R.drawable.stub;
+	Context ctx;
 	FileCache fileCache;
 	private Map<ImageView, String> imageViews = Collections
 			.synchronizedMap(new WeakHashMap<ImageView, String>());
@@ -38,11 +41,12 @@ public class ImageLoader {
 
 	public ImageLoader(Context context) {
 		fileCache = new FileCache(context);
+		ctx = context;
 		executorService = Executors.newFixedThreadPool(5);
-		int cacheSize = (int) (Runtime.getRuntime().maxMemory()/4);
-		posterCache = new LruCache<String, Poster>(cacheSize){
+		int cacheSize = (int) (Runtime.getRuntime().maxMemory() / 4);
+		posterCache = new LruCache<String, Poster>(cacheSize) {
 			protected int sizeOf(String key, Poster value) {
-		           return value.getBytes();
+				return value.getBytes();
 			}
 		};
 		Poster.generateStub(context, stub_id);
@@ -51,28 +55,31 @@ public class ImageLoader {
 	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		imageViews.put(imageView, url);
 		Poster poster = posterCache.get(url);
-		if (poster != null){
+		if (poster != null) {
 			imageView.setImageBitmap(poster.getBmp(levelRequested));
-			if(poster.levelRequested < levelRequested){
+			if (poster.levelRequested < levelRequested) {
 				poster.levelRequested = levelRequested;
 			}
-			if(poster.level < levelRequested){
+			if (poster.level < levelRequested) {
 				poster.level++;
 				queuePhoto(poster, url, imageView, levelRequested);
+			} else {
+				Intent i = new Intent(PosterViewerActivity.POSTER_LOADED);
+				ctx.sendBroadcast(i);
 			}
-		}
-		else {
+		} else {
 			Poster nPoster = new Poster(1, levelRequested);
 			imageView.setImageBitmap(nPoster.getBmp(levelRequested));
 			queuePhoto(nPoster, url, imageView, levelRequested);
 		}
 	}
 
-	private void queuePhoto(Poster poster, String url, ImageView imageView, int levelRequested) {
+	private void queuePhoto(Poster poster, String url, ImageView imageView,
+			int levelRequested) {
 		PhotoToLoad p = new PhotoToLoad(poster, url, imageView, levelRequested);
 		executorService.submit(new PhotosLoader(p));
 	}
-	
+
 	private void queuePhoto(PhotoToLoad p) {
 		executorService.submit(new PhotosLoader(p));
 	}
@@ -81,8 +88,8 @@ public class ImageLoader {
 		String fullUrl = makeUrl(url, poster.level);
 
 		File f = fileCache.getFile(fullUrl);
-		
-		if(poster.level < 3){
+
+		if (poster.level < 3) {
 			// from SD cache
 			Bitmap b = decodeFile(f);
 			if (b != null)
@@ -93,7 +100,8 @@ public class ImageLoader {
 		try {
 			Bitmap bitmap = null;
 			URL imageUrl = new URL(fullUrl);
-			HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
+			HttpURLConnection conn = (HttpURLConnection) imageUrl
+					.openConnection();
 			conn.setConnectTimeout(30000);
 			conn.setReadTimeout(30000);
 			conn.setInstanceFollowRedirects(true);
@@ -102,7 +110,7 @@ public class ImageLoader {
 			Utils.CopyStream(is, os);
 			os.close();
 			bitmap = decodeFile(f);
-			if (poster.level > 2){
+			if (poster.level > 2) {
 				f.delete();
 			}
 			return bitmap;
@@ -155,9 +163,10 @@ public class ImageLoader {
 			try {
 				if (imageViewReused(photoToLoad))
 					return;
-				photoToLoad.poster.setCurrentBmp(getBitmap(photoToLoad.url, photoToLoad.poster));
+				photoToLoad.poster.setCurrentBmp(getBitmap(photoToLoad.url,
+						photoToLoad.poster));
 				posterCache.put(photoToLoad.url, photoToLoad.poster);
-				if(photoToLoad.poster.continueLoading()){
+				if (photoToLoad.poster.continueLoading()) {
 					photoToLoad.poster.level++;
 					queuePhoto(photoToLoad);
 				}
@@ -190,7 +199,12 @@ public class ImageLoader {
 		public void run() {
 			if (imageViewReused(photoToLoad))
 				return;
-			photoToLoad.imageView.setImageBitmap(photoToLoad.poster.getBmp(photoToLoad.levelRequested));
+			photoToLoad.imageView.setImageBitmap(photoToLoad.poster
+					.getBmp(photoToLoad.levelRequested));
+			if (photoToLoad.poster.level == photoToLoad.levelRequested) {
+				Intent i = new Intent(PosterViewerActivity.POSTER_LOADED);
+				ctx.sendBroadcast(i);
+			}
 		}
 	}
 
@@ -198,8 +212,8 @@ public class ImageLoader {
 		posterCache.evictAll();
 		fileCache.clear();
 	}
-	
-	private String makeUrl(String baseUrl, int level){
+
+	private String makeUrl(String baseUrl, int level) {
 		String url = null;
 		switch (level) {
 		case 1:

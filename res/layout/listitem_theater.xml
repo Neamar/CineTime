@@ -3,13 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:descendantFocusability="blocksDescendants"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:padding="5dp" >
 
     <CheckBox
         android:id="@+id/listitem_theater_fav"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center"
+        android:layout_marginLeft="5dp"
         android:button="@android:drawable/btn_star"
         android:padding="5dp" />
 
@@ -27,6 +29,8 @@
                 android:id="@+id/listitem_theater_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:singleLine="true"
                 android:text="Theater name"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -34,7 +38,7 @@
                 android:id="@+id/listitem_theater_distance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
+                android:ellipsize="marquee"
                 android:singleLine="true"
                 android:text="Theater Distance"
                 android:textAppearance="?android:attr/textAppearanceSmall"
@@ -46,7 +50,7 @@
             android:id="@+id/listitem_theater_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
+            android:ellipsize="marquee"
             android:singleLine="true"
             android:text="Theater location"
             android:textAppearance="?android:attr/textAppearanceSmall"
