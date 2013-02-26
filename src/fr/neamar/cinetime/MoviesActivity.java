@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toast;
 import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
@@ -148,5 +149,14 @@ public class MoviesActivity extends FragmentActivity implements
 		}else if (source instanceof DetailsFragment){
 			startActivity(new Intent(this, PosterViewerActivity.class));
 		}
+	}
+	
+	@Override
+	public void finishNoNetwork() {
+		Toast.makeText(
+				this,
+				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+				Toast.LENGTH_SHORT).show();
+		finish();
 	}
 }

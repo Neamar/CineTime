@@ -8,5 +8,5 @@ public interface TaskMoviesCallbacks {
 
 	public void updateListView(ArrayList<Movie> movies);
 
-	public void finish();
+	public void finishNoNetwork();
 }

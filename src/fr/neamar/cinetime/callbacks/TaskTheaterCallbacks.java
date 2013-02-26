@@ -8,5 +8,5 @@ public interface TaskTheaterCallbacks {
 
 	public void onLoadOver(ArrayList<Theater> theaters);
 
-	public void finish();
+	public void finishNoNetwork();
 }

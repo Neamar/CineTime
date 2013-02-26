@@ -44,6 +44,8 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		public void setFragment(Fragment fragment);
 		
 		public void setIsLoading(Boolean isLoading);
+		
+		public void finishNoNetwork();
 	}
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
@@ -58,6 +60,11 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		public void setIsLoading(Boolean isLoading)
 		{
 			
+		}
+		
+		@Override
+		public void finishNoNetwork() {
+			toFinish = true;
 		}
 	};
 
@@ -99,7 +106,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
 		if (toFinish) {
-			getActivity().finish();
+			mCallbacks.finishNoNetwork();
 			toFinish = false;
 		}
 		if (dialogPending) {
@@ -152,12 +159,8 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		mActivatedPosition = position;
 	}
 
-	public void finish() {
-		if (getActivity() != null) {
-			getActivity().finish();
-		} else {
-			toFinish = true;
-		}
+	public void finishNoNetwork() {
+		mCallbacks.finishNoNetwork();
 	}
 
 	private class LoadMoviesTask extends AsyncTask<String, Void, JSONArray> {
@@ -182,7 +185,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 				try {
 					Log.i("cache-hit", "Getting display datas from cache for " + theaterCode);
 					mCallbacks.setIsLoading(true);
-					ArrayList<Movie> movies = (new APIHelper(fragment)).formatMoviesList(new JSONArray(cache), theaterCode);
+					ArrayList<Movie> movies = (new APIHelper().formatMoviesList(new JSONArray(cache), theaterCode));
 					fragment.updateListView(movies);
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -204,7 +207,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			{
 				throw new RuntimeException("Fragment misuse: theaterCode differs");
 			}
-			JSONArray jsonResults = (new APIHelper(fragment)).downloadMoviesList(theaterCode);
+			JSONArray jsonResults = (new APIHelper()).downloadMoviesList(theaterCode);
 			
 			String oldCache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
 			String newCache = jsonResults.toString();
@@ -239,7 +242,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			//Update only if data changed
 			if(remoteDataHasChangedFromLocalCache)
 			{
-				ArrayList<Movie> movies = (new APIHelper(fragment)).formatMoviesList(jsonResults, theaterCode);
+				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(jsonResults, theaterCode);
 				fragment.updateListView(movies);
 			}
 		}

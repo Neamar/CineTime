@@ -50,7 +50,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	protected String theater = "";
 	private LoadMovieTask mTask;
 	private boolean titleToSet = false;
-	private boolean toFinish = false;
+	private static boolean toFinish = false;
 
 	public DetailsFragment() {
 	}
@@ -67,6 +67,11 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 		@Override
 		public void setIsLoading(Boolean isLoading) {
+		}
+
+		@Override
+		public void finishNoNetwork() {
+			toFinish = true;
 		}
 	};
 
@@ -122,7 +127,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			titleToSet = false;
 		}
 		if (toFinish) {
-			getActivity().finish();
+			mCallbacks.finishNoNetwork();
 			toFinish = false;
 		}
 	}
@@ -198,7 +203,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			else
 			{
 				Log.i("cache-miss", "Remote loading synopsis for " + movieCode);
-				displayedMovie = (new APIHelper(DetailsFragment.this)).findMovie(displayedMovie);
+				displayedMovie = (new APIHelper()).findMovie(displayedMovie);
 				String synopsis = displayedMovie.synopsis;
 				SharedPreferences.Editor ed = preferences.edit();
 				ed.putString(movieCode, synopsis);
@@ -224,12 +229,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	}
 
 	@Override
-	public void finish() {
-		if (getActivity() != null) {
-			getActivity().finish();
-		} else {
-			toFinish = true;
-		}
+	public void finishNoNetwork() {
+		mCallbacks.finishNoNetwork();
 	}
 
 	@Override

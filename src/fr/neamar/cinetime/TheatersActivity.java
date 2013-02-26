@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.widget.Toast;
 import fr.neamar.cinetime.fragments.TheatersFragment;
 
 public class TheatersActivity extends FragmentActivity implements TheatersFragment.Callbacks{
@@ -48,5 +49,14 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 		String uri = "geo:0,0?q="
 				+ theatersFragment.getTheaters().get(position).location;
 		startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
+	}
+
+	@Override
+	public void finishNoNetwork() {
+		Toast.makeText(
+				this,
+				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+				Toast.LENGTH_SHORT).show();
+		finish();
 	}
 }

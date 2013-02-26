@@ -1,6 +1,9 @@
 package fr.neamar.cinetime.fragments;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -44,7 +47,7 @@ public class TheatersFragment extends ListFragment implements
 
 	private Callbacks mCallbacks = sDummyCallbacks;
 	private int mActivatedPosition = ListView.INVALID_POSITION;
-	private boolean toFinish = false;
+	private static boolean toFinish = false;
 	private boolean dialogPending = false;
 	private ProgressDialog dialog;
 	public EditText searchText;
@@ -62,6 +65,8 @@ public class TheatersFragment extends ListFragment implements
 		public void onLongItemSelected(int position, Fragment source);
 
 		public void setFragment(Fragment fragment);
+
+		public void finishNoNetwork();
 	}
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
@@ -77,6 +82,11 @@ public class TheatersFragment extends ListFragment implements
 		public void onLongItemSelected(int position, Fragment source) {
 			// TODO Auto-generated method stub
 
+		}
+
+		@Override
+		public void finishNoNetwork() {
+			toFinish = true;
 		}
 	};
 
@@ -264,7 +274,7 @@ public class TheatersFragment extends ListFragment implements
 		mCallbacks.setFragment(this);
 		ctx = activity;
 		if (toFinish) {
-			getActivity().finish();
+			mCallbacks.finishNoNetwork();
 			toFinish = false;
 		}
 		if (dialogPending) {
@@ -341,12 +351,8 @@ public class TheatersFragment extends ListFragment implements
 	}
 
 	@Override
-	public void finish() {
-		if (getActivity() != null) {
-			getActivity().finish();
-		} else {
-			toFinish = true;
-		}
+	public void finishNoNetwork() {
+		mCallbacks.finishNoNetwork();
 	}
 
 	private class LoadTheatersTask extends
@@ -372,19 +378,23 @@ public class TheatersFragment extends ListFragment implements
 
 		@Override
 		protected ArrayList<Theater> doInBackground(String... queries) {
-			if (queries.length == 1) {
-				if (queries[0].equals("")) {
-					isLoadingFavorites = true;
-					return DBHelper.getFavorites(ctx);
+			try {
+				if (queries.length == 1) {
+					if (queries[0].equals("")) {
+						isLoadingFavorites = true;
+						return DBHelper.getFavorites(ctx);
+					}
+					return (new APIHelper().findTheaters(queries[0]));
+				} else if (queries.length == 2) {
+					lat = queries[0];
+					lon = queries[1];
+					return (new APIHelper().findTheatersGeo(queries[0],
+							queries[1]));
 				}
+			} catch (ClientProtocolException e) {
 
-				return (new APIHelper(TheatersFragment.this))
-						.findTheaters(queries[0]);
-			} else if (queries.length == 2) {
-				lat = queries[0];
-				lon = queries[1];
-				return (new APIHelper(TheatersFragment.this)).findTheatersGeo(
-						queries[0], queries[1]);
+			} catch (IOException e) {
+
 			}
 			return null;
 		}
@@ -397,11 +407,15 @@ public class TheatersFragment extends ListFragment implements
 			}
 			dialogPending = false;
 
-			if (!isLoadingFavorites) {
-				((TextView) getListView().getEmptyView())
-						.setText("Aucun résultat pour cette recherche.");
+			if (resultsList != null) {
+				if (!isLoadingFavorites) {
+					((TextView) getListView().getEmptyView())
+							.setText("Aucun résultat pour cette recherche.");
+				}
+				TheatersFragment.this.onLoadOver(resultsList);
+			} else {
+				finishNoNetwork();
 			}
-			TheatersFragment.this.onLoadOver(resultsList);
 		}
 	}
 
