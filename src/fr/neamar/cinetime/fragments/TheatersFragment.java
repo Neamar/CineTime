@@ -185,6 +185,8 @@ public class TheatersFragment extends ListFragment implements
 											});
 							builder.create().show();
 						} else {
+							query = "";
+							searchText.setText("");
 							Location oldLocation = locationManager
 									.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 							Time t = new Time();
