@@ -2,6 +2,7 @@ package fr.neamar.cinetime;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
@@ -65,10 +66,10 @@ public class MoviesActivity extends FragmentActivity implements
 		if (mTwoPane) {
 			inflater.inflate(R.menu.activity_details, menu);
 			shareItem = menu.findItem(R.id.menu_share);
-			if(detailsFragment == null){
-				shareItem.setEnabled(false);
-			}else {
-				shareItem.setEnabled(true);
+			if (detailsFragment == null) {
+				desactivateShare();
+			} else {
+				activateShare();
 			}
 			return true;
 		}
@@ -84,11 +85,9 @@ public class MoviesActivity extends FragmentActivity implements
 						.beginTransaction()
 						.replace(R.id.file_detail_container,
 								new DetailsEmptyFragment()).commit();
-				if(shareItem != null){
-					shareItem.setEnabled(false);
-				}
-			} else if (shareItem != null){
-				shareItem.setEnabled(true);
+				desactivateShare();
+			} else {
+				activateShare();
 			}
 		}
 	}
@@ -115,9 +114,7 @@ public class MoviesActivity extends FragmentActivity implements
 			this.moviesFragment = (MoviesFragment) fragment;
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
-			if (shareItem != null) {
-				shareItem.setEnabled(true);
-			}
+			activateShare();
 		}
 	}
 
@@ -129,7 +126,7 @@ public class MoviesActivity extends FragmentActivity implements
 					.replace(R.id.file_detail_container,
 							new DetailsEmptyFragment()).commit();
 			detailsFragment = null;
-			shareItem.setEnabled(false);
+			desactivateShare();
 			setTitle("Séances " + getIntent().getStringExtra("theater"));
 		} else {
 			moviesFragment.clear();
@@ -179,5 +176,27 @@ public class MoviesActivity extends FragmentActivity implements
 				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
 				Toast.LENGTH_SHORT).show();
 		finish();
+	}
+
+	@SuppressLint("NewApi")
+	private void activateShare() {
+		if (shareItem != null) {
+			shareItem.setVisible(true);
+			shareItem.setEnabled(true);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				invalidateOptionsMenu();
+			}
+		}
+	}
+
+	@SuppressLint("NewApi")
+	private void desactivateShare() {
+		if (shareItem != null) {
+			shareItem.setEnabled(false);
+			shareItem.setVisible(false);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				invalidateOptionsMenu();
+			}
+		}
 	}
 }
