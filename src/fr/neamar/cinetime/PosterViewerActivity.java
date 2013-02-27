@@ -1,5 +1,7 @@
 package fr.neamar.cinetime;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -47,6 +49,18 @@ public class PosterViewerActivity extends Activity{
 		if(DetailsFragment.displayedMovie.poster != null){
 			imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
 		}
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
 	}
 	
 }

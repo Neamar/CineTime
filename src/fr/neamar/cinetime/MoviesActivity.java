@@ -1,5 +1,7 @@
 package fr.neamar.cinetime;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
@@ -51,7 +53,7 @@ public class MoviesActivity extends FragmentActivity implements
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
-	
+
 	@Override
 	public void setIsLoading(Boolean isLoading) {
 		setProgressBarIndeterminateVisibility(isLoading);
@@ -63,7 +65,11 @@ public class MoviesActivity extends FragmentActivity implements
 		if (mTwoPane) {
 			inflater.inflate(R.menu.activity_details, menu);
 			shareItem = menu.findItem(R.id.menu_share);
-			shareItem.setEnabled(false);
+			if(detailsFragment == null){
+				shareItem.setEnabled(false);
+			}else {
+				shareItem.setEnabled(true);
+			}
 			return true;
 		}
 		return false;
@@ -72,14 +78,16 @@ public class MoviesActivity extends FragmentActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (mTwoPane && shareItem != null) {
+		if (mTwoPane) {
 			if (detailsFragment == null) {
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.file_detail_container,
 								new DetailsEmptyFragment()).commit();
-				shareItem.setEnabled(false);
-			} else {
+				if(shareItem != null){
+					shareItem.setEnabled(false);
+				}
+			} else if (shareItem != null){
 				shareItem.setEnabled(true);
 			}
 		}
@@ -128,6 +136,7 @@ public class MoviesActivity extends FragmentActivity implements
 			super.onBackPressed();
 		}
 	}
+
 	@Override
 	public void onItemSelected(int position, Fragment source) {
 		if (source instanceof MoviesFragment) {
@@ -146,11 +155,23 @@ public class MoviesActivity extends FragmentActivity implements
 				details.putExtra(DetailsFragment.ARG_THEATER_NAME, theater);
 				startActivity(details);
 			}
-		}else if (source instanceof DetailsFragment){
+		} else if (source instanceof DetailsFragment) {
 			startActivity(new Intent(this, PosterViewerActivity.class));
 		}
 	}
-	
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
+	}
+
 	@Override
 	public void finishNoNetwork() {
 		Toast.makeText(
