@@ -192,6 +192,7 @@ public class TheatersFragment extends ListFragment implements
 							builder.create().show();
 						} else {
 							query = "";
+							previousQuery = "";
 							searchText.setText("");
 							Location oldLocation = locationManager
 									.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -348,13 +349,16 @@ public class TheatersFragment extends ListFragment implements
 		if (!lat.equalsIgnoreCase("") && !lon.equalsIgnoreCase("")) {
 			lat = "";
 			lon = "";
+			query = "";
+			previousQuery = "";
 			searchText.setText("");
 			searchButton.performClick();
 			return false;
-		}
-		if (searchText.getText().toString().equals("")) {
+		}else if (searchText.getText().toString().equals("")) {
 			return true;
 		} else {
+			query = "";
+			previousQuery = "";
 			searchText.setText("");
 			searchButton.performClick();
 			return false;

@@ -46,9 +46,7 @@ public class PosterViewerActivity extends Activity{
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			getActionBar().hide();
 		}
-		if(DetailsFragment.displayedMovie.poster != null){
-			imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
-		}
+		imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
 	}
 	
 	@Override
