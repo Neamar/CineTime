@@ -24,10 +24,11 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 	 */
 	public ArrayList<Movie> movies = new ArrayList<Movie>();
 
+	@SuppressWarnings("unchecked")
 	public MovieAdapter(Context ac, int textViewResourceId, ArrayList<Movie> movies) {
 		super(ac, textViewResourceId, movies);
 		this.context = ac;
-		this.movies = movies;
+		this.movies = (ArrayList<Movie>) movies.clone();
 		imageLoader = CineTimeApplication.getImageLoader(ac);
 	}
 
