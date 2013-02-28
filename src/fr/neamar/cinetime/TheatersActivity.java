@@ -80,7 +80,7 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 
 	@Override
 	public void updateTitle(String title) {
-		this.title = title;
+		TheatersActivity.title = title;
 		setTitle(title);
 	}
 }
