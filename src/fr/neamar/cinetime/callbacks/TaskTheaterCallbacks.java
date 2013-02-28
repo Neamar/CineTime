@@ -6,7 +6,8 @@ import fr.neamar.cinetime.objects.Theater;
 
 public interface TaskTheaterCallbacks {
 
-	public void onLoadOver(ArrayList<Theater> theaters);
-
 	public void finishNoNetwork();
+
+	void onLoadOver(ArrayList<Theater> theaters, boolean isFavorite,
+			boolean isGeoSearch);
 }

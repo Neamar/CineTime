@@ -13,13 +13,17 @@ import fr.neamar.cinetime.fragments.TheatersFragment;
 public class TheatersActivity extends FragmentActivity implements TheatersFragment.Callbacks{
 
 	TheatersFragment theatersFragment;
+	static String title = "";
 	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_theaters_list);
-		setTitle(R.string.title_activity_theaters);
+		if(title.equalsIgnoreCase("")){
+			title = getResources().getString(R.string.title_activity_theaters);
+		}
+		setTitle(title);
 	}
 
 	@Override
@@ -72,5 +76,11 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 	protected void onStop() {
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
+	}
+
+	@Override
+	public void updateTitle(String title) {
+		this.title = title;
+		setTitle(title);
 	}
 }

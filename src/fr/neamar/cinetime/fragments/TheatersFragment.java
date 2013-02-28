@@ -57,6 +57,7 @@ public class TheatersFragment extends ListFragment implements
 	static private String previousQuery = "";
 	static private String lat = "";
 	static private String lon = "";
+	static private String parentTitle = "";
 
 	public interface Callbacks {
 
@@ -67,6 +68,8 @@ public class TheatersFragment extends ListFragment implements
 		public void setFragment(Fragment fragment);
 
 		public void finishNoNetwork();
+		
+		public void updateTitle(String title);
 	}
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
@@ -80,13 +83,16 @@ public class TheatersFragment extends ListFragment implements
 
 		@Override
 		public void onLongItemSelected(int position, Fragment source) {
-			// TODO Auto-generated method stub
-
 		}
 
 		@Override
 		public void finishNoNetwork() {
 			toFinish = true;
+		}
+
+		@Override
+		public void updateTitle(String title) {
+			parentTitle = title;
 		}
 	};
 
@@ -140,7 +146,7 @@ public class TheatersFragment extends ListFragment implements
 				if (!query.equalsIgnoreCase("")) {
 					searchForTheater(query);
 				} else {
-					onLoadOver(DBHelper.getFavorites(ctx));
+					onLoadOver(DBHelper.getFavorites(ctx), true, false);
 				}
 			}
 		});
@@ -284,6 +290,9 @@ public class TheatersFragment extends ListFragment implements
 			dialog.setMessage("Recherche en cours...");
 			dialog.show();
 		}
+		if(!parentTitle.equalsIgnoreCase("")){
+			mCallbacks.updateTitle(parentTitle);
+		}
 	}
 
 	@Override
@@ -360,6 +369,7 @@ public class TheatersFragment extends ListFragment implements
 	private class LoadTheatersTask extends
 			AsyncTask<String, Void, ArrayList<Theater>> {
 		private Boolean isLoadingFavorites = false;
+		private Boolean isGeoSearch = false;
 		private Context ctx;
 
 		public LoadTheatersTask(Context ctx) {
@@ -390,6 +400,7 @@ public class TheatersFragment extends ListFragment implements
 				} else if (queries.length == 2) {
 					lat = queries[0];
 					lon = queries[1];
+					isGeoSearch = true;
 					return (new APIHelper().findTheatersGeo(queries[0],
 							queries[1]));
 				}
@@ -414,7 +425,7 @@ public class TheatersFragment extends ListFragment implements
 					((TextView) getListView().getEmptyView())
 							.setText("Aucun résultat pour cette recherche.");
 				}
-				TheatersFragment.this.onLoadOver(resultsList);
+				TheatersFragment.this.onLoadOver(resultsList, isLoadingFavorites, isGeoSearch);
 			} else {
 				finishNoNetwork();
 			}
@@ -422,12 +433,18 @@ public class TheatersFragment extends ListFragment implements
 	}
 
 	@Override
-	public void onLoadOver(ArrayList<Theater> theaters) {
+	public void onLoadOver(ArrayList<Theater> theaters, boolean isFavorite, boolean isGeoSearch) {
 		setListAdapter(new TheaterAdapter(ctx, R.layout.listitem_theater,
 				theaters));
-
 		if (theaters.size() > 0) {
 			getListView().requestFocus();
+		}
+		if(isFavorite){
+			mCallbacks.updateTitle("Mes cinémas");
+		}else if(isGeoSearch){
+			mCallbacks.updateTitle("Cinémas à proximité");
+		}else {
+			mCallbacks.updateTitle("Recherche : " + query);
 		}
 	}
 }
