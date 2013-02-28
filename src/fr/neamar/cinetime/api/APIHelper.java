@@ -1,6 +1,7 @@
 package fr.neamar.cinetime.api;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
@@ -15,25 +17,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.widget.Toast;
-import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
-import fr.neamar.cinetime.callbacks.TaskTheaterCallbacks;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
-
-	protected TaskMoviesCallbacks fragmentM;
-	protected TaskTheaterCallbacks fragmentT;
+	
 	protected Context ctx;
-
-	public APIHelper(TaskMoviesCallbacks fragment) {
-		this.fragmentM = fragment;
-	}
-
-	public APIHelper(TaskTheaterCallbacks fragment) {
-		this.fragmentT = fragment;
-	}
 
 	/**
 	 * Retrieve base URL.
@@ -51,38 +40,25 @@ public class APIHelper {
 	 * 
 	 * @param url
 	 * @return
+	 * @throws IOException 
+	 * @throws ClientProtocolException 
 	 */
-	protected String downloadUrl(String url) {
-		try {
-			// Create a new HTTP Client
-			DefaultHttpClient defaultClient = new DefaultHttpClient();
-			// Setup the get request
-			HttpGet httpGetRequest = new HttpGet(url);
+	protected String downloadUrl(String url) throws ClientProtocolException, IOException {
+		// Create a new HTTP Client
+		DefaultHttpClient defaultClient = new DefaultHttpClient();
+		// Setup the get request
+		HttpGet httpGetRequest = new HttpGet(url);
 
-			// Execute the request in the client
-			HttpResponse httpResponse = defaultClient.execute(httpGetRequest);
+		// Execute the request in the client
+		HttpResponse httpResponse = defaultClient.execute(httpGetRequest);
 
-			// Grab the response
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					httpResponse.getEntity().getContent(), "UTF-8"));
-			return reader.readLine();
-		} catch (Exception e) {
-			Toast.makeText(
-					ctx,
-					"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
-					Toast.LENGTH_SHORT).show();
-			if (fragmentT != null) {
-				fragmentT.finish();
-			} else {
-				fragmentM.finish();
-			}
-		}
-
-		return "";
-
+		// Grab the response
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				httpResponse.getEntity().getContent(), "UTF-8"));
+		return reader.readLine();
 	}
 
-	protected JSONArray downloadTheatersList(String query) {
+	protected JSONArray downloadTheatersList(String query) throws ClientProtocolException, IOException {
 		String url;
 		try {
 			url = getBaseUrl("search") + "&filter=theater&q="
@@ -112,7 +88,7 @@ public class APIHelper {
 		}
 	}
 
-	protected JSONArray downloadTheatersListGeo(String lat, String lon) {
+	protected JSONArray downloadTheatersListGeo(String lat, String lon) throws ClientProtocolException, IOException {
 		String url;
 		try {
 			url = getBaseUrl("theaterlist") + "&lat="
@@ -167,7 +143,7 @@ public class APIHelper {
 		}
 	}
 
-	public ArrayList<Theater> findTheaters(String query) {
+	public ArrayList<Theater> findTheaters(String query) throws ClientProtocolException, IOException {
 
 		ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
@@ -191,8 +167,8 @@ public class APIHelper {
 		}
 		return resultsList;
 	}
-	
-	public ArrayList<Theater> findTheatersGeo(String lat, String lon) {
+
+	public ArrayList<Theater> findTheatersGeo(String lat, String lon) throws ClientProtocolException, IOException {
 
 		ArrayList<Theater> resultsList = new ArrayList<Theater>();
 

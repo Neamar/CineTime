@@ -47,9 +47,9 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 		if(theater.distance != -1){
 			if(theater.distance < 1){
 				long dist = Math.round(theater.distance*1000);
-				theaterDistance.setText(" - " + String.valueOf(dist) + "m");
+				theaterDistance.setText(String.valueOf(dist) + "m" + " - ");
 			}else {
-				theaterDistance.setText(" - " + String.valueOf(new DecimalFormat("#.#").format(theater.distance)) + "km");
+				theaterDistance.setText(String.valueOf(new DecimalFormat("#.#").format(theater.distance)) + "km" + " - ");
 			}
 			theaterDistance.setVisibility(View.VISIBLE);
 		}else{

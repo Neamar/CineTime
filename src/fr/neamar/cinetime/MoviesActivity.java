@@ -1,5 +1,8 @@
 package fr.neamar.cinetime;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
@@ -10,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toast;
 import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
@@ -50,7 +54,7 @@ public class MoviesActivity extends FragmentActivity implements
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
-	
+
 	@Override
 	public void setIsLoading(Boolean isLoading) {
 		setProgressBarIndeterminateVisibility(isLoading);
@@ -62,7 +66,11 @@ public class MoviesActivity extends FragmentActivity implements
 		if (mTwoPane) {
 			inflater.inflate(R.menu.activity_details, menu);
 			shareItem = menu.findItem(R.id.menu_share);
-			shareItem.setEnabled(false);
+			if (detailsFragment == null) {
+				desactivateShare();
+			} else {
+				activateShare();
+			}
 			return true;
 		}
 		return false;
@@ -71,15 +79,15 @@ public class MoviesActivity extends FragmentActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (mTwoPane && shareItem != null) {
+		if (mTwoPane) {
 			if (detailsFragment == null) {
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.file_detail_container,
 								new DetailsEmptyFragment()).commit();
-				shareItem.setEnabled(false);
+				desactivateShare();
 			} else {
-				shareItem.setEnabled(true);
+				activateShare();
 			}
 		}
 	}
@@ -106,9 +114,7 @@ public class MoviesActivity extends FragmentActivity implements
 			this.moviesFragment = (MoviesFragment) fragment;
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
-			if (shareItem != null) {
-				shareItem.setEnabled(true);
-			}
+			activateShare();
 		}
 	}
 
@@ -120,13 +126,14 @@ public class MoviesActivity extends FragmentActivity implements
 					.replace(R.id.file_detail_container,
 							new DetailsEmptyFragment()).commit();
 			detailsFragment = null;
-			shareItem.setEnabled(false);
+			desactivateShare();
 			setTitle("Séances " + getIntent().getStringExtra("theater"));
 		} else {
 			moviesFragment.clear();
 			super.onBackPressed();
 		}
 	}
+
 	@Override
 	public void onItemSelected(int position, Fragment source) {
 		if (source instanceof MoviesFragment) {
@@ -145,8 +152,51 @@ public class MoviesActivity extends FragmentActivity implements
 				details.putExtra(DetailsFragment.ARG_THEATER_NAME, theater);
 				startActivity(details);
 			}
-		}else if (source instanceof DetailsFragment){
+		} else if (source instanceof DetailsFragment) {
 			startActivity(new Intent(this, PosterViewerActivity.class));
+		}
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
+	}
+
+	@Override
+	public void finishNoNetwork() {
+		Toast.makeText(
+				this,
+				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+				Toast.LENGTH_SHORT).show();
+		finish();
+	}
+
+	@SuppressLint("NewApi")
+	private void activateShare() {
+		if (shareItem != null) {
+			shareItem.setVisible(true);
+			shareItem.setEnabled(true);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				invalidateOptionsMenu();
+			}
+		}
+	}
+
+	@SuppressLint("NewApi")
+	private void desactivateShare() {
+		if (shareItem != null) {
+			shareItem.setEnabled(false);
+			shareItem.setVisible(false);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				invalidateOptionsMenu();
+			}
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package fr.neamar.cinetime;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
@@ -10,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toast;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
@@ -79,6 +82,27 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 	@Override
 	public void setIsLoading(Boolean isLoading) {
 		setProgressBarIndeterminateVisibility(isLoading);
+	}
+
+	@Override
+	public void finishNoNetwork() {
+		Toast.makeText(
+				this,
+				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+				Toast.LENGTH_SHORT).show();
+		finish();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
 	}
 
 }
