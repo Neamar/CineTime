@@ -58,7 +58,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
 		public void onItemSelected(int position, Fragment source) {
-			
+
 		}
 
 		@Override
@@ -91,8 +91,10 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_details, container, false);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.fragment_details, container,
+				false);
 		title = (TextView) view.findViewById(R.id.details_title);
 		extra = (TextView) view.findViewById(R.id.details_extra);
 		display = (TextView) view.findViewById(R.id.details_display);
@@ -117,7 +119,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		if (!(activity instanceof Callbacks)) {
-			throw new IllegalStateException("Activity must implement fragment's callbacks.");
+			throw new IllegalStateException(
+					"Activity must implement fragment's callbacks.");
 		}
 		imageLoader = CineTimeApplication.getImageLoader(getActivity());
 		mCallbacks = (Callbacks) activity;
@@ -138,40 +141,43 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT,
 				displayedMovie.getSharingText(theater));
 
-		startActivity(Intent.createChooser(sharingIntent, "Partager le film..."));
+		startActivity(Intent
+				.createChooser(sharingIntent, "Partager le film..."));
 	}
 
 	public void updateUI() {
 		title.setText(displayedMovie.title);
 
 		String extraString = "";
-		extraString += "<strong>Durée</strong> : " + displayedMovie.getDuration() + "<br />";
+		extraString += "<strong>Durée</strong> : "
+				+ displayedMovie.getDuration() + "<br />";
 
 		if (!displayedMovie.directors.equals(""))
-			extraString += "<strong>Directeur</strong> : " + displayedMovie.directors + "<br />";
+			extraString += "<strong>Directeur</strong> : "
+					+ displayedMovie.directors + "<br />";
 		if (!displayedMovie.actors.equals(""))
-			extraString += "<strong>Acteurs</strong> : " + displayedMovie.actors + "<br />";
+			extraString += "<strong>Acteurs</strong> : "
+					+ displayedMovie.actors + "<br />";
 		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
 		extra.setText(Html.fromHtml(extraString));
 		display.setText(Html.fromHtml("<strong>" + theater + "</strong>"
-				+ displayedMovie.getDisplayDetails() + "<br>" + displayedMovie.getDisplay()));
+				+ displayedMovie.getDisplayDetails() + "<br>"
+				+ displayedMovie.getDisplay()));
 		if (displayedMovie.certificateString.equals(""))
 			certificate.setVisibility(View.GONE);
 		else
 			certificate.setText(displayedMovie.certificateString);
-		if (displayedMovie.poster != null) {
-			imageLoader.DisplayImage(displayedMovie.poster, poster, 2);
-			poster.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					mCallbacks.onItemSelected(-1, DetailsFragment.this);
-				}
-			});
-		}
+		imageLoader.DisplayImage(displayedMovie.poster, poster, 2);
+		poster.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mCallbacks.onItemSelected(-1, DetailsFragment.this);
+			}
+		});
 		pressRating.setProgress(displayedMovie.getPressRating());
 		userRating.setProgress(displayedMovie.getUserRating());
-		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html
-				.fromHtml(displayedMovie.synopsis));
+		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..."
+				: Html.fromHtml(displayedMovie.synopsis));
 		if (getActivity() != null) {
 			getActivity().setTitle(displayedMovie.title);
 		} else {
@@ -182,26 +188,25 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	private class LoadMovieTask extends AsyncTask<String, Void, Movie> {
 		private SharedPreferences preferences;
 		private Context ctx;
-		
+
 		public LoadMovieTask(DetailsFragment fragment) {
 			super();
 			this.ctx = fragment.getActivity();
-			this.preferences = ctx.getSharedPreferences("synopsis", Context.MODE_PRIVATE);
+			this.preferences = ctx.getSharedPreferences("synopsis",
+					Context.MODE_PRIVATE);
 		}
-		
+
 		@Override
 		@SuppressLint("NewApi")
 		protected Movie doInBackground(String... queries) {
-			//Try to read synopsis from cache
+			// Try to read synopsis from cache
 			String movieCode = displayedMovie.code;
 			String cache = preferences.getString(movieCode, "");
-			if(!cache.equals(""))
-			{
-				Log.i("cache-hit", "Getting synopsis from cache for " + movieCode);
+			if (!cache.equals("")) {
+				Log.i("cache-hit", "Getting synopsis from cache for "
+						+ movieCode);
 				displayedMovie.synopsis = cache;
-			}
-			else
-			{
+			} else {
 				Log.i("cache-miss", "Remote loading synopsis for " + movieCode);
 				displayedMovie = (new APIHelper()).findMovie(displayedMovie);
 				String synopsis = displayedMovie.synopsis;
@@ -212,8 +217,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 					new BackupManager(ctx).dataChanged();
 				}
 			}
-			
-			return displayedMovie; 
+
+			return displayedMovie;
 		}
 
 		@Override

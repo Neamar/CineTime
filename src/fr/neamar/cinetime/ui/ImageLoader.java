@@ -53,24 +53,35 @@ public class ImageLoader {
 	}
 
 	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
-		imageViews.put(imageView, url);
-		Poster poster = posterCache.get(url);
-		if (poster != null) {
-			imageView.setImageBitmap(poster.getBmp(levelRequested));
-			if (poster.levelRequested < levelRequested) {
-				poster.levelRequested = levelRequested;
-			}
-			if (poster.level < levelRequested) {
-				poster.level++;
-				queuePhoto(poster, url, imageView, levelRequested);
+		if (url == null) {
+			url = "";
+		}
+		if (url != "") {
+			imageViews.put(imageView, url);
+			Poster poster = posterCache.get(url);
+			if (poster != null) {
+				imageView.setImageBitmap(poster.getBmp(levelRequested));
+				if (poster.levelRequested < levelRequested) {
+					poster.levelRequested = levelRequested;
+				}
+				if (poster.level < levelRequested) {
+					poster.level++;
+					queuePhoto(poster, url, imageView, levelRequested);
+				} else {
+					Intent i = new Intent(PosterViewerActivity.POSTER_LOADED);
+					ctx.sendBroadcast(i);
+				}
 			} else {
+				Poster nPoster = new Poster(1, levelRequested);
+				imageView.setImageBitmap(nPoster.getBmp(levelRequested));
+				queuePhoto(nPoster, url, imageView, levelRequested);
+			}
+		}else {
+			imageView.setImageBitmap(Poster.getStub(levelRequested));
+			if(levelRequested == 3){
 				Intent i = new Intent(PosterViewerActivity.POSTER_LOADED);
 				ctx.sendBroadcast(i);
 			}
-		} else {
-			Poster nPoster = new Poster(1, levelRequested);
-			imageView.setImageBitmap(nPoster.getBmp(levelRequested));
-			queuePhoto(nPoster, url, imageView, levelRequested);
 		}
 	}
 

@@ -35,6 +35,19 @@ public class Poster {
 		}
 	}
 	
+	public static Bitmap getStub(int level) {
+		switch (level) {
+		case 1:
+			return Bitmap.createScaledBitmap(stub, 150, 200, false);
+		case 2:
+			return Bitmap.createScaledBitmap(stub, 200, 267, false);
+		case 3:
+			return stub;
+		default:
+			return null;
+		}
+	}
+	
 	private Bitmap getBmpLow(){
 		if(bmpLow != null)
 			return bmpLow;
