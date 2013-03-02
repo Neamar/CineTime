@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -255,6 +256,15 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	public void clear() {
 		movies.clear();
 		movies = null;
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		PackageManager pm = getActivity().getPackageManager();
+		if(!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)){
+			getListView().requestFocus();
+		}
 	}
 
 	@Override

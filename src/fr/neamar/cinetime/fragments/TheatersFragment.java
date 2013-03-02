@@ -5,17 +5,20 @@ import java.util.ArrayList;
 
 import org.apache.http.client.ClientProtocolException;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
@@ -68,7 +71,7 @@ public class TheatersFragment extends ListFragment implements
 		public void setFragment(Fragment fragment);
 
 		public void finishNoNetwork();
-		
+
 		public void updateTitle(String title);
 	}
 
@@ -150,100 +153,105 @@ public class TheatersFragment extends ListFragment implements
 				}
 			}
 		});
+		if (hasLocationSupport()) {
+			root.findViewById(R.id.theaters_search_geo_button)
+					.setOnClickListener(new OnClickListener() {
 
-		root.findViewById(R.id.theaters_search_geo_button).setOnClickListener(
-				new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							final LocationManager locationManager = (LocationManager) ctx
+									.getSystemService(Context.LOCATION_SERVICE);
+							final boolean locationEnable = locationManager
+									.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-					@Override
-					public void onClick(View v) {
-						final LocationManager locationManager = (LocationManager) ctx
-								.getSystemService(Context.LOCATION_SERVICE);
-						final boolean locationEnable = locationManager
-								.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-						if (!locationEnable) {
-							AlertDialog.Builder builder = new AlertDialog.Builder(
-									ctx);
-							Resources res = getResources();
-							builder.setMessage(
-									res.getString(R.string.location_dialog_mess))
-									.setCancelable(true)
-									.setPositiveButton(
-											res.getString(R.string.location_dialog_ok),
-											new DialogInterface.OnClickListener() {
-												public void onClick(
-														DialogInterface dialog,
-														int id) {
-													dialog.cancel();
-													Intent settingsIntent = new Intent(
-															Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-													startActivity(settingsIntent);
-												}
-											})
-									.setNegativeButton(
-											res.getString(R.string.location_dialog_cancel),
-											new DialogInterface.OnClickListener() {
-												public void onClick(
-														DialogInterface dialog,
-														int id) {
-													dialog.cancel();
-												}
-											});
-							builder.create().show();
-						} else {
-							query = "";
-							previousQuery = "";
-							searchText.setText("");
-							Location oldLocation = locationManager
-									.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-							Time t = new Time();
-							t.setToNow();
-							if (oldLocation == null
-									|| ((oldLocation.getTime() - t
-											.toMillis(true)) > 300000)) {
-								LocationListener listener = new LocationListener() {
-
-									@Override
-									public void onLocationChanged(
-											Location location) {
-										if (location.getAccuracy() < 1000) {
-											new LoadTheatersTask(ctx).execute(
-													String.valueOf(location
-															.getLatitude()),
-													String.valueOf(location
-															.getLongitude()));
-											locationManager.removeUpdates(this);
-										}
-									}
-
-									@Override
-									public void onProviderDisabled(
-											String provider) {
-									}
-
-									@Override
-									public void onProviderEnabled(
-											String provider) {
-									}
-
-									@Override
-									public void onStatusChanged(
-											String provider, int status,
-											Bundle extras) {
-									}
-								};
-								locationManager.requestLocationUpdates(
-										LocationManager.NETWORK_PROVIDER, 1000,
-										10, listener);
+							if (!locationEnable) {
+								AlertDialog.Builder builder = new AlertDialog.Builder(
+										ctx);
+								Resources res = getResources();
+								builder.setMessage(
+										res.getString(R.string.location_dialog_mess))
+										.setCancelable(true)
+										.setPositiveButton(
+												res.getString(R.string.location_dialog_ok),
+												new DialogInterface.OnClickListener() {
+													public void onClick(
+															DialogInterface dialog,
+															int id) {
+														dialog.cancel();
+														Intent settingsIntent = new Intent(
+																Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+														startActivity(settingsIntent);
+													}
+												})
+										.setNegativeButton(
+												res.getString(R.string.location_dialog_cancel),
+												new DialogInterface.OnClickListener() {
+													public void onClick(
+															DialogInterface dialog,
+															int id) {
+														dialog.cancel();
+													}
+												});
+								builder.create().show();
 							} else {
-								new LoadTheatersTask(ctx).execute(String
-										.valueOf(oldLocation.getLatitude()),
-										String.valueOf(oldLocation
-												.getLongitude()));
+								query = "";
+								previousQuery = "";
+								searchText.setText("");
+								Location oldLocation = locationManager
+										.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+								Time t = new Time();
+								t.setToNow();
+								if (oldLocation == null
+										|| ((oldLocation.getTime() - t
+												.toMillis(true)) > 300000)) {
+									LocationListener listener = new LocationListener() {
+
+										@Override
+										public void onLocationChanged(
+												Location location) {
+											if (location.getAccuracy() < 1000) {
+												new LoadTheatersTask(ctx).execute(
+														String.valueOf(location
+																.getLatitude()),
+														String.valueOf(location
+																.getLongitude()));
+												locationManager
+														.removeUpdates(this);
+											}
+										}
+
+										@Override
+										public void onProviderDisabled(
+												String provider) {
+										}
+
+										@Override
+										public void onProviderEnabled(
+												String provider) {
+										}
+
+										@Override
+										public void onStatusChanged(
+												String provider, int status,
+												Bundle extras) {
+										}
+									};
+									locationManager.requestLocationUpdates(
+											LocationManager.NETWORK_PROVIDER,
+											1000, 10, listener);
+								} else {
+									new LoadTheatersTask(ctx).execute(
+											String.valueOf(oldLocation
+													.getLatitude()), String
+													.valueOf(oldLocation
+															.getLongitude()));
+								}
 							}
 						}
-					}
-				});
+					});
+		}else {
+			root.findViewById(R.id.theaters_search_geo_button).setVisibility(View.GONE);
+		}
 
 		// When searching from keyboard
 		searchText
@@ -291,7 +299,7 @@ public class TheatersFragment extends ListFragment implements
 			dialog.setMessage("Recherche en cours...");
 			dialog.show();
 		}
-		if(!parentTitle.equalsIgnoreCase("")){
+		if (!parentTitle.equalsIgnoreCase("")) {
 			mCallbacks.updateTitle(parentTitle);
 		}
 	}
@@ -354,7 +362,7 @@ public class TheatersFragment extends ListFragment implements
 			searchText.setText("");
 			searchButton.performClick();
 			return false;
-		}else if (searchText.getText().toString().equals("")) {
+		} else if (searchText.getText().toString().equals("")) {
 			return true;
 		} else {
 			query = "";
@@ -429,7 +437,8 @@ public class TheatersFragment extends ListFragment implements
 					((TextView) getListView().getEmptyView())
 							.setText("Aucun résultat pour cette recherche.");
 				}
-				TheatersFragment.this.onLoadOver(resultsList, isLoadingFavorites, isGeoSearch);
+				TheatersFragment.this.onLoadOver(resultsList,
+						isLoadingFavorites, isGeoSearch);
 			} else {
 				finishNoNetwork();
 			}
@@ -437,18 +446,28 @@ public class TheatersFragment extends ListFragment implements
 	}
 
 	@Override
-	public void onLoadOver(ArrayList<Theater> theaters, boolean isFavorite, boolean isGeoSearch) {
+	public void onLoadOver(ArrayList<Theater> theaters, boolean isFavorite,
+			boolean isGeoSearch) {
 		setListAdapter(new TheaterAdapter(ctx, R.layout.listitem_theater,
 				theaters));
 		if (theaters.size() > 0) {
 			getListView().requestFocus();
 		}
-		if(isFavorite){
+		if (isFavorite) {
 			mCallbacks.updateTitle("Mes cinémas");
-		}else if(isGeoSearch){
+		} else if (isGeoSearch) {
 			mCallbacks.updateTitle("Cinémas à proximité");
-		}else {
+		} else {
 			mCallbacks.updateTitle("Recherche : " + query);
 		}
+	}
+
+	@SuppressLint("InlinedApi")
+	private boolean hasLocationSupport() {
+		PackageManager pm = getActivity().getPackageManager();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+			return pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
+		}
+		return false;
 	}
 }
