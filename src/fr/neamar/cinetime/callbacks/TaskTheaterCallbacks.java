@@ -8,6 +8,5 @@ public interface TaskTheaterCallbacks {
 
 	public void finishNoNetwork();
 
-	void onLoadOver(ArrayList<Theater> theaters, boolean isFavorite,
-			boolean isGeoSearch);
+	void onLoadOver(ArrayList<Theater> theaters, boolean isFavorite, boolean isGeoSearch);
 }

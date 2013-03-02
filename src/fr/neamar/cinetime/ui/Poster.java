@@ -34,7 +34,7 @@ public class Poster {
 			return null;
 		}
 	}
-	
+
 	public static Bitmap getStub(int level) {
 		switch (level) {
 		case 1:
@@ -47,21 +47,21 @@ public class Poster {
 			return null;
 		}
 	}
-	
-	private Bitmap getBmpLow(){
-		if(bmpLow != null)
+
+	private Bitmap getBmpLow() {
+		if (bmpLow != null)
 			return bmpLow;
 		return stub;
 	}
-	
-	private Bitmap getBmpMed(){
-		if(bmpMed != null)
+
+	private Bitmap getBmpMed() {
+		if (bmpMed != null)
 			return bmpMed;
 		return getBmpLow();
 	}
-	
-	private Bitmap getBmpHigh(){
-		if(bmpHigh != null)
+
+	private Bitmap getBmpHigh() {
+		if (bmpHigh != null)
 			return bmpHigh;
 		return getBmpMed();
 	}
@@ -100,13 +100,13 @@ public class Poster {
 
 	public int getBytes() {
 		int size = 0;
-		if(bmpLow != null){
+		if (bmpLow != null) {
 			size += bmpLow.getRowBytes() * bmpLow.getHeight();
 		}
-		if(bmpMed != null){
+		if (bmpMed != null) {
 			size += bmpMed.getRowBytes() * bmpMed.getHeight();
 		}
-		if(bmpHigh != null){
+		if (bmpHigh != null) {
 			size += bmpHigh.getRowBytes() * bmpHigh.getHeight();
 		}
 		size += Integer.SIZE * 2;
@@ -114,8 +114,7 @@ public class Poster {
 	}
 
 	static public void generateStub(Context ctx, int stub_id) {
-		Bitmap bitmap = BitmapFactory.decodeResource(ctx.getResources(),
-				stub_id);
+		Bitmap bitmap = BitmapFactory.decodeResource(ctx.getResources(), stub_id);
 		stub = bitmap;
 	}
 

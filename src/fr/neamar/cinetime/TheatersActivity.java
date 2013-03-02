@@ -1,26 +1,26 @@
 package fr.neamar.cinetime;
 
-import com.google.analytics.tracking.android.EasyTracker;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
+
+import com.google.analytics.tracking.android.EasyTracker;
+
 import fr.neamar.cinetime.fragments.TheatersFragment;
 
-public class TheatersActivity extends FragmentActivity implements TheatersFragment.Callbacks{
+public class TheatersActivity extends FragmentActivity implements TheatersFragment.Callbacks {
 
 	TheatersFragment theatersFragment;
 	static String title = "";
-	
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_theaters_list);
-		if(title.equalsIgnoreCase("")){
+		if (title.equalsIgnoreCase("")) {
 			title = getResources().getString(R.string.title_activity_theaters);
 		}
 		setTitle(title);
@@ -52,8 +52,7 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 
 	@Override
 	public void onLongItemSelected(int position, Fragment source) {
-		String uri = "geo:0,0?q="
-				+ theatersFragment.getTheaters().get(position).location;
+		String uri = "geo:0,0?q=" + theatersFragment.getTheaters().get(position).location;
 		startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
 	}
 
@@ -65,7 +64,7 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 				Toast.LENGTH_SHORT).show();
 		finish();
 	}
-	
+
 	@Override
 	protected void onStart() {
 		super.onStart();

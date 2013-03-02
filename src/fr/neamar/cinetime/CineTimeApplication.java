@@ -7,10 +7,10 @@ public class CineTimeApplication {
 	static protected ImageLoader imageLoader;
 
 	public static ImageLoader getImageLoader(Context ctx) {
-		if(imageLoader == null){
+		if (imageLoader == null) {
 			imageLoader = new ImageLoader(ctx);
 		}
 		return imageLoader;
 	}
-	
+
 }

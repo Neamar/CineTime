@@ -44,15 +44,16 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 		TextView theaterLocation = (TextView) v.findViewById(R.id.listitem_theater_location);
 
 		TextView theaterDistance = (TextView) v.findViewById(R.id.listitem_theater_distance);
-		if(theater.distance != -1){
-			if(theater.distance < 1){
-				long dist = Math.round(theater.distance*1000);
+		if (theater.distance != -1) {
+			if (theater.distance < 1) {
+				long dist = Math.round(theater.distance * 1000);
 				theaterDistance.setText(String.valueOf(dist) + "m" + " - ");
-			}else {
-				theaterDistance.setText(String.valueOf(new DecimalFormat("#.#").format(theater.distance)) + "km" + " - ");
+			} else {
+				theaterDistance.setText(String.valueOf(new DecimalFormat("#.#")
+						.format(theater.distance)) + "km" + " - ");
 			}
 			theaterDistance.setVisibility(View.VISIBLE);
-		}else{
+		} else {
 			theaterDistance.setVisibility(View.GONE);
 		}
 

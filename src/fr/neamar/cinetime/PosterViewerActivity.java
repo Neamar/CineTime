@@ -1,7 +1,5 @@
 package fr.neamar.cinetime;
 
-import com.google.analytics.tracking.android.EasyTracker;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -12,15 +10,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.google.analytics.tracking.android.EasyTracker;
+
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.ui.ImageLoader;
 
-public class PosterViewerActivity extends Activity{
+public class PosterViewerActivity extends Activity {
 
 	private ImageView poster;
 	public ImageLoader imageLoader;
 	public static String POSTER_LOADED = "fr.neamar.cinetime.POSTER_LOADED";
-	
+
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,17 +31,17 @@ public class PosterViewerActivity extends Activity{
 		poster = (ImageView) findViewById(R.id.posterView);
 		findViewById(R.id.spinner).setVisibility(View.VISIBLE);
 		setTitle(DetailsFragment.displayedMovie.title);
-		BroadcastReceiver receiver = new BroadcastReceiver(){
+		BroadcastReceiver receiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				findViewById(R.id.spinner).setVisibility(View.INVISIBLE);
-				try{
+				try {
 					unregisterReceiver(this);
-				}catch(IllegalArgumentException e){
-					//Nothing
+				} catch (IllegalArgumentException e) {
+					// Nothing
 				}
 			}
-			
+
 		};
 		registerReceiver(receiver, new IntentFilter(POSTER_LOADED));
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -48,7 +49,7 @@ public class PosterViewerActivity extends Activity{
 		}
 		imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
 	}
-	
+
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -60,5 +61,5 @@ public class PosterViewerActivity extends Activity{
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
 	}
-	
+
 }

@@ -43,8 +43,7 @@ import fr.neamar.cinetime.callbacks.TaskTheaterCallbacks;
 import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
 
-public class TheatersFragment extends ListFragment implements
-		TaskTheaterCallbacks {
+public class TheatersFragment extends ListFragment implements TaskTheaterCallbacks {
 
 	private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
@@ -105,8 +104,7 @@ public class TheatersFragment extends ListFragment implements
 		getListView().setLongClickable(true);
 		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
 
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				mCallbacks.onLongItemSelected(position, TheatersFragment.this);
 				return true;
 			}
@@ -125,19 +123,14 @@ public class TheatersFragment extends ListFragment implements
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		if (savedInstanceState != null
-				&& savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
-			setActivatedPosition(savedInstanceState
-					.getInt(STATE_ACTIVATED_POSITION));
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		if (savedInstanceState != null && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+			setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
 		}
-		View root = inflater.inflate(R.layout.fragment_theaters, container,
-				false);
+		View root = inflater.inflate(R.layout.fragment_theaters, container, false);
 
 		searchText = (EditText) root.findViewById(R.id.theaters_search);
-		searchButton = (ImageButton) root
-				.findViewById(R.id.theaters_search_button);
+		searchButton = (ImageButton) root.findViewById(R.id.theaters_search_button);
 
 		searchButton.setOnClickListener(new View.OnClickListener() {
 
@@ -154,8 +147,8 @@ public class TheatersFragment extends ListFragment implements
 			}
 		});
 		if (hasLocationSupport()) {
-			root.findViewById(R.id.theaters_search_geo_button)
-					.setOnClickListener(new OnClickListener() {
+			root.findViewById(R.id.theaters_search_geo_button).setOnClickListener(
+					new OnClickListener() {
 
 						@Override
 						public void onClick(View v) {
@@ -165,17 +158,14 @@ public class TheatersFragment extends ListFragment implements
 									.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
 							if (!locationEnable) {
-								AlertDialog.Builder builder = new AlertDialog.Builder(
-										ctx);
+								AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
 								Resources res = getResources();
-								builder.setMessage(
-										res.getString(R.string.location_dialog_mess))
+								builder.setMessage(res.getString(R.string.location_dialog_mess))
 										.setCancelable(true)
 										.setPositiveButton(
 												res.getString(R.string.location_dialog_ok),
 												new DialogInterface.OnClickListener() {
-													public void onClick(
-															DialogInterface dialog,
+													public void onClick(DialogInterface dialog,
 															int id) {
 														dialog.cancel();
 														Intent settingsIntent = new Intent(
@@ -186,8 +176,7 @@ public class TheatersFragment extends ListFragment implements
 										.setNegativeButton(
 												res.getString(R.string.location_dialog_cancel),
 												new DialogInterface.OnClickListener() {
-													public void onClick(
-															DialogInterface dialog,
+													public void onClick(DialogInterface dialog,
 															int id) {
 														dialog.cancel();
 													}
@@ -202,71 +191,57 @@ public class TheatersFragment extends ListFragment implements
 								Time t = new Time();
 								t.setToNow();
 								if (oldLocation == null
-										|| ((oldLocation.getTime() - t
-												.toMillis(true)) > 300000)) {
+										|| ((oldLocation.getTime() - t.toMillis(true)) > 300000)) {
 									LocationListener listener = new LocationListener() {
 
 										@Override
-										public void onLocationChanged(
-												Location location) {
+										public void onLocationChanged(Location location) {
 											if (location.getAccuracy() < 1000) {
 												new LoadTheatersTask(ctx).execute(
-														String.valueOf(location
-																.getLatitude()),
-														String.valueOf(location
-																.getLongitude()));
-												locationManager
-														.removeUpdates(this);
+														String.valueOf(location.getLatitude()),
+														String.valueOf(location.getLongitude()));
+												locationManager.removeUpdates(this);
 											}
 										}
 
 										@Override
-										public void onProviderDisabled(
-												String provider) {
+										public void onProviderDisabled(String provider) {
 										}
 
 										@Override
-										public void onProviderEnabled(
-												String provider) {
+										public void onProviderEnabled(String provider) {
 										}
 
 										@Override
-										public void onStatusChanged(
-												String provider, int status,
+										public void onStatusChanged(String provider, int status,
 												Bundle extras) {
 										}
 									};
 									locationManager.requestLocationUpdates(
-											LocationManager.NETWORK_PROVIDER,
-											1000, 10, listener);
+											LocationManager.NETWORK_PROVIDER, 1000, 10, listener);
 								} else {
 									new LoadTheatersTask(ctx).execute(
-											String.valueOf(oldLocation
-													.getLatitude()), String
-													.valueOf(oldLocation
-															.getLongitude()));
+											String.valueOf(oldLocation.getLatitude()),
+											String.valueOf(oldLocation.getLongitude()));
 								}
 							}
 						}
 					});
-		}else {
+		} else {
 			root.findViewById(R.id.theaters_search_geo_button).setVisibility(View.GONE);
 		}
 
 		// When searching from keyboard
-		searchText
-				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-					@Override
-					public boolean onEditorAction(TextView v, int actionId,
-							KeyEvent event) {
-						InputMethodManager imm = (InputMethodManager) getActivity()
-								.getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(
-								searchText.getWindowToken(), 0);
-						return searchButton.performClick();
-					}
+		searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+						Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
+				return searchButton.performClick();
+			}
 
-				});
+		});
 		return root;
 	}
 
@@ -284,8 +259,7 @@ public class TheatersFragment extends ListFragment implements
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		if (!(activity instanceof Callbacks)) {
-			throw new IllegalStateException(
-					"Activity must implement fragment's callbacks.");
+			throw new IllegalStateException("Activity must implement fragment's callbacks.");
 		}
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
@@ -322,8 +296,7 @@ public class TheatersFragment extends ListFragment implements
 	}
 
 	@Override
-	public void onListItemClick(ListView listView, View view, int position,
-			long id) {
+	public void onListItemClick(ListView listView, View view, int position, long id) {
 		super.onListItemClick(listView, view, position, id);
 		mCallbacks.onItemSelected(position, this);
 	}
@@ -338,8 +311,7 @@ public class TheatersFragment extends ListFragment implements
 
 	public void setActivateOnItemClick(boolean activateOnItemClick) {
 		getListView().setChoiceMode(
-				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE
-						: ListView.CHOICE_MODE_NONE);
+				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE : ListView.CHOICE_MODE_NONE);
 	}
 
 	public void setActivatedPosition(int position) {
@@ -378,8 +350,7 @@ public class TheatersFragment extends ListFragment implements
 		mCallbacks.finishNoNetwork();
 	}
 
-	private class LoadTheatersTask extends
-			AsyncTask<String, Void, ArrayList<Theater>> {
+	private class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
 		private Boolean isLoadingFavorites = false;
 		private Boolean isGeoSearch = false;
 		private Context ctx;
@@ -413,8 +384,7 @@ public class TheatersFragment extends ListFragment implements
 					lat = queries[0];
 					lon = queries[1];
 					isGeoSearch = true;
-					return (new APIHelper().findTheatersGeo(queries[0],
-							queries[1]));
+					return (new APIHelper().findTheatersGeo(queries[0], queries[1]));
 				}
 			} catch (ClientProtocolException e) {
 
@@ -437,8 +407,7 @@ public class TheatersFragment extends ListFragment implements
 					((TextView) getListView().getEmptyView())
 							.setText("Aucun résultat pour cette recherche.");
 				}
-				TheatersFragment.this.onLoadOver(resultsList,
-						isLoadingFavorites, isGeoSearch);
+				TheatersFragment.this.onLoadOver(resultsList, isLoadingFavorites, isGeoSearch);
 			} else {
 				finishNoNetwork();
 			}
@@ -446,10 +415,8 @@ public class TheatersFragment extends ListFragment implements
 	}
 
 	@Override
-	public void onLoadOver(ArrayList<Theater> theaters, boolean isFavorite,
-			boolean isGeoSearch) {
-		setListAdapter(new TheaterAdapter(ctx, R.layout.listitem_theater,
-				theaters));
+	public void onLoadOver(ArrayList<Theater> theaters, boolean isFavorite, boolean isGeoSearch) {
+		setListAdapter(new TheaterAdapter(ctx, R.layout.listitem_theater, theaters));
 		if (theaters.size() > 0) {
 			getListView().requestFocus();
 		}

@@ -1,7 +1,5 @@
 package fr.neamar.cinetime;
 
-import com.google.analytics.tracking.android.EasyTracker;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
@@ -14,12 +12,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
+
+import com.google.analytics.tracking.android.EasyTracker;
+
 import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
-public class MoviesActivity extends FragmentActivity implements
-		MoviesFragment.Callbacks {
+public class MoviesActivity extends FragmentActivity implements MoviesFragment.Callbacks {
 
 	private boolean mTwoPane;
 	private MoviesFragment moviesFragment;
@@ -38,14 +38,11 @@ public class MoviesActivity extends FragmentActivity implements
 		setTitle(getIntent().getStringExtra("theater"));
 		if (mTwoPane) {
 			if (detailsFragment == null) {
-				getSupportFragmentManager()
-						.beginTransaction()
-						.replace(R.id.file_detail_container,
-								new DetailsEmptyFragment()).commit();
+				getSupportFragmentManager().beginTransaction()
+						.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 			} else {
 				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.file_detail_container, detailsFragment)
-						.commit();
+						.replace(R.id.file_detail_container, detailsFragment).commit();
 			}
 		}
 		// Title in action bar brings back one level
@@ -81,10 +78,8 @@ public class MoviesActivity extends FragmentActivity implements
 		super.onResume();
 		if (mTwoPane) {
 			if (detailsFragment == null) {
-				getSupportFragmentManager()
-						.beginTransaction()
-						.replace(R.id.file_detail_container,
-								new DetailsEmptyFragment()).commit();
+				getSupportFragmentManager().beginTransaction()
+						.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 				desactivateShare();
 			} else {
 				activateShare();
@@ -121,10 +116,8 @@ public class MoviesActivity extends FragmentActivity implements
 	@Override
 	public void onBackPressed() {
 		if (mTwoPane && detailsFragment != null) {
-			getSupportFragmentManager()
-					.beginTransaction()
-					.replace(R.id.file_detail_container,
-							new DetailsEmptyFragment()).commit();
+			getSupportFragmentManager().beginTransaction()
+					.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 			detailsFragment = null;
 			desactivateShare();
 			setTitle("Séances " + getIntent().getStringExtra("theater"));
@@ -144,8 +137,7 @@ public class MoviesActivity extends FragmentActivity implements
 				detailsFragment = new DetailsFragment();
 				detailsFragment.setArguments(arguments);
 				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.file_detail_container, detailsFragment)
-						.commit();
+						.replace(R.id.file_detail_container, detailsFragment).commit();
 			} else {
 				Intent details = new Intent(this, DetailsActivity.class);
 				details.putExtra(DetailsFragment.ARG_ITEM_ID, position);

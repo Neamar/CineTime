@@ -1,7 +1,5 @@
 package fr.neamar.cinetime;
 
-import com.google.analytics.tracking.android.EasyTracker;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
@@ -13,6 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
+
+import com.google.analytics.tracking.android.EasyTracker;
+
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
@@ -69,7 +70,7 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 
 	@Override
 	public void onItemSelected(int position, Fragment source) {
-		if(source instanceof DetailsFragment){
+		if (source instanceof DetailsFragment) {
 			startActivity(new Intent(this, PosterViewerActivity.class));
 		}
 	}

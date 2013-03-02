@@ -43,9 +43,9 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		public void onItemSelected(int position, Fragment source);
 
 		public void setFragment(Fragment fragment);
-		
+
 		public void setIsLoading(Boolean isLoading);
-		
+
 		public void finishNoNetwork();
 	}
 
@@ -57,12 +57,11 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		@Override
 		public void setFragment(Fragment fragment) {
 		}
-		
-		public void setIsLoading(Boolean isLoading)
-		{
-			
+
+		public void setIsLoading(Boolean isLoading) {
+
 		}
-		
+
 		@Override
 		public void finishNoNetwork() {
 			toFinish = true;
@@ -115,7 +114,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			dialog.setMessage("Chargement des séances en cours...");
 			dialog.show();
 		}
-		if(toUpdate){
+		if (toUpdate) {
 			updateListView(movies);
 			toUpdate = false;
 		}
@@ -179,21 +178,20 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 		@Override
 		protected void onPreExecute() {
-			String cache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
-			if(!cache.equals(""))
-			{
-				//Display cached values
+			String cache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE)
+					.getString(theaterCode, "");
+			if (!cache.equals("")) {
+				// Display cached values
 				try {
 					Log.i("cache-hit", "Getting display datas from cache for " + theaterCode);
 					mCallbacks.setIsLoading(true);
-					ArrayList<Movie> movies = (new APIHelper().formatMoviesList(new JSONArray(cache), theaterCode));
+					ArrayList<Movie> movies = (new APIHelper().formatMoviesList(
+							new JSONArray(cache), theaterCode));
 					fragment.updateListView(movies);
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-			}
-			else
-			{
+			} else {
 				Log.i("cache-miss", "Remote loading first-time datas for " + theaterCode);
 				dialog = new ProgressDialog(ctx);
 				dialog.setMessage("Chargement des séances en cours...");
@@ -204,30 +202,27 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 		@Override
 		protected JSONArray doInBackground(String... queries) {
-			if(theaterCode != queries[0])
-			{
+			if (theaterCode != queries[0]) {
 				throw new RuntimeException("Fragment misuse: theaterCode differs");
 			}
 			JSONArray jsonResults = (new APIHelper()).downloadMoviesList(theaterCode);
-			
-			String oldCache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
+
+			String oldCache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE)
+					.getString(theaterCode, "");
 			String newCache = jsonResults.toString();
-			if(oldCache.equals(newCache))
-			{
+			if (oldCache.equals(newCache)) {
 				Log.i("cache-hit", "Remote datas equals local datas; skipping UI update.");
 				remoteDataHasChangedFromLocalCache = false;
-			}
-			else
-			{
+			} else {
 				Log.i("cache-miss", "Remote data differs from local datas; updating UI");
-				//Store in cache for future use
-				SharedPreferences.Editor ed = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).edit();
+				// Store in cache for future use
+				SharedPreferences.Editor ed = ctx.getSharedPreferences("theater-cache",
+						Context.MODE_PRIVATE).edit();
 				ed.putString(theaterCode, jsonResults.toString());
 				ed.commit();
 				remoteDataHasChangedFromLocalCache = true;
 			}
-			
-			
+
 			return jsonResults;
 		}
 
@@ -239,11 +234,11 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 					dialog.dismiss();
 			}
 			dialogPending = false;
-			
-			//Update only if data changed
-			if(remoteDataHasChangedFromLocalCache)
-			{
-				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(jsonResults, theaterCode);
+
+			// Update only if data changed
+			if (remoteDataHasChangedFromLocalCache) {
+				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(jsonResults,
+						theaterCode);
 				fragment.updateListView(movies);
 			}
 		}
@@ -262,7 +257,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		PackageManager pm = getActivity().getPackageManager();
-		if(!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)){
+		if (!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {
 			getListView().requestFocus();
 		}
 	}
@@ -270,9 +265,9 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	@Override
 	public void updateListView(ArrayList<Movie> movies) {
 		MoviesFragment.movies = movies;
-		if(getActivity() != null){
+		if (getActivity() != null) {
 			setListAdapter(new MovieAdapter(getActivity(), R.layout.listitem_theater, movies));
-		}else {
+		} else {
 			toUpdate = true;
 		}
 		mTask = null;
