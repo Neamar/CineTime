@@ -64,9 +64,11 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 			inflater.inflate(R.menu.activity_details, menu);
 			shareItem = menu.findItem(R.id.menu_share);
 			if (detailsFragment == null) {
-				desactivateShare();
+				shareItem.setEnabled(false);
+				shareItem.setVisible(false);
 			} else {
-				activateShare();
+				shareItem.setVisible(true);
+				shareItem.setEnabled(true);
 			}
 			return true;
 		}
