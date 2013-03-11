@@ -84,7 +84,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null) {
+		if (displayedMovie != null && displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null) {
 			mTask = new LoadMovieTask(this);
 			mTask.execute(displayedMovie.code);
 		}
