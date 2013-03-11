@@ -152,6 +152,7 @@
             android:padding="5dp"
             android:text="@string/stub_synopsis"
             android:textAppearance="?android:attr/textAppearanceSmall" />
+
     </LinearLayout>
 
 </ScrollView>
