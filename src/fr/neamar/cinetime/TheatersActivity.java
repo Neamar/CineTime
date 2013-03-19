@@ -1,5 +1,6 @@
 package fr.neamar.cinetime;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -53,7 +54,13 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 	@Override
 	public void onLongItemSelected(int position, Fragment source) {
 		String uri = "geo:0,0?q=" + theatersFragment.getTheaters().get(position).location;
-		startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
+
+		try {
+			startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
+		} catch (ActivityNotFoundException e) {
+			Toast.makeText(this, "Installez Google Maps pour afficher le plan !",
+					Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override
