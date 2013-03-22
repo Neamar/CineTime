@@ -76,4 +76,9 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
 		return v;
 	}
+	
+	public void clear(){
+		movies.clear();
+		notifyDataSetChanged();
+	}
 }

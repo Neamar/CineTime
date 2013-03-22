@@ -114,7 +114,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			dialog.setMessage("Chargement des séances en cours...");
 			dialog.show();
 		}
-		if (toUpdate) {
+		if (toUpdate && (movies != null)) {
 			updateListView(movies);
 			toUpdate = false;
 		}
@@ -251,6 +251,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	public void clear() {
 		movies.clear();
 		movies = null;
+		((MovieAdapter) getListAdapter()).clear();
 	}
 
 	@Override
