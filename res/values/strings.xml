@@ -27,6 +27,7 @@
     <string name="stub_extra">2h44 VO 3D</string>
     <string name="stub_display">Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10\nJeu 3 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10</string>
     <string name="stub_cast">Par Peter Jackson, avec Ian McKellen, Martin Freeman, Richard Armitage, Ken Stott, Graham McTavish</string>
+    <string name="stub_rating">3.2</string>
     <string name="stub_certificate">Déconseillé au moins de 10 ans.</string>
     <string name="stub_synopsis">Les aventures de Bilbon Sacquet, entraîné dans une quête héroïque pour reprendre le Royaume perdu des nains d’Erebor, conquis longtemps auparavant par le dragon Smaug.</string>
 </resources>

@@ -45,7 +45,9 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	private TextView certificate;
 	private TextView synopsis;
 	private ProgressBar pressRating;
+	private TextView pressRatingText;
 	private ProgressBar userRating;
+	private TextView userRatingText;
 	public ImageLoader imageLoader;
 	protected String theater = "";
 	private LoadMovieTask mTask;
@@ -98,7 +100,9 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		display = (TextView) view.findViewById(R.id.details_display);
 		poster = (ImageView) view.findViewById(R.id.details_poster);
 		pressRating = (ProgressBar) view.findViewById(R.id.details_pressrating);
+		pressRatingText = (TextView) view.findViewById(R.id.details_pressrating_text);
 		userRating = (ProgressBar) view.findViewById(R.id.details_userrating);
+		userRatingText = (TextView) view.findViewById(R.id.details_userrating_text);
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
 		if (displayedMovie != null) {
@@ -167,7 +171,9 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			}
 		});
 		pressRating.setProgress(displayedMovie.getPressRating());
+		pressRatingText.setText(displayedMovie.pressRating.substring(0, 3));
 		userRating.setProgress(displayedMovie.getUserRating());
+		userRatingText.setText(displayedMovie.userRating.substring(0, 3));
 		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html
 				.fromHtml(displayedMovie.synopsis));
 		if (getActivity() != null) {

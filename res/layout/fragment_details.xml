@@ -76,10 +76,19 @@
                 android:layout_height="wrap_content" >
 
                 <TextView
-                    android:id="@+id/textView3"
+                    android:id="@+id/TextView01"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/content_rating_press"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:id="@+id/details_pressrating_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="@string/stub_rating"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <RatingBar
@@ -92,6 +101,7 @@
                     android:max="5"
                     android:rating="3.1"
                     android:stepSize="0.1" />
+
             </TableRow>
 
             <TableRow
@@ -106,6 +116,15 @@
                     android:text="@string/content_rating_user"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
+                <TextView
+                    android:id="@+id/details_userrating_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="@string/stub_rating"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
                 <RatingBar
                     android:id="@+id/details_userrating"
                     style="?android:attr/ratingBarStyleSmall"
@@ -116,6 +135,7 @@
                     android:max="10"
                     android:rating="3.1"
                     android:stepSize=".1" />
+
             </TableRow>
         </TableLayout>
 
