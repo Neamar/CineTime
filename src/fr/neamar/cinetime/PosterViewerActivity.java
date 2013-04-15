@@ -9,6 +9,8 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.google.analytics.tracking.android.EasyTracker;
@@ -26,6 +28,9 @@ public class PosterViewerActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.poster_viewer);
 		imageLoader = CineTimeApplication.getImageLoader(this);
@@ -45,9 +50,6 @@ public class PosterViewerActivity extends Activity {
 
 		};
 		registerReceiver(receiver, new IntentFilter(POSTER_LOADED));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			getActionBar().hide();
-		}
 		imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
 	}
 
