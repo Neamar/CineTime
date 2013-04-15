@@ -8,12 +8,12 @@
         android:id="@+id/listitem_movie_poster"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="142dp"
         android:adjustViewBounds="true"
         android:contentDescription="@string/content_description_poster"
-        android:src="@drawable/stub" 
+        android:maxWidth="142dp"
+        android:paddingBottom="5dp"
         android:paddingTop="5dp"
-        android:paddingBottom="5dp"/>
+        android:src="@drawable/stub" />
 
     <LinearLayout
         android:layout_width="match_parent"
