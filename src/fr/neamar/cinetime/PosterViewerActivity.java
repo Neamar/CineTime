@@ -26,6 +26,7 @@ public class PosterViewerActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.poster_viewer);
 		imageLoader = CineTimeApplication.getImageLoader(this);
 		poster = (ImageView) findViewById(R.id.posterView);

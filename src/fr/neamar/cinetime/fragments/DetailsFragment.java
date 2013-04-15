@@ -20,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TableRow;
 import android.widget.TextView;
 import fr.neamar.cinetime.CineTimeApplication;
 import fr.neamar.cinetime.R;
@@ -46,8 +47,10 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	private TextView synopsis;
 	private ProgressBar pressRating;
 	private TextView pressRatingText;
+	private TableRow pressRatingRow;
 	private ProgressBar userRating;
 	private TextView userRatingText;
+	private TableRow userRatingRow;
 	public ImageLoader imageLoader;
 	protected String theater = "";
 	private LoadMovieTask mTask;
@@ -101,8 +104,10 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		poster = (ImageView) view.findViewById(R.id.details_poster);
 		pressRating = (ProgressBar) view.findViewById(R.id.details_pressrating);
 		pressRatingText = (TextView) view.findViewById(R.id.details_pressrating_text);
+		pressRatingRow = (TableRow) view.findViewById(R.id.details_pressrating_row);
 		userRating = (ProgressBar) view.findViewById(R.id.details_userrating);
 		userRatingText = (TextView) view.findViewById(R.id.details_userrating_text);
+		userRatingRow = (TableRow) view.findViewById(R.id.details_userrating_row);
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
 		if (displayedMovie != null) {
@@ -170,10 +175,23 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 				mCallbacks.onItemSelected(-1, DetailsFragment.this);
 			}
 		});
+		
 		pressRating.setProgress(displayedMovie.getPressRating());
-		pressRatingText.setText(displayedMovie.pressRating.substring(0, 3));
+		if(displayedMovie.pressRating.equals("0"))
+			pressRatingText.setText("");
+		else if (displayedMovie.pressRating.length() > 3)
+			pressRatingText.setText(displayedMovie.pressRating.substring(0, 3));
+		else
+			pressRatingText.setText(displayedMovie.pressRating);
+			
 		userRating.setProgress(displayedMovie.getUserRating());
-		userRatingText.setText(displayedMovie.userRating.substring(0, 3));
+		if(displayedMovie.userRating.equals("0"))
+			userRatingText.setText("");
+		else if (displayedMovie.userRating.length() > 3)
+			userRatingText.setText(displayedMovie.userRating.substring(0, 3));
+		else
+			userRatingText.setText(displayedMovie.userRating);
+		
 		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html
 				.fromHtml(displayedMovie.synopsis));
 		if (getActivity() != null) {
