@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -36,7 +35,7 @@ public class PosterViewerActivity extends Activity {
 		imageLoader = CineTimeApplication.getImageLoader(this);
 		poster = (ImageView) findViewById(R.id.posterView);
 		findViewById(R.id.spinner).setVisibility(View.VISIBLE);
-		setTitle(DetailsFragment.displayedMovie.title);
+
 		BroadcastReceiver receiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
