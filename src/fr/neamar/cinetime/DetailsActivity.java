@@ -3,6 +3,7 @@ package fr.neamar.cinetime;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,6 +20,7 @@ import com.google.analytics.tracking.android.EasyTracker;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
+import fr.neamar.cinetime.objects.Movie;
 
 public class DetailsActivity extends FragmentActivity implements
 		MoviesFragment.Callbacks {
@@ -74,25 +76,29 @@ public class DetailsActivity extends FragmentActivity implements
 	}
 
 	protected void displayTrailer() {
-		Thread thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				String trailerUrl = new APIHelper()
-						.downloadTrailerUrl(DetailsFragment.displayedMovie);
-				Log.e("wtf", "T:" + trailerUrl);
-				if (trailerUrl != null) {
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
-					DetailsActivity.this.startActivity(intent);
-				} else {
+		class RetrieveTrailerTask extends AsyncTask<Movie, Void, String> {
+			protected String doInBackground(Movie... movies) {
+				return new APIHelper().downloadTrailerUrl(movies[0]);
+			}
+
+			protected void onPostExecute(String trailerUrl) {
+				if (trailerUrl == null)
+				{
 					Toast.makeText(
 							DetailsActivity.this,
 							"Woops ! La bande annonce ne semble pas disponible...",
 							Toast.LENGTH_SHORT).show();
 				}
+				else
+				{
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
+					DetailsActivity.this.startActivity(intent);
+				}
 			}
-		});
-		thread.start();
+		}
+
+		new RetrieveTrailerTask().execute(DetailsFragment.displayedMovie);
 	}
 
 	@Override
