@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
@@ -256,6 +257,11 @@ public class APIHelper {
 										.toLowerCase(Locale.FRANCE);
 					}
 				}
+				
+				if (jsonShow.has("trailer")) {
+					JSONObject jsonTrailer = jsonShow.getJSONObject("trailer");
+					movie.trailerCode = jsonTrailer.optString("code", "");
+				}
 
 				movie.display = jsonMovie.getString("display");
 				movie.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original")
@@ -278,5 +284,23 @@ public class APIHelper {
 		JSONObject jsonMovie = downloadMovie(movie.code);
 		movie.synopsis = jsonMovie.optString("synopsisShort", "");
 		return movie;
+	}
+	
+	public String downloadTrailerUrl(Movie movie) {
+		if(movie.trailerCode.equals(""))
+			return null;
+		
+		String url = getBaseUrl("media") + "&mediafmt=mp4-lc&code=" + movie.trailerCode + "&format=json";
+		try {
+			String json = downloadUrl(url);
+			JSONObject jsonTrailer = new JSONObject(json).getJSONObject("media");
+			if(jsonTrailer.has("rendition"))
+				return jsonTrailer.getJSONArray("rendition").getJSONObject(0).getString("href");
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 }

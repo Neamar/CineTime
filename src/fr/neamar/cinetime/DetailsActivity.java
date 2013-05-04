@@ -2,10 +2,12 @@ package fr.neamar.cinetime;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,10 +16,12 @@ import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
+import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
-public class DetailsActivity extends FragmentActivity implements MoviesFragment.Callbacks {
+public class DetailsActivity extends FragmentActivity implements
+		MoviesFragment.Callbacks {
 
 	DetailsFragment detailsFragment;
 
@@ -36,10 +40,10 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 			Bundle arguments = new Bundle();
 			// FileCodeMirrorFragment fragment = new FileCodeMirrorFragment();
 			DetailsFragment fragment = new DetailsFragment();
-			arguments.putInt(DetailsFragment.ARG_ITEM_ID,
-					getIntent().getIntExtra(DetailsFragment.ARG_ITEM_ID, -1));
-			arguments.putString(DetailsFragment.ARG_THEATER_NAME,
-					getIntent().getStringExtra(DetailsFragment.ARG_THEATER_NAME));
+			arguments.putInt(DetailsFragment.ARG_ITEM_ID, getIntent()
+					.getIntExtra(DetailsFragment.ARG_ITEM_ID, -1));
+			arguments.putString(DetailsFragment.ARG_THEATER_NAME, getIntent()
+					.getStringExtra(DetailsFragment.ARG_THEATER_NAME));
 			fragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction()
 					.add(R.id.file_detail_container, fragment).commit();
@@ -55,7 +59,6 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Click on title in actionbar
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			finish();
@@ -63,9 +66,33 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 		case R.id.menu_share:
 			detailsFragment.shareMovie();
 			return true;
+		case R.id.menu_play:
+			displayTrailer();
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	protected void displayTrailer() {
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String trailerUrl = new APIHelper()
+						.downloadTrailerUrl(DetailsFragment.displayedMovie);
+				Log.e("wtf", "T:" + trailerUrl);
+				if (trailerUrl != null) {
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
+					DetailsActivity.this.startActivity(intent);
+				} else {
+					Toast.makeText(
+							DetailsActivity.this,
+							"Woops ! La bande annonce ne semble pas disponible...",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
+		thread.start();
 	}
 
 	@Override

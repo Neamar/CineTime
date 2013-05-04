@@ -8,4 +8,4 @@ gen/
 
 # Local configuration file (sdk path, etc)
 local.properties
-/.settings/org.eclipse.core.resources.prefs
+/.settings/*

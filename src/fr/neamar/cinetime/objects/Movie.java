@@ -6,6 +6,7 @@ import android.text.Html;
 
 public class Movie {
 	public String code;
+	public String trailerCode = "";
 
 	public String title;
 	public String poster = null;
