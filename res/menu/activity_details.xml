@@ -3,13 +3,12 @@
 
     <item
         android:id="@+id/menu_play"
-        android:icon="@android:drawable/ic_menu_slideshow"
+        android:icon="@drawable/ic_menu_play_clip"
         android:showAsAction="ifRoom"
         android:title="@string/menu_play"/>
     <item
         android:id="@+id/menu_share"
-        android:icon="@android:drawable/ic_menu_share"
+        android:icon="@drawable/ic_menu_share"
         android:showAsAction="ifRoom"
         android:title="@string/menu_share"/>
-
 </menu>
