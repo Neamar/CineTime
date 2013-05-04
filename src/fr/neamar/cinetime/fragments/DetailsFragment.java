@@ -172,11 +172,16 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			}
 
 			protected void onPostExecute(String trailerUrl) {
-				
+
 				// Dismiss dialog
-				if(dialog != null)
-					dialog.dismiss();
-				
+				if (dialog != null) {
+					try {
+						dialog.dismiss();
+					} catch (Exception e) {
+
+					}
+				}
+
 				if (trailerUrl == null) {
 					Toast.makeText(
 							getActivity(),
