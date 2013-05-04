@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.backup.BackupManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,7 +24,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 import fr.neamar.cinetime.CineTimeApplication;
+import fr.neamar.cinetime.DetailsActivity;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
@@ -56,6 +60,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	private LoadMovieTask mTask;
 	private boolean titleToSet = false;
 	private static boolean toFinish = false;
+	private ProgressDialog dialog = null;
 
 	public DetailsFragment() {
 	}
@@ -89,25 +94,33 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (displayedMovie != null && displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null) {
+		if (displayedMovie != null
+				&& displayedMovie.synopsis.equalsIgnoreCase("")
+				&& mTask == null) {
 			mTask = new LoadMovieTask(this);
 			mTask.execute(displayedMovie.code);
 		}
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_details, container, false);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.fragment_details, container,
+				false);
 		title = (TextView) view.findViewById(R.id.details_title);
 		extra = (TextView) view.findViewById(R.id.details_extra);
 		display = (TextView) view.findViewById(R.id.details_display);
 		poster = (ImageView) view.findViewById(R.id.details_poster);
 		pressRating = (ProgressBar) view.findViewById(R.id.details_pressrating);
-		pressRatingText = (TextView) view.findViewById(R.id.details_pressrating_text);
-		pressRatingRow = (TableRow) view.findViewById(R.id.details_pressrating_row);
+		pressRatingText = (TextView) view
+				.findViewById(R.id.details_pressrating_text);
+		pressRatingRow = (TableRow) view
+				.findViewById(R.id.details_pressrating_row);
 		userRating = (ProgressBar) view.findViewById(R.id.details_userrating);
-		userRatingText = (TextView) view.findViewById(R.id.details_userrating_text);
-		userRatingRow = (TableRow) view.findViewById(R.id.details_userrating_row);
+		userRatingText = (TextView) view
+				.findViewById(R.id.details_userrating_text);
+		userRatingRow = (TableRow) view
+				.findViewById(R.id.details_userrating_row);
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
 		if (displayedMovie != null) {
@@ -126,7 +139,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		if (!(activity instanceof Callbacks)) {
-			throw new IllegalStateException("Activity must implement fragment's callbacks.");
+			throw new IllegalStateException(
+					"Activity must implement fragment's callbacks.");
 		}
 		imageLoader = CineTimeApplication.getImageLoader(getActivity());
 		mCallbacks = (Callbacks) activity;
@@ -147,23 +161,59 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT,
 				displayedMovie.getSharingText(theater));
 
-		startActivity(Intent.createChooser(sharingIntent, "Partager le film..."));
+		startActivity(Intent
+				.createChooser(sharingIntent, "Partager le film..."));
+	}
+
+	public void displayTrailer() {
+		class RetrieveTrailerTask extends AsyncTask<Movie, Void, String> {
+			protected String doInBackground(Movie... movies) {
+				return new APIHelper().downloadTrailerUrl(movies[0]);
+			}
+
+			protected void onPostExecute(String trailerUrl) {
+				
+				// Dismiss dialog
+				if(dialog != null)
+					dialog.dismiss();
+				
+				if (trailerUrl == null) {
+					Toast.makeText(
+							getActivity(),
+							"Woops ! La bande annonce ne semble pas disponible...",
+							Toast.LENGTH_SHORT).show();
+				} else {
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
+					startActivity(intent);
+				}
+			}
+		}
+
+		new RetrieveTrailerTask().execute(DetailsFragment.displayedMovie);
+		dialog = new ProgressDialog(getActivity());
+		dialog.setMessage("Chargement de la bande annonce...");
+		dialog.show();
 	}
 
 	public void updateUI() {
 		title.setText(displayedMovie.title);
 
 		String extraString = "";
-		extraString += "<strong>Durée</strong> : " + displayedMovie.getDuration() + "<br />";
+		extraString += "<strong>Durée</strong> : "
+				+ displayedMovie.getDuration() + "<br />";
 
 		if (!displayedMovie.directors.equals(""))
-			extraString += "<strong>Directeur</strong> : " + displayedMovie.directors + "<br />";
+			extraString += "<strong>Directeur</strong> : "
+					+ displayedMovie.directors + "<br />";
 		if (!displayedMovie.actors.equals(""))
-			extraString += "<strong>Acteurs</strong> : " + displayedMovie.actors + "<br />";
+			extraString += "<strong>Acteurs</strong> : "
+					+ displayedMovie.actors + "<br />";
 		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
 		extra.setText(Html.fromHtml(extraString));
 		display.setText(Html.fromHtml("<strong>" + theater + "</strong>"
-				+ displayedMovie.getDisplayDetails() + "<br>" + displayedMovie.getDisplay()));
+				+ displayedMovie.getDisplayDetails() + "<br>"
+				+ displayedMovie.getDisplay()));
 		if (displayedMovie.certificateString.equals(""))
 			certificate.setVisibility(View.GONE);
 		else
@@ -175,25 +225,25 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 				mCallbacks.onItemSelected(-1, DetailsFragment.this);
 			}
 		});
-		
+
 		pressRating.setProgress(displayedMovie.getPressRating());
-		if(displayedMovie.pressRating.equals("0"))
+		if (displayedMovie.pressRating.equals("0"))
 			pressRatingText.setText("");
 		else if (displayedMovie.pressRating.length() > 3)
 			pressRatingText.setText(displayedMovie.pressRating.substring(0, 3));
 		else
 			pressRatingText.setText(displayedMovie.pressRating);
-			
+
 		userRating.setProgress(displayedMovie.getUserRating());
-		if(displayedMovie.userRating.equals("0"))
+		if (displayedMovie.userRating.equals("0"))
 			userRatingText.setText("");
 		else if (displayedMovie.userRating.length() > 3)
 			userRatingText.setText(displayedMovie.userRating.substring(0, 3));
 		else
 			userRatingText.setText(displayedMovie.userRating);
-		
-		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html
-				.fromHtml(displayedMovie.synopsis));
+
+		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..."
+				: Html.fromHtml(displayedMovie.synopsis));
 		if (getActivity() != null) {
 			getActivity().setTitle(displayedMovie.title);
 		} else {
@@ -208,7 +258,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		public LoadMovieTask(DetailsFragment fragment) {
 			super();
 			this.ctx = fragment.getActivity();
-			this.preferences = ctx.getSharedPreferences("synopsis", Context.MODE_PRIVATE);
+			this.preferences = ctx.getSharedPreferences("synopsis",
+					Context.MODE_PRIVATE);
 		}
 
 		@Override
@@ -218,7 +269,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			String movieCode = displayedMovie.code;
 			String cache = preferences.getString(movieCode, "");
 			if (!cache.equals("")) {
-				Log.i("cache-hit", "Getting synopsis from cache for " + movieCode);
+				Log.i("cache-hit", "Getting synopsis from cache for "
+						+ movieCode);
 				displayedMovie.synopsis = cache;
 			} else {
 				Log.i("cache-miss", "Remote loading synopsis for " + movieCode);

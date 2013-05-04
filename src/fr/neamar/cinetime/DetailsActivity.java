@@ -69,37 +69,14 @@ public class DetailsActivity extends FragmentActivity implements
 			detailsFragment.shareMovie();
 			return true;
 		case R.id.menu_play:
-			displayTrailer();
+			detailsFragment.displayTrailer();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
 
-	protected void displayTrailer() {
-		class RetrieveTrailerTask extends AsyncTask<Movie, Void, String> {
-			protected String doInBackground(Movie... movies) {
-				return new APIHelper().downloadTrailerUrl(movies[0]);
-			}
 
-			protected void onPostExecute(String trailerUrl) {
-				if (trailerUrl == null)
-				{
-					Toast.makeText(
-							DetailsActivity.this,
-							"Woops ! La bande annonce ne semble pas disponible...",
-							Toast.LENGTH_SHORT).show();
-				}
-				else
-				{
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
-					DetailsActivity.this.startActivity(intent);
-				}
-			}
-		}
-
-		new RetrieveTrailerTask().execute(DetailsFragment.displayedMovie);
-	}
 
 	@Override
 	public void onItemSelected(int position, Fragment source) {
