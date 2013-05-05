@@ -55,6 +55,7 @@ public class ImageLoader {
         return instance;
     }
 
+
 	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		if (url == null) {
 			url = "";
@@ -67,7 +68,7 @@ public class ImageLoader {
 				if (poster.levelRequested < levelRequested) {
 					poster.levelRequested = levelRequested;
 				}
-				if (poster.level < levelRequested) {
+				if (poster.continueLoading()) {
 					poster.level++;
 					queuePhoto(poster, url, imageView, levelRequested);
 				} else {
