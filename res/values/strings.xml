@@ -93,4 +93,7 @@
     <string name="deleted_from_favourites">Theater deleted from favourites</string>
 
     <string name="install_maps">Install Google Maps to get the map view !</string>
+
+    <string name="watch_trailer_hd_title">Watch trailers in HD</string>
+    <string name="watch_trailer_hd_summary">Watch movie trailers in HD, use this feature if you have a fast connexion</string>
 </resources>

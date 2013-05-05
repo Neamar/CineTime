@@ -311,8 +311,11 @@ public class APIHelper {
 	public String downloadTrailerUrl(Movie movie) {
 		if(movie.trailerCode.equals(""))
 			return null;
-		
-		String url = getBaseUrl("media") + "&mediafmt=mp4-lc&code=" + movie.trailerCode + "&format=json";
+		String codec = "mp4-lc";
+        if(PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("hd_trailer", false)){
+            codec = "mp4-hip";
+        }
+		String url = getBaseUrl("media") + "&mediafmt="+codec+"&code=" + movie.trailerCode + "&format=json";
 		try {
 			String json = downloadUrl(url);
 			JSONObject jsonTrailer = new JSONObject(json).getJSONObject("media");

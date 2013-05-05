@@ -77,4 +77,7 @@
     <string name="deleted_from_favourites">Cinéma retiré des favoris</string>
 
     <string name="install_maps">Installez Google Maps pour afficher le plan !</string>
+
+    <string name="watch_trailer_hd_title">Regarder les bandes annonces en HD</string>
+    <string name="watch_trailer_hd_summary">Regarder les bandes annonces de films en HD, utilisez ce mode si vous avez un connexion rapide</string>
 </resources>
