@@ -29,7 +29,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		super(ac, textViewResourceId, movies);
 		this.context = ac;
 		this.movies = (ArrayList<Movie>) movies.clone();
-		imageLoader = CineTimeApplication.getImageLoader(ac);
+		imageLoader = ImageLoader.getInstance(getContext());
 	}
 
 	@Override

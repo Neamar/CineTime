@@ -32,7 +32,7 @@ public class PosterViewerActivity extends Activity {
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.poster_viewer);
-		imageLoader = CineTimeApplication.getImageLoader(this);
+		imageLoader = ImageLoader.getInstance(this);
 		poster = (ImageView) findViewById(R.id.posterView);
 		findViewById(R.id.spinner).setVisibility(View.VISIBLE);
 

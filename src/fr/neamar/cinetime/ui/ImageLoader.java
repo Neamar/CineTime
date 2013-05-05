@@ -3,13 +3,15 @@ package fr.neamar.cinetime.ui;
 //Credits goes to com.fedorvlasov.lazylist
 // https://github.com/thest1/LazyList
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.support.v4.util.LruCache;
+import android.widget.ImageView;
+
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
@@ -18,17 +20,12 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
-import android.support.v4.util.LruCache;
-import android.widget.ImageView;
 import fr.neamar.cinetime.PosterViewerActivity;
 import fr.neamar.cinetime.R;
 
 public class ImageLoader {
+
+    private static ImageLoader instance;
 
 	LruCache<String, Poster> posterCache;
 	final int stub_id = R.drawable.stub;
@@ -39,7 +36,7 @@ public class ImageLoader {
 	ExecutorService executorService;
 	Handler handler = new Handler();// handler to display images in UI thread
 
-	public ImageLoader(Context context) {
+	private ImageLoader(Context context) {
 		fileCache = new FileCache(context);
 		ctx = context;
 		executorService = Executors.newFixedThreadPool(5);
@@ -51,6 +48,13 @@ public class ImageLoader {
 		};
 		Poster.generateStub(context, stub_id);
 	}
+
+    public static ImageLoader getInstance(Context ctx){
+        if(instance == null){
+            instance = new ImageLoader(ctx);
+        }
+        return instance;
+    }
 
 	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		if (url == null) {

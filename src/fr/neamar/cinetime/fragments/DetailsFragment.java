@@ -25,8 +25,6 @@ import android.widget.ProgressBar;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-import fr.neamar.cinetime.CineTimeApplication;
-import fr.neamar.cinetime.DetailsActivity;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
@@ -142,7 +140,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			throw new IllegalStateException(
 					"Activity must implement fragment's callbacks.");
 		}
-		imageLoader = CineTimeApplication.getImageLoader(getActivity());
+		imageLoader = ImageLoader.getInstance(getActivity());
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
 		if (titleToSet) {
