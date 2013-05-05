@@ -1,7 +1,6 @@
 package fr.neamar.cinetime.ui;
 
-//Credits goes to com.fedorvlasov.lazylist
-// https://github.com/thest1/LazyList
+// inspired by https://github.com/thest1/LazyList
 
 import android.content.Context;
 import android.content.Intent;
