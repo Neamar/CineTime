@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string-array name="countries">
+    <item>@string/country_fr</item>
+    <item>@string/country_uk</item>
+    <item>@string/country_de</item>
+    <item>@string/country_es</item>
+  </string-array>
+  <string-array name="countriesCodes">
+    <item>@string/fr</item>
+    <item>@string/uk</item>
+    <item>@string/de</item>
+    <item>@string/es</item>
+  </string-array>
+</resources>

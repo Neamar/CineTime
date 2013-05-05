@@ -100,6 +100,21 @@ public class DBHelper {
 		}
 	}
 
+    @SuppressLint("NewApi")
+    public static void clearFavorite(Context context) {
+        synchronized (DBHelper.sDataLock) {
+            SQLiteDatabase db = getDatabase(context);
+
+            db.delete("favorites", null, null);
+            db.close();
+        }
+        favCodes.clear();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+            new BackupManager(context).dataChanged();
+        }
+    }
+
+
 	public static boolean isFavorite(String code) {
 		return favCodes.contains(code);
 	}

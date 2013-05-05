@@ -6,6 +6,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
@@ -22,10 +25,29 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_theaters_list);
 		if (title.equalsIgnoreCase("")) {
-			title = getResources().getString(R.string.title_activity_theaters);
+			title = getString(R.string.title_activity_theaters);
 		}
 		setTitle(title);
 	}
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.activity_theater, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Click on title in actionbar
+        switch (item.getItemId()) {
+            case R.id.menu_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 	@Override
 	public void onBackPressed() {
@@ -58,7 +80,7 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 		try {
 			startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
 		} catch (ActivityNotFoundException e) {
-			Toast.makeText(this, "Installez Google Maps pour afficher le plan !",
+			Toast.makeText(this, getString(R.string.install_maps),
 					Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -67,7 +89,7 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 	public void finishNoNetwork() {
 		Toast.makeText(
 				this,
-				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+				getString(R.string.no_network),
 				Toast.LENGTH_SHORT).show();
 		finish();
 	}

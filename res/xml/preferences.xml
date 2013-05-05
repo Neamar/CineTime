@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:title="@string/settings">
+    <PreferenceCategory android:title="@string/global_settings">
+      <ListPreference
+        android:key="country"
+        android:entries="@array/countries"
+        android:summary="@string/change_country_mess"
+        android:entryValues="@array/countriesCodes"
+        android:title="@string/change_country_title" />
+    </PreferenceCategory>
+</PreferenceScreen>

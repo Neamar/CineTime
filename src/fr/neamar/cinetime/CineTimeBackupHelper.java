@@ -1,15 +1,12 @@
 package fr.neamar.cinetime;
 
-import java.io.IOException;
-
 import android.annotation.TargetApi;
-import android.app.backup.BackupAgentHelper;
-import android.app.backup.BackupDataInput;
-import android.app.backup.BackupDataOutput;
-import android.app.backup.FileBackupHelper;
-import android.app.backup.SharedPreferencesBackupHelper;
+import android.app.backup.*;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+
+import java.io.IOException;
+
 import fr.neamar.cinetime.db.DBHelper;
 
 @TargetApi(Build.VERSION_CODES.FROYO)
@@ -17,9 +14,11 @@ public class CineTimeBackupHelper extends BackupAgentHelper {
 
 	// The name of the SharedPreferences file
 	static final String PREFS = "synopsis";
+    static final String PREFS_COUNTRY = "fr.neamar.summon_preferences";
 
 	// A key to uniquely identify the set of backup data
 	static final String PREFS_BACKUP_KEY = "prefs";
+    static final String PREFS_BACKUP_KEY_COUNTRY = "prefs_country";
 
 	// The name of the SharedPreferences file
 	static final String DB = "../databases/cintetime.s3db";
@@ -32,6 +31,8 @@ public class CineTimeBackupHelper extends BackupAgentHelper {
 	public void onCreate() {
 		SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, PREFS);
 		addHelper(PREFS_BACKUP_KEY, helper);
+        SharedPreferencesBackupHelper helperC = new SharedPreferencesBackupHelper(this, PREFS_COUNTRY);
+        addHelper(PREFS_BACKUP_KEY_COUNTRY, helperC);
 		FileBackupHelper helperF = new FileBackupHelper(this, DB);
 		addHelper(FILES_BACKUP_KEY, helperF);
 	}
