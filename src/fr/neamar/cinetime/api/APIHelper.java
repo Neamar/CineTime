@@ -1,29 +1,75 @@
 package fr.neamar.cinetime.api;
 
+import android.content.Context;
+import android.util.Base64;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.util.Log;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
 
+    private static final String MAGIC_STRING = "29d185d98c984a359e6e6f26a0474269";
+    private static final String SED_FORMAT = "yyyyMMdd";
+    private static final String SED = "&sed=";
+    private static final String URL_FORMAT_WITH_SED_SIG = "{0}" + SED + "{1}&sig={2}";
+
 	protected Context ctx;
+
+    private static URI encode(URI uri) throws URISyntaxException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        String uriAsString = uri.toString();
+        String[] splittedUri = uriAsString.split("\\?");
+        if (splittedUri.length == 2) {
+            String tokens = splittedUri[1];
+            String sed = getSed();
+            String sid = getSig(tokens, sed);
+            return new URI(MessageFormat.format(URL_FORMAT_WITH_SED_SIG, uriAsString, sed, sid));
+        } else {
+            throw new URISyntaxException(uriAsString, "Multiple '?'");
+        }
+    }
+
+    private static String getSed() {
+        return new SimpleDateFormat(SED_FORMAT).format(new Date());
+    }
+
+    private static String getSig(String tokens, String sed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md = MessageDigest.getInstance("SHA1");
+        String toDigest = toDigest(tokens, sed);
+        md.update(toDigest.getBytes());
+        String sig = Base64.encodeToString(md.digest(), Base64.NO_WRAP);
+        return URLEncoder.encode(sig, "UTF-8");
+    }
+
+    private static String toDigest(String tokens, String sed) {
+        return MessageFormat.format("{0}{1}{2}{3}", MAGIC_STRING, tokens, SED, sed);
+    }
 
 	/**
 	 * Retrieve base URL.
@@ -32,7 +78,7 @@ public class APIHelper {
 	 * @return
 	 */
 	protected String getBaseUrl(String page) {
-		return "http://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
+		return "http://api.allocine.fr/rest/v3/" + page + "?partner=100043982026";
 	}
 
 	/**
@@ -44,13 +90,26 @@ public class APIHelper {
 	 * @throws ClientProtocolException
 	 */
 	protected String downloadUrl(String url) throws ClientProtocolException, IOException {
-		// Create a new HTTP Client
-		DefaultHttpClient defaultClient = new DefaultHttpClient();
-		// Setup the get request
-		HttpGet httpGetRequest = new HttpGet(url);
 
-		// Execute the request in the client
-		HttpResponse httpResponse = defaultClient.execute(httpGetRequest);
+        final HttpParams httpParameters = new BasicHttpParams();
+        httpParameters.setParameter(CoreProtocolPNames.USER_AGENT, "Dalvik/1.6.0 (Linux; U; Android 4.2.2; Nexus 4 Build/JDQ39E)");
+
+        final HttpClient httpclient = new DefaultHttpClient(httpParameters);
+
+		// Setup the get request
+        HttpGet httpGetRequest = null;
+        try {
+            httpGetRequest = new HttpGet(encode(new URI(url)));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return null;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        // Execute the request in the client
+		HttpResponse httpResponse = httpclient.execute(httpGetRequest);
 
 		// Grab the response
 		BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity()
