@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.backup.BackupManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,8 +26,6 @@ import android.widget.ProgressBar;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-import fr.neamar.cinetime.CineTimeApplication;
-import fr.neamar.cinetime.DetailsActivity;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
@@ -142,7 +141,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			throw new IllegalStateException(
 					"Activity must implement fragment's callbacks.");
 		}
-		imageLoader = CineTimeApplication.getImageLoader(getActivity());
+		imageLoader = ImageLoader.getInstance(getActivity());
 		mCallbacks = (Callbacks) activity;
 		mCallbacks.setFragment(this);
 		if (titleToSet) {
@@ -188,9 +187,17 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 							"Woops ! La bande annonce ne semble pas disponible...",
 							Toast.LENGTH_SHORT).show();
 				} else {
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
-					startActivity(intent);
+					try {
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setDataAndType(Uri.parse(trailerUrl),
+								"video/mp4");
+						startActivity(intent);
+					} catch (ActivityNotFoundException e) {
+						Toast.makeText(
+								getActivity(),
+								"Vous devez avoir un lecteur vidéo pour afficher la bande-annonce de ce film.",
+								Toast.LENGTH_SHORT).show();
+					}
 				}
 			}
 		}
@@ -265,6 +272,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			this.ctx = fragment.getActivity();
 			this.preferences = ctx.getSharedPreferences("synopsis",
 					Context.MODE_PRIVATE);
+			mCallbacks.setIsLoading(true);
 		}
 
 		@Override
@@ -294,6 +302,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 		@Override
 		protected void onPostExecute(Movie resultsList) {
+			mCallbacks.setIsLoading(false);
 			displayedMovie = resultsList;
 			updateUI();
 		}
