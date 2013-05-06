@@ -2,13 +2,10 @@ package fr.neamar.cinetime;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,10 +14,8 @@ import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
-import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
-import fr.neamar.cinetime.objects.Movie;
 
 public class DetailsActivity extends FragmentActivity implements
 		MoviesFragment.Callbacks {

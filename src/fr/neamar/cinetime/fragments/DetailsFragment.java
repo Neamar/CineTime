@@ -272,6 +272,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			this.ctx = fragment.getActivity();
 			this.preferences = ctx.getSharedPreferences("synopsis",
 					Context.MODE_PRIVATE);
+			mCallbacks.setIsLoading(true);
 		}
 
 		@Override
@@ -301,6 +302,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 		@Override
 		protected void onPostExecute(Movie resultsList) {
+			mCallbacks.setIsLoading(false);
 			displayedMovie = resultsList;
 			updateUI();
 		}
