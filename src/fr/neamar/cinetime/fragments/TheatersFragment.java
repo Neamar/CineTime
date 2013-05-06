@@ -1,10 +1,5 @@
 package fr.neamar.cinetime.fragments;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-import org.apache.http.client.ClientProtocolException;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -30,12 +25,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
+import android.widget.*;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.TextView;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.apache.http.client.ClientProtocolException;
+
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.TheaterAdapter;
 import fr.neamar.cinetime.api.APIHelper;
@@ -159,11 +156,10 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 
 							if (!locationEnable) {
 								AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-								Resources res = getResources();
-								builder.setMessage(res.getString(R.string.location_dialog_mess))
+								builder.setMessage(getString(R.string.location_dialog_mess))
 										.setCancelable(true)
 										.setPositiveButton(
-												res.getString(R.string.location_dialog_ok),
+												getString(R.string.location_dialog_ok),
 												new DialogInterface.OnClickListener() {
 													public void onClick(DialogInterface dialog,
 															int id) {
@@ -174,7 +170,7 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 													}
 												})
 										.setNegativeButton(
-												res.getString(R.string.location_dialog_cancel),
+												getString(R.string.location_dialog_cancel),
 												new DialogInterface.OnClickListener() {
 													public void onClick(DialogInterface dialog,
 															int id) {
@@ -270,7 +266,7 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 		}
 		if (dialogPending) {
 			dialog = new ProgressDialog(activity);
-			dialog.setMessage("Recherche en cours...");
+			dialog.setMessage(getString(R.string.searching));
 			dialog.show();
 		}
 		if (!parentTitle.equalsIgnoreCase("")) {
@@ -367,7 +363,7 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 			}
 			dialog = new ProgressDialog(ctx);
 			dialogPending = true;
-			dialog.setMessage("Recherche en cours...");
+			dialog.setMessage(getString(R.string.searching));
 			dialog.show();
 		}
 
@@ -379,12 +375,12 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 						isLoadingFavorites = true;
 						return DBHelper.getFavorites(ctx);
 					}
-					return (new APIHelper().findTheaters(queries[0]));
+					return (new APIHelper(ctx).findTheaters(queries[0]));
 				} else if (queries.length == 2) {
 					lat = queries[0];
 					lon = queries[1];
 					isGeoSearch = true;
-					return (new APIHelper().findTheatersGeo(queries[0], queries[1]));
+					return (new APIHelper(ctx).findTheatersGeo(queries[0], queries[1]));
 				}
 			} catch (ClientProtocolException e) {
 
@@ -405,7 +401,7 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 			if (resultsList != null) {
 				if (!isLoadingFavorites) {
 					((TextView) getListView().getEmptyView())
-							.setText("Aucun résultat pour cette recherche.");
+							.setText(getString(R.string.no_results));
 				}
 				TheatersFragment.this.onLoadOver(resultsList, isLoadingFavorites, isGeoSearch);
 			} else {
@@ -421,11 +417,11 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 			getListView().requestFocus();
 		}
 		if (isFavorite) {
-			mCallbacks.updateTitle("Mes cinémas");
+			mCallbacks.updateTitle(getString(R.string.title_activity_theaters));
 		} else if (isGeoSearch) {
-			mCallbacks.updateTitle("Cinémas à proximité");
+			mCallbacks.updateTitle(getString(R.string.title_activity_theaters_geo));
 		} else {
-			mCallbacks.updateTitle("Recherche : " + query);
+			mCallbacks.updateTitle(getString(R.string.title_activity_theaters_search) + query);
 		}
 	}
 

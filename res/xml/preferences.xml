@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:title="@string/settings">
+    <PreferenceCategory android:title="@string/global_settings">
+      <ListPreference
+        android:key="country"
+        android:entries="@array/countries"
+        android:summary="@string/change_country_mess"
+        android:entryValues="@array/countriesCodes"
+        android:title="@string/change_country_title" />
+      <CheckBoxPreference
+        android:key="hd_trailer"
+        android:title="@string/watch_trailer_hd_title"
+        android:summary="@string/watch_trailer_hd_summary"
+        android:defaultValue="false"/>
+    </PreferenceCategory>
+</PreferenceScreen>

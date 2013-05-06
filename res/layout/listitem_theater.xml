@@ -24,7 +24,7 @@
         android:layout_alignParentTop="true"
         android:ellipsize="marquee"
         android:singleLine="true"
-        android:text="Theater name"
+        android:text="@string/theater_name"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -36,7 +36,7 @@
         android:layout_below="@+id/listitem_theater_name"
         android:layout_alignParentBottom="true"
         android:layout_toRightOf="@+id/listitem_theater_fav"
-        android:text="Theater Distance"
+        android:text="@string/theater_distance"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@android:color/tertiary_text_dark"
         android:textStyle="bold"
@@ -51,7 +51,7 @@
         android:layout_toRightOf="@+id/listitem_theater_distance"
         android:layout_below="@+id/listitem_theater_name"
         android:layout_alignParentBottom="true"
-        android:text="Theater location"
+        android:text="@string/theater_location"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@android:color/tertiary_text_dark" />
 

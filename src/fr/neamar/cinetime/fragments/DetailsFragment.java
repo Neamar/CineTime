@@ -158,16 +158,17 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
 		sharingIntent.setType("text/plain");
 		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT,
-				displayedMovie.getSharingText(theater));
+				displayedMovie.getSharingText(getActivity(), theater));
 
-		startActivity(Intent
-				.createChooser(sharingIntent, "Partager le film..."));
+		startActivity(Intent.createChooser(sharingIntent,
+				getString(R.string.share_movie)));
 	}
 
 	public void displayTrailer() {
 		class RetrieveTrailerTask extends AsyncTask<Movie, Void, String> {
 			protected String doInBackground(Movie... movies) {
-				return new APIHelper().downloadTrailerUrl(movies[0]);
+				return new APIHelper(getActivity())
+						.downloadTrailerUrl(movies[0]);
 			}
 
 			protected void onPostExecute(String trailerUrl) {
@@ -182,9 +183,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 				}
 
 				if (trailerUrl == null) {
-					Toast.makeText(
-							getActivity(),
-							"Woops ! La bande annonce ne semble pas disponible...",
+					Toast.makeText(getActivity(),
+							getString(R.string.trailer_unavailable),
 							Toast.LENGTH_SHORT).show();
 				} else {
 					try {
@@ -204,7 +204,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 		new RetrieveTrailerTask().execute(DetailsFragment.displayedMovie);
 		dialog = new ProgressDialog(getActivity());
-		dialog.setMessage("Chargement de la bande annonce...");
+		dialog.setMessage(getString(R.string.loading_trailer));
 		dialog.show();
 	}
 
@@ -212,20 +212,21 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		title.setText(displayedMovie.title);
 
 		String extraString = "";
-		extraString += "<strong>Durée</strong> : "
+		extraString += "<strong>" + getString(R.string.length) + "</strong> : "
 				+ displayedMovie.getDuration() + "<br />";
 
 		if (!displayedMovie.directors.equals(""))
-			extraString += "<strong>Directeur</strong> : "
-					+ displayedMovie.directors + "<br />";
+			extraString += "<strong>" + getString(R.string.director)
+					+ "</strong> : " + displayedMovie.directors + "<br />";
 		if (!displayedMovie.actors.equals(""))
-			extraString += "<strong>Acteurs</strong> : "
-					+ displayedMovie.actors + "<br />";
-		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
+			extraString += "<strong>" + getString(R.string.actors)
+					+ "</strong> : " + displayedMovie.actors + "<br />";
+		extraString += "<strong>" + getString(R.string.genre) + "</strong> : "
+				+ displayedMovie.genres;
 		extra.setText(Html.fromHtml(extraString));
 		display.setText(Html.fromHtml("<strong>" + theater + "</strong>"
 				+ displayedMovie.getDisplayDetails() + "<br>"
-				+ displayedMovie.getDisplay()));
+				+ displayedMovie.getDisplay(getActivity())));
 		if (displayedMovie.certificateString.equals(""))
 			certificate.setVisibility(View.GONE);
 		else
@@ -254,7 +255,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		else
 			userRatingText.setText(displayedMovie.userRating);
 
-		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..."
+		synopsis.setText(displayedMovie.synopsis.equals("") ? getString(R.string.loading_synopsis)
 				: Html.fromHtml(displayedMovie.synopsis));
 		if (getActivity() != null) {
 			getActivity().setTitle(displayedMovie.title);
@@ -287,7 +288,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 				displayedMovie.synopsis = cache;
 			} else {
 				Log.i("cache-miss", "Remote loading synopsis for " + movieCode);
-				displayedMovie = (new APIHelper()).findMovie(displayedMovie);
+				displayedMovie = (new APIHelper(getActivity()))
+						.findMovie(displayedMovie);
 				String synopsis = displayedMovie.synopsis;
 				SharedPreferences.Editor ed = preferences.edit();
 				ed.putString(movieCode, synopsis);

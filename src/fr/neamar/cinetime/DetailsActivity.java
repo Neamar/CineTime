@@ -94,7 +94,7 @@ public class DetailsActivity extends FragmentActivity implements
 	public void finishNoNetwork() {
 		Toast.makeText(
 				this,
-				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+				getString(R.string.no_network),
 				Toast.LENGTH_SHORT).show();
 		finish();
 	}
