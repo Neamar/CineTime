@@ -53,7 +53,7 @@
             android:name=".PosterViewerActivity"
             android:label="@string/title_activity_details" >
         </activity>
-      <activity android:name=".SettingsActivity" />
+       <activity android:name=".SettingsActivity" />
     </application>
 
 </manifest>

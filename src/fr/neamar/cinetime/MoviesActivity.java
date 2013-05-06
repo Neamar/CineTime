@@ -26,6 +26,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 	private DetailsFragment detailsFragment;
 	private String theater;
 	private MenuItem shareItem;
+    private MenuItem trailerItem;
 
 	@TargetApi(14)
 	@Override
@@ -63,12 +64,11 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 		if (mTwoPane) {
 			inflater.inflate(R.menu.activity_details, menu);
 			shareItem = menu.findItem(R.id.menu_share);
+            trailerItem = menu.findItem(R.id.menu_play);
 			if (detailsFragment == null) {
-				shareItem.setEnabled(false);
-				shareItem.setVisible(false);
+				desactivateDetailsMenu();
 			} else {
-				shareItem.setVisible(true);
-				shareItem.setEnabled(true);
+				activateDetailsMenu();
 			}
 			return true;
 		}
@@ -82,9 +82,9 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 			if (detailsFragment == null) {
 				getSupportFragmentManager().beginTransaction()
 						.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
-				desactivateShare();
+				desactivateDetailsMenu();
 			} else {
-				activateShare();
+				activateDetailsMenu();
 			}
 		}
 	}
@@ -100,6 +100,9 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 		case R.id.menu_share:
 			detailsFragment.shareMovie();
 			return true;
+        case R.id.menu_play:
+            detailsFragment.displayTrailer();
+            return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -111,7 +114,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 			this.moviesFragment = (MoviesFragment) fragment;
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
-			activateShare();
+			activateDetailsMenu();
 		}
 	}
 
@@ -121,7 +124,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 			getSupportFragmentManager().beginTransaction()
 					.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 			detailsFragment = null;
-			desactivateShare();
+			desactivateDetailsMenu();
 			setTitle(getString(R.string.showtimes)+" " + getIntent().getStringExtra("theater"));
 		} else {
 			moviesFragment.clear();
@@ -173,24 +176,32 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 	}
 
 	@SuppressLint("NewApi")
-	private void activateShare() {
+	private void activateDetailsMenu() {
 		if (shareItem != null) {
 			shareItem.setVisible(true);
 			shareItem.setEnabled(true);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-				invalidateOptionsMenu();
-			}
 		}
+        if(trailerItem != null){
+            trailerItem.setVisible(true);
+            trailerItem.setEnabled(true);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            invalidateOptionsMenu();
+        }
 	}
 
 	@SuppressLint("NewApi")
-	private void desactivateShare() {
+	private void desactivateDetailsMenu() {
 		if (shareItem != null) {
 			shareItem.setEnabled(false);
 			shareItem.setVisible(false);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-				invalidateOptionsMenu();
-			}
 		}
+        if(trailerItem != null){
+            trailerItem.setEnabled(false);
+            trailerItem.setVisible(false);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            invalidateOptionsMenu();
+        }
 	}
 }
