@@ -19,6 +19,6 @@
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="Aucune séance." />
+        android:text="@string/no_showtimes" />
 
 </LinearLayout>

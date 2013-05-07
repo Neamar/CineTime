@@ -1,8 +1,11 @@
 package fr.neamar.cinetime.objects;
 
+import android.content.Context;
+import android.text.Html;
+
 import java.util.Calendar;
 
-import android.text.Html;
+import fr.neamar.cinetime.R;
 
 public class Movie {
 	public String code;
@@ -21,7 +24,7 @@ public class Movie {
 	public String pressRating = "0";
 	public String userRating = "0";
 
-	public Boolean isOriginalLanguage;
+	public Boolean isOriginalLanguage = false;
 	public Boolean is3D = false;
 
 	public String display;
@@ -52,11 +55,15 @@ public class Movie {
 		}
 	}
 
-	public String getDisplay() {
+	public String getDisplay(Context ctx) {
 		String optimisedDisplay = display;
 		// "Séances du"
 		optimisedDisplay = optimisedDisplay.replaceAll(
 				"Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-zéû]+ 20[0-9]{2} :", "$1 $2 :");
+
+        //TODO optimise times on uk results
+        optimisedDisplay = optimisedDisplay.replaceAll(
+                "Séances du", ctx.getString(R.string.showtimes_on));
 
 		// "(film à ..)"
 		optimisedDisplay = optimisedDisplay.replaceAll(" \\([^\\)]+\\)", "");
@@ -79,9 +86,10 @@ public class Movie {
 
 		if (isSimilar && days.length == 7) {
 			if (!optimisedDisplay.contains(" " + today + " :")) {
-				optimisedDisplay = lowlightHour("Semaine prochaine<br>TLJ : " + days[0]) + "";
+				optimisedDisplay = lowlightHour(ctx.getString(R.string.next_week)+
+                        "<br>"+ctx.getString(R.string.everyday)+" : " + days[0]) + "";
 			} else {
-				optimisedDisplay = lowlightHour("TLJ : " + days[0]) + "";
+				optimisedDisplay = lowlightHour(ctx.getString(R.string.everyday) +" : " + days[0]) + "";
 			}
 		} else {
 			// Lowlight every days but today.
@@ -169,7 +177,7 @@ public class Movie {
 	 * @param theater
 	 * @return
 	 */
-	public String getSharingText(String theater) {
+	public String getSharingText(Context ctx, String theater) {
 		String sharingText = "";
 		sharingText += this.title + " (" + getDuration() + ")\r\n";
 
@@ -177,7 +185,7 @@ public class Movie {
 			sharingText += this.synopsis + "\r\n\r\n";
 
 		String htmlDisplayDetails = "<strong>" + theater + "</strong>" + this.getDisplayDetails()
-				+ " :<br>" + this.getDisplay();
+				+ " :<br>" + this.getDisplay(ctx);
 
 		sharingText += Html.fromHtml(htmlDisplayDetails).toString();
 		return sharingText;

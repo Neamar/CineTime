@@ -1,5 +1,8 @@
 package fr.neamar.cinetime.api;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,8 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.util.Log;
+import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
@@ -25,14 +27,32 @@ public class APIHelper {
 
 	protected Context ctx;
 
-	/**
+    public APIHelper(Context ctx) {
+        this.ctx = ctx;
+    }
+
+    /**
 	 * Retrieve base URL.
 	 * 
 	 * @param page
 	 * @return
 	 */
 	protected String getBaseUrl(String page) {
-		return "http://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
+        String country = PreferenceManager.getDefaultSharedPreferences(ctx).
+                getString("country", ctx.getString(R.string.default_country));
+        String url;
+        if(country.equalsIgnoreCase("uk")){
+            url = ctx.getResources().getString(R.string.api_url_uk);
+        }else if(country.equalsIgnoreCase("fr")){
+            url = ctx.getResources().getString(R.string.api_url_fr);
+        }else if(country.equalsIgnoreCase("de")){
+            url = ctx.getResources().getString(R.string.api_url_de);
+        }else if(country.equalsIgnoreCase("es")){
+            url = ctx.getResources().getString(R.string.api_url_es);
+        }else {
+            throw new UnsupportedOperationException("Locale unkown " + country);
+        }
+        return "http://" + url +"/rest/v3/" + page + "?partner=aXBhZC12MQ";
 	}
 
 	/**
@@ -264,8 +284,10 @@ public class APIHelper {
 				}
 
 				movie.display = jsonMovie.getString("display");
-				movie.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original")
-						.equals("true");
+                if(jsonMovie.has("version")){
+                    movie.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original")
+                            .equals("true");
+                }
 				if (jsonMovie.has("screenFormat"))
 					movie.is3D = jsonMovie.getJSONObject("screenFormat").getString("$")
 							.equals("3D");
@@ -289,13 +311,18 @@ public class APIHelper {
 	public String downloadTrailerUrl(Movie movie) {
 		if(movie.trailerCode.equals(""))
 			return null;
-		
-		String url = getBaseUrl("media") + "&mediafmt=mp4-lc&code=" + movie.trailerCode + "&format=json";
+		String url = getBaseUrl("media") + "&mediafmt=mp4-hip&code=" + movie.trailerCode + "&format=json";
 		try {
 			String json = downloadUrl(url);
 			JSONObject jsonTrailer = new JSONObject(json).getJSONObject("media");
-			if(jsonTrailer.has("rendition"))
-				return jsonTrailer.getJSONArray("rendition").getJSONObject(0).getString("href");
+			if(jsonTrailer.has("rendition")){
+				JSONArray rendition = jsonTrailer.getJSONArray("rendition");
+                if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("hd_trailer", false)) {
+                    return rendition.getJSONObject(rendition.length()-1).getString("href");
+                }else {
+                    return rendition.getJSONObject(0).getString("href");
+                }
+            }
 			return null;
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,10 +1,5 @@
 package fr.neamar.cinetime.fragments;
 
-import java.util.ArrayList;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,6 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+
+import java.util.ArrayList;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import fr.neamar.cinetime.MovieAdapter;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
@@ -111,7 +112,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		}
 		if (dialogPending) {
 			dialog = new ProgressDialog(activity);
-			dialog.setMessage("Chargement des séances en cours...");
+			dialog.setMessage(getString(R.string.loading_showtimes));
 			dialog.show();
 		}
 		if (toUpdate && (movies != null)) {
@@ -185,7 +186,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 				try {
 					Log.i("cache-hit", "Getting display datas from cache for " + theaterCode);
 					mCallbacks.setIsLoading(true);
-					ArrayList<Movie> movies = (new APIHelper().formatMoviesList(
+					ArrayList<Movie> movies = (new APIHelper(ctx).formatMoviesList(
 							new JSONArray(cache), theaterCode));
 					fragment.updateListView(movies);
 				} catch (JSONException e) {
@@ -194,7 +195,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			} else {
 				Log.i("cache-miss", "Remote loading first-time datas for " + theaterCode);
 				dialog = new ProgressDialog(ctx);
-				dialog.setMessage("Chargement des séances en cours...");
+				dialog.setMessage(getString(R.string.loading_showtimes));
 				dialog.show();
 				dialogPending = true;
 			}
@@ -205,7 +206,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			if (theaterCode != queries[0]) {
 				throw new RuntimeException("Fragment misuse: theaterCode differs");
 			}
-			JSONArray jsonResults = (new APIHelper()).downloadMoviesList(theaterCode);
+			JSONArray jsonResults = (new APIHelper(ctx)).downloadMoviesList(theaterCode);
 
 			String oldCache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE)
 					.getString(theaterCode, "");
@@ -237,7 +238,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 			// Update only if data changed
 			if (remoteDataHasChangedFromLocalCache) {
-				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(jsonResults,
+				ArrayList<Movie> movies = (new APIHelper(ctx)).formatMoviesList(jsonResults,
 						theaterCode);
 				fragment.updateListView(movies);
 			}

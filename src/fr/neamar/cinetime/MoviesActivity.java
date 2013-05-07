@@ -115,6 +115,13 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
 			activateDetailsMenu();
+            if (DetailsFragment.displayedMovie.trailerCode.isEmpty() && trailerItem != null) {
+                trailerItem.setEnabled(false);
+                trailerItem.setVisible(false);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    invalidateOptionsMenu();
+                }
+            }
 		}
 	}
 
@@ -125,7 +132,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 					.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 			detailsFragment = null;
 			desactivateDetailsMenu();
-			setTitle("Séances " + getIntent().getStringExtra("theater"));
+			setTitle(getString(R.string.showtimes)+" " + getIntent().getStringExtra("theater"));
 		} else {
 			moviesFragment.clear();
 			super.onBackPressed();
@@ -170,7 +177,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 	public void finishNoNetwork() {
 		Toast.makeText(
 				this,
-				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+				getString(R.string.no_network),
 				Toast.LENGTH_SHORT).show();
 		finish();
 	}

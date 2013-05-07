@@ -21,6 +21,7 @@ public class DetailsActivity extends FragmentActivity implements
 		MoviesFragment.Callbacks {
 
 	DetailsFragment detailsFragment;
+    private MenuItem trailerItem;
 
 	@SuppressLint("NewApi")
 	@Override
@@ -51,6 +52,7 @@ public class DetailsActivity extends FragmentActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.activity_details, menu);
+        trailerItem = menu.findItem(R.id.menu_play);
 		return true;
 	}
 
@@ -83,6 +85,13 @@ public class DetailsActivity extends FragmentActivity implements
 	@Override
 	public void setFragment(Fragment fragment) {
 		detailsFragment = (DetailsFragment) fragment;
+        if(DetailsFragment.displayedMovie.trailerCode.isEmpty() && trailerItem != null){
+            trailerItem.setEnabled(false);
+            trailerItem.setVisible(false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                invalidateOptionsMenu();
+            }
+        }
 	}
 
 	@Override
@@ -94,7 +103,7 @@ public class DetailsActivity extends FragmentActivity implements
 	public void finishNoNetwork() {
 		Toast.makeText(
 				this,
-				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
+				getString(R.string.no_network),
 				Toast.LENGTH_SHORT).show();
 		finish();
 	}

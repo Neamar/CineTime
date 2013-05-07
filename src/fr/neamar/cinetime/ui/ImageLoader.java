@@ -1,16 +1,15 @@
 package fr.neamar.cinetime.ui;
 
-// inspired by https://github.com/thest1/LazyList
+//Credits goes to com.fedorvlasov.lazylist
+// https://github.com/thest1/LazyList
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
-import android.support.v4.util.LruCache;
-import android.widget.ImageView;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
@@ -19,12 +18,20 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.support.v4.util.LruCache;
+import android.widget.ImageView;
 import fr.neamar.cinetime.PosterViewerActivity;
 import fr.neamar.cinetime.R;
 
 public class ImageLoader {
 
-    private static ImageLoader instance;
+	private static ImageLoader instance;
 
 	LruCache<String, Poster> posterCache;
 	final int stub_id = R.drawable.stub;
@@ -48,13 +55,12 @@ public class ImageLoader {
 		Poster.generateStub(context, stub_id);
 	}
 
-    public static ImageLoader getInstance(Context ctx){
-        if(instance == null){
-            instance = new ImageLoader(ctx);
-        }
-        return instance;
-    }
-
+	public static ImageLoader getInstance(Context ctx) {
+		if (instance == null) {
+			instance = new ImageLoader(ctx);
+		}
+		return instance;
+	}
 
 	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		if (url == null) {
@@ -89,7 +95,8 @@ public class ImageLoader {
 		}
 	}
 
-	private void queuePhoto(Poster poster, String url, ImageView imageView, int levelRequested) {
+	private void queuePhoto(Poster poster, String url, ImageView imageView,
+			int levelRequested) {
 		PhotoToLoad p = new PhotoToLoad(poster, url, imageView, levelRequested);
 		executorService.submit(new PhotosLoader(p));
 	}
@@ -114,7 +121,8 @@ public class ImageLoader {
 		try {
 			Bitmap bitmap = null;
 			URL imageUrl = new URL(fullUrl);
-			HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
+			HttpURLConnection conn = (HttpURLConnection) imageUrl
+					.openConnection();
 			conn.setConnectTimeout(30000);
 			conn.setReadTimeout(30000);
 			conn.setInstanceFollowRedirects(true);
@@ -176,7 +184,8 @@ public class ImageLoader {
 			try {
 				if (imageViewReused(photoToLoad))
 					return;
-				photoToLoad.poster.setCurrentBmp(getBitmap(photoToLoad.url, photoToLoad.poster));
+				photoToLoad.poster.setCurrentBmp(getBitmap(photoToLoad.url,
+						photoToLoad.poster));
 				posterCache.put(photoToLoad.url, photoToLoad.poster);
 				if (photoToLoad.poster.continueLoading()) {
 					photoToLoad.poster.level++;
@@ -225,17 +234,35 @@ public class ImageLoader {
 		fileCache.clear();
 	}
 
+	private String getLocalisedUrl() {
+		String country = PreferenceManager.getDefaultSharedPreferences(ctx)
+				.getString("country", ctx.getString(R.string.default_country));
+		String url;
+		if (country.equalsIgnoreCase("uk")) {
+			url = ctx.getResources().getString(R.string.images_url_uk);
+		} else if (country.equalsIgnoreCase("fr")) {
+			url = ctx.getResources().getString(R.string.images_url_fr);
+		} else if (country.equalsIgnoreCase("de")) {
+			url = ctx.getResources().getString(R.string.images_url_de);
+		} else if (country.equalsIgnoreCase("es")) {
+			url = ctx.getResources().getString(R.string.images_url_es);
+		} else {
+			throw new UnsupportedOperationException("Locale unkown " + country);
+		}
+		return "http://" + url;
+	}
+
 	private String makeUrl(String baseUrl, int level) {
 		String url = null;
 		switch (level) {
 		case 1:
-			url = "http://images.allocine.fr/r_150_500" + baseUrl;
+			url = getLocalisedUrl() + "/r_150_500" + baseUrl;
 			break;
 		case 2:
-			url = "http://images.allocine.fr/r_200_666" + baseUrl;
+			url = getLocalisedUrl() + "/r_200_666" + baseUrl;
 			break;
 		case 3:
-			url = "http://images.allocine.fr/r_720_2400" + baseUrl;
+			url = getLocalisedUrl() + "/r_720_2400" + baseUrl;
 			break;
 		default:
 			url = "";

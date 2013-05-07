@@ -1,7 +1,5 @@
 package fr.neamar.cinetime;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -11,6 +9,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.ui.ImageLoader;
 
@@ -70,7 +71,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 			movieRating.setVisibility(View.INVISIBLE);
 		}
 
-		movieDisplay.setText(Html.fromHtml(movie.getDisplay()));
+		movieDisplay.setText(Html.fromHtml(movie.getDisplay(context)));
 
 		imageLoader.DisplayImage(movie.poster, moviePoster, 1);
 

@@ -1,34 +1,100 @@
 <resources>
 
-    <string name="app_name">CinéTime</string>
-    <string name="menu_settings">Paramètres</string>
-    <string name="menu_share">Partager</string>
-    <string name="menu_play">Voir la bande annonce</string>
-    <string name="title_activity_theaters">Mes cinémas</string>
-    <string name="title_activity_movies">Séances</string>
-    <string name="title_activity_details">Détails</string>
-    <string name="ui_add_theater">Ajouter un cinéma</string>
-    <string name="ui_add_theater_title">Ajouter un cinéma aux favoris</string>
+    <string name="app_name">CineTime</string>
+    <string name="settings">Settings</string>
+    <string name="global_settings">Global settings</string>
+    <string name="change_country_title">Select Country</string>
+    <string name="change_country_mess">Search for theaters and showtimes will be performed in this country.</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_play">Watch Trailer</string>
+    <string name="title_activity_theaters">My theaters</string>
+    <string name="title_activity_theaters_geo">Theaters close to you</string>
+    <string name="title_activity_theaters_search">Search for: </string>
+    <string name="title_activity_movies">Showtimes</string>
+    <string name="title_activity_details">Details</string>
+    <string name="ui_add_theater">Add a theater</string>
+    <string name="ui_add_theater_title">Add theater to your favorites</string>
     
-    <string name="content_description_rating">Note</string>
+    <string name="content_description_rating">Rating</string>
     <string name="content_description_poster">Movie poster</string>
     
-    <string name="location_dialog_mess">Pour vous localiser veuillez activer la localisation via Réseau mobile et Wifi</string>
-    <string name="location_dialog_ok">Ouvrir les paramètres</string>
-    <string name="location_dialog_cancel">Annuler</string>
+    <string name="location_dialog_mess">To enable localised search please enable network and wifi localisation</string>
+    <string name="location_dialog_ok">Open phone settings</string>
+    <string name="location_dialog_cancel">Cancel</string>
     
-    <string name="content_title_rating">Notes</string>
-    <string name="content_rating_press">Presse :</string>
-    <string name="content_rating_user">Utilisateurs :</string>
-    <string name="content_title_display">Horaires</string>
+    <string name="content_title_rating">Ratings</string>
+    <string name="content_rating_press">Press: </string>
+    <string name="content_rating_user">Users: </string>
+    <string name="content_title_display">Time slots</string>
     <string name="content_title_synopsis">Synopsis</string>
-    <string name="content_empty">Sélectionnez un film pour plus de détails.</string>
+    <string name="content_empty">Select a movie and get more informations</string>
     
-    <string name="stub_title">Bilbo le hobbit</string>
+    <string name="stub_title">The hobbit</string>
     <string name="stub_extra">2h44 VO 3D</string>
-    <string name="stub_display">Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10\nJeu 3 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10</string>
-    <string name="stub_cast">Par Peter Jackson, avec Ian McKellen, Martin Freeman, Richard Armitage, Ken Stott, Graham McTavish</string>
+    <string name="stub_display">Thr 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10\nTue 3 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10</string>
+    <string name="stub_cast">By Peter Jackson, with Ian McKellen, Martin Freeman, Richard Armitage, Ken Stott, Graham McTavish</string>
     <string name="stub_rating">3.2</string>
-    <string name="stub_certificate">Déconseillé au moins de 10 ans.</string>
-    <string name="stub_synopsis">Les aventures de Bilbon Sacquet, entraîné dans une quête héroïque pour reprendre le Royaume perdu des nains d’Erebor, conquis longtemps auparavant par le dragon Smaug.</string>
+    <string name="stub_certificate">10 years and above</string>
+    <string name="stub_synopsis">Bilbo Baggins finds himself joining a company of thirteen dwarves, led by the legendary  warrior Thorin Oakenshield and wizard Gandalf the Grey, to reclaim the lost Dwarf Kingdom of Erebor, ...</string>
+
+    <string name="default_country">@string/uk</string>
+
+    <string name="fr">fr</string>
+    <string name="uk">uk</string>
+    <string name="de">de</string>
+    <string name="es">es</string>
+
+    <string name="country_fr">France</string>
+    <string name="country_uk">United Kingdom</string>
+    <string name="country_de">Germany</string>
+    <string name="country_es">Spain</string>
+
+    <string name="api_url_fr">api.allocine.fr</string>
+    <string name="images_url_fr">images.allocine.fr</string>
+
+    <string name="api_url_uk">api.screenrush.co.uk</string>
+    <string name="images_url_uk">images.screenrush.co.uk</string>
+
+    <string name="api_url_de">api.filmstarts.de</string>
+    <string name="images_url_de">bilder.filmstarts.de</string>
+
+    <string name="api_url_es">api.sensacine.com</string>
+    <string name="images_url_es">imagenes.sensacine.com</string>
+
+    <string name="no_showtimes">No Showtimes.</string>
+    <string name="search_theater">Search a theater</string>
+    <string name="hint_add_favorites">Add theaters to your favourites to see them at startup.</string>
+    <string name="theater_name">Theater name</string>
+    <string name="theater_distance">Theater Distance</string>
+    <string name="theater_location">Theater location</string>
+    <string name="share_movie">Share this movie</string>
+    <string name="trailer_unavailable">Woops ! The trailer seems unavailable.</string>
+    <string name="loading_trailer">Loading trailer&#8230;</string>
+
+    <string name="length">Length</string>
+    <string name="director">Director</string>
+    <string name="actors">Actors</string>
+    <string name="genre">Genre</string>
+    <string name="showtimes_on">Showtimes on</string>
+    <string name="showtimes">Showtimes</string>
+    <string name="loading_synopsis">Loading synopsis&#8230;</string>
+
+    <string name="loading_showtimes">Loading Showtimes&#8230;</string>
+
+    <string name="searching">Searching&#8230;</string>
+    <string name="no_results">No results for this search. You can change your country in the settings if you are not in the UK.</string>
+
+    <string name="next_week">Next week</string>
+    <string name="everyday">Everyday</string>
+
+    <string name="no_network">Impossible to retrieve data, please check your connexion or retry later</string>
+
+    <string name="added_to_favourites">Theater added to favourites</string>
+    <string name="deleted_from_favourites">Theater deleted from favourites</string>
+
+    <string name="install_maps">Install Google Maps to get the map view !</string>
+
+    <string name="watch_trailer_hd_title">Watch trailers in HD</string>
+    <string name="watch_trailer_hd_summary">Watch movie trailers in HD, use this feature if you have a fast connexion</string>
+    <string name="no_player">You need a video player on your device to watch trailers.</string>
 </resources>

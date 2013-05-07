@@ -1,0 +1,84 @@
+<resources>
+
+    <string name="app_name">CinéTime</string>
+    <string name="settings">Paramètres</string>
+    <string name="global_settings">Paramètres généraux</string>
+    <string name="change_country_title">Choix du pays</string>
+    <string name="change_country_mess">Les recherches de cinémas et de scéances seront effectuées dans ce pays</string>
+    <string name="menu_share">Partager</string>
+    <string name="menu_play">Voir la bande annonce</string>
+    <string name="title_activity_theaters">Mes cinémas</string>
+    <string name="title_activity_theaters_geo">Cinémas à proximité</string>
+    <string name="title_activity_theaters_search">Recherche : </string>
+    <string name="title_activity_movies">Séances</string>
+    <string name="title_activity_details">Détails</string>
+    <string name="ui_add_theater">Ajouter un cinéma</string>
+    <string name="ui_add_theater_title">Ajouter un cinéma aux favoris</string>
+    
+    <string name="content_description_rating">Note</string>
+    <string name="content_description_poster">Movie poster</string>
+    
+    <string name="location_dialog_mess">Pour vous localiser veuillez activer la localisation via Réseau mobile et Wifi</string>
+    <string name="location_dialog_ok">Ouvrir les paramètres</string>
+    <string name="location_dialog_cancel">Annuler</string>
+    
+    <string name="content_title_rating">Notes</string>
+    <string name="content_rating_press">Presse :</string>
+    <string name="content_rating_user">Utilisateurs :</string>
+    <string name="content_title_display">Horaires</string>
+    <string name="content_title_synopsis">Synopsis</string>
+    <string name="content_empty">Sélectionnez un film pour plus de détails.</string>
+    
+    <string name="stub_title">Bilbo le hobbit</string>
+    <string name="stub_extra">2h44 VO 3D</string>
+    <string name="stub_display">Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10\nJeu 3 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10</string>
+    <string name="stub_cast">Par Peter Jackson, avec Ian McKellen, Martin Freeman, Richard Armitage, Ken Stott, Graham McTavish</string>
+    <string name="stub_rating">3.2</string>
+    <string name="stub_certificate">Déconseillé au moins de 10 ans.</string>
+    <string name="stub_synopsis">Les aventures de Bilbon Sacquet, entraîné dans une quête héroïque pour reprendre le Royaume perdu des nains d’Erebor, conquis longtemps auparavant par le dragon Smaug.</string>
+
+    <string name="default_country">@string/fr</string>
+    <string name="country_fr">France</string>
+    <string name="country_uk">Royaume Uni</string>
+    <string name="country_de">Allemagne</string>
+    <string name="country_es">Espagne</string>
+
+    <string name="no_showtimes">Aucune séance.</string>
+    <string name="search_theater">Rechercher un cinéma</string>
+    <string name="hint_add_favorites">Ajoutez des cinémas aux favoris pour les voir apparaître dès le lancement de
+      l\'application.
+    </string>
+    <string name="theater_name">Nom du cinéma</string>
+    <string name="theater_distance">Distance au cinéma</string>
+    <string name="theater_location">Localisation du cinéma</string>
+    <string name="share_movie">Partager le film...</string>
+    <string name="trailer_unavailable">Woops ! La bande annonce ne semble pas disponible...</string>
+    <string name="loading_trailer">Chargement de la bande annonce...</string>
+
+    <string name="length">Durée</string>
+    <string name="director">Directeur</string>
+    <string name="actors">Acteurs</string>
+    <string name="genre">Genre</string>
+    <string name="showtimes_on">Séances du</string>
+    <string name="showtimes">Séances</string>
+    <string name="loading_synopsis">Chargement du synopsis...</string>
+
+    <string name="loading_showtimes">Chargement des séances en cours...</string>
+
+    <string name="searching">Recherche en cours...</string>
+    <string name="no_results">Aucun résultat pour cette recherche. Pensez à changer votre pays de recherche si vous n\'êtes pas en France</string>
+
+    <string name="next_week">Semaine prochaine</string>
+    <string name="everyday">TLJ</string>
+
+    <string name="no_network">Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.</string>
+
+    <string name="added_to_favourites">Cinéma ajouté aux favoris</string>
+    <string name="deleted_from_favourites">Cinéma retiré des favoris</string>
+
+    <string name="install_maps">Installez Google Maps pour afficher le plan !</string>
+
+    <string name="watch_trailer_hd_title">Regarder les bandes annonces en HD</string>
+    <string name="watch_trailer_hd_summary">Regarder les bandes annonces de films en HD, utilisez ce mode si vous avez un connexion rapide</string>
+    <string name="no_player">Vous devez avoir un lecteur vidéo pour afficher la bande-annonce de ce film.</string>
+</resources>

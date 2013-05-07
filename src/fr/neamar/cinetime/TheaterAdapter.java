@@ -1,8 +1,5 @@
 package fr.neamar.cinetime;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+
 import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
 
@@ -66,12 +67,12 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 				if (fav.isChecked()) {
 					DBHelper.insertFavorite(v.getContext(), theater.code, theater.title,
 							theater.location);
-					Toast.makeText(getContext(), "Cinéma ajouté aux favoris", Toast.LENGTH_SHORT)
-							.show();
+					Toast.makeText(getContext(), getContext().getString(R.string.added_to_favourites),
+                            Toast.LENGTH_SHORT).show();
 				} else {
 					DBHelper.removeFavorite(v.getContext(), theater.code);
-					Toast.makeText(getContext(), "Cinéma retiré des favoris", Toast.LENGTH_SHORT)
-							.show();
+					Toast.makeText(getContext(), getContext().getString(R.string.deleted_from_favourites),
+                            Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
