@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.backup.BackupManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -186,9 +187,17 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 							getString(R.string.trailer_unavailable),
 							Toast.LENGTH_SHORT).show();
 				} else {
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
-					startActivity(intent);
+					try {
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setDataAndType(Uri.parse(trailerUrl),
+								"video/mp4");
+						startActivity(intent);
+					} catch (ActivityNotFoundException e) {
+						Toast.makeText(
+								getActivity(),
+								"Vous devez avoir un lecteur vidéo pour afficher la bande-annonce de ce film.",
+								Toast.LENGTH_SHORT).show();
+					}
 				}
 			}
 		}
@@ -264,6 +273,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 			this.ctx = fragment.getActivity();
 			this.preferences = ctx.getSharedPreferences("synopsis",
 					Context.MODE_PRIVATE);
+			mCallbacks.setIsLoading(true);
 		}
 
 		@Override
@@ -294,6 +304,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 		@Override
 		protected void onPostExecute(Movie resultsList) {
+			mCallbacks.setIsLoading(false);
 			displayedMovie = resultsList;
 			updateUI();
 		}
