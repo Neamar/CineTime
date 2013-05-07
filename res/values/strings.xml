@@ -96,4 +96,5 @@
 
     <string name="watch_trailer_hd_title">Watch trailers in HD</string>
     <string name="watch_trailer_hd_summary">Watch movie trailers in HD, use this feature if you have a fast connexion</string>
+    <string name="no_player">You need a video player on your device to watch trailers.</string>
 </resources>

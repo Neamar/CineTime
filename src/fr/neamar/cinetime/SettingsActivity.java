@@ -17,7 +17,9 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        DBHelper.clearFavorite(this);
-        getSharedPreferences("synopsis", Context.MODE_PRIVATE).edit().clear().commit();
+        if(key.equalsIgnoreCase("country")){
+            DBHelper.clearFavorite(this);
+            getSharedPreferences("synopsis", Context.MODE_PRIVATE).edit().clear().commit();
+        }
     }
 }

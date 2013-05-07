@@ -80,4 +80,5 @@
 
     <string name="watch_trailer_hd_title">Regarder les bandes annonces en HD</string>
     <string name="watch_trailer_hd_summary">Regarder les bandes annonces de films en HD, utilisez ce mode si vous avez un connexion rapide</string>
+    <string name="no_player">Vous devez avoir un lecteur vidéo pour afficher la bande-annonce de ce film.</string>
 </resources>

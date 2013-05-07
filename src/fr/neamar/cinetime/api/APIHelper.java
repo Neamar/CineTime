@@ -311,16 +311,18 @@ public class APIHelper {
 	public String downloadTrailerUrl(Movie movie) {
 		if(movie.trailerCode.equals(""))
 			return null;
-		String codec = "mp4-lc";
-        if(PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("hd_trailer", false)){
-            codec = "mp4-hip";
-        }
-		String url = getBaseUrl("media") + "&mediafmt="+codec+"&code=" + movie.trailerCode + "&format=json";
+		String url = getBaseUrl("media") + "&mediafmt=mp4-hip&code=" + movie.trailerCode + "&format=json";
 		try {
 			String json = downloadUrl(url);
 			JSONObject jsonTrailer = new JSONObject(json).getJSONObject("media");
-			if(jsonTrailer.has("rendition"))
-				return jsonTrailer.getJSONArray("rendition").getJSONObject(0).getString("href");
+			if(jsonTrailer.has("rendition")){
+				JSONArray rendition = jsonTrailer.getJSONArray("rendition");
+                if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("hd_trailer", false)) {
+                    return rendition.getJSONObject(rendition.length()-1).getString("href");
+                }else {
+                    return rendition.getJSONObject(0).getString("href");
+                }
+            }
 			return null;
 		} catch (Exception e) {
 			e.printStackTrace();

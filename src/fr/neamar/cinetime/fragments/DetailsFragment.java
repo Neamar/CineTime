@@ -1,7 +1,5 @@
 package fr.neamar.cinetime.fragments;
 
-import java.util.ArrayList;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -21,11 +19,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TableRow;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
+
+import java.util.ArrayList;
+
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
@@ -195,7 +192,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 					} catch (ActivityNotFoundException e) {
 						Toast.makeText(
 								getActivity(),
-								"Vous devez avoir un lecteur vidéo pour afficher la bande-annonce de ce film.",
+								getString(R.string.no_player),
 								Toast.LENGTH_SHORT).show();
 					}
 				}
