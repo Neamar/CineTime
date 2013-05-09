@@ -173,9 +173,6 @@ public class Movie {
 		String sharingText = "";
 		sharingText += this.title + " (" + getDuration() + ")\r\n";
 
-		if (!this.synopsis.equals(""))
-			sharingText += this.synopsis + "\r\n\r\n";
-
 		String htmlDisplayDetails = "<strong>" + theater + "</strong>" + this.getDisplayDetails()
 				+ " :<br>" + this.getDisplay();
 
