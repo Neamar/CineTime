@@ -20,6 +20,10 @@ public class TheatersSearchActivity extends TheatersActivity {
 		String query = getIntent().getStringExtra(SearchManager.QUERY);
 		setTitle("Recherche : " + query);
 		
+		if(hasRestoredFromNonConfigurationInstance) {
+			return;
+		}
+		
 		new LoadTheatersTask().execute(query);
 	}
 	

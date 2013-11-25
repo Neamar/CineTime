@@ -30,6 +30,10 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 
 		setTitle("Cinémas à proximité");
 
+		if(hasRestoredFromNonConfigurationInstance) {
+			return;
+		}
+		
 		final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		final boolean locationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 

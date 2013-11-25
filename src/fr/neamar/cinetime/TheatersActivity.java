@@ -23,6 +23,7 @@ import fr.neamar.cinetime.objects.Theater;
 
 public abstract class TheatersActivity extends ListActivity {
 	private ProgressDialog dialog;
+	protected Boolean hasRestoredFromNonConfigurationInstance = false;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -30,6 +31,12 @@ public abstract class TheatersActivity extends ListActivity {
 
 		setContentView(R.layout.activity_theaters);
 		setTitle(R.string.title_activity_theaters);
+		
+		ArrayList<Theater> theaters = (ArrayList<Theater>) getLastNonConfigurationInstance();
+		if(theaters != null) {
+			setListAdapter(new TheaterAdapter(this, R.layout.listitem_theater, theaters));
+			hasRestoredFromNonConfigurationInstance = true;
+		}
 	}
 
 	@Override
@@ -62,6 +69,11 @@ public abstract class TheatersActivity extends ListActivity {
 		intent.putExtra("code", theater.code);
 		intent.putExtra("theater", theater.title);
 		startActivity(intent);
+	}
+	
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return ((TheaterAdapter) getListAdapter()).theaters;
 	}
 
 	@Override
