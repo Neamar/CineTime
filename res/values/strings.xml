@@ -4,26 +4,25 @@
     <string name="menu_settings">Paramètres</string>
     <string name="menu_share">Partager</string>
     <string name="menu_play">Voir la bande annonce</string>
+    <string name="menu_map">Voir l\'emplacement du cinéma sur une carte</string>
+    <string name="search_hint">Rechercher un cinéma</string>
+    <string name="search_geo_hint">Rechercher un cinéma à proximité</string>
     <string name="title_activity_theaters">Mes cinémas</string>
     <string name="title_activity_movies">Séances</string>
     <string name="title_activity_details">Détails</string>
     <string name="ui_add_theater">Ajouter un cinéma</string>
     <string name="ui_add_theater_title">Ajouter un cinéma aux favoris</string>
-    
     <string name="content_description_rating">Note</string>
     <string name="content_description_poster">Movie poster</string>
-    
-    <string name="location_dialog_mess">Pour vous localiser veuillez activer la localisation via Réseau mobile et Wifi</string>
+    <string name="location_dialog_mess">Pour afficher les cinémas à proximité, veuillez activer la localisation via Réseau mobile et Wifi.</string>
     <string name="location_dialog_ok">Ouvrir les paramètres</string>
     <string name="location_dialog_cancel">Annuler</string>
-    
     <string name="content_title_rating">Notes</string>
     <string name="content_rating_press">Presse :</string>
     <string name="content_rating_user">Utilisateurs :</string>
     <string name="content_title_display">Horaires</string>
     <string name="content_title_synopsis">Synopsis</string>
     <string name="content_empty">Sélectionnez un film pour plus de détails.</string>
-    
     <string name="stub_title">Bilbo le hobbit</string>
     <string name="stub_extra">2h44 VO 3D</string>
     <string name="stub_display">Mer 2 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10\nJeu 3 : 11:00, 13:50, 15:55, 18:00, 20:05, 22:10</string>
@@ -31,4 +30,5 @@
     <string name="stub_rating">3.2</string>
     <string name="stub_certificate">Déconseillé au moins de 10 ans.</string>
     <string name="stub_synopsis">Les aventures de Bilbon Sacquet, entraîné dans une quête héroïque pour reprendre le Royaume perdu des nains d’Erebor, conquis longtemps auparavant par le dragon Smaug.</string>
+
 </resources>

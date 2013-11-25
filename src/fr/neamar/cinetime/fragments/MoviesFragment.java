@@ -18,12 +18,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import fr.neamar.cinetime.MovieAdapter;
+import fr.neamar.cinetime.MoviesActivity;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
+import fr.neamar.cinetime.objects.DisplayList;
 import fr.neamar.cinetime.objects.Movie;
+import fr.neamar.cinetime.objects.Theater;
 
 public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks {
 
@@ -37,6 +43,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	static private boolean dialogPending = false;
 	static private boolean toUpdate = false;
 	private ProgressDialog dialog;
+	private Theater theater = null;
 
 	public interface Callbacks {
 
@@ -58,6 +65,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		public void setFragment(Fragment fragment) {
 		}
 
+		@Override
 		public void setIsLoading(Boolean isLoading) {
 
 		}
@@ -118,6 +126,9 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			updateListView(movies);
 			toUpdate = false;
 		}
+		if (theater != null) {
+			((MoviesActivity) activity).setTheaterLocation(theater);
+		}
 	}
 
 	@Override
@@ -139,18 +150,17 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if (mActivatedPosition != ListView.INVALID_POSITION) {
+		if (mActivatedPosition != AdapterView.INVALID_POSITION) {
 			outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
 		}
 	}
 
 	public void setActivateOnItemClick(boolean activateOnItemClick) {
-		getListView().setChoiceMode(
-				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE : ListView.CHOICE_MODE_NONE);
+		getListView().setChoiceMode(activateOnItemClick ? AbsListView.CHOICE_MODE_SINGLE : AbsListView.CHOICE_MODE_NONE);
 	}
 
 	public void setActivatedPosition(int position) {
-		if (position == ListView.INVALID_POSITION) {
+		if (position == AdapterView.INVALID_POSITION) {
 			getListView().setItemChecked(mActivatedPosition, false);
 		} else {
 			getListView().setItemChecked(position, true);
@@ -159,11 +169,12 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		mActivatedPosition = position;
 	}
 
+	@Override
 	public void finishNoNetwork() {
 		mCallbacks.finishNoNetwork();
 	}
 
-	private class LoadMoviesTask extends AsyncTask<String, Void, JSONArray> {
+	private class LoadMoviesTask extends AsyncTask<String, Void, DisplayList> {
 		private MoviesFragment fragment;
 		private Context ctx;
 		private String theaterCode;
@@ -178,15 +189,13 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 		@Override
 		protected void onPreExecute() {
-			String cache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE)
-					.getString(theaterCode, "");
+			String cache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
 			if (!cache.equals("")) {
 				// Display cached values
 				try {
 					Log.i("cache-hit", "Getting display datas from cache for " + theaterCode);
 					mCallbacks.setIsLoading(true);
-					ArrayList<Movie> movies = (new APIHelper().formatMoviesList(
-							new JSONArray(cache), theaterCode));
+					ArrayList<Movie> movies = (new APIHelper().formatMoviesList(new JSONArray(cache), theaterCode));
 					fragment.updateListView(movies);
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -201,33 +210,34 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		}
 
 		@Override
-		protected JSONArray doInBackground(String... queries) {
+		protected DisplayList doInBackground(String... queries) {
 			if (theaterCode != queries[0]) {
 				throw new RuntimeException("Fragment misuse: theaterCode differs");
 			}
-			JSONArray jsonResults = (new APIHelper()).downloadMoviesList(theaterCode);
+			DisplayList displayList = (new APIHelper()).downloadMoviesList(theaterCode);
 
-			String oldCache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE)
-					.getString(theaterCode, "");
+			JSONArray jsonResults = displayList.jsonArray;
+
+			String oldCache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
 			String newCache = jsonResults.toString();
+
 			if (oldCache.equals(newCache)) {
 				Log.i("cache-hit", "Remote datas equals local datas; skipping UI update.");
 				remoteDataHasChangedFromLocalCache = false;
 			} else {
 				Log.i("cache-miss", "Remote data differs from local datas; updating UI");
 				// Store in cache for future use
-				SharedPreferences.Editor ed = ctx.getSharedPreferences("theater-cache",
-						Context.MODE_PRIVATE).edit();
+				SharedPreferences.Editor ed = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).edit();
 				ed.putString(theaterCode, jsonResults.toString());
 				ed.commit();
 				remoteDataHasChangedFromLocalCache = true;
 			}
 
-			return jsonResults;
+			return displayList;
 		}
 
 		@Override
-		protected void onPostExecute(JSONArray jsonResults) {
+		protected void onPostExecute(DisplayList displayList) {
 			mCallbacks.setIsLoading(false);
 			if (dialog != null) {
 				if (dialog.isShowing())
@@ -235,11 +245,20 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			}
 			dialogPending = false;
 
+			if (displayList.noDataConnection && getActivity() != null) {
+				TextView emptyText = (TextView) getActivity().findViewById(android.R.id.empty);
+				emptyText.setText("Aucune connexion Internet.");
+			}
+
 			// Update only if data changed
 			if (remoteDataHasChangedFromLocalCache) {
-				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(jsonResults,
-						theaterCode);
+				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(displayList.jsonArray, theaterCode);
 				fragment.updateListView(movies);
+			}
+
+			theater = displayList.theater;
+			if (getActivity() != null) {
+				((MoviesActivity) getActivity()).setTheaterLocation(theater);
 			}
 		}
 	}
@@ -249,9 +268,11 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	}
 
 	public void clear() {
-		movies.clear();
-		movies = null;
-		((MovieAdapter) getListAdapter()).clear();
+		if (movies != null) {
+			movies.clear();
+			movies = null;
+			((MovieAdapter) getListAdapter()).clear();
+		}
 	}
 
 	@Override

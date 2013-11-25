@@ -42,8 +42,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		View v = convertView;
 
 		if (v == null) {
-			LayoutInflater vi = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = vi.inflate(R.layout.listitem_movie, null);
 		}
 
@@ -60,8 +59,6 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		String description = movie.getDuration();
 		description += movie.getDisplayDetails();
 
-		movieExtra.setText(Html.fromHtml(description));
-
 		int rating = movie.getRating();
 		if (rating > 0) {
 			movieRating.setVisibility(View.VISIBLE);
@@ -70,14 +67,22 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 			movieRating.setVisibility(View.INVISIBLE);
 		}
 
-		movieDisplay.setText(Html.fromHtml(movie.getDisplay()));
+		if (movie.displays.size() == 1) {
+			// Optimize layout when only one display available
+			description += movie.displays.get(0).getDisplayDetails();
+			movieDisplay.setText(Html.fromHtml(movie.displays.get(0).getDisplay()));
+		} else {
+			movieDisplay.setText(Html.fromHtml(movie.getDisplays()));
+		}
 
+		movieExtra.setText(Html.fromHtml(description));
 		imageLoader.DisplayImage(movie.poster, moviePoster, 1);
 
 		return v;
 	}
-	
-	public void clear(){
+
+	@Override
+	public void clear() {
 		movies.clear();
 		notifyDataSetChanged();
 	}

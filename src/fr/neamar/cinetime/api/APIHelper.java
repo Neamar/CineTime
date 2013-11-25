@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.apache.http.HttpResponse;
@@ -17,7 +19,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.util.Log;
+import fr.neamar.cinetime.objects.Display;
+import fr.neamar.cinetime.objects.DisplayList;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
@@ -53,17 +56,14 @@ public class APIHelper {
 		HttpResponse httpResponse = defaultClient.execute(httpGetRequest);
 
 		// Grab the response
-		BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity()
-				.getContent(), "UTF-8"));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), "UTF-8"));
 		return reader.readLine();
 	}
 
-	protected JSONArray downloadTheatersList(String query) throws ClientProtocolException,
-			IOException {
+	protected JSONArray downloadTheatersList(String query) throws ClientProtocolException, IOException {
 		String url;
 		try {
-			url = getBaseUrl("search") + "&filter=theater&q=" + URLEncoder.encode(query, "UTF-8")
-					+ "&count=25&format=json";
+			url = getBaseUrl("search") + "&filter=theater&q=" + URLEncoder.encode(query, "UTF-8") + "&count=25&format=json";
 		} catch (UnsupportedEncodingException e1) {
 			url = getBaseUrl("search") + "&filter=theater&q=" + query + "&count=25&format=json";
 		}
@@ -87,15 +87,12 @@ public class APIHelper {
 		}
 	}
 
-	protected JSONArray downloadTheatersListGeo(String lat, String lon)
-			throws ClientProtocolException, IOException {
+	protected JSONArray downloadTheatersListGeo(String lat, String lon) throws ClientProtocolException, IOException {
 		String url;
 		try {
-			url = getBaseUrl("theaterlist") + "&lat=" + URLEncoder.encode(lat, "UTF-8") + "&long="
-					+ URLEncoder.encode(lon, "UTF-8") + "&radius=50" + "&count=25&format=json";
+			url = getBaseUrl("theaterlist") + "&lat=" + URLEncoder.encode(lat, "UTF-8") + "&long=" + URLEncoder.encode(lon, "UTF-8") + "&radius=50" + "&count=25&format=json";
 		} catch (UnsupportedEncodingException e1) {
-			url = getBaseUrl("theaterlist") + "&lat=" + lat + "&long=" + lon + "&radius=25"
-					+ "&count=25&format=json";
+			url = getBaseUrl("theaterlist") + "&lat=" + lat + "&long=" + lon + "&radius=25" + "&count=25&format=json";
 		}
 
 		try {
@@ -117,31 +114,42 @@ public class APIHelper {
 		}
 	}
 
-	public JSONArray downloadMoviesList(String theaterCode) {
+	public DisplayList downloadMoviesList(String theaterCode) {
+		DisplayList displayList = new DisplayList();
+
 		String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
 
+		String json;
 		try {
-			String json = downloadUrl(url);
+			json = downloadUrl(url);
+		} catch (Exception e) {
+			displayList.noDataConnection = true;
+			return displayList;
+		}
 
+		try {
 			// Instantiate a JSON object from the request response
 			JSONObject jsonObject = new JSONObject(json);
-
 			JSONObject feed = jsonObject.getJSONObject("feed");
+			JSONObject datas = feed.getJSONArray("theaterShowtimes").getJSONObject(0);
 
 			if (feed.getInt("totalResults") > 0)
-				return feed.getJSONArray("theaterShowtimes").getJSONObject(0)
-						.getJSONArray("movieShowtimes");
-			else
-				return new JSONArray();
+				displayList.jsonArray = datas.getJSONArray("movieShowtimes");
 
-		} catch (Exception e) {
-			// throw new RuntimeException("Unable to download movies list.");
-			return new JSONArray();
+			JSONObject jsonTheater = datas.getJSONObject("place").getJSONObject("theater");
+
+			displayList.theater.code = jsonTheater.getString("code");
+			displayList.theater.title = jsonTheater.getString("name");
+			displayList.theater.location = jsonTheater.getString("address");
+			displayList.theater.zipCode = jsonTheater.getString("postalCode");
+		} catch (JSONException e) {
+			// Keep our default empty array for displayList.jsonArray
 		}
+
+		return displayList;
 	}
 
-	public ArrayList<Theater> findTheaters(String query) throws ClientProtocolException,
-			IOException {
+	public ArrayList<Theater> findTheaters(String query) throws ClientProtocolException, IOException {
 
 		ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
@@ -166,8 +174,7 @@ public class APIHelper {
 		return resultsList;
 	}
 
-	public ArrayList<Theater> findTheatersGeo(String lat, String lon)
-			throws ClientProtocolException, IOException {
+	public ArrayList<Theater> findTheatersGeo(String lat, String lon) throws ClientProtocolException, IOException {
 
 		ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
@@ -211,7 +218,7 @@ public class APIHelper {
 	}
 
 	public ArrayList<Movie> formatMoviesList(JSONArray jsonResults, String theaterCode) {
-		ArrayList<Movie> resultsList = new ArrayList<Movie>();
+		HashMap<String, Movie> moviesHash = new HashMap<String, Movie>();
 
 		for (int i = 0; i < jsonResults.length(); i++) {
 			JSONObject jsonMovie, jsonShow;
@@ -220,7 +227,15 @@ public class APIHelper {
 				jsonMovie = jsonResults.getJSONObject(i);
 				jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject("movie");
 
-				Movie movie = new Movie();
+				String code = jsonShow.getString("code");
+
+				Movie movie;
+				if (moviesHash.containsKey(code)) {
+					movie = moviesHash.get(code);
+				} else {
+					movie = new Movie();
+				}
+
 				movie.code = jsonShow.getString("code");
 				movie.title = jsonShow.getString("title");
 				if (jsonShow.has("poster")) {
@@ -235,8 +250,7 @@ public class APIHelper {
 				}
 
 				if (jsonShow.has("movieCertificate")) {
-					JSONObject jsonCertificate = jsonShow.getJSONObject("movieCertificate")
-							.getJSONObject("certificate");
+					JSONObject jsonCertificate = jsonShow.getJSONObject("movieCertificate").getJSONObject("certificate");
 					movie.certificate = jsonCertificate.getInt("code");
 					movie.certificateString = jsonCertificate.optString("$", "");
 				}
@@ -249,34 +263,40 @@ public class APIHelper {
 
 				if (jsonShow.has("genre")) {
 					JSONArray jsonGenres = jsonShow.getJSONArray("genre");
-					movie.genres = jsonGenres.getJSONObject(0).getString("$")
-							.toLowerCase(Locale.FRANCE);
+					movie.genres = jsonGenres.getJSONObject(0).getString("$").toLowerCase(Locale.FRANCE);
 					for (int j = 1; j < jsonGenres.length(); j++) {
-						movie.genres += ", "
-								+ jsonGenres.getJSONObject(j).getString("$")
-										.toLowerCase(Locale.FRANCE);
+						movie.genres += ", " + jsonGenres.getJSONObject(j).getString("$").toLowerCase(Locale.FRANCE);
 					}
 				}
-				
+
 				if (jsonShow.has("trailer")) {
 					JSONObject jsonTrailer = jsonShow.getJSONObject("trailer");
 					movie.trailerCode = jsonTrailer.optString("code", "");
 				}
 
-				movie.display = jsonMovie.getString("display");
-				movie.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original")
-						.equals("true");
-				if (jsonMovie.has("screenFormat"))
-					movie.is3D = jsonMovie.getJSONObject("screenFormat").getString("$")
-							.equals("3D");
-				resultsList.add(movie);
+				Display display = new Display();
+				try {
+					display.display = jsonMovie.getString("display");
+				} catch (JSONException e) {
+					// This movie is not displayed this week, skip.
+					continue;
+				}
+
+				display.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original").equals("true");
+				if (jsonMovie.has("screenFormat")) {
+					display.is3D = jsonMovie.getJSONObject("screenFormat").getString("$").contains("3D");
+					display.isIMAX = jsonMovie.getJSONObject("screenFormat").getString("$").contains("IMAX");
+				}
+				movie.displays.add(display);
+				moviesHash.put(code, movie);
 
 			} catch (JSONException e) {
-				throw new RuntimeException("An error occured while loading datas for "
-						+ theaterCode + ": " + e.getMessage());
+				throw new RuntimeException("An error occured while loading datas for " + theaterCode + ": " + e.getMessage());
 			}
 		}
 
+		ArrayList<Movie> resultsList = new ArrayList<Movie>(moviesHash.values());
+		Collections.sort(resultsList, Collections.reverseOrder());
 		return resultsList;
 	}
 
@@ -285,16 +305,16 @@ public class APIHelper {
 		movie.synopsis = jsonMovie.optString("synopsisShort", "");
 		return movie;
 	}
-	
+
 	public String downloadTrailerUrl(Movie movie) {
-		if(movie.trailerCode.equals(""))
+		if (movie.trailerCode.equals(""))
 			return null;
-		
+
 		String url = getBaseUrl("media") + "&mediafmt=mp4-lc&code=" + movie.trailerCode + "&format=json";
 		try {
 			String json = downloadUrl(url);
 			JSONObject jsonTrailer = new JSONObject(json).getJSONObject("media");
-			if(jsonTrailer.has("rendition"))
+			if (jsonTrailer.has("rendition"))
 				return jsonTrailer.getJSONArray("rendition").getJSONObject(0).getString("href");
 			return null;
 		} catch (Exception e) {

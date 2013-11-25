@@ -49,8 +49,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 				long dist = Math.round(theater.distance * 1000);
 				theaterDistance.setText(String.valueOf(dist) + "m" + " - ");
 			} else {
-				theaterDistance.setText(String.valueOf(new DecimalFormat("#.#")
-						.format(theater.distance)) + "km" + " - ");
+				theaterDistance.setText(String.valueOf(new DecimalFormat("#.#").format(theater.distance)) + "km" + " - ");
 			}
 			theaterDistance.setVisibility(View.VISIBLE);
 		} else {
@@ -64,14 +63,11 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
 			@Override
 			public void onClick(View v) {
 				if (fav.isChecked()) {
-					DBHelper.insertFavorite(v.getContext(), theater.code, theater.title,
-							theater.location);
-					Toast.makeText(getContext(), "Cinéma ajouté aux favoris", Toast.LENGTH_SHORT)
-							.show();
+					DBHelper.insertFavorite(v.getContext(), theater.code, theater.title, theater.location);
+					Toast.makeText(getContext(), "Cinéma ajouté aux favoris", Toast.LENGTH_SHORT).show();
 				} else {
 					DBHelper.removeFavorite(v.getContext(), theater.code);
-					Toast.makeText(getContext(), "Cinéma retiré des favoris", Toast.LENGTH_SHORT)
-							.show();
+					Toast.makeText(getContext(), "Cinéma retiré des favoris", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});

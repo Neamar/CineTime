@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -7,18 +8,15 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:scrollbarStyle="outsideOverlay"
-        android:fadingEdge="horizontal" >
+        android:layout_height="wrap_content" >
     </ListView>
 
     <TextView
         android:id="@android:id/empty"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="Aucune séance." />
+        android:layout_gravity="center"
+        android:text="Ajoutez des cinémas aux favoris pour les voir apparaître dès le lancement de l'application." />
 
 </LinearLayout>

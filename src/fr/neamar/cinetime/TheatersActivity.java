@@ -1,75 +1,79 @@
 package fr.neamar.cinetime;
 
-import android.content.ActivityNotFoundException;
+import java.util.ArrayList;
+
+import android.annotation.SuppressLint;
+import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.widget.Toast;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
-import fr.neamar.cinetime.fragments.TheatersFragment;
+import fr.neamar.cinetime.objects.Theater;
 
-public class TheatersActivity extends FragmentActivity implements TheatersFragment.Callbacks {
-
-	TheatersFragment theatersFragment;
-	static String title = "";
-
+public abstract class TheatersActivity extends ListActivity {
+	private ProgressDialog dialog;
+	protected Boolean hasRestoredFromNonConfigurationInstance = false;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_theaters_list);
-		if (title.equalsIgnoreCase("")) {
-			title = getResources().getString(R.string.title_activity_theaters);
-		}
-		setTitle(title);
-	}
 
-	@Override
-	public void onBackPressed() {
-		if (theatersFragment.goBack()) {
-			super.onBackPressed();
+		setContentView(R.layout.activity_theaters);
+		setTitle(R.string.title_activity_theaters);
+		
+		ArrayList<Theater> theaters = (ArrayList<Theater>) getLastNonConfigurationInstance();
+		if(theaters != null) {
+			setListAdapter(new TheaterAdapter(this, R.layout.listitem_theater, theaters));
+			hasRestoredFromNonConfigurationInstance = true;
 		}
 	}
 
 	@Override
-	public void onItemSelected(int position, Fragment source) {
-		String code = theatersFragment.getTheaters().get(position).code;
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.activity_theaters, menu);
+		menu.findItem(R.id.menu_search_geo).setVisible(hasLocationSupport());
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_search:
+			onSearchRequested();
+			return true;
+		case R.id.menu_search_geo:
+			Intent intent = new Intent(this, TheatersSearchGeoActivity.class);
+			startActivity(intent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
-		String title = theatersFragment.getTheaters().get(position).title;
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Theater theater = ((TheaterAdapter) getListAdapter()).theaters.get(position);
 
 		Intent intent = new Intent(this, MoviesActivity.class);
-		intent.putExtra("code", code);
-		intent.putExtra("theater", title);
+		intent.putExtra("code", theater.code);
+		intent.putExtra("theater", theater.title);
 		startActivity(intent);
 	}
-
+	
 	@Override
-	public void setFragment(Fragment fragment) {
-		theatersFragment = (TheatersFragment) fragment;
-	}
-
-	@Override
-	public void onLongItemSelected(int position, Fragment source) {
-		String uri = "geo:0,0?q=" + theatersFragment.getTheaters().get(position).location;
-
-		try {
-			startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
-		} catch (ActivityNotFoundException e) {
-			Toast.makeText(this, "Installez Google Maps pour afficher le plan !",
-					Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	@Override
-	public void finishNoNetwork() {
-		Toast.makeText(
-				this,
-				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
-				Toast.LENGTH_SHORT).show();
-		finish();
+	public Object onRetainNonConfigurationInstance() {
+		return ((TheaterAdapter) getListAdapter()).theaters;
 	}
 
 	@Override
@@ -83,10 +87,50 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
 	}
+	
+	protected abstract ArrayList<Theater> retrieveResults(String... queries);
+	
 
-	@Override
-	public void updateTitle(String title) {
-		TheatersActivity.title = title;
-		setTitle(title);
+	@SuppressLint("InlinedApi")
+	protected boolean hasLocationSupport() {
+		PackageManager pm = getPackageManager();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+			return pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
+		}
+		return false;
+	}
+	
+	protected class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
+		public LoadTheatersTask() {
+			super();
+		}
+
+		@Override
+		protected void onPreExecute() {
+			if (dialog != null && dialog.isShowing()) {
+				dialog.dismiss();
+			}
+			dialog = new ProgressDialog(TheatersActivity.this);
+			dialog.setMessage("Recherche en cours...");
+			dialog.show();
+		}
+
+		@Override
+		protected ArrayList<Theater> doInBackground(String... queries) {
+			return retrieveResults(queries);
+		}
+		
+		@Override
+		protected void onPostExecute(ArrayList<Theater> theaters) {
+			if (dialog != null && dialog.isShowing()) {
+				dialog.dismiss();
+			}
+			
+			if(theaters != null) {
+				setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+			} else {
+				((TextView) findViewById(android.R.id.empty)).setText("Aucune connexion Internet :\\");
+			}
+		}
 	}
 }

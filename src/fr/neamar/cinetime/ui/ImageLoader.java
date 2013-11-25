@@ -2,15 +2,13 @@ package fr.neamar.cinetime.ui;
 
 // inspired by https://github.com/thest1/LazyList
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
-import android.support.v4.util.LruCache;
-import android.widget.ImageView;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
@@ -19,19 +17,25 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.support.v4.util.LruCache;
+import android.widget.ImageView;
 import fr.neamar.cinetime.PosterViewerActivity;
 import fr.neamar.cinetime.R;
 
 public class ImageLoader {
 
-    private static ImageLoader instance;
+	private static ImageLoader instance;
 
 	LruCache<String, Poster> posterCache;
 	final int stub_id = R.drawable.stub;
 	Context ctx;
 	FileCache fileCache;
-	private Map<ImageView, String> imageViews = Collections
-			.synchronizedMap(new WeakHashMap<ImageView, String>());
+	private Map<ImageView, String> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
 	ExecutorService executorService;
 	Handler handler = new Handler();// handler to display images in UI thread
 
@@ -41,6 +45,7 @@ public class ImageLoader {
 		executorService = Executors.newFixedThreadPool(5);
 		int cacheSize = (int) (Runtime.getRuntime().maxMemory() / 4);
 		posterCache = new LruCache<String, Poster>(cacheSize) {
+			@Override
 			protected int sizeOf(String key, Poster value) {
 				return value.getBytes();
 			}
@@ -48,13 +53,12 @@ public class ImageLoader {
 		Poster.generateStub(context, stub_id);
 	}
 
-    public static ImageLoader getInstance(Context ctx){
-        if(instance == null){
-            instance = new ImageLoader(ctx);
-        }
-        return instance;
-    }
-
+	public static ImageLoader getInstance(Context ctx) {
+		if (instance == null) {
+			instance = new ImageLoader(ctx);
+		}
+		return instance;
+	}
 
 	public void DisplayImage(String url, ImageView imageView, int levelRequested) {
 		if (url == null) {
@@ -211,8 +215,7 @@ public class ImageLoader {
 		public void run() {
 			if (imageViewReused(photoToLoad))
 				return;
-			photoToLoad.imageView.setImageBitmap(photoToLoad.poster
-					.getBmp(photoToLoad.levelRequested));
+			photoToLoad.imageView.setImageBitmap(photoToLoad.poster.getBmp(photoToLoad.levelRequested));
 			if (photoToLoad.poster.level == photoToLoad.levelRequested) {
 				Intent i = new Intent(PosterViewerActivity.POSTER_LOADED);
 				ctx.sendBroadcast(i);
