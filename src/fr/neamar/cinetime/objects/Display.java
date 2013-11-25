@@ -70,7 +70,7 @@ public class Display {
 
 			// Remove final <br>
 			optimisedDisplay = optimisedDisplay.substring(0,
-					optimisedDisplay.length() - 5);
+					optimisedDisplay.length() - 4);
 		}
 
 		return optimisedDisplay;

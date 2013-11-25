@@ -1,9 +1,9 @@
 package fr.neamar.cinetime.objects;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import android.text.Html;
+import android.util.Log;
 
 /**
  * Holds datas for one movie.
