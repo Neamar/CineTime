@@ -19,10 +19,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 import fr.neamar.cinetime.MovieAdapter;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
+import fr.neamar.cinetime.objects.DisplayList;
 import fr.neamar.cinetime.objects.Movie;
 
 public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks {
@@ -163,7 +166,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		mCallbacks.finishNoNetwork();
 	}
 
-	private class LoadMoviesTask extends AsyncTask<String, Void, JSONArray> {
+	private class LoadMoviesTask extends AsyncTask<String, Void, DisplayList> {
 		private MoviesFragment fragment;
 		private Context ctx;
 		private String theaterCode;
@@ -201,15 +204,18 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		}
 
 		@Override
-		protected JSONArray doInBackground(String... queries) {
+		protected DisplayList doInBackground(String... queries) {
 			if (theaterCode != queries[0]) {
 				throw new RuntimeException("Fragment misuse: theaterCode differs");
 			}
-			JSONArray jsonResults = (new APIHelper()).downloadMoviesList(theaterCode);
+			DisplayList displayList = (new APIHelper()).downloadMoviesList(theaterCode);
+			
+			JSONArray jsonResults = displayList.jsonArray;
 
 			String oldCache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE)
 					.getString(theaterCode, "");
 			String newCache = jsonResults.toString();
+			
 			if (oldCache.equals(newCache)) {
 				Log.i("cache-hit", "Remote datas equals local datas; skipping UI update.");
 				remoteDataHasChangedFromLocalCache = false;
@@ -223,21 +229,26 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 				remoteDataHasChangedFromLocalCache = true;
 			}
 
-			return jsonResults;
+			return displayList;
 		}
 
 		@Override
-		protected void onPostExecute(JSONArray jsonResults) {
+		protected void onPostExecute(DisplayList displayList) {
 			mCallbacks.setIsLoading(false);
 			if (dialog != null) {
 				if (dialog.isShowing())
 					dialog.dismiss();
 			}
 			dialogPending = false;
+			
+			if(displayList.noDataConnection && getActivity() != null) {
+				TextView emptyText = (TextView) getActivity().findViewById(android.R.id.empty);
+				emptyText.setText("Aucune connexion Internet.");
+			}
 
 			// Update only if data changed
 			if (remoteDataHasChangedFromLocalCache) {
-				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(jsonResults,
+				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(displayList.jsonArray,
 						theaterCode);
 				fragment.updateListView(movies);
 			}

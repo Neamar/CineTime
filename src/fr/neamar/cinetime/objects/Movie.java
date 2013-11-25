@@ -4,6 +4,11 @@ import java.util.Calendar;
 
 import android.text.Html;
 
+/**
+ * Holds datas for one movie.
+ * @author neamar
+ *
+ */
 public class Movie {
 	public String code;
 	public String trailerCode = "";
