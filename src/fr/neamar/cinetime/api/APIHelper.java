@@ -8,6 +8,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.apache.http.HttpResponse;
@@ -20,6 +21,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.util.Log;
+import fr.neamar.cinetime.objects.Display;
 import fr.neamar.cinetime.objects.DisplayList;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
@@ -236,7 +238,7 @@ public class APIHelper {
 
 	public ArrayList<Movie> formatMoviesList(JSONArray jsonResults,
 			String theaterCode) {
-		ArrayList<Movie> resultsList = new ArrayList<Movie>();
+		HashMap<String, Movie> moviesHash = new HashMap<String, Movie>();
 
 		for (int i = 0; i < jsonResults.length(); i++) {
 			JSONObject jsonMovie, jsonShow;
@@ -246,7 +248,15 @@ public class APIHelper {
 				jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject(
 						"movie");
 
-				Movie movie = new Movie();
+				String code = jsonShow.getString("code");
+				
+				Movie movie;
+				if(moviesHash.containsKey(code)) {
+					movie = moviesHash.get(code);
+				} else {
+					movie = new Movie();
+				}
+				
 				movie.code = jsonShow.getString("code");
 				movie.title = jsonShow.getString("title");
 				if (jsonShow.has("poster")) {
@@ -295,19 +305,21 @@ public class APIHelper {
 					movie.trailerCode = jsonTrailer.optString("code", "");
 				}
 
+				Display display = new Display();
 				try {
-					movie.display = jsonMovie.getString("display");
+					display.display = jsonMovie.getString("display");
 				} catch (JSONException e) {
 					// This movie is not displayed this week, skip.
 					continue;
 				}
 
-				movie.isOriginalLanguage = jsonMovie.getJSONObject("version")
+				display.isOriginalLanguage = jsonMovie.getJSONObject("version")
 						.getString("original").equals("true");
 				if (jsonMovie.has("screenFormat"))
-					movie.is3D = jsonMovie.getJSONObject("screenFormat")
+					display.is3D = jsonMovie.getJSONObject("screenFormat")
 							.getString("$").equals("3D");
-				resultsList.add(movie);
+				movie.displays.add(display);
+				moviesHash.put(code, movie);
 
 			} catch (JSONException e) {
 				throw new RuntimeException(
@@ -316,6 +328,7 @@ public class APIHelper {
 			}
 		}
 
+		ArrayList<Movie> resultsList = new ArrayList<Movie>(moviesHash.values());
 		Collections.sort(resultsList, Collections.reverseOrder());
 		return resultsList;
 	}
