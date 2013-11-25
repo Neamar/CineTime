@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import fr.neamar.cinetime.MovieAdapter;
 import fr.neamar.cinetime.MoviesActivity;
 import fr.neamar.cinetime.R;
@@ -286,9 +285,11 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	}
 
 	public void clear() {
-		movies.clear();
-		movies = null;
-		((MovieAdapter) getListAdapter()).clear();
+		if(movies != null) {
+			movies.clear();
+			movies = null;
+			((MovieAdapter) getListAdapter()).clear();
+		}
 	}
 
 	@Override
