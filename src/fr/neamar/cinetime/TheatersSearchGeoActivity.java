@@ -110,6 +110,6 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 			e.printStackTrace();
 		}
 
-		return new ArrayList<Theater>();
+		return null;
 	}
 }

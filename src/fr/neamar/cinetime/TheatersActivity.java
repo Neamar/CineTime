@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
@@ -113,7 +114,11 @@ public abstract class TheatersActivity extends ListActivity {
 				dialog.dismiss();
 			}
 			
-			setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+			if(theaters != null) {
+				setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+			} else {
+				((TextView) findViewById(android.R.id.empty)).setText("Aucune connexion Internet :\\");
+			}
 		}
 	}
 }

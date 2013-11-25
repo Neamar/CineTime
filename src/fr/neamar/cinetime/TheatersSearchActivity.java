@@ -15,7 +15,7 @@ public class TheatersSearchActivity extends TheatersActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {	
 		super.onCreate(savedInstanceState);
-		((TextView) findViewById(android.R.id.empty)).setText("Aucun résultat pour cette recherche");
+		((TextView) findViewById(android.R.id.empty)).setText("Aucun résultat pour cette recherche.");
 		
 		String query = getIntent().getStringExtra(SearchManager.QUERY);
 		setTitle("Recherche : " + query);
@@ -34,6 +34,6 @@ public class TheatersSearchActivity extends TheatersActivity {
 			e.printStackTrace();
 		}
 		
-		return new ArrayList<Theater>();
+		return null;
 	}
 }
