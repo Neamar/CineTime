@@ -6,10 +6,11 @@ import android.text.Html;
 
 /**
  * Holds datas for one movie.
+ * 
  * @author neamar
- *
+ * 
  */
-public class Movie {
+public class Movie implements Comparable<Movie> {
 	public String code;
 	public String trailerCode = "";
 
@@ -33,7 +34,8 @@ public class Movie {
 
 	public String getDuration() {
 		if (duration > 0)
-			return (duration / 3600) + "h" + String.format("%02d", (duration / 60) % 60);
+			return (duration / 3600) + "h"
+					+ String.format("%02d", (duration / 60) % 60);
 		else
 			return "NC";
 	}
@@ -61,7 +63,8 @@ public class Movie {
 		String optimisedDisplay = display;
 		// "Séances du"
 		optimisedDisplay = optimisedDisplay.replaceAll(
-				"Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-zéû]+ 20[0-9]{2} :", "$1 $2 :");
+				"Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-zéû]+ 20[0-9]{2} :",
+				"$1 $2 :");
 
 		// "(film à ..)"
 		optimisedDisplay = optimisedDisplay.replaceAll(" \\([^\\)]+\\)", "");
@@ -80,11 +83,14 @@ public class Movie {
 			}
 		}
 
-		String today = Integer.toString((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
+		String today = Integer.toString((Calendar.getInstance()
+				.get(Calendar.DAY_OF_MONTH)));
 
 		if (isSimilar && days.length == 7) {
 			if (!optimisedDisplay.contains(" " + today + " :")) {
-				optimisedDisplay = lowlightHour("Semaine prochaine<br>TLJ : " + days[0]) + "";
+				optimisedDisplay = lowlightHour("Semaine prochaine<br>TLJ : "
+						+ days[0])
+						+ "";
 			} else {
 				optimisedDisplay = lowlightHour("TLJ : " + days[0]) + "";
 			}
@@ -108,7 +114,8 @@ public class Movie {
 			}
 
 			// Remove final <br>
-			optimisedDisplay = optimisedDisplay.substring(0, optimisedDisplay.length() - 5);
+			optimisedDisplay = optimisedDisplay.substring(0,
+					optimisedDisplay.length() - 5);
 		}
 
 		return optimisedDisplay;
@@ -131,7 +138,8 @@ public class Movie {
 			String[] parts = hours[j].split(":");
 			int hour = Integer.parseInt(parts[0]);
 			int minute = Integer.parseInt(parts[1]);
-			if (hour > current_hour || (hour == current_hour && minute > current_minute)) {
+			if (hour > current_hour
+					|| (hour == current_hour && minute > current_minute)) {
 				nextVisibleDisplay = hours[j];
 				break;
 			}
@@ -151,7 +159,8 @@ public class Movie {
 
 	public int getRating() {
 		if (!pressRating.equals("0") && !userRating.equals("0"))
-			return (int) ((Float.parseFloat(pressRating) * 10) + (Float.parseFloat(userRating) * 10)) / 2;
+			return (int) ((Float.parseFloat(pressRating) * 10) + (Float
+					.parseFloat(userRating) * 10)) / 2;
 		else if (pressRating.equals("0") && !userRating.equals("0"))
 			return getUserRating();
 		else if (!pressRating.equals("0") && userRating.equals("0"))
@@ -163,8 +172,8 @@ public class Movie {
 	public String getDisplayDetails() {
 		return (isOriginalLanguage ? " <i>VO</i>" : "")
 				+ (is3D ? " <strong>3D</strong>" : "")
-				+ (certificate != 0 ? " <font color=\"#8B0000\">" + getShortCertificate()
-						+ "</font>" : "");
+				+ (certificate != 0 ? " <font color=\"#8B0000\">"
+						+ getShortCertificate() + "</font>" : "");
 	}
 
 	/**
@@ -178,10 +187,14 @@ public class Movie {
 		String sharingText = "";
 		sharingText += this.title + " (" + getDuration() + ")\r\n";
 
-		String htmlDisplayDetails = "<strong>" + theater + "</strong>" + this.getDisplayDetails()
-				+ " :<br>" + this.getDisplay();
+		String htmlDisplayDetails = "<strong>" + theater + "</strong>"
+				+ this.getDisplayDetails() + " :<br>" + this.getDisplay();
 
 		sharingText += Html.fromHtml(htmlDisplayDetails).toString();
 		return sharingText;
+	}
+
+	public int compareTo(Movie movie) {
+		return this.getRating() - movie.getRating();
 	}
 }
