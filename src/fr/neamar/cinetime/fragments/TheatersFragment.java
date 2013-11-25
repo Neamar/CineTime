@@ -30,8 +30,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -65,8 +63,6 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 
 		public void onItemSelected(int position, Fragment source);
 
-		public void onLongItemSelected(int position, Fragment source);
-
 		public void setFragment(Fragment fragment);
 
 		public void finishNoNetwork();
@@ -84,10 +80,6 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 		}
 
 		@Override
-		public void onLongItemSelected(int position, Fragment source) {
-		}
-
-		@Override
 		public void finishNoNetwork() {
 			toFinish = true;
 		}
@@ -101,14 +93,6 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 	@Override
 	public void onResume() {
 		super.onResume();
-		getListView().setLongClickable(true);
-		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
-
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				mCallbacks.onLongItemSelected(position, TheatersFragment.this);
-				return true;
-			}
-		});
 		if (lat.equalsIgnoreCase("") || lon.equalsIgnoreCase("")) {
 			searchText.setText(query);
 			// Display favorites :
