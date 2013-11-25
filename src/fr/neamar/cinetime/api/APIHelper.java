@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -315,9 +314,12 @@ public class APIHelper {
 
 				display.isOriginalLanguage = jsonMovie.getJSONObject("version")
 						.getString("original").equals("true");
-				if (jsonMovie.has("screenFormat"))
+				if (jsonMovie.has("screenFormat")) {
 					display.is3D = jsonMovie.getJSONObject("screenFormat")
-							.getString("$").equals("3D");
+							.getString("$").contains("3D");
+					display.isIMAX = jsonMovie.getJSONObject("screenFormat")
+							.getString("$").contains("IMAX");
+				}
 				movie.displays.add(display);
 				moviesHash.put(code, movie);
 

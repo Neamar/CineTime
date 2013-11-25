@@ -6,10 +6,12 @@ public class Display {
 	public String display;
 	public Boolean isOriginalLanguage;
 	public Boolean is3D = false;
+	public Boolean isIMAX = false;
 	
 	public String getDisplayDetails() {
 		return (isOriginalLanguage ? " <i>VO</i>" : "")
-				+ (is3D ? " <strong>3D</strong>" : "");
+				+ (is3D ? " <strong>3D</strong>" : "")
+				+ (isIMAX ? " <strong>IMAX</strong>" : "");
 	}
 	
 	public String getDisplay() {
