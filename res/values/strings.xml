@@ -14,7 +14,7 @@
     <string name="ui_add_theater_title">Ajouter un cinéma aux favoris</string>
     <string name="content_description_rating">Note</string>
     <string name="content_description_poster">Movie poster</string>
-    <string name="location_dialog_mess">Pour vous localiser veuillez activer la localisation via Réseau mobile et Wifi</string>
+    <string name="location_dialog_mess">Pour afficher les cinémas à proximité, veuillez activer la localisation via Réseau mobile et Wifi.</string>
     <string name="location_dialog_ok">Ouvrir les paramètres</string>
     <string name="location_dialog_cancel">Annuler</string>
     <string name="content_title_rating">Notes</string>

@@ -9,7 +9,6 @@ import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.objects.Theater;
 import android.app.SearchManager;
 import android.os.Bundle;
-import android.view.Menu;
 import android.widget.TextView;
 
 public class TheatersSearchActivity extends TheatersActivity {

@@ -2,10 +2,13 @@ package fr.neamar.cinetime;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +20,7 @@ import com.google.analytics.tracking.android.EasyTracker;
 
 import fr.neamar.cinetime.objects.Theater;
 
-public class TheatersActivity extends ListActivity {
+public abstract class TheatersActivity extends ListActivity {
 	private ProgressDialog dialog;
 	
 	@Override
@@ -32,6 +35,7 @@ public class TheatersActivity extends ListActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.activity_theaters, menu);
+		menu.findItem(R.id.menu_search_geo).setVisible(hasLocationSupport());
 		return true;
 	}
 	
@@ -42,6 +46,8 @@ public class TheatersActivity extends ListActivity {
 			onSearchRequested();
 			return true;
 		case R.id.menu_search_geo:
+			Intent intent = new Intent(this, TheatersSearchGeoActivity.class);
+			startActivity(intent);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -69,9 +75,16 @@ public class TheatersActivity extends ListActivity {
 		EasyTracker.getInstance().activityStop(this);
 	}
 	
-	protected ArrayList<Theater> retrieveResults(String... queries) {
-		//TODO: abstract
-		return null;
+	protected abstract ArrayList<Theater> retrieveResults(String... queries);
+	
+
+	@SuppressLint("InlinedApi")
+	protected boolean hasLocationSupport() {
+		PackageManager pm = getPackageManager();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+			return pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
+		}
+		return false;
 	}
 	
 	protected class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
