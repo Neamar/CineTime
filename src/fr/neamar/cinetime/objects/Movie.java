@@ -3,7 +3,6 @@ package fr.neamar.cinetime.objects;
 import java.util.ArrayList;
 
 import android.text.Html;
-import android.util.Log;
 
 /**
  * Holds datas for one movie.
@@ -32,8 +31,7 @@ public class Movie implements Comparable<Movie> {
 
 	public String getDuration() {
 		if (duration > 0)
-			return (duration / 3600) + "h"
-					+ String.format("%02d", (duration / 60) % 60);
+			return (duration / 3600) + "h" + String.format("%02d", (duration / 60) % 60);
 		else
 			return "NC";
 	}
@@ -67,8 +65,7 @@ public class Movie implements Comparable<Movie> {
 
 	public int getRating() {
 		if (!pressRating.equals("0") && !userRating.equals("0"))
-			return (int) ((Float.parseFloat(pressRating) * 10) + (Float
-					.parseFloat(userRating) * 10)) / 2;
+			return (int) ((Float.parseFloat(pressRating) * 10) + (Float.parseFloat(userRating) * 10)) / 2;
 		else if (pressRating.equals("0") && !userRating.equals("0"))
 			return getUserRating();
 		else if (!pressRating.equals("0") && userRating.equals("0"))
@@ -97,8 +94,7 @@ public class Movie implements Comparable<Movie> {
 	}
 
 	public String getDisplayDetails() {
-		return (certificate != 0 ? " <font color=\"#8B0000\">"
-				+ getShortCertificate() + "</font>" : "");
+		return (certificate != 0 ? " <font color=\"#8B0000\">" + getShortCertificate() + "</font>" : "");
 	}
 
 	/**
@@ -112,13 +108,13 @@ public class Movie implements Comparable<Movie> {
 		String sharingText = "";
 		sharingText += this.title + " (" + getDuration() + ")\r\n";
 
-		String htmlDisplayDetails = "<strong>" + theater + "</strong>"
-				+ this.getDisplayDetails() + " :<br>" + this.getDisplays();
+		String htmlDisplayDetails = "<strong>" + theater + "</strong>" + this.getDisplayDetails() + " :<br>" + this.getDisplays();
 
 		sharingText += Html.fromHtml(htmlDisplayDetails).toString();
 		return sharingText;
 	}
 
+	@Override
 	public int compareTo(Movie movie) {
 		return this.getRating() - movie.getRating();
 	}

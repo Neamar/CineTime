@@ -51,10 +51,7 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 
 	@Override
 	public void finishNoNetwork() {
-		Toast.makeText(
-				this,
-				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
-				Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.", Toast.LENGTH_SHORT).show();
 		finish();
 	}
 

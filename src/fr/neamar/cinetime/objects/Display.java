@@ -7,19 +7,15 @@ public class Display {
 	public Boolean isOriginalLanguage;
 	public Boolean is3D = false;
 	public Boolean isIMAX = false;
-	
+
 	public String getDisplayDetails() {
-		return (isOriginalLanguage ? " <i>VO</i>" : "")
-				+ (is3D ? " <strong>3D</strong>" : "")
-				+ (isIMAX ? " <strong>IMAX</strong>" : "");
+		return (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
 	}
-	
+
 	public String getDisplay() {
 		String optimisedDisplay = display;
 		// "Séances du"
-		optimisedDisplay = optimisedDisplay.replaceAll(
-				"Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-zéû]+ 20[0-9]{2} :",
-				"$1 $2 :");
+		optimisedDisplay = optimisedDisplay.replaceAll("Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-zéû]+ 20[0-9]{2} :", "$1 $2 :");
 
 		// "(film à ..)"
 		optimisedDisplay = optimisedDisplay.replaceAll(" \\([^\\)]+\\)", "");
@@ -38,14 +34,11 @@ public class Display {
 			}
 		}
 
-		String today = Integer.toString((Calendar.getInstance()
-				.get(Calendar.DAY_OF_MONTH)));
+		String today = Integer.toString((Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
 
 		if (isSimilar && days.length == 7) {
 			if (!optimisedDisplay.contains(" " + today + " :")) {
-				optimisedDisplay = lowlightHour("Semaine prochaine<br>TLJ : "
-						+ days[0])
-						+ "";
+				optimisedDisplay = lowlightHour("Semaine prochaine<br>TLJ : " + days[0]) + "";
 			} else {
 				optimisedDisplay = lowlightHour("TLJ : " + days[0]) + "";
 			}
@@ -69,8 +62,7 @@ public class Display {
 			}
 
 			// Remove final <br>
-			optimisedDisplay = optimisedDisplay.substring(0,
-					optimisedDisplay.length() - 4);
+			optimisedDisplay = optimisedDisplay.substring(0, optimisedDisplay.length() - 4);
 		}
 
 		return optimisedDisplay;
@@ -93,14 +85,12 @@ public class Display {
 			String[] parts = hours[j].split(":");
 			int hour = Integer.parseInt(parts[0]);
 			int minute = Integer.parseInt(parts[1]);
-			if (hour > current_hour
-					|| (hour == current_hour && minute > current_minute)) {
+			if (hour > current_hour || (hour == current_hour && minute > current_minute)) {
 				nextVisibleDisplay = hours[j];
 				break;
 			}
 		}
 
-		return day.replaceAll("(.+ :)(.+)(" + nextVisibleDisplay + ")",
-				"<strong>$1</strong><font color=\"#9A9A9A\">$2</font>$3");
+		return day.replaceAll("(.+ :)(.+)(" + nextVisibleDisplay + ")", "<strong>$1</strong><font color=\"#9A9A9A\">$2</font>$3");
 	}
 }

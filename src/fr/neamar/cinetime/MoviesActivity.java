@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,8 +22,7 @@ import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 import fr.neamar.cinetime.objects.Theater;
 
-public class MoviesActivity extends FragmentActivity implements
-		MoviesFragment.Callbacks {
+public class MoviesActivity extends FragmentActivity implements MoviesFragment.Callbacks {
 
 	private boolean mTwoPane;
 	private MoviesFragment moviesFragment;
@@ -45,14 +43,9 @@ public class MoviesActivity extends FragmentActivity implements
 		setTitle(getIntent().getStringExtra("theater"));
 		if (mTwoPane) {
 			if (detailsFragment == null) {
-				getSupportFragmentManager()
-						.beginTransaction()
-						.replace(R.id.file_detail_container,
-								new DetailsEmptyFragment()).commit();
+				getSupportFragmentManager().beginTransaction().replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 			} else {
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.file_detail_container, detailsFragment)
-						.commit();
+				getSupportFragmentManager().beginTransaction().replace(R.id.file_detail_container, detailsFragment).commit();
 			}
 		}
 		// Title in action bar brings back one level
@@ -81,12 +74,12 @@ public class MoviesActivity extends FragmentActivity implements
 			}
 		} else {
 			inflater.inflate(R.menu.activity_movies, menu);
-			if(!theaterLocation.equals("")) {
+			if (!theaterLocation.equals("")) {
 				menu.findItem(R.id.menu_map).setVisible(true);
 			}
 			return true;
 		}
-	
+
 		return true;
 	}
 
@@ -95,10 +88,7 @@ public class MoviesActivity extends FragmentActivity implements
 		super.onResume();
 		if (mTwoPane) {
 			if (detailsFragment == null) {
-				getSupportFragmentManager()
-						.beginTransaction()
-						.replace(R.id.file_detail_container,
-								new DetailsEmptyFragment()).commit();
+				getSupportFragmentManager().beginTransaction().replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 				desactivateDetailsMenu(true);
 			} else {
 				activateDetailsMenu(true);
@@ -126,8 +116,7 @@ public class MoviesActivity extends FragmentActivity implements
 			try {
 				startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
 			} catch (ActivityNotFoundException e) {
-				Toast.makeText(this, "Installez Google Maps pour afficher le plan !",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Installez Google Maps pour afficher le plan !", Toast.LENGTH_SHORT).show();
 			}
 		default:
 			return super.onOptionsItemSelected(item);
@@ -142,8 +131,7 @@ public class MoviesActivity extends FragmentActivity implements
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
 			activateDetailsMenu(true);
-			if (DetailsFragment.displayedMovie.trailerCode.isEmpty()
-					&& trailerItem != null) {
+			if (DetailsFragment.displayedMovie.trailerCode.isEmpty() && trailerItem != null) {
 				trailerItem.setEnabled(false);
 				trailerItem.setVisible(false);
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -152,7 +140,7 @@ public class MoviesActivity extends FragmentActivity implements
 			}
 		}
 	}
-	
+
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public void setTheaterLocation(Theater theater) {
 		theaterLocation = theater.title + ", " + theater.location + " " + theater.zipCode;
@@ -164,8 +152,7 @@ public class MoviesActivity extends FragmentActivity implements
 	@Override
 	public void onBackPressed() {
 		if (mTwoPane && detailsFragment != null) {
-			getSupportFragmentManager().beginTransaction()
-					.replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
+			getSupportFragmentManager().beginTransaction().replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
 			detailsFragment = null;
 			desactivateDetailsMenu(true);
 		} else {
@@ -183,9 +170,7 @@ public class MoviesActivity extends FragmentActivity implements
 				arguments.putString(DetailsFragment.ARG_THEATER_NAME, theater);
 				detailsFragment = new DetailsFragment();
 				detailsFragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.file_detail_container, detailsFragment)
-						.commit();
+				getSupportFragmentManager().beginTransaction().replace(R.id.file_detail_container, detailsFragment).commit();
 			} else {
 				Intent details = new Intent(this, DetailsActivity.class);
 				details.putExtra(DetailsFragment.ARG_ITEM_ID, position);
@@ -211,10 +196,7 @@ public class MoviesActivity extends FragmentActivity implements
 
 	@Override
 	public void finishNoNetwork() {
-		Toast.makeText(
-				this,
-				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
-				Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.", Toast.LENGTH_SHORT).show();
 		finish();
 	}
 

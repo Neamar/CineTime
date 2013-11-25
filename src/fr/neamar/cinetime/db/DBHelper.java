@@ -64,9 +64,7 @@ public class DBHelper {
 			// Cursor query (boolean distinct, String table, String[] columns,
 			// String selection, String[] selectionArgs, String groupBy, String
 			// having, String orderBy, String limit)
-			Cursor cursor = db.query(true, "favorites",
-					new String[] { "code", "title", "location" }, null, null, null, null,
-					"_id DESC", "20");
+			Cursor cursor = db.query(true, "favorites", new String[] { "code", "title", "location" }, null, null, null, null, "_id DESC", "20");
 
 			cursor.moveToFirst();
 			while (!cursor.isAfterLast()) {

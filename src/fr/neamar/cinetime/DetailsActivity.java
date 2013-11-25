@@ -17,8 +17,7 @@ import com.google.analytics.tracking.android.EasyTracker;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
 
-public class DetailsActivity extends FragmentActivity implements
-		MoviesFragment.Callbacks {
+public class DetailsActivity extends FragmentActivity implements MoviesFragment.Callbacks {
 
 	DetailsFragment detailsFragment;
 
@@ -37,13 +36,10 @@ public class DetailsActivity extends FragmentActivity implements
 			Bundle arguments = new Bundle();
 			// FileCodeMirrorFragment fragment = new FileCodeMirrorFragment();
 			DetailsFragment fragment = new DetailsFragment();
-			arguments.putInt(DetailsFragment.ARG_ITEM_ID, getIntent()
-					.getIntExtra(DetailsFragment.ARG_ITEM_ID, -1));
-			arguments.putString(DetailsFragment.ARG_THEATER_NAME, getIntent()
-					.getStringExtra(DetailsFragment.ARG_THEATER_NAME));
+			arguments.putInt(DetailsFragment.ARG_ITEM_ID, getIntent().getIntExtra(DetailsFragment.ARG_ITEM_ID, -1));
+			arguments.putString(DetailsFragment.ARG_THEATER_NAME, getIntent().getStringExtra(DetailsFragment.ARG_THEATER_NAME));
 			fragment.setArguments(arguments);
-			getSupportFragmentManager().beginTransaction()
-					.add(R.id.file_detail_container, fragment).commit();
+			getSupportFragmentManager().beginTransaction().add(R.id.file_detail_container, fragment).commit();
 		}
 	}
 
@@ -71,8 +67,6 @@ public class DetailsActivity extends FragmentActivity implements
 		}
 	}
 
-
-
 	@Override
 	public void onItemSelected(int position, Fragment source) {
 		if (source instanceof DetailsFragment) {
@@ -92,10 +86,7 @@ public class DetailsActivity extends FragmentActivity implements
 
 	@Override
 	public void finishNoNetwork() {
-		Toast.makeText(
-				this,
-				"Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.",
-				Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Impossible de télécharger les données. Merci de vérifier votre connexion ou de réessayer dans quelques minutes.", Toast.LENGTH_SHORT).show();
 		finish();
 	}
 

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.text.Html;
-import android.text.Spannable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,8 +25,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 	public ArrayList<Movie> movies = new ArrayList<Movie>();
 
 	@SuppressWarnings("unchecked")
-	public MovieAdapter(Context ac, int textViewResourceId,
-			ArrayList<Movie> movies) {
+	public MovieAdapter(Context ac, int textViewResourceId, ArrayList<Movie> movies) {
 		super(ac, textViewResourceId, movies);
 		this.context = ac;
 		this.movies = (ArrayList<Movie>) movies.clone();
@@ -44,23 +42,17 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		View v = convertView;
 
 		if (v == null) {
-			LayoutInflater vi = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = vi.inflate(R.layout.listitem_movie, null);
 		}
 
 		Movie movie = movies.get(position);
 
-		TextView movieTitle = (TextView) v
-				.findViewById(R.id.listitem_movie_title);
-		TextView movieExtra = (TextView) v
-				.findViewById(R.id.listitem_movie_extra);
-		ProgressBar movieRating = (ProgressBar) v
-				.findViewById(R.id.listitem_movie_rating);
-		TextView movieDisplay = (TextView) v
-				.findViewById(R.id.listitem_movie_display);
-		ImageView moviePoster = (ImageView) v
-				.findViewById(R.id.listitem_movie_poster);
+		TextView movieTitle = (TextView) v.findViewById(R.id.listitem_movie_title);
+		TextView movieExtra = (TextView) v.findViewById(R.id.listitem_movie_extra);
+		ProgressBar movieRating = (ProgressBar) v.findViewById(R.id.listitem_movie_rating);
+		TextView movieDisplay = (TextView) v.findViewById(R.id.listitem_movie_display);
+		ImageView moviePoster = (ImageView) v.findViewById(R.id.listitem_movie_poster);
 
 		movieTitle.setText(movie.title);
 
@@ -78,8 +70,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		if (movie.displays.size() == 1) {
 			// Optimize layout when only one display available
 			description += movie.displays.get(0).getDisplayDetails();
-			movieDisplay.setText(Html.fromHtml(movie.displays.get(0)
-					.getDisplay()));
+			movieDisplay.setText(Html.fromHtml(movie.displays.get(0).getDisplay()));
 		} else {
 			movieDisplay.setText(Html.fromHtml(movie.getDisplays()));
 		}
@@ -90,6 +81,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		return v;
 	}
 
+	@Override
 	public void clear() {
 		movies.clear();
 		notifyDataSetChanged();

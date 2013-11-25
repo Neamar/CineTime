@@ -30,6 +30,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -131,86 +133,67 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 			}
 		});
 		if (hasLocationSupport()) {
-			root.findViewById(R.id.theaters_search_geo_button).setOnClickListener(
-					new OnClickListener() {
+			root.findViewById(R.id.theaters_search_geo_button).setOnClickListener(new OnClickListener() {
 
-						@Override
-						public void onClick(View v) {
-							final LocationManager locationManager = (LocationManager) ctx
-									.getSystemService(Context.LOCATION_SERVICE);
-							final boolean locationEnable = locationManager
-									.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+				@Override
+				public void onClick(View v) {
+					final LocationManager locationManager = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+					final boolean locationEnable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-							if (!locationEnable) {
-								AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-								Resources res = getResources();
-								builder.setMessage(res.getString(R.string.location_dialog_mess))
-										.setCancelable(true)
-										.setPositiveButton(
-												res.getString(R.string.location_dialog_ok),
-												new DialogInterface.OnClickListener() {
-													public void onClick(DialogInterface dialog,
-															int id) {
-														dialog.cancel();
-														Intent settingsIntent = new Intent(
-																Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-														startActivity(settingsIntent);
-													}
-												})
-										.setNegativeButton(
-												res.getString(R.string.location_dialog_cancel),
-												new DialogInterface.OnClickListener() {
-													public void onClick(DialogInterface dialog,
-															int id) {
-														dialog.cancel();
-													}
-												});
-								builder.create().show();
-							} else {
-								query = "";
-								previousQuery = "";
-								searchText.setText("");
-								Location oldLocation = locationManager
-										.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-								Time t = new Time();
-								t.setToNow();
-								if (oldLocation == null
-										|| ((oldLocation.getTime() - t.toMillis(true)) > 300000)) {
-									LocationListener listener = new LocationListener() {
-
-										@Override
-										public void onLocationChanged(Location location) {
-											if (location.getAccuracy() < 1000) {
-												new LoadTheatersTask(ctx).execute(
-														String.valueOf(location.getLatitude()),
-														String.valueOf(location.getLongitude()));
-												locationManager.removeUpdates(this);
-											}
-										}
-
-										@Override
-										public void onProviderDisabled(String provider) {
-										}
-
-										@Override
-										public void onProviderEnabled(String provider) {
-										}
-
-										@Override
-										public void onStatusChanged(String provider, int status,
-												Bundle extras) {
-										}
-									};
-									locationManager.requestLocationUpdates(
-											LocationManager.NETWORK_PROVIDER, 1000, 10, listener);
-								} else {
-									new LoadTheatersTask(ctx).execute(
-											String.valueOf(oldLocation.getLatitude()),
-											String.valueOf(oldLocation.getLongitude()));
-								}
+					if (!locationEnable) {
+						AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+						Resources res = getResources();
+						builder.setMessage(res.getString(R.string.location_dialog_mess)).setCancelable(true).setPositiveButton(res.getString(R.string.location_dialog_ok), new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+								Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+								startActivity(settingsIntent);
 							}
+						}).setNegativeButton(res.getString(R.string.location_dialog_cancel), new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.create().show();
+					} else {
+						query = "";
+						previousQuery = "";
+						searchText.setText("");
+						Location oldLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+						Time t = new Time();
+						t.setToNow();
+						if (oldLocation == null || ((oldLocation.getTime() - t.toMillis(true)) > 300000)) {
+							LocationListener listener = new LocationListener() {
+
+								@Override
+								public void onLocationChanged(Location location) {
+									if (location.getAccuracy() < 1000) {
+										new LoadTheatersTask(ctx).execute(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+										locationManager.removeUpdates(this);
+									}
+								}
+
+								@Override
+								public void onProviderDisabled(String provider) {
+								}
+
+								@Override
+								public void onProviderEnabled(String provider) {
+								}
+
+								@Override
+								public void onStatusChanged(String provider, int status, Bundle extras) {
+								}
+							};
+							locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, listener);
+						} else {
+							new LoadTheatersTask(ctx).execute(String.valueOf(oldLocation.getLatitude()), String.valueOf(oldLocation.getLongitude()));
 						}
-					});
+					}
+				}
+			});
 		} else {
 			root.findViewById(R.id.theaters_search_geo_button).setVisibility(View.GONE);
 		}
@@ -219,8 +202,7 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 		searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-						Context.INPUT_METHOD_SERVICE);
+				InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
 				return searchButton.performClick();
 			}
@@ -288,18 +270,17 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if (mActivatedPosition != ListView.INVALID_POSITION) {
+		if (mActivatedPosition != AdapterView.INVALID_POSITION) {
 			outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
 		}
 	}
 
 	public void setActivateOnItemClick(boolean activateOnItemClick) {
-		getListView().setChoiceMode(
-				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE : ListView.CHOICE_MODE_NONE);
+		getListView().setChoiceMode(activateOnItemClick ? AbsListView.CHOICE_MODE_SINGLE : AbsListView.CHOICE_MODE_NONE);
 	}
 
 	public void setActivatedPosition(int position) {
-		if (position == ListView.INVALID_POSITION) {
+		if (position == AdapterView.INVALID_POSITION) {
 			getListView().setItemChecked(mActivatedPosition, false);
 		} else {
 			getListView().setItemChecked(position, true);
@@ -388,8 +369,7 @@ public class TheatersFragment extends ListFragment implements TaskTheaterCallbac
 
 			if (resultsList != null) {
 				if (!isLoadingFavorites) {
-					((TextView) getListView().getEmptyView())
-							.setText("Aucun résultat pour cette recherche.");
+					((TextView) getListView().getEmptyView()).setText("Aucun résultat pour cette recherche.");
 				}
 				TheatersFragment.this.onLoadOver(resultsList, isLoadingFavorites, isGeoSearch);
 			} else {

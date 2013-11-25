@@ -19,7 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.util.Log;
 import fr.neamar.cinetime.objects.Display;
 import fr.neamar.cinetime.objects.DisplayList;
 import fr.neamar.cinetime.objects.Movie;
@@ -36,8 +35,7 @@ public class APIHelper {
 	 * @return
 	 */
 	protected String getBaseUrl(String page) {
-		return "http://api.allocine.fr/rest/v3/" + page
-				+ "?partner=YW5kcm9pZC12M3M";
+		return "http://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
 	}
 
 	/**
@@ -48,8 +46,7 @@ public class APIHelper {
 	 * @throws IOException
 	 * @throws ClientProtocolException
 	 */
-	protected String downloadUrl(String url) throws ClientProtocolException,
-			IOException {
+	protected String downloadUrl(String url) throws ClientProtocolException, IOException {
 		// Create a new HTTP Client
 		DefaultHttpClient defaultClient = new DefaultHttpClient();
 		// Setup the get request
@@ -59,21 +56,16 @@ public class APIHelper {
 		HttpResponse httpResponse = defaultClient.execute(httpGetRequest);
 
 		// Grab the response
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				httpResponse.getEntity().getContent(), "UTF-8"));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), "UTF-8"));
 		return reader.readLine();
 	}
 
-	protected JSONArray downloadTheatersList(String query)
-			throws ClientProtocolException, IOException {
+	protected JSONArray downloadTheatersList(String query) throws ClientProtocolException, IOException {
 		String url;
 		try {
-			url = getBaseUrl("search") + "&filter=theater&q="
-					+ URLEncoder.encode(query, "UTF-8")
-					+ "&count=25&format=json";
+			url = getBaseUrl("search") + "&filter=theater&q=" + URLEncoder.encode(query, "UTF-8") + "&count=25&format=json";
 		} catch (UnsupportedEncodingException e1) {
-			url = getBaseUrl("search") + "&filter=theater&q=" + query
-					+ "&count=25&format=json";
+			url = getBaseUrl("search") + "&filter=theater&q=" + query + "&count=25&format=json";
 		}
 
 		try {
@@ -95,17 +87,12 @@ public class APIHelper {
 		}
 	}
 
-	protected JSONArray downloadTheatersListGeo(String lat, String lon)
-			throws ClientProtocolException, IOException {
+	protected JSONArray downloadTheatersListGeo(String lat, String lon) throws ClientProtocolException, IOException {
 		String url;
 		try {
-			url = getBaseUrl("theaterlist") + "&lat="
-					+ URLEncoder.encode(lat, "UTF-8") + "&long="
-					+ URLEncoder.encode(lon, "UTF-8") + "&radius=50"
-					+ "&count=25&format=json";
+			url = getBaseUrl("theaterlist") + "&lat=" + URLEncoder.encode(lat, "UTF-8") + "&long=" + URLEncoder.encode(lon, "UTF-8") + "&radius=50" + "&count=25&format=json";
 		} catch (UnsupportedEncodingException e1) {
-			url = getBaseUrl("theaterlist") + "&lat=" + lat + "&long=" + lon
-					+ "&radius=25" + "&count=25&format=json";
+			url = getBaseUrl("theaterlist") + "&lat=" + lat + "&long=" + lon + "&radius=25" + "&count=25&format=json";
 		}
 
 		try {
@@ -130,8 +117,7 @@ public class APIHelper {
 	public DisplayList downloadMoviesList(String theaterCode) {
 		DisplayList displayList = new DisplayList();
 
-		String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode
-				+ "&format=json";
+		String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
 
 		String json;
 		try {
@@ -145,14 +131,13 @@ public class APIHelper {
 			// Instantiate a JSON object from the request response
 			JSONObject jsonObject = new JSONObject(json);
 			JSONObject feed = jsonObject.getJSONObject("feed");
-			JSONObject datas = feed.getJSONArray("theaterShowtimes")
-					.getJSONObject(0);
-			
+			JSONObject datas = feed.getJSONArray("theaterShowtimes").getJSONObject(0);
+
 			if (feed.getInt("totalResults") > 0)
 				displayList.jsonArray = datas.getJSONArray("movieShowtimes");
-			
+
 			JSONObject jsonTheater = datas.getJSONObject("place").getJSONObject("theater");
-			
+
 			displayList.theater.code = jsonTheater.getString("code");
 			displayList.theater.title = jsonTheater.getString("name");
 			displayList.theater.location = jsonTheater.getString("address");
@@ -164,8 +149,7 @@ public class APIHelper {
 		return displayList;
 	}
 
-	public ArrayList<Theater> findTheaters(String query)
-			throws ClientProtocolException, IOException {
+	public ArrayList<Theater> findTheaters(String query) throws ClientProtocolException, IOException {
 
 		ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
@@ -190,8 +174,7 @@ public class APIHelper {
 		return resultsList;
 	}
 
-	public ArrayList<Theater> findTheatersGeo(String lat, String lon)
-			throws ClientProtocolException, IOException {
+	public ArrayList<Theater> findTheatersGeo(String lat, String lon) throws ClientProtocolException, IOException {
 
 		ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
@@ -218,8 +201,7 @@ public class APIHelper {
 	}
 
 	protected JSONObject downloadMovie(String movieCode) {
-		String url = getBaseUrl("movie") + "&code=" + movieCode
-				+ "&profile=small&format=json";
+		String url = getBaseUrl("movie") + "&code=" + movieCode + "&profile=small&format=json";
 
 		try {
 			String json = downloadUrl(url);
@@ -235,8 +217,7 @@ public class APIHelper {
 		}
 	}
 
-	public ArrayList<Movie> formatMoviesList(JSONArray jsonResults,
-			String theaterCode) {
+	public ArrayList<Movie> formatMoviesList(JSONArray jsonResults, String theaterCode) {
 		HashMap<String, Movie> moviesHash = new HashMap<String, Movie>();
 
 		for (int i = 0; i < jsonResults.length(); i++) {
@@ -244,58 +225,47 @@ public class APIHelper {
 
 			try {
 				jsonMovie = jsonResults.getJSONObject(i);
-				jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject(
-						"movie");
+				jsonShow = jsonMovie.getJSONObject("onShow").getJSONObject("movie");
 
 				String code = jsonShow.getString("code");
-				
+
 				Movie movie;
-				if(moviesHash.containsKey(code)) {
+				if (moviesHash.containsKey(code)) {
 					movie = moviesHash.get(code);
 				} else {
 					movie = new Movie();
 				}
-				
+
 				movie.code = jsonShow.getString("code");
 				movie.title = jsonShow.getString("title");
 				if (jsonShow.has("poster")) {
-					movie.poster = jsonShow.getJSONObject("poster").getString(
-							"path");
+					movie.poster = jsonShow.getJSONObject("poster").getString("path");
 				}
 				movie.duration = jsonShow.optInt("runtime");
 
 				if (jsonShow.has("statistics")) {
-					JSONObject jsonStatistics = jsonShow
-							.getJSONObject("statistics");
-					movie.pressRating = jsonStatistics.optString("pressRating",
-							"0");
-					movie.userRating = jsonStatistics.optString("userRating",
-							"0");
+					JSONObject jsonStatistics = jsonShow.getJSONObject("statistics");
+					movie.pressRating = jsonStatistics.optString("pressRating", "0");
+					movie.userRating = jsonStatistics.optString("userRating", "0");
 				}
 
 				if (jsonShow.has("movieCertificate")) {
-					JSONObject jsonCertificate = jsonShow.getJSONObject(
-							"movieCertificate").getJSONObject("certificate");
+					JSONObject jsonCertificate = jsonShow.getJSONObject("movieCertificate").getJSONObject("certificate");
 					movie.certificate = jsonCertificate.getInt("code");
-					movie.certificateString = jsonCertificate
-							.optString("$", "");
+					movie.certificateString = jsonCertificate.optString("$", "");
 				}
 
 				if (jsonShow.has("castingShort")) {
-					JSONObject jsonCasting = jsonShow
-							.getJSONObject("castingShort");
+					JSONObject jsonCasting = jsonShow.getJSONObject("castingShort");
 					movie.directors = jsonCasting.optString("directors", "");
 					movie.actors = jsonCasting.optString("actors", "");
 				}
 
 				if (jsonShow.has("genre")) {
 					JSONArray jsonGenres = jsonShow.getJSONArray("genre");
-					movie.genres = jsonGenres.getJSONObject(0).getString("$")
-							.toLowerCase(Locale.FRANCE);
+					movie.genres = jsonGenres.getJSONObject(0).getString("$").toLowerCase(Locale.FRANCE);
 					for (int j = 1; j < jsonGenres.length(); j++) {
-						movie.genres += ", "
-								+ jsonGenres.getJSONObject(j).getString("$")
-										.toLowerCase(Locale.FRANCE);
+						movie.genres += ", " + jsonGenres.getJSONObject(j).getString("$").toLowerCase(Locale.FRANCE);
 					}
 				}
 
@@ -312,21 +282,16 @@ public class APIHelper {
 					continue;
 				}
 
-				display.isOriginalLanguage = jsonMovie.getJSONObject("version")
-						.getString("original").equals("true");
+				display.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original").equals("true");
 				if (jsonMovie.has("screenFormat")) {
-					display.is3D = jsonMovie.getJSONObject("screenFormat")
-							.getString("$").contains("3D");
-					display.isIMAX = jsonMovie.getJSONObject("screenFormat")
-							.getString("$").contains("IMAX");
+					display.is3D = jsonMovie.getJSONObject("screenFormat").getString("$").contains("3D");
+					display.isIMAX = jsonMovie.getJSONObject("screenFormat").getString("$").contains("IMAX");
 				}
 				movie.displays.add(display);
 				moviesHash.put(code, movie);
 
 			} catch (JSONException e) {
-				throw new RuntimeException(
-						"An error occured while loading datas for "
-								+ theaterCode + ": " + e.getMessage());
+				throw new RuntimeException("An error occured while loading datas for " + theaterCode + ": " + e.getMessage());
 			}
 		}
 
@@ -345,15 +310,12 @@ public class APIHelper {
 		if (movie.trailerCode.equals(""))
 			return null;
 
-		String url = getBaseUrl("media") + "&mediafmt=mp4-lc&code="
-				+ movie.trailerCode + "&format=json";
+		String url = getBaseUrl("media") + "&mediafmt=mp4-lc&code=" + movie.trailerCode + "&format=json";
 		try {
 			String json = downloadUrl(url);
-			JSONObject jsonTrailer = new JSONObject(json)
-					.getJSONObject("media");
+			JSONObject jsonTrailer = new JSONObject(json).getJSONObject("media");
 			if (jsonTrailer.has("rendition"))
-				return jsonTrailer.getJSONArray("rendition").getJSONObject(0)
-						.getString("href");
+				return jsonTrailer.getJSONArray("rendition").getJSONObject(0).getString("href");
 			return null;
 		} catch (Exception e) {
 			e.printStackTrace();
