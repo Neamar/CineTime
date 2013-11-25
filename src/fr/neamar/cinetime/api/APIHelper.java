@@ -263,7 +263,13 @@ public class APIHelper {
 					movie.trailerCode = jsonTrailer.optString("code", "");
 				}
 
-				movie.display = jsonMovie.getString("display");
+				try {
+					movie.display = jsonMovie.getString("display");
+				} catch(JSONException e) {
+					// This movie is not displayed this week, skip.
+					continue;
+				}
+				
 				movie.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original")
 						.equals("true");
 				if (jsonMovie.has("screenFormat"))
