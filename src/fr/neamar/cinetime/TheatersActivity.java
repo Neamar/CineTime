@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
@@ -23,6 +25,14 @@ public class TheatersActivity extends FragmentActivity implements TheatersFragme
 			title = getResources().getString(R.string.title_activity_theaters);
 		}
 		setTitle(title);
+	}
+	
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.activit_theaters, menu);
+		return true;
 	}
 
 	@Override
