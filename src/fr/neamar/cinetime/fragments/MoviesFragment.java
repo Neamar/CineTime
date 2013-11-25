@@ -255,7 +255,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			}
 			
 			if(getActivity() != null) {
-				((MoviesActivity) getActivity()).theaterLocation = displayList.theater.title + ", " + displayList.theater.location + " " + displayList.theater.zipCode;
+				((MoviesActivity) getActivity()).setTheaterLocation(displayList.theater);
 			}
 		}
 	}

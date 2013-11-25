@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,6 +21,7 @@ import com.google.analytics.tracking.android.EasyTracker;
 import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.fragments.MoviesFragment;
+import fr.neamar.cinetime.objects.Theater;
 
 public class MoviesActivity extends FragmentActivity implements
 		MoviesFragment.Callbacks {
@@ -28,7 +30,7 @@ public class MoviesActivity extends FragmentActivity implements
 	private MoviesFragment moviesFragment;
 	private DetailsFragment detailsFragment;
 	private String theater;
-	public String theaterLocation;
+	private String theaterLocation = "";
 	private MenuItem shareItem;
 	private MenuItem trailerItem;
 
@@ -79,6 +81,9 @@ public class MoviesActivity extends FragmentActivity implements
 			}
 		} else {
 			inflater.inflate(R.menu.activity_movies, menu);
+			if(!theaterLocation.equals("")) {
+				menu.findItem(R.id.menu_map).setVisible(true);
+			}
 			return true;
 		}
 	
@@ -145,6 +150,14 @@ public class MoviesActivity extends FragmentActivity implements
 					invalidateOptionsMenu();
 				}
 			}
+		}
+	}
+	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	public void setTheaterLocation(Theater theater) {
+		theaterLocation = theater.title + ", " + theater.location + " " + theater.zipCode;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && !mTwoPane) {
+			invalidateOptionsMenu();
 		}
 	}
 
