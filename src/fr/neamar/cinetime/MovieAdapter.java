@@ -76,27 +76,12 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		}
 
 		if (movie.displays.size() == 1) {
+			// Optimize layout when only one display available
 			description += movie.displays.get(0).getDisplayDetails();
 			movieDisplay.setText(Html.fromHtml(movie.displays.get(0)
 					.getDisplay()));
 		} else {
-			movieDisplay.setText("");
-			for (int i = 0; i < movie.displays.size(); i++) {
-				String displayDetails = movie.displays.get(i)
-						.getDisplayDetails();
-				if (displayDetails.equals("")) {
-					displayDetails = "VF";
-				}
-				displayDetails = "<u>" + displayDetails + "</u> :<br>";
-
-				movieDisplay.append(Html.fromHtml(displayDetails));
-				movieDisplay.append(Html.fromHtml(movie.displays.get(i)
-						.getDisplay()));
-
-				if (i < movie.displays.size() - 1) {
-					movieDisplay.append(Html.fromHtml("<br><br>"));
-				}
-			}
+			movieDisplay.setText(Html.fromHtml(movie.getDisplays()));
 		}
 
 		movieExtra.setText(Html.fromHtml(description));

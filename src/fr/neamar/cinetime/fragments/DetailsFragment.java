@@ -23,7 +23,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import fr.neamar.cinetime.R;
@@ -217,9 +216,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 					+ displayedMovie.actors + "<br />";
 		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
 		extra.setText(Html.fromHtml(extraString));
-		display.setText(Html.fromHtml("<strong>" + theater + "</strong>"
-				+ displayedMovie.getDisplayDetails() + "<br>"
-				+ displayedMovie.getDisplay()));
+		display.setText(Html.fromHtml("<strong>" + theater + "</strong><br>"
+				+ displayedMovie.getDisplays()));
 		if (displayedMovie.certificateString.equals(""))
 			certificate.setVisibility(View.GONE);
 		else
