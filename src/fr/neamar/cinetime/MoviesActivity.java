@@ -114,6 +114,7 @@ public class MoviesActivity extends FragmentActivity implements
 		}
 	}
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public void setFragment(Fragment fragment) {
 		if (fragment instanceof MoviesFragment) {
