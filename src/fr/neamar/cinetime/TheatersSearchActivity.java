@@ -9,11 +9,12 @@ import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.objects.Theater;
 import android.app.SearchManager;
 import android.os.Bundle;
+import android.view.Menu;
 import android.widget.TextView;
 
 public class TheatersSearchActivity extends TheatersActivity {
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {	
 		super.onCreate(savedInstanceState);
 		((TextView) findViewById(android.R.id.empty)).setText("Aucun résultat pour cette recherche");
 		

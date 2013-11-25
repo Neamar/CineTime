@@ -4,12 +4,14 @@ import java.util.ArrayList;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
@@ -29,7 +31,7 @@ public class TheatersActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.activit_theaters, menu);
+		inflater.inflate(R.menu.activity_theaters, menu);
 		return true;
 	}
 	
@@ -44,6 +46,15 @@ public class TheatersActivity extends ListActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Theater theater = ((TheaterAdapter) getListAdapter()).theaters.get(position);
+
+		Intent intent = new Intent(this, MoviesActivity.class);
+		intent.putExtra("code", theater.code);
+		intent.putExtra("theater", theater.title);
+		startActivity(intent);
 	}
 
 	@Override
@@ -82,7 +93,7 @@ public class TheatersActivity extends ListActivity {
 		protected ArrayList<Theater> doInBackground(String... queries) {
 			return retrieveResults(queries);
 		}
-
+		
 		@Override
 		protected void onPostExecute(ArrayList<Theater> theaters) {
 			if (dialog != null && dialog.isShowing()) {
