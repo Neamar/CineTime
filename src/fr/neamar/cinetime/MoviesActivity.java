@@ -9,7 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
+import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -99,11 +99,10 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Click on title in actionbar
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			moviesFragment.clear();
-			finish();
+			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.menu_share:
 			detailsFragment.shareMovie();
