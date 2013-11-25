@@ -142,11 +142,18 @@ public class APIHelper {
 			// Instantiate a JSON object from the request response
 			JSONObject jsonObject = new JSONObject(json);
 			JSONObject feed = jsonObject.getJSONObject("feed");
-
+			JSONObject datas = feed.getJSONArray("theaterShowtimes")
+					.getJSONObject(0);
+			
 			if (feed.getInt("totalResults") > 0)
-				displayList.jsonArray = feed.getJSONArray("theaterShowtimes")
-						.getJSONObject(0).getJSONArray("movieShowtimes");
-
+				displayList.jsonArray = datas.getJSONArray("movieShowtimes");
+			
+			JSONObject jsonTheater = datas.getJSONObject("place").getJSONObject("theater");
+			
+			displayList.theater.code = jsonTheater.getString("code");
+			displayList.theater.title = jsonTheater.getString("name");
+			displayList.theater.location = jsonTheater.getString("address");
+			displayList.theater.zipCode = jsonTheater.getString("postalCode");
 		} catch (JSONException e) {
 			// Keep our default empty array for displayList.jsonArray
 		}
