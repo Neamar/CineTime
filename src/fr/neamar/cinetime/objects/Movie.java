@@ -78,6 +78,7 @@ public class Movie implements Comparable<Movie> {
 	}
 	
 	public String getDisplay() {
+		//TODO: remove
 		return displays.get(0).getDisplay();
 	}
 

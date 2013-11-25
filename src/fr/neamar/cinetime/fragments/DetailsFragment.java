@@ -50,10 +50,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	private TextView synopsis;
 	private ProgressBar pressRating;
 	private TextView pressRatingText;
-	private TableRow pressRatingRow;
 	private ProgressBar userRating;
 	private TextView userRatingText;
-	private TableRow userRatingRow;
 	public ImageLoader imageLoader;
 	protected String theater = "";
 	private LoadMovieTask mTask;
@@ -113,13 +111,9 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		pressRating = (ProgressBar) view.findViewById(R.id.details_pressrating);
 		pressRatingText = (TextView) view
 				.findViewById(R.id.details_pressrating_text);
-		pressRatingRow = (TableRow) view
-				.findViewById(R.id.details_pressrating_row);
 		userRating = (ProgressBar) view.findViewById(R.id.details_userrating);
 		userRatingText = (TextView) view
 				.findViewById(R.id.details_userrating_text);
-		userRatingRow = (TableRow) view
-				.findViewById(R.id.details_userrating_row);
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
 		if (displayedMovie != null) {
