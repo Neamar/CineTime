@@ -16,7 +16,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.format.Time;
-import android.util.Log;
 import android.view.Menu;
 import android.widget.TextView;
 import fr.neamar.cinetime.api.APIHelper;
@@ -30,10 +29,10 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 
 		setTitle("Cinémas à proximité");
 
-		if(hasRestoredFromNonConfigurationInstance) {
+		if (hasRestoredFromNonConfigurationInstance) {
 			return;
 		}
-		
+
 		final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		final boolean locationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 

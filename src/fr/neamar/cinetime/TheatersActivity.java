@@ -24,16 +24,16 @@ import fr.neamar.cinetime.objects.Theater;
 public abstract class TheatersActivity extends ListActivity {
 	private ProgressDialog dialog;
 	protected Boolean hasRestoredFromNonConfigurationInstance = false;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_theaters);
 		setTitle(R.string.title_activity_theaters);
-		
+
 		ArrayList<Theater> theaters = (ArrayList<Theater>) getLastNonConfigurationInstance();
-		if(theaters != null) {
+		if (theaters != null) {
 			setListAdapter(new TheaterAdapter(this, R.layout.listitem_theater, theaters));
 			hasRestoredFromNonConfigurationInstance = true;
 		}
@@ -46,7 +46,7 @@ public abstract class TheatersActivity extends ListActivity {
 		menu.findItem(R.id.menu_search_geo).setVisible(hasLocationSupport());
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -70,7 +70,7 @@ public abstract class TheatersActivity extends ListActivity {
 		intent.putExtra("theater", theater.title);
 		startActivity(intent);
 	}
-	
+
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		return ((TheaterAdapter) getListAdapter()).theaters;
@@ -87,9 +87,8 @@ public abstract class TheatersActivity extends ListActivity {
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
 	}
-	
+
 	protected abstract ArrayList<Theater> retrieveResults(String... queries);
-	
 
 	@SuppressLint("InlinedApi")
 	protected boolean hasLocationSupport() {
@@ -99,7 +98,7 @@ public abstract class TheatersActivity extends ListActivity {
 		}
 		return false;
 	}
-	
+
 	protected class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
 		public LoadTheatersTask() {
 			super();
@@ -119,14 +118,14 @@ public abstract class TheatersActivity extends ListActivity {
 		protected ArrayList<Theater> doInBackground(String... queries) {
 			return retrieveResults(queries);
 		}
-		
+
 		@Override
 		protected void onPostExecute(ArrayList<Theater> theaters) {
 			if (dialog != null && dialog.isShowing()) {
 				dialog.dismiss();
 			}
-			
-			if(theaters != null) {
+
+			if (theaters != null) {
 				setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
 			} else {
 				((TextView) findViewById(android.R.id.empty)).setText("Aucune connexion Internet :\\");
