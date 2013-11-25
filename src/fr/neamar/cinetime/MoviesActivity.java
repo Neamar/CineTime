@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,6 +36,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 	@TargetApi(14)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.e("WTF","WAS HERE");
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_movies_list);

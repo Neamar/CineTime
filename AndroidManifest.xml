@@ -66,6 +66,10 @@
         <activity
             android:name=".MoviesActivity"
             android:label="@string/title_activity_movies" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".DetailsActivity"
@@ -74,6 +78,15 @@
         <activity
             android:name=".PosterViewerActivity"
             android:label="@string/title_activity_details" >
+        </activity>
+        <activity
+            android:name=".ShortcutActivity"
+            android:label="Accès direct aux séances" >
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
     </application>
 
