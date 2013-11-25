@@ -271,7 +271,9 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		if (movies != null) {
 			movies.clear();
 			movies = null;
-			((MovieAdapter) getListAdapter()).clear();
+			if(getListAdapter() != null) {
+				((MovieAdapter) getListAdapter()).clear();
+			}
 		}
 	}
 

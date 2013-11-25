@@ -36,7 +36,6 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 	@TargetApi(14)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.e("WTF","WAS HERE");
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_movies_list);

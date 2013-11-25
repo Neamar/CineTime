@@ -12,4 +12,8 @@ public class Theater {
 	public String location;
 	public String zipCode;
 	public double distance = -1;
+	
+	public String toString() {
+		return title;
+	}
 }
