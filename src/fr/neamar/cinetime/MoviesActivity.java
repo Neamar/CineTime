@@ -2,7 +2,9 @@ package fr.neamar.cinetime;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,6 +28,7 @@ public class MoviesActivity extends FragmentActivity implements
 	private MoviesFragment moviesFragment;
 	private DetailsFragment detailsFragment;
 	private String theater;
+	public String theaterLocation;
 	private MenuItem shareItem;
 	private MenuItem trailerItem;
 
@@ -74,9 +77,12 @@ public class MoviesActivity extends FragmentActivity implements
 			} else {
 				activateDetailsMenu(false);
 			}
+		} else {
+			inflater.inflate(R.menu.activity_movies, menu);
 			return true;
 		}
-		return false;
+	
+		return true;
 	}
 
 	@Override
@@ -109,6 +115,15 @@ public class MoviesActivity extends FragmentActivity implements
 		case R.id.menu_play:
 			detailsFragment.displayTrailer();
 			return true;
+		case R.id.menu_map:
+			String uri = "geo:0,0?q=" + theaterLocation;
+
+			try {
+				startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
+			} catch (ActivityNotFoundException e) {
+				Toast.makeText(this, "Installez Google Maps pour afficher le plan !",
+						Toast.LENGTH_SHORT).show();
+			}
 		default:
 			return super.onOptionsItemSelected(item);
 		}

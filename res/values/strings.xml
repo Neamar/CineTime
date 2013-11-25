@@ -4,6 +4,7 @@
     <string name="menu_settings">Paramètres</string>
     <string name="menu_share">Partager</string>
     <string name="menu_play">Voir la bande annonce</string>
+    <string name="menu_map">Voir l\'emplacement du cinéma sur une carte</string>
     <string name="title_activity_theaters">Mes cinémas</string>
     <string name="title_activity_movies">Séances</string>
     <string name="title_activity_details">Détails</string>

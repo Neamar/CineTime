@@ -22,6 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import fr.neamar.cinetime.MovieAdapter;
+import fr.neamar.cinetime.MoviesActivity;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
@@ -251,6 +252,10 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 				ArrayList<Movie> movies = (new APIHelper()).formatMoviesList(displayList.jsonArray,
 						theaterCode);
 				fragment.updateListView(movies);
+			}
+			
+			if(getActivity() != null) {
+				((MoviesActivity) getActivity()).theaterLocation = displayList.theater.title + ", " + displayList.theater.location + " " + displayList.theater.zipCode;
 			}
 		}
 	}
