@@ -54,6 +54,8 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 			}).setNegativeButton(res.getString(R.string.location_dialog_cancel), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int id) {
+					onSearchRequested();
+					((TextView) findViewById(android.R.id.empty)).setText("Aucune information de localisation, utilisez la recherche.");
 					dialog.cancel();
 				}
 			});
