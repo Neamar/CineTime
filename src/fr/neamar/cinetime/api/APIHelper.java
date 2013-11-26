@@ -125,11 +125,9 @@ public class APIHelper {
 		DisplayList displayList = new DisplayList();
 
 		String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
-		Log.e("WTF", url);
 		String json;
 		try {
 			json = downloadUrl(url);
-			Log.e("WTF", json);
 		} catch (Exception e) {
 			displayList.noDataConnection = true;
 			return displayList;
