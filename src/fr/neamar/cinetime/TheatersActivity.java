@@ -1,6 +1,7 @@
 package fr.neamar.cinetime;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.ListActivity;
@@ -62,16 +63,20 @@ public abstract class TheatersActivity extends ListActivity {
 			return true;
 		case R.id.menu_unified:
 			ArrayList<Theater> theaters = ((TheaterAdapter) getListAdapter()).theaters;
+			List<Theater> unified = theaters.subList(0, Math.min(7, theaters.size()));
 			
 			ArrayList<String> codes = new ArrayList<String>();
-			for (Theater t : theaters)
+			for (Theater t : unified)
 			{
 				codes.add(t.code);
 			}
 			
+			int c = 0x2460 + unified.size() - 1;
+			String count = Character.toString((char)c) + " ";
+			
 			Intent unifiedIntent = new Intent(TheatersActivity.this, MoviesActivity.class);
 			unifiedIntent.putExtra("code", TextUtils.join(",", codes));
-			unifiedIntent.putExtra("theater", TextUtils.join(", ", theaters));
+			unifiedIntent.putExtra("theater", count + TextUtils.join(", ", unified));
 			startActivity(unifiedIntent);
 		default:
 			return super.onOptionsItemSelected(item);
