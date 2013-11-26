@@ -27,6 +27,7 @@ public abstract class TheatersActivity extends ListActivity {
 	private ProgressDialog dialog;
 	protected Boolean hasRestoredFromNonConfigurationInstance = false;
 
+	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
