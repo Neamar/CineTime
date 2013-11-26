@@ -310,7 +310,7 @@ public class APIHelper {
 				}
 
 				display.isOriginalLanguage = jsonMovie.getJSONObject("version").getString("original").equals("true");
-				if (jsonMovie.has("screenFormat")) {
+				if (jsonMovie.has("screenFormat") && jsonMovie.getJSONObject("screenFromat").has("$")) {
 					display.is3D = jsonMovie.getJSONObject("screenFormat").getString("$").contains("3D");
 					display.isIMAX = jsonMovie.getJSONObject("screenFormat").getString("$").contains("IMAX");
 				}
