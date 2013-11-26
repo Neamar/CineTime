@@ -22,6 +22,8 @@ import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.objects.Theater;
 
 public class TheatersSearchGeoActivity extends TheatersActivity {
+	static final int WAITING_TO_ENABLE_LOCATION_PROVIDER = 0;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -32,7 +34,11 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 		if (hasRestoredFromNonConfigurationInstance) {
 			return;
 		}
-
+		
+		retrieveLocation();
+	}
+	
+	public void retrieveLocation() {
 		final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		final boolean locationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
@@ -49,7 +55,7 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
 					Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-					startActivity(settingsIntent);
+					startActivityForResult(settingsIntent, WAITING_TO_ENABLE_LOCATION_PROVIDER);
 				}
 			}).setNegativeButton(res.getString(R.string.location_dialog_cancel), new DialogInterface.OnClickListener() {
 				@Override
@@ -90,6 +96,12 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 				}
 			};
 			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, listener);
+		}
+	}
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == WAITING_TO_ENABLE_LOCATION_PROVIDER) {
+			retrieveLocation();
 		}
 	}
 
