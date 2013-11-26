@@ -34,8 +34,9 @@ import fr.neamar.cinetime.objects.Theater;
 public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks {
 
 	private static final String STATE_ACTIVATED_POSITION = "activated_position";
-	static public ArrayList<Movie> movies;
+	static public ArrayList<Movie> currentMovies;
 
+	public ArrayList<Movie> movies = null;
 	private Callbacks mCallbacks = sDummyCallbacks;
 	private int mActivatedPosition = ListView.INVALID_POSITION;
 	private LoadMoviesTask mTask;
@@ -264,14 +265,17 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	}
 
 	static public ArrayList<Movie> getMovies() {
-		return movies;
+		return currentMovies;
 	}
 
 	public void clear() {
-		if (movies != null) {
-			movies.clear();
+		if (currentMovies != null) {
+			currentMovies.clear();
+			currentMovies = null;
 			movies = null;
-			((MovieAdapter) getListAdapter()).clear();
+			if(getListAdapter() != null) {
+				((MovieAdapter) getListAdapter()).clear();
+			}
 		}
 	}
 
@@ -286,7 +290,8 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 	@Override
 	public void updateListView(ArrayList<Movie> movies) {
-		MoviesFragment.movies = movies;
+		MoviesFragment.currentMovies = movies;
+		this.movies = movies;
 		if (getActivity() != null) {
 			setListAdapter(new MovieAdapter(getActivity(), R.layout.listitem_theater, movies));
 		} else {
