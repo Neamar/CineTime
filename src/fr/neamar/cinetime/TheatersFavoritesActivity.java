@@ -30,6 +30,13 @@ public class TheatersFavoritesActivity extends TheatersActivity {
 			finish();
 		}
 	}
+	
+	public void onResume() {
+		favorites = DBHelper.getFavorites(this);
+		setTheaters(favorites);
+
+		super.onResume();
+	}
 
 	protected ArrayList<Theater> retrieveResults(String... queries) {
 		return null;
