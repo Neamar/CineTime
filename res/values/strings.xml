@@ -7,6 +7,7 @@
     <string name="menu_map">Voir l\'emplacement du cinéma sur une carte</string>
     <string name="search_hint">Rechercher un cinéma</string>
     <string name="search_geo_hint">Rechercher un cinéma à proximité</string>
+    <string name="unified_hint">Afficher toutes les séances</string>
     <string name="title_activity_theaters">Mes cinémas</string>
     <string name="title_activity_movies">Séances</string>
     <string name="title_activity_details">Détails</string>

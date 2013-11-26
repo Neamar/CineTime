@@ -29,9 +29,6 @@ public class TheatersFavoritesActivity extends TheatersActivity {
 			startActivity(intent);
 			finish();
 		}
-		
-		((Button) findViewById(R.id.unified)).setVisibility(View.VISIBLE);
-
 	}
 
 	protected ArrayList<Theater> retrieveResults(String... queries) {

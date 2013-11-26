@@ -39,25 +39,6 @@ public abstract class TheatersActivity extends ListActivity {
 			setListAdapter(new TheaterAdapter(this, R.layout.listitem_theater, theaters));
 			hasRestoredFromNonConfigurationInstance = true;
 		}
-
-		Button unified = (Button) findViewById(R.id.unified);
-		unified.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				ArrayList<Theater> theaters = ((TheaterAdapter) getListAdapter()).theaters;
-				
-				ArrayList<String> codes = new ArrayList<String>();
-				for (Theater t : theaters)
-				{
-					codes.add(t.code);
-				}
-				
-				Intent intent = new Intent(TheatersActivity.this, MoviesActivity.class);
-				intent.putExtra("code", TextUtils.join(",", codes));
-				intent.putExtra("theater", TextUtils.join(", ", theaters));
-				startActivity(intent);
-			}
-		});
 	}
 
 	@Override
@@ -75,9 +56,23 @@ public abstract class TheatersActivity extends ListActivity {
 			onSearchRequested();
 			return true;
 		case R.id.menu_search_geo:
-			Intent intent = new Intent(this, TheatersSearchGeoActivity.class);
-			startActivity(intent);
+			Intent geoIntent = new Intent(this, TheatersSearchGeoActivity.class);
+			geoIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			startActivity(geoIntent);
 			return true;
+		case R.id.menu_unified:
+			ArrayList<Theater> theaters = ((TheaterAdapter) getListAdapter()).theaters;
+			
+			ArrayList<String> codes = new ArrayList<String>();
+			for (Theater t : theaters)
+			{
+				codes.add(t.code);
+			}
+			
+			Intent unifiedIntent = new Intent(TheatersActivity.this, MoviesActivity.class);
+			unifiedIntent.putExtra("code", TextUtils.join(",", codes));
+			unifiedIntent.putExtra("theater", TextUtils.join(", ", theaters));
+			startActivity(unifiedIntent);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
