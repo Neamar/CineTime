@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ListAdapter;
+import android.widget.Button;
 import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
 
@@ -27,6 +29,9 @@ public class TheatersFavoritesActivity extends TheatersActivity {
 			startActivity(intent);
 			finish();
 		}
+		
+		((Button) findViewById(R.id.unified)).setVisibility(View.VISIBLE);
+
 	}
 
 	protected ArrayList<Theater> retrieveResults(String... queries) {

@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 import fr.neamar.cinetime.objects.Display;
 import fr.neamar.cinetime.objects.DisplayList;
 import fr.neamar.cinetime.objects.Movie;
@@ -118,10 +119,11 @@ public class APIHelper {
 		DisplayList displayList = new DisplayList();
 
 		String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
-
+		Log.e("WTF", url);
 		String json;
 		try {
 			json = downloadUrl(url);
+			Log.e("WTF", json);
 		} catch (Exception e) {
 			displayList.noDataConnection = true;
 			return displayList;

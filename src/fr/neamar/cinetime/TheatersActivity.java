@@ -10,10 +10,12 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,6 +39,25 @@ public abstract class TheatersActivity extends ListActivity {
 			setListAdapter(new TheaterAdapter(this, R.layout.listitem_theater, theaters));
 			hasRestoredFromNonConfigurationInstance = true;
 		}
+
+		Button unified = (Button) findViewById(R.id.unified);
+		unified.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ArrayList<Theater> theaters = ((TheaterAdapter) getListAdapter()).theaters;
+				
+				ArrayList<String> codes = new ArrayList<String>();
+				for (Theater t : theaters)
+				{
+					codes.add(t.code);
+				}
+				
+				Intent intent = new Intent(TheatersActivity.this, MoviesActivity.class);
+				intent.putExtra("code", TextUtils.join(",", codes));
+				intent.putExtra("theater", TextUtils.join(", ", theaters));
+				startActivity(intent);
+			}
+		});
 	}
 
 	@Override
@@ -87,7 +108,7 @@ public abstract class TheatersActivity extends ListActivity {
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
 	}
-	
+
 	protected void setTheaters(ArrayList<Theater> theaters) {
 		setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
 	}
