@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.apache.http.client.ClientProtocolException;
 
 import android.app.SearchManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 import fr.neamar.cinetime.api.APIHelper;
@@ -17,12 +18,22 @@ public class TheatersSearchActivity extends TheatersActivity {
 		super.onCreate(savedInstanceState);
 		((TextView) findViewById(android.R.id.empty)).setText("Aucun résultat pour cette recherche.");
 
-		String query = getIntent().getStringExtra(SearchManager.QUERY);
-		setTitle("Recherche : " + query);
-
 		if (hasRestoredFromNonConfigurationInstance) {
 			return;
 		}
+
+		handleIntent(getIntent());
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		setIntent(intent);
+		handleIntent(intent);
+	}
+
+	public void handleIntent(Intent intent) {
+		String query = intent.getStringExtra(SearchManager.QUERY);
+		setTitle("Recherche : " + query);
 
 		new LoadTheatersTask().execute(query);
 	}

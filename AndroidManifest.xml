@@ -54,7 +54,8 @@
         </activity>
         <activity
             android:name=".TheatersSearchActivity"
-            android:label="Search for theaters" >
+            android:label="Search for theaters"
+            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
