@@ -87,6 +87,10 @@ public abstract class TheatersActivity extends ListActivity {
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
 	}
+	
+	protected void setTheaters(ArrayList<Theater> theaters) {
+		setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+	}
 
 	protected abstract ArrayList<Theater> retrieveResults(String... queries);
 
@@ -126,7 +130,7 @@ public abstract class TheatersActivity extends ListActivity {
 			}
 
 			if (theaters != null) {
-				setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+				setTheaters(theaters);
 			} else {
 				((TextView) findViewById(android.R.id.empty)).setText("Aucune connexion Internet :\\");
 			}
