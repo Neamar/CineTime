@@ -1,6 +1,7 @@
 package fr.neamar.cinetime;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.ListActivity;
@@ -10,10 +11,12 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -54,9 +57,27 @@ public abstract class TheatersActivity extends ListActivity {
 			onSearchRequested();
 			return true;
 		case R.id.menu_search_geo:
-			Intent intent = new Intent(this, TheatersSearchGeoActivity.class);
-			startActivity(intent);
+			Intent geoIntent = new Intent(this, TheatersSearchGeoActivity.class);
+			geoIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			startActivity(geoIntent);
 			return true;
+		case R.id.menu_unified:
+			ArrayList<Theater> theaters = ((TheaterAdapter) getListAdapter()).theaters;
+			List<Theater> unified = theaters.subList(0, Math.min(7, theaters.size()));
+			
+			ArrayList<String> codes = new ArrayList<String>();
+			for (Theater t : unified)
+			{
+				codes.add(t.code);
+			}
+			
+			int c = 0x2460 + unified.size() - 1;
+			String count = Character.toString((char)c) + " ";
+			
+			Intent unifiedIntent = new Intent(TheatersActivity.this, MoviesActivity.class);
+			unifiedIntent.putExtra("code", TextUtils.join(",", codes));
+			unifiedIntent.putExtra("theater", count + TextUtils.join(", ", unified));
+			startActivity(unifiedIntent);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -86,6 +107,10 @@ public abstract class TheatersActivity extends ListActivity {
 	protected void onStop() {
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
+	}
+
+	protected void setTheaters(ArrayList<Theater> theaters) {
+		setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
 	}
 
 	protected abstract ArrayList<Theater> retrieveResults(String... queries);
@@ -126,7 +151,7 @@ public abstract class TheatersActivity extends ListActivity {
 			}
 
 			if (theaters != null) {
-				setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+				setTheaters(theaters);
 			} else {
 				((TextView) findViewById(android.R.id.empty)).setText("Aucune connexion Internet :\\");
 			}

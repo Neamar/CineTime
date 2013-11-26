@@ -258,7 +258,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			}
 
 			theater = displayList.theater;
-			if (getActivity() != null) {
+			if (getActivity() != null && theater.code != null) {
 				((MoviesActivity) getActivity()).setTheaterLocation(theater);
 			}
 		}

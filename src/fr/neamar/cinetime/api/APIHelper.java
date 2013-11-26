@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 import fr.neamar.cinetime.objects.Display;
 import fr.neamar.cinetime.objects.DisplayList;
 import fr.neamar.cinetime.objects.Movie;
@@ -114,14 +115,21 @@ public class APIHelper {
 		}
 	}
 
+	/**
+	 * Download all movies for the specified theater.
+	 * 
+	 * @param theaterCode Code, or a comma separated list of code to load.
+	 * @return
+	 */
 	public DisplayList downloadMoviesList(String theaterCode) {
 		DisplayList displayList = new DisplayList();
 
 		String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
-
+		Log.e("WTF", url);
 		String json;
 		try {
 			json = downloadUrl(url);
+			Log.e("WTF", json);
 		} catch (Exception e) {
 			displayList.noDataConnection = true;
 			return displayList;
@@ -131,18 +139,37 @@ public class APIHelper {
 			// Instantiate a JSON object from the request response
 			JSONObject jsonObject = new JSONObject(json);
 			JSONObject feed = jsonObject.getJSONObject("feed");
-			JSONObject datas = feed.getJSONArray("theaterShowtimes").getJSONObject(0);
-
-			if (feed.getInt("totalResults") > 0)
-				displayList.jsonArray = datas.getJSONArray("movieShowtimes");
-
-			JSONObject jsonTheater = datas.getJSONObject("place").getJSONObject("theater");
-
-			displayList.theater.code = jsonTheater.getString("code");
-			displayList.theater.title = jsonTheater.getString("name");
-			displayList.theater.location = jsonTheater.getString("address");
-			displayList.theater.zipCode = jsonTheater.getString("postalCode");
+			
+			JSONArray theaters = feed.getJSONArray("theaterShowtimes");
+			// Iterate over each theaters
+			for(int i = 0; i < theaters.length(); i++) {
+				JSONObject theater = theaters.getJSONObject(i);
+				String theaterName = theater.getJSONObject("place").getJSONObject("theater").getString("name");
+				
+				if (theater.has("movieShowtimes")) {
+					JSONArray showtimes = theater.getJSONArray("movieShowtimes");
+					for(int j = 0; j < showtimes.length(); j++) {
+						JSONObject showtime = showtimes.getJSONObject(j);
+						
+						if(theaters.length() > 1) {
+							// Add theater name when multiple theaters returned
+							showtime.put("theater", theaterName);
+						}
+						displayList.jsonArray.put(showtime);
+					}
+				}
+			}
+			
+			// Only return theater when it is unique
+			if(theaters.length() == 1) {
+				JSONObject jsonTheater = theaters.getJSONObject(0).getJSONObject("place").getJSONObject("theater");
+				displayList.theater.code = jsonTheater.getString("code");
+				displayList.theater.title = jsonTheater.getString("name");
+				displayList.theater.location = jsonTheater.getString("address");
+				displayList.theater.zipCode = jsonTheater.getString("postalCode");
+			}
 		} catch (JSONException e) {
+			Log.e("JSON", "Error parsing JSON for " + theaterCode);
 			// Keep our default empty array for displayList.jsonArray
 		}
 
@@ -286,6 +313,11 @@ public class APIHelper {
 				if (jsonMovie.has("screenFormat")) {
 					display.is3D = jsonMovie.getJSONObject("screenFormat").getString("$").contains("3D");
 					display.isIMAX = jsonMovie.getJSONObject("screenFormat").getString("$").contains("IMAX");
+				}
+				
+				if(jsonMovie.has("theater")) {
+					// displaying unified view, need to remind the display of the theater.
+					display.theater = jsonMovie.getString("theater");
 				}
 				movie.displays.add(display);
 				moviesHash.put(code, movie);
