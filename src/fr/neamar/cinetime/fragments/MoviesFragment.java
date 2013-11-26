@@ -14,7 +14,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.text.Html;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,11 +101,22 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setRetainInstance(true);
+	}
+	
+	public void onActivityCreated(Bundle savedInstanceState) {
+		TextView text = new TextView(getActivity());
+		text.setText(Html.fromHtml("<small><strong>TLJ</strong> : Tous Les Jours (jusqu'à mardi inclus)"));
+		text.setGravity(Gravity.CENTER_HORIZONTAL);
+		ListView list = (ListView) getActivity().findViewById(android.R.id.list);
+		list.addFooterView(text, null, false);
+		
 		if (movies == null && mTask == null) {
 			String theaterCode = getActivity().getIntent().getStringExtra("code");
 			mTask = new LoadMoviesTask(this, theaterCode);
 			mTask.execute(theaterCode);
 		}
+		
+		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
@@ -189,7 +202,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		}
 
 		@Override
-		protected void onPreExecute() {
+		protected void onPreExecute() {		
 			String cache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
 			if (!cache.equals("")) {
 				// Display cached values
@@ -245,7 +258,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 					dialog.dismiss();
 			}
 			dialogPending = false;
-
+			
 			if (displayList.noDataConnection && getActivity() != null) {
 				TextView emptyText = (TextView) getActivity().findViewById(android.R.id.empty);
 				emptyText.setText("Aucune connexion Internet.");
