@@ -25,7 +25,7 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		((TextView) findViewById(android.R.id.empty)).setText("Activez le GPS !");
+		((TextView) findViewById(android.R.id.empty)).setText("Aucun cinéma à proximité, utilisez la recherche.");
 
 		setTitle("Cinémas à proximité");
 
@@ -75,7 +75,6 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 				public void onLocationChanged(Location location) {
 					new LoadTheatersTask().execute(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
 					locationManager.removeUpdates(this);
-					((TextView) findViewById(android.R.id.empty)).setText("Aucun résultat à proximité.");
 				}
 
 				@Override
