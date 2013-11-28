@@ -5,14 +5,19 @@ import java.util.ArrayList;
 
 import org.apache.http.client.ClientProtocolException;
 
+import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.view.MenuItem;
 import android.widget.TextView;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.objects.Theater;
 
 public class TheatersSearchActivity extends TheatersActivity {
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -23,6 +28,12 @@ public class TheatersSearchActivity extends TheatersActivity {
 		}
 
 		handleIntent(getIntent());
+		
+		// Title in action bar brings back one level
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			getActionBar().setHomeButtonEnabled(true);
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+		}
 	}
 
 	@Override
@@ -37,7 +48,16 @@ public class TheatersSearchActivity extends TheatersActivity {
 
 		new LoadTheatersTask().execute(query);
 	}
-
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if(item.getItemId() == android.R.id.home) {
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
 	protected ArrayList<Theater> retrieveResults(String... queries) {
 		try {
 			return (new APIHelper().findTheaters(queries[0]));

@@ -104,6 +104,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	}
 	
 	public void onActivityCreated(Bundle savedInstanceState) {
+		// Add details footer to listView
 		TextView text = new TextView(getActivity());
 		text.setText(Html.fromHtml("<small><strong>TLJ</strong> : Tous Les Jours (jusqu'à mardi inclus)"));
 		text.setGravity(Gravity.CENTER_HORIZONTAL);

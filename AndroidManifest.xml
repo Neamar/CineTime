@@ -55,7 +55,8 @@
         <activity
             android:name=".TheatersSearchActivity"
             android:label="Search for theaters"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop"
+            android:parentActivityName="fr.neamar.cinetime.TheatersFavoritesActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
