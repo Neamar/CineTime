@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -47,6 +48,8 @@ public abstract class TheatersActivity extends ListActivity {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.activity_theaters, menu);
 		menu.findItem(R.id.menu_search_geo).setVisible(hasLocationSupport());
+		menu.findItem(R.id.menu_unified).setEnabled(getTheaters().size() > 1);
+
 		return true;
 	}
 
@@ -62,7 +65,7 @@ public abstract class TheatersActivity extends ListActivity {
 			startActivity(geoIntent);
 			return true;
 		case R.id.menu_unified:
-			ArrayList<Theater> theaters = ((TheaterAdapter) getListAdapter()).theaters;
+			ArrayList<Theater> theaters = getTheaters();
 			List<Theater> unified = theaters.subList(0, Math.min(7, theaters.size()));
 
 			ArrayList<String> codes = new ArrayList<String>();
@@ -83,7 +86,7 @@ public abstract class TheatersActivity extends ListActivity {
 	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Theater theater = ((TheaterAdapter) getListAdapter()).theaters.get(position);
+		Theater theater = getTheaters().get(position);
 
 		Intent intent = new Intent(this, MoviesActivity.class);
 		intent.putExtra("code", theater.code);
@@ -108,8 +111,23 @@ public abstract class TheatersActivity extends ListActivity {
 		EasyTracker.getInstance().activityStop(this);
 	}
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	protected void setTheaters(ArrayList<Theater> theaters) {
 		setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+		
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			invalidateOptionsMenu();
+		}
+	}
+	
+	protected ArrayList<Theater> getTheaters() {
+		TheaterAdapter adapter = ((TheaterAdapter) getListAdapter());
+		
+		if(adapter != null) {
+			return adapter.theaters;
+		} else {
+			return new ArrayList<Theater>();
+		}
 	}
 
 	protected abstract ArrayList<Theater> retrieveResults(String... queries);
