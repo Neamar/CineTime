@@ -34,10 +34,10 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 		if (hasRestoredFromNonConfigurationInstance) {
 			return;
 		}
-		
+
 		retrieveLocation();
 	}
-	
+
 	public void retrieveLocation() {
 		final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		final boolean locationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -99,12 +99,14 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 		}
 	}
 
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == WAITING_TO_ENABLE_LOCATION_PROVIDER) {
 			retrieveLocation();
 		}
 	}
 
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		menu.findItem(R.id.menu_search_geo).setVisible(false);
@@ -112,6 +114,7 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 		return true;
 	}
 
+	@Override
 	protected ArrayList<Theater> retrieveResults(String... queries) {
 		String lat = queries[0];
 		String lon = queries[1];

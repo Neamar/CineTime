@@ -10,7 +10,7 @@ public class Display {
 	public Boolean isIMAX = false;
 
 	public String getDisplayDetails() {
-		return (theater != null ? "<small>" + theater + "</small>": "") + (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
+		return (theater != null ? "<small>" + theater + "</small>" : "") + (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
 	}
 
 	public String getDisplay() {

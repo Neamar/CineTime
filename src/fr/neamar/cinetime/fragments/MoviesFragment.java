@@ -102,7 +102,8 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		super.onCreate(savedInstanceState);
 		this.setRetainInstance(true);
 	}
-	
+
+	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		// Add details footer to listView
 		TextView text = new TextView(getActivity());
@@ -110,13 +111,13 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		text.setGravity(Gravity.CENTER_HORIZONTAL);
 		ListView list = (ListView) getActivity().findViewById(android.R.id.list);
 		list.addFooterView(text, null, false);
-		
+
 		if (movies == null && mTask == null) {
 			String theaterCode = getActivity().getIntent().getStringExtra("code");
 			mTask = new LoadMoviesTask(this, theaterCode);
 			mTask.execute(theaterCode);
 		}
-		
+
 		super.onActivityCreated(savedInstanceState);
 	}
 
@@ -203,7 +204,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		}
 
 		@Override
-		protected void onPreExecute() {		
+		protected void onPreExecute() {
 			String cache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
 			if (!cache.equals("")) {
 				// Display cached values
@@ -259,7 +260,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 					dialog.dismiss();
 			}
 			dialogPending = false;
-			
+
 			if (displayList.noDataConnection && getActivity() != null) {
 				TextView emptyText = (TextView) getActivity().findViewById(android.R.id.empty);
 				emptyText.setText("Aucune connexion Internet.");
@@ -287,7 +288,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			currentMovies.clear();
 			currentMovies = null;
 			movies = null;
-			if(getListAdapter() != null) {
+			if (getListAdapter() != null) {
 				((MovieAdapter) getListAdapter()).clear();
 			}
 		}

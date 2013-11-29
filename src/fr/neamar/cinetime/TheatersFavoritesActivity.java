@@ -9,7 +9,7 @@ import fr.neamar.cinetime.objects.Theater;
 
 public class TheatersFavoritesActivity extends TheatersActivity {
 	public ArrayList<Theater> favorites;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -17,8 +17,8 @@ public class TheatersFavoritesActivity extends TheatersActivity {
 		setTitle(R.string.app_name);
 
 		favorites = DBHelper.getFavorites(this);
-		
-		if(favorites.size() > 0) {
+
+		if (favorites.size() > 0) {
 			setTheaters(favorites);
 		} else {
 			// No favorites yet. Display theaters around
@@ -27,7 +27,8 @@ public class TheatersFavoritesActivity extends TheatersActivity {
 			finish();
 		}
 	}
-	
+
+	@Override
 	public void onResume() {
 		favorites = DBHelper.getFavorites(this);
 		setTheaters(favorites);
@@ -35,6 +36,7 @@ public class TheatersFavoritesActivity extends TheatersActivity {
 		super.onResume();
 	}
 
+	@Override
 	protected ArrayList<Theater> retrieveResults(String... queries) {
 		return null;
 	}

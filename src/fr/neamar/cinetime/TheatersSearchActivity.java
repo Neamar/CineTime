@@ -28,7 +28,7 @@ public class TheatersSearchActivity extends TheatersActivity {
 		}
 
 		handleIntent(getIntent());
-		
+
 		// Title in action bar brings back one level
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setHomeButtonEnabled(true);
@@ -48,16 +48,17 @@ public class TheatersSearchActivity extends TheatersActivity {
 
 		new LoadTheatersTask().execute(query);
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if(item.getItemId() == android.R.id.home) {
+		if (item.getItemId() == android.R.id.home) {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
+	@Override
 	protected ArrayList<Theater> retrieveResults(String... queries) {
 		try {
 			return (new APIHelper().findTheaters(queries[0]));

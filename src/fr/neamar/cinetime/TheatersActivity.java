@@ -85,6 +85,7 @@ public abstract class TheatersActivity extends ListActivity {
 		}
 	}
 
+	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Theater theater = getTheaters().get(position);
 
@@ -114,16 +115,16 @@ public abstract class TheatersActivity extends ListActivity {
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	protected void setTheaters(ArrayList<Theater> theaters) {
 		setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
-		
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			invalidateOptionsMenu();
 		}
 	}
-	
+
 	protected ArrayList<Theater> getTheaters() {
 		TheaterAdapter adapter = ((TheaterAdapter) getListAdapter());
-		
-		if(adapter != null) {
+
+		if (adapter != null) {
 			return adapter.theaters;
 		} else {
 			return new ArrayList<Theater>();

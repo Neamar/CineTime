@@ -15,22 +15,21 @@ import fr.neamar.cinetime.objects.Theater;
 
 public class ShortcutActivity extends ListActivity {
 	private ArrayList<Theater> theaters;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		theaters = DBHelper.getFavorites(this);
-		
-		if(theaters.size() > 0) {
+
+		if (theaters.size() > 0) {
 			setListAdapter(new ArrayAdapter<Theater>(this, android.R.layout.simple_list_item_1, theaters));
-		}
-		else {
+		} else {
 			Toast.makeText(this, "Ajoutez un cinéma aux favoris pour l'ajouter directement à l'écran d'accueil.", Toast.LENGTH_LONG).show();
 			finish();
 		}
 	}
-	
+
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		// The meat of our shortcut
