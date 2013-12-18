@@ -199,7 +199,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		private String theaterCode;
 		
 		/**
-		 * Last alues retrieved from previous run.
+		 * Last values retrieved from previous run.
 		 */
 		private String cache;
 		
@@ -295,8 +295,6 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 				c.set(Calendar.SECOND, 0);
 				Date lastWednesday = c.getTime();
 				
-				Log.e("WTF", cacheDate.toString());
-				Log.e("WTF", lastWednesday.toString());
 				if(cacheDate.getTime() > lastWednesday.getTime()) {
 					Toast.makeText(ctx, "No connection, displaying datas from cache.", Toast.LENGTH_SHORT).show();
 					remoteDataHasChangedFromLocalCache = false;
