@@ -13,7 +13,7 @@ public class TheatersFavoritesActivity extends TheatersActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		setTitle(R.string.app_name);
 
 		favorites = DBHelper.getFavorites(this);

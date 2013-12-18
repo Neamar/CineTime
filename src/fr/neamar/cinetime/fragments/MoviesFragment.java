@@ -1,6 +1,8 @@
 package fr.neamar.cinetime.fragments;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +26,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import fr.neamar.cinetime.MovieAdapter;
 import fr.neamar.cinetime.MoviesActivity;
 import fr.neamar.cinetime.R;
@@ -194,6 +197,17 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 		private MoviesFragment fragment;
 		private Context ctx;
 		private String theaterCode;
+		
+		/**
+		 * Last alues retrieved from previous run.
+		 */
+		private String cache;
+		
+		/**
+		 * Timestamp for last update
+		 */
+		private Long lastCacheUpdate;
+		
 		private Boolean remoteDataHasChangedFromLocalCache = true;
 
 		public LoadMoviesTask(MoviesFragment fragment, String theaterCode) {
@@ -205,7 +219,10 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 		@Override
 		protected void onPreExecute() {
-			String cache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
+			SharedPreferences sp = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE);
+			
+			lastCacheUpdate = sp.getLong(theaterCode + "-date", 0);
+			cache = sp.getString(theaterCode, "");
 			if (!cache.equals("")) {
 				// Display cached values
 				try {
@@ -234,17 +251,18 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 			JSONArray jsonResults = displayList.jsonArray;
 
-			String oldCache = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).getString(theaterCode, "");
 			String newCache = jsonResults.toString();
 
-			if (oldCache.equals(newCache)) {
+			if (cache.equals(newCache)) {
 				Log.i("cache-hit", "Remote datas equals local datas; skipping UI update.");
 				remoteDataHasChangedFromLocalCache = false;
 			} else {
 				Log.i("cache-miss", "Remote data differs from local datas; updating UI");
 				// Store in cache for future use
+				// Also store the date of the day
 				SharedPreferences.Editor ed = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).edit();
 				ed.putString(theaterCode, jsonResults.toString());
+				ed.putLong(theaterCode + "-date", new Date().getTime());
 				ed.commit();
 				remoteDataHasChangedFromLocalCache = true;
 			}
@@ -262,8 +280,30 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			dialogPending = false;
 
 			if (displayList.noDataConnection && getActivity() != null) {
-				TextView emptyText = (TextView) getActivity().findViewById(android.R.id.empty);
-				emptyText.setText("Aucune connexion Internet.");
+				// No data connection, so unable to update.
+				// However our cache may be valid.
+				Date cacheDate = new Date(lastCacheUpdate);
+				
+				Calendar c = Calendar.getInstance();
+				// If we're before wednesday and after start of next week, get back one week before setting day to Wednesay
+				if(c.get(Calendar.DAY_OF_WEEK) < Calendar.WEDNESDAY) {
+					c.roll(Calendar.WEEK_OF_YEAR, -1);
+				}
+				c.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY);
+				c.set(Calendar.HOUR_OF_DAY, 0);
+				c.set(Calendar.MINUTE, 0);
+				c.set(Calendar.SECOND, 0);
+				Date lastWednesday = c.getTime();
+				
+				Log.e("WTF", cacheDate.toString());
+				Log.e("WTF", lastWednesday.toString());
+				if(cacheDate.getTime() > lastWednesday.getTime()) {
+					Toast.makeText(ctx, "No connection, displaying datas from cache.", Toast.LENGTH_SHORT).show();
+					remoteDataHasChangedFromLocalCache = false;
+				} else {
+					TextView emptyText = (TextView) getActivity().findViewById(android.R.id.empty);
+					emptyText.setText("Aucune connexion Internet.");
+				}
 			}
 
 			// Update only if data changed
