@@ -103,9 +103,9 @@ public class Display implements Comparable<Display> {
 	 */
 	public int toInteger() {
 		int v = 0;
-		v += this.isIMAX ? 200 : 0;
+		v += this.isIMAX ? 10 : 0;
 		v += this.is3D ? 100 : 0;
-		v += this.isOriginalLanguage ? 10 : 0;
+		v += this.isOriginalLanguage ? 1000 : 0;
 		
 		return v;
 	}
