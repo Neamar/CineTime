@@ -327,7 +327,15 @@ public class APIHelper {
 			}
 		}
 
+		// Build final ArrayList, to be used in adapter
 		ArrayList<Movie> resultsList = new ArrayList<Movie>(moviesHash.values());
+		
+		// Sort displays
+		for(Movie movie: resultsList) {
+			Collections.sort(movie.displays, Collections.reverseOrder());
+		}
+		
+		// Sort movies by rating
 		Collections.sort(resultsList, Collections.reverseOrder());
 		return resultsList;
 	}
