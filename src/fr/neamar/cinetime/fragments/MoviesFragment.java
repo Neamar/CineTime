@@ -256,7 +256,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 			if (cache.equals(newCache)) {
 				Log.i("cache-hit", "Remote datas equals local datas; skipping UI update.");
 				remoteDataHasChangedFromLocalCache = false;
-			} else {
+			} else if(!displayList.noDataConnection) { // Do not overwrite cache with empty datas
 				Log.i("cache-miss", "Remote data differs from local datas; updating UI");
 				// Store in cache for future use
 				// Also store the date of the day
