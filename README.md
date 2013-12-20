@@ -10,3 +10,5 @@ Pourquoi perdre son temps ? CineTime vous propose, en direct et en toute simplic
 Bons films !
 
 Disponible sur le Play Store : https://play.google.com/store/apps/details?id=fr.neamar.cinetime
+
+> Pour tester la version α, [rejoignez la communauté](https://plus.google.com/u/0/communities/106195420559774911027).
