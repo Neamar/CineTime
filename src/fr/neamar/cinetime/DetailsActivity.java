@@ -41,6 +41,11 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 			fragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction().add(R.id.file_detail_container, fragment).commit();
 		}
+		
+		// Add a subtitle to display the current theater for this movie.
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getIntent().hasExtra(DetailsFragment.ARG_THEATER_NAME)) {
+			getActionBar().setSubtitle(getIntent().getStringExtra(DetailsFragment.ARG_THEATER_NAME));
+		}
 	}
 
 	@Override

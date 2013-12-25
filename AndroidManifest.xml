@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="fr.neamar.cinetime"
-    android:versionCode="28"
-    android:versionName="1.13.3a" >
+    android:versionCode="29"
+    android:versionName="1.13.4a" >
 
     <uses-sdk
         android:minSdkVersion="7"
