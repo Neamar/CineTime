@@ -2,7 +2,7 @@ package fr.neamar.cinetime.objects;
 
 import java.util.Calendar;
 
-public class Display {
+public class Display implements Comparable<Display> {
 	public String display;
 	public String theater = null;
 	public Boolean isOriginalLanguage;
@@ -93,5 +93,25 @@ public class Display {
 		}
 
 		return day.replaceAll("(.+ :)(.+)(" + nextVisibleDisplay + ")", "<strong>$1</strong><font color=\"#9A9A9A\">$2</font>$3");
+	}
+
+	/**
+	 * Returns an absolute value to sort this display. First display Imax
+	 * movies, then 3D, then VO, then VF.
+	 * 
+	 * @return abstract value for comparison
+	 */
+	public int toInteger() {
+		int v = 0;
+		v += this.isIMAX ? 10 : 0;
+		v += this.is3D ? 100 : 0;
+		v += this.isOriginalLanguage ? 1000 : 0;
+		
+		return v;
+	}
+
+	@Override
+	public int compareTo(Display d) {
+		return this.toInteger() - d.toInteger();
 	}
 }
