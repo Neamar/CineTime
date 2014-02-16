@@ -97,7 +97,12 @@ public abstract class TheatersActivity extends ListActivity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		return ((TheaterAdapter) getListAdapter()).theaters;
+		if(getListAdapter() != null) {
+			return null;
+		}
+		else {
+			return ((TheaterAdapter) getListAdapter()).theaters;
+		}
 	}
 
 	@Override
