@@ -112,6 +112,12 @@ public abstract class TheatersActivity extends ListActivity {
 	}
 
 	@Override
+	protected void onPause() {
+		super.onPause();
+		// Remove dialog when leaving activity
+		dialog = null;
+	}
+	@Override
 	protected void onStop() {
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
