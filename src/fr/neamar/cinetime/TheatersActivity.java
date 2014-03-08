@@ -97,7 +97,12 @@ public abstract class TheatersActivity extends ListActivity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		return ((TheaterAdapter) getListAdapter()).theaters;
+		if(getListAdapter() != null) {
+			return null;
+		}
+		else {
+			return ((TheaterAdapter) getListAdapter()).theaters;
+		}
 	}
 
 	@Override
@@ -106,6 +111,12 @@ public abstract class TheatersActivity extends ListActivity {
 		EasyTracker.getInstance().activityStart(this);
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		// Remove dialog when leaving activity
+		dialog = null;
+	}
 	@Override
 	protected void onStop() {
 		super.onStop();

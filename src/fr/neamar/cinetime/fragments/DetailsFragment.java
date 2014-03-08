@@ -167,7 +167,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 					}
 				}
 
-				if (trailerUrl == null) {
+				if (trailerUrl == null && getActivity() != null) {
 					Toast.makeText(getActivity(), "Woops ! La bande annonce ne semble pas disponible...", Toast.LENGTH_SHORT).show();
 				} else {
 					try {

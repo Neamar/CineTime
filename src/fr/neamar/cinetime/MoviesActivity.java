@@ -132,7 +132,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 		} else if (fragment instanceof DetailsFragment) {
 			this.detailsFragment = (DetailsFragment) fragment;
 			activateDetailsMenu(true);
-			if (DetailsFragment.displayedMovie.trailerCode.isEmpty() && trailerItem != null) {
+			if (DetailsFragment.displayedMovie == null || DetailsFragment.displayedMovie.trailerCode.isEmpty() && trailerItem != null) {
 				trailerItem.setEnabled(false);
 				trailerItem.setVisible(false);
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {

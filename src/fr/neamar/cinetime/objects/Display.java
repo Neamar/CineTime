@@ -53,12 +53,8 @@ public class Display implements Comparable<Display> {
 					optimisedDisplay += lowlightDay(days[i]) + "<br>";
 				} else {
 					// Note : it isn't "+=", but "=" : we remove past entries.
-					optimisedDisplay = lowlightHour(days[i]) + " <br>"; // Space
-																		// required
-																		// to
-																		// fixing
-																		// trimming
-																		// bug.
+					// Space required to fixing trimming bug.
+					optimisedDisplay = lowlightHour(days[i]) + " <br>";
 				}
 			}
 
@@ -106,7 +102,7 @@ public class Display implements Comparable<Display> {
 		v += this.isIMAX ? 10 : 0;
 		v += this.is3D ? 100 : 0;
 		v += this.isOriginalLanguage ? 1000 : 0;
-		
+
 		return v;
 	}
 

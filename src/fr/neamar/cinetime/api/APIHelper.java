@@ -58,7 +58,14 @@ public class APIHelper {
 
 		// Grab the response
 		BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), "UTF-8"));
-		return reader.readLine();
+		
+		StringBuilder builder = new StringBuilder();
+		String aux = "";
+		while ((aux = reader.readLine()) != null) {
+			builder.append(aux);
+		}
+		
+		return builder.toString();
 	}
 
 	protected JSONArray downloadTheatersList(String query) throws ClientProtocolException, IOException {
