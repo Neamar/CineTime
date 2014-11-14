@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:contentDescription="@string/content_description_poster"
-        android:width="142dp"
+        android:maxWidth="142dp"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
         android:transitionName="moviePoster"
