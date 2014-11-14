@@ -1,12 +1,5 @@
 package fr.neamar.cinetime.fragments;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -27,6 +20,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
 import fr.neamar.cinetime.MovieAdapter;
 import fr.neamar.cinetime.MoviesActivity;
 import fr.neamar.cinetime.R;
@@ -53,7 +54,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 	public interface Callbacks {
 
-		public void onItemSelected(int position, Fragment source);
+		public void onItemSelected(int position, Fragment source, View currentView);
 
 		public void setFragment(Fragment fragment);
 
@@ -64,7 +65,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
-		public void onItemSelected(int position, Fragment source) {
+		public void onItemSelected(int position, Fragment source, View currentView) {
 		}
 
 		@Override
@@ -163,7 +164,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 	@Override
 	public void onListItemClick(ListView listView, View view, int position, long id) {
 		super.onListItemClick(listView, view, position, id);
-		mCallbacks.onItemSelected(position, this);
+		mCallbacks.onItemSelected(position, this, view);
 	}
 
 	@Override

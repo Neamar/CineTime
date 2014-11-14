@@ -2,6 +2,7 @@ package fr.neamar.cinetime;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.ActivityOptions;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,13 +11,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
-
-import com.google.analytics.tracking.android.EasyTracker;
 
 import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
@@ -163,7 +164,8 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 	}
 
 	@Override
-	public void onItemSelected(int position, Fragment source) {
+	@TargetApi(21)
+	public void onItemSelected(int position, Fragment source, View currentView) {
 		if (source instanceof MoviesFragment) {
 			if (mTwoPane) {
 				Bundle arguments = new Bundle();
@@ -176,23 +178,20 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 				Intent details = new Intent(this, DetailsActivity.class);
 				details.putExtra(DetailsFragment.ARG_ITEM_ID, position);
 				details.putExtra(DetailsFragment.ARG_THEATER_NAME, theater);
-				startActivity(details);
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+					startActivity(details);
+				}
+				else {
+					// Animation time!
+					final View moviePoster = currentView.findViewById(R.id.listitem_movie_poster);
+					final View movieName = currentView.findViewById(R.id.listitem_movie_title);
+					ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, Pair.create(moviePoster, "moviePoster"), Pair.create(movieName, "movieName"));
+					startActivity(details, options.toBundle());
+				}
 			}
 		} else if (source instanceof DetailsFragment) {
 			startActivity(new Intent(this, PosterViewerActivity.class));
 		}
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
 	}
 
 	@Override

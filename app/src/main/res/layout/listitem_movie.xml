@@ -10,13 +10,14 @@
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:contentDescription="@string/content_description_poster"
-        android:maxWidth="142dp"
+        android:width="142dp"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
+        android:transitionName="moviePoster"
         android:src="@drawable/stub" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="5dp" >
@@ -26,6 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/stub_title"
+            android:transitionName="movieName"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <LinearLayout

@@ -12,6 +12,7 @@
         android:layout_height="match_parent"
         android:src="@drawable/stub"
         android:scaleType="fitCenter"
+        android:transitionName="moviePoster"
         android:layout_gravity="center"/>
 
     <ProgressBar

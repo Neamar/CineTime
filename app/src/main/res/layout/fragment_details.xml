@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/details_scroll"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/details_scroll"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    tools:context=".DetailsActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,6 +14,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="5dp"
             android:orientation="horizontal" >
 
             <ImageView
@@ -22,7 +25,7 @@
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/content_description_poster"
                 android:maxWidth="150dp"
-                android:padding="5dp"
+                android:transitionName="moviePoster"
                 android:src="@drawable/stub" />
 
             <LinearLayout
@@ -36,6 +39,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/stub_title"
+                    android:transitionName="movieName"
                     android:textAppearance="?android:attr/textAppearanceLarge" />
 
                 <TextView

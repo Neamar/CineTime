@@ -12,8 +12,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.google.analytics.tracking.android.EasyTracker;
-
 import fr.neamar.cinetime.fragments.DetailsFragment;
 import fr.neamar.cinetime.ui.ImageLoader;
 
@@ -50,17 +48,4 @@ public class PosterViewerActivity extends Activity {
 		registerReceiver(receiver, new IntentFilter(POSTER_LOADED));
 		imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
 	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
-	}
-
 }
