@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -71,7 +72,7 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 	}
 
 	@Override
-	public void onItemSelected(int position, Fragment source) {
+	public void onItemSelected(int position, Fragment source, View currentView) {
 		if (source instanceof DetailsFragment) {
 			startActivity(new Intent(this, PosterViewerActivity.class));
 		}

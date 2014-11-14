@@ -1,7 +1,5 @@
 package fr.neamar.cinetime.fragments;
 
-import java.util.ArrayList;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -25,6 +23,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
@@ -63,7 +64,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
-		public void onItemSelected(int position, Fragment source) {
+		public void onItemSelected(int position, Fragment source, View currentView) {
 
 		}
 
@@ -208,7 +209,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		poster.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mCallbacks.onItemSelected(-1, DetailsFragment.this);
+				mCallbacks.onItemSelected(-1, DetailsFragment.this, null);
 			}
 		});
 
