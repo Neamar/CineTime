@@ -74,7 +74,8 @@ public class DetailsActivity extends FragmentActivity implements MoviesFragment.
 	@Override
 	public void onItemSelected(int position, Fragment source, View currentView) {
 		if (source instanceof DetailsFragment) {
-			startActivity(new Intent(this, PosterViewerActivity.class));
+			Intent intent = new Intent(this, PosterViewerActivity.class);
+			startActivity(intent);
 		}
 	}
 

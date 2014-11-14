@@ -179,18 +179,13 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 				details.putExtra(DetailsFragment.ARG_ITEM_ID, position);
 				details.putExtra(DetailsFragment.ARG_THEATER_NAME, theater);
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-						startActivity(details);
+					startActivity(details);
 				}
 				else {
 					// Animation time!
-					ActivityOptions options = null;
-					if (currentView != null) {
-				  final View moviePoster = currentView.findViewById(R.id.listitem_movie_poster);
-					  final View movieName = currentView.findViewById(R.id.listitem_movie_title);
-					  if (moviePoster != null) {
-						  options = ActivityOptions.makeSceneTransitionAnimation(this, Pair.create(moviePoster, "moviePoster"), Pair.create(movieName, "movieName"));
-						}
-					}
+					final View moviePoster = currentView.findViewById(R.id.listitem_movie_poster);
+					final View movieName = currentView.findViewById(R.id.listitem_movie_title);
+					ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, Pair.create(moviePoster, "moviePoster"), Pair.create(movieName, "movieName"));
 					startActivity(details, options.toBundle());
 				}
 			}

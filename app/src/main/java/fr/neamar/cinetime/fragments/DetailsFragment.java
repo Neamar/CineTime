@@ -209,7 +209,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		poster.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mCallbacks.onItemSelected(-1, DetailsFragment.this, null);
+				mCallbacks.onItemSelected(-1, DetailsFragment.this, v);
 			}
 		});
 
