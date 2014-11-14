@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 17
+    compileSdkVersion 21
     buildToolsVersion "21.0.0"
 
     defaultConfig {
         applicationId "fr.neamar.cinetime"
         minSdkVersion 7
-        targetSdkVersion 19
+        targetSdkVersion 21
     }
 
     buildTypes {
@@ -19,6 +19,5 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:18.0.0'
-    compile files('libs/libGoogleAnalyticsV2.jar')
+    compile 'com.android.support:support-v4:21.0.0'
 }

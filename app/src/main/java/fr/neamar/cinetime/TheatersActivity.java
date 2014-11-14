@@ -1,8 +1,5 @@
 package fr.neamar.cinetime;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ListActivity;
@@ -20,7 +17,8 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.analytics.tracking.android.EasyTracker;
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.neamar.cinetime.objects.Theater;
 
@@ -106,21 +104,10 @@ public abstract class TheatersActivity extends ListActivity {
 	}
 
 	@Override
-	protected void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
 	protected void onPause() {
 		super.onPause();
 		// Remove dialog when leaving activity
 		dialog = null;
-	}
-	@Override
-	protected void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
