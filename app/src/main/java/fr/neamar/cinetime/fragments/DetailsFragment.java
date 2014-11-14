@@ -20,7 +20,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,9 +48,9 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 	private ImageView poster;
 	private TextView certificate;
 	private TextView synopsis;
-	private ProgressBar pressRating;
+	private RatingBar pressRating;
 	private TextView pressRatingText;
-	private ProgressBar userRating;
+	private RatingBar userRating;
 	private TextView userRatingText;
 	public ImageLoader imageLoader;
 	protected String theater = "";
@@ -104,9 +104,9 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 		extra = (TextView) view.findViewById(R.id.details_extra);
 		display = (TextView) view.findViewById(R.id.details_display);
 		poster = (ImageView) view.findViewById(R.id.details_poster);
-		pressRating = (ProgressBar) view.findViewById(R.id.details_pressrating);
+		pressRating = (RatingBar) view.findViewById(R.id.details_pressrating);
 		pressRatingText = (TextView) view.findViewById(R.id.details_pressrating_text);
-		userRating = (ProgressBar) view.findViewById(R.id.details_userrating);
+		userRating = (RatingBar) view.findViewById(R.id.details_userrating);
 		userRatingText = (TextView) view.findViewById(R.id.details_userrating_text);
 		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
 		certificate = (TextView) view.findViewById(R.id.details_certificate);
