@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import fr.neamar.cinetime.fragments.DetailsEmptyFragment;
 import fr.neamar.cinetime.fragments.DetailsFragment;
@@ -51,6 +52,10 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
 				getSupportFragmentManager().beginTransaction().replace(R.id.file_detail_container, detailsFragment).commit();
 			}
 		}
+
+			Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+			setActionBar(toolbar);
+
 		// Title in action bar brings back one level
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getActionBar().setHomeButtonEnabled(true);

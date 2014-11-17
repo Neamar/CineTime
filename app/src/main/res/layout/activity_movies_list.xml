@@ -4,4 +4,5 @@
     android:name="fr.neamar.cinetime.fragments.MoviesFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MoviesActivity" />
+    tools:context=".MoviesActivity"
+    tools:layout="@layout/fragment_movies"/>
