@@ -1,7 +1,5 @@
 package fr.neamar.cinetime;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -9,8 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.ui.ImageLoader;
 
@@ -50,7 +51,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
 		TextView movieTitle = (TextView) v.findViewById(R.id.listitem_movie_title);
 		TextView movieExtra = (TextView) v.findViewById(R.id.listitem_movie_extra);
-		ProgressBar movieRating = (ProgressBar) v.findViewById(R.id.listitem_movie_rating);
+		RatingBar movieRating = (RatingBar) v.findViewById(R.id.listitem_movie_rating);
 		TextView movieDisplay = (TextView) v.findViewById(R.id.listitem_movie_display);
 		ImageView moviePoster = (ImageView) v.findViewById(R.id.listitem_movie_poster);
 
