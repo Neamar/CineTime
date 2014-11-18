@@ -1,0 +1,9 @@
+<resources>
+  <!-- inherit from the material theme -->
+  <style name="AppThemeToolbar" parent="android:Theme.Material.Light.NoActionBar">
+      <item name="android:windowActionBar">false</item>
+      <item name="android:colorPrimary">#ba0101</item>
+      <item name="android:colorPrimaryDark">#880101</item>
+      <item name="android:colorAccent">#ba0101</item>
+  </style>
+</resources>

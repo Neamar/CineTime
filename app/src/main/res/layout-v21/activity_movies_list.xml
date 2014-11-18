@@ -1,0 +1,31 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:background="#ba0101"
+        android:layout_height="wrap_content">
+        <Toolbar
+            android:id="@+id/toolbar"
+
+            android:theme="@android:style/ThemeOverlay.Material.Dark.ActionBar"
+            android:popupTheme="@android:style/Widget.Material.Light.ActionBar"
+            android:layout_width="match_parent"
+            android:transitionName="theaterName"
+            android:layout_height="?android:attr/actionBarSize">
+
+        </Toolbar>
+    </LinearLayout>
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/file_list"
+              android:name="fr.neamar.cinetime.fragments.MoviesFragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context=".MoviesActivity"
+              tools:layout="@layout/fragment_movies"/>
+</LinearLayout>

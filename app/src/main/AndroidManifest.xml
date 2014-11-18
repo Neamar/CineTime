@@ -68,6 +68,7 @@
             android:name=".MoviesActivity"
             android:exported="true"
             android:label="@string/title_activity_movies"
+            android:theme="@style/AppThemeToolbar"
             android:parentActivityName="fr.neamar.cinetime.TheatersFavoritesActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

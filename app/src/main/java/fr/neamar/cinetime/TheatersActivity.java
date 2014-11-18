@@ -2,6 +2,7 @@ package fr.neamar.cinetime;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.ActivityOptions;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -84,13 +85,22 @@ public abstract class TheatersActivity extends ListActivity {
 	}
 
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	protected void onListItemClick(ListView l, View currentView, int position, long id) {
 		Theater theater = getTheaters().get(position);
 
 		Intent intent = new Intent(this, MoviesActivity.class);
 		intent.putExtra("code", theater.code);
 		intent.putExtra("theater", theater.title);
-		startActivity(intent);
+
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+					startActivity(intent);
+			}
+			else {
+					// Animation time!
+					final View theaterName = currentView.findViewById(R.id.listitem_theater_name);
+					ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, theaterName, "theaterName");
+					startActivity(intent, options.toBundle());
+			}
 	}
 
 	@Override
