@@ -4,15 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <Toolbar
-        android:id="@+id/toolbar"
-        android:background="#ba0101"
-        android:theme="@android:style/ThemeOverlay.Material.Dark.ActionBar"
-        android:popupTheme="@android:style/Widget.Material.Light.ActionBar"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize">
+        android:background="#ba0101"
+        android:layout_height="wrap_content">
+        <Toolbar
+            android:id="@+id/toolbar"
 
-    </Toolbar>
+            android:theme="@android:style/ThemeOverlay.Material.Dark.ActionBar"
+            android:popupTheme="@android:style/Widget.Material.Light.ActionBar"
+            android:layout_width="match_parent"
+            android:transitionName="theaterName"
+            android:layout_height="?android:attr/actionBarSize">
+
+        </Toolbar>
+    </LinearLayout>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
