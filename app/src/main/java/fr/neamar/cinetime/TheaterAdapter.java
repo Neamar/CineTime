@@ -1,6 +1,7 @@
 package fr.neamar.cinetime;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +18,12 @@ import fr.neamar.cinetime.objects.Theater;
 
 public class TheaterAdapter extends ArrayAdapter<Theater> {
 
+    private LayoutInflater inflater;
+
     /**
      * Array list containing all the theaters currently displayed
      */
     public ArrayList<Theater> theaters = new ArrayList<Theater>();
-    private LayoutInflater inflater;
 
     public TheaterAdapter(Context context, int textViewResourceId, ArrayList<Theater> theaters) {
         super(context, textViewResourceId, theaters);
@@ -41,19 +43,21 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
         final Theater theater = theaters.get(position);
 
         TextView theaterName = (TextView) v.findViewById(R.id.listitem_theater_name);
-        TextView theaterLocation = (TextView) v.findViewById(R.id.listitem_theater_location);
+        theaterName.setText(theater.title);
 
-        TextView theaterDistance = (TextView) v.findViewById(R.id.listitem_theater_distance);
+
+        TextView theaterLocation = (TextView) v.findViewById(R.id.listitem_theater_location);
         if (theater.distance != -1) {
+            String distance;
             if (theater.distance < 1) {
                 long dist = Math.round(theater.distance * 1000);
-                theaterDistance.setText(String.valueOf(dist) + "m" + " - ");
+                distance = String.valueOf(dist) + "m";
             } else {
-                theaterDistance.setText(String.valueOf(new DecimalFormat("#.#").format(theater.distance)) + "km" + " - ");
+                distance = String.valueOf(new DecimalFormat("#.#").format(theater.distance)) + "km";
             }
-            theaterDistance.setVisibility(View.VISIBLE);
+            theaterLocation.setText(Html.fromHtml("<b>" + distance + "</b> - " + theater.location));
         } else {
-            theaterDistance.setVisibility(View.GONE);
+            theaterLocation.setText(theater.location);
         }
 
         final CheckBox fav = (CheckBox) v.findViewById(R.id.listitem_theater_fav);
@@ -72,8 +76,6 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
             }
         });
 
-        theaterName.setText(theater.title);
-        theaterLocation.setText(theater.location);
 
         return v;
     }

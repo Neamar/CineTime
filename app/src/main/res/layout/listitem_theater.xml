@@ -4,51 +4,41 @@
                 android:layout_height="match_parent"
                 android:descendantFocusability="blocksDescendants"
                 android:orientation="horizontal"
-                android:padding="5dp">
+                android:padding="10dp">
 
     <CheckBox
         android:id="@+id/listitem_theater_fav"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="5dp"
-        android:button="@android:drawable/btn_star"
+        android:button="@drawable/star"
+        android:layout_marginLeft="10dp"
         android:padding="5dp"/>
 
     <TextView
         android:id="@+id/listitem_theater_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/listitem_theater_fav"
-        android:ellipsize="marquee"
+        android:layout_toLeftOf="@+id/listitem_theater_fav"
+        android:ellipsize="end"
         android:singleLine="true"
         android:text="Theater name"
-        android:textAppearance="?android:attr/textAppearanceLarge"/>
-
-    <TextView
-        android:id="@+id/listitem_theater_distance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@+id/listitem_theater_name"
-        android:layout_toRightOf="@+id/listitem_theater_fav"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:text="Theater Distance"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@android:color/tertiary_text_dark"
         android:textStyle="bold"
-        android:visibility="gone"/>
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
 
     <TextView
         android:id="@+id/listitem_theater_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/listitem_theater_name"
-        android:layout_toRightOf="@+id/listitem_theater_distance"
+        android:layout_toLeftOf="@+id/listitem_theater_fav"
         android:ellipsize="marquee"
         android:singleLine="true"
         android:text="Theater location"
