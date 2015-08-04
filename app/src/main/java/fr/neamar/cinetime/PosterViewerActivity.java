@@ -17,35 +17,35 @@ import fr.neamar.cinetime.ui.ImageLoader;
 
 public class PosterViewerActivity extends Activity {
 
-	private ImageView poster;
-	public ImageLoader imageLoader;
-	public static String POSTER_LOADED = "fr.neamar.cinetime.POSTER_LOADED";
+    public static String POSTER_LOADED = "fr.neamar.cinetime.POSTER_LOADED";
+    public ImageLoader imageLoader;
+    private ImageView poster;
 
-	@SuppressLint("NewApi")
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    @SuppressLint("NewApi")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		setContentView(R.layout.poster_viewer);
-		imageLoader = ImageLoader.getInstance(this);
-		poster = (ImageView) findViewById(R.id.posterView);
-		findViewById(R.id.spinner).setVisibility(View.VISIBLE);
+        setContentView(R.layout.poster_viewer);
+        imageLoader = ImageLoader.getInstance(this);
+        poster = (ImageView) findViewById(R.id.posterView);
+        findViewById(R.id.spinner).setVisibility(View.VISIBLE);
 
-		BroadcastReceiver receiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				findViewById(R.id.spinner).setVisibility(View.INVISIBLE);
-				try {
-					unregisterReceiver(this);
-				} catch (IllegalArgumentException e) {
-					// Nothing
-				}
-			}
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                findViewById(R.id.spinner).setVisibility(View.INVISIBLE);
+                try {
+                    unregisterReceiver(this);
+                } catch (IllegalArgumentException e) {
+                    // Nothing
+                }
+            }
 
-		};
-		registerReceiver(receiver, new IntentFilter(POSTER_LOADED));
-		imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
-	}
+        };
+        registerReceiver(receiver, new IntentFilter(POSTER_LOADED));
+        imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
+    }
 }

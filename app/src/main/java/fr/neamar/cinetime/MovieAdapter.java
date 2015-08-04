@@ -17,74 +17,73 @@ import fr.neamar.cinetime.ui.ImageLoader;
 
 public class MovieAdapter extends ArrayAdapter<Movie> {
 
-	private Context context;
-	public ImageLoader imageLoader;
+    public ImageLoader imageLoader;
+    /**
+     * Array list containing all the movies currently displayed
+     */
+    public ArrayList<Movie> movies = new ArrayList<Movie>();
+    private Context context;
 
-	/**
-	 * Array list containing all the movies currently displayed
-	 */
-	public ArrayList<Movie> movies = new ArrayList<Movie>();
+    @SuppressWarnings("unchecked")
+    public MovieAdapter(Context ac, int textViewResourceId, ArrayList<Movie> movies) {
+        super(ac, textViewResourceId, movies);
+        this.context = ac;
+        this.movies = (ArrayList<Movie>) movies.clone();
+        imageLoader = ImageLoader.getInstance(getContext());
+    }
 
-	@SuppressWarnings("unchecked")
-	public MovieAdapter(Context ac, int textViewResourceId, ArrayList<Movie> movies) {
-		super(ac, textViewResourceId, movies);
-		this.context = ac;
-		this.movies = (ArrayList<Movie>) movies.clone();
-		imageLoader = ImageLoader.getInstance(getContext());
-	}
+    @Override
+    public int getCount() {
+        return movies.size();
+    }
 
-	@Override
-	public int getCount() {
-		return movies.size();
-	}
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v = convertView;
 
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		View v = convertView;
+        if (v == null) {
+            LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            v = vi.inflate(R.layout.listitem_movie, null);
+        }
 
-		if (v == null) {
-			LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			v = vi.inflate(R.layout.listitem_movie, null);
-		}
+        Movie movie = movies.get(position);
 
-		Movie movie = movies.get(position);
+        TextView movieTitle = (TextView) v.findViewById(R.id.listitem_movie_title);
+        TextView movieExtra = (TextView) v.findViewById(R.id.listitem_movie_extra);
+        RatingBar movieRating = (RatingBar) v.findViewById(R.id.listitem_movie_rating);
+        TextView movieDisplay = (TextView) v.findViewById(R.id.listitem_movie_display);
+        ImageView moviePoster = (ImageView) v.findViewById(R.id.listitem_movie_poster);
 
-		TextView movieTitle = (TextView) v.findViewById(R.id.listitem_movie_title);
-		TextView movieExtra = (TextView) v.findViewById(R.id.listitem_movie_extra);
-		RatingBar movieRating = (RatingBar) v.findViewById(R.id.listitem_movie_rating);
-		TextView movieDisplay = (TextView) v.findViewById(R.id.listitem_movie_display);
-		ImageView moviePoster = (ImageView) v.findViewById(R.id.listitem_movie_poster);
+        movieTitle.setText(movie.title);
 
-		movieTitle.setText(movie.title);
+        String description = movie.getDuration();
+        description += movie.getDisplayDetails();
 
-		String description = movie.getDuration();
-		description += movie.getDisplayDetails();
+        int rating = movie.getRating();
+        if (rating > 0) {
+            movieRating.setVisibility(View.VISIBLE);
+            movieRating.setProgress(movie.getRating());
+        } else {
+            movieRating.setVisibility(View.INVISIBLE);
+        }
 
-		int rating = movie.getRating();
-		if (rating > 0) {
-			movieRating.setVisibility(View.VISIBLE);
-			movieRating.setProgress(movie.getRating());
-		} else {
-			movieRating.setVisibility(View.INVISIBLE);
-		}
+        if (movie.displays.size() == 1 && movie.displays.get(0).theater == null) {
+            // Optimize layout when only one display available
+            description += movie.displays.get(0).getDisplayDetails();
+            movieDisplay.setText(Html.fromHtml(movie.displays.get(0).getDisplay()));
+        } else {
+            movieDisplay.setText(Html.fromHtml(movie.getDisplays()));
+        }
 
-		if (movie.displays.size() == 1 && movie.displays.get(0).theater == null) {
-			// Optimize layout when only one display available
-			description += movie.displays.get(0).getDisplayDetails();
-			movieDisplay.setText(Html.fromHtml(movie.displays.get(0).getDisplay()));
-		} else {
-			movieDisplay.setText(Html.fromHtml(movie.getDisplays()));
-		}
+        movieExtra.setText(Html.fromHtml(description));
+        imageLoader.DisplayImage(movie.poster, moviePoster, 1);
 
-		movieExtra.setText(Html.fromHtml(description));
-		imageLoader.DisplayImage(movie.poster, moviePoster, 1);
+        return v;
+    }
 
-		return v;
-	}
-
-	@Override
-	public void clear() {
-		movies.clear();
-		notifyDataSetChanged();
-	}
+    @Override
+    public void clear() {
+        movies.clear();
+        notifyDataSetChanged();
+    }
 }

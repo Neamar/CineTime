@@ -35,270 +35,267 @@ import fr.neamar.cinetime.ui.ImageLoader;
 
 public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
-	public static final String ARG_ITEM_ID = "item_id";
-	public static final String ARG_THEATER_NAME = "theater_name";
-	static public Movie displayedMovie;
+    public static final String ARG_ITEM_ID = "item_id";
+    public static final String ARG_THEATER_NAME = "theater_name";
+    static public Movie displayedMovie;
+    private static boolean toFinish = false;
+    private static Callbacks sDummyCallbacks = new Callbacks() {
+        @Override
+        public void onItemSelected(int position, Fragment source, View currentView) {
 
-	private Callbacks mCallbacks = sDummyCallbacks;
+        }
 
-	private int idItem;
-	private TextView title;
-	private TextView extra;
-	private TextView display;
-	private ImageView poster;
-	private TextView certificate;
-	private TextView synopsis;
-	private RatingBar pressRating;
-	private TextView pressRatingText;
-	private RatingBar userRating;
-	private TextView userRatingText;
-	public ImageLoader imageLoader;
-	protected String theater = "";
-	private LoadMovieTask mTask;
-	private boolean titleToSet = false;
-	private static boolean toFinish = false;
-	private ProgressDialog dialog = null;
+        @Override
+        public void setFragment(Fragment fragment) {
+        }
 
-	public DetailsFragment() {
-	}
+        @Override
+        public void setIsLoading(Boolean isLoading) {
+        }
 
-	private static Callbacks sDummyCallbacks = new Callbacks() {
-		@Override
-		public void onItemSelected(int position, Fragment source, View currentView) {
+        @Override
+        public void finishNoNetwork() {
+            toFinish = true;
+        }
+    };
+    public ImageLoader imageLoader;
+    protected String theater = "";
+    private Callbacks mCallbacks = sDummyCallbacks;
+    private int idItem;
+    private TextView title;
+    private TextView extra;
+    private TextView display;
+    private ImageView poster;
+    private TextView certificate;
+    private TextView synopsis;
+    private RatingBar pressRating;
+    private TextView pressRatingText;
+    private RatingBar userRating;
+    private TextView userRatingText;
+    private LoadMovieTask mTask;
+    private boolean titleToSet = false;
+    private ProgressDialog dialog = null;
 
-		}
+    public DetailsFragment() {
+    }
 
-		@Override
-		public void setFragment(Fragment fragment) {
-		}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.setRetainInstance(true);
+    }
 
-		@Override
-		public void setIsLoading(Boolean isLoading) {
-		}
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (displayedMovie != null && displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null) {
+            mTask = new LoadMovieTask(this);
+            mTask.execute(displayedMovie.code);
+        }
+    }
 
-		@Override
-		public void finishNoNetwork() {
-			toFinish = true;
-		}
-	};
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_details, container, false);
+        title = (TextView) view.findViewById(R.id.details_title);
+        extra = (TextView) view.findViewById(R.id.details_extra);
+        display = (TextView) view.findViewById(R.id.details_display);
+        poster = (ImageView) view.findViewById(R.id.details_poster);
+        pressRating = (RatingBar) view.findViewById(R.id.details_pressrating);
+        pressRatingText = (TextView) view.findViewById(R.id.details_pressrating_text);
+        userRating = (RatingBar) view.findViewById(R.id.details_userrating);
+        userRatingText = (TextView) view.findViewById(R.id.details_userrating_text);
+        synopsis = (TextView) view.findViewById(R.id.details_synopsis);
+        certificate = (TextView) view.findViewById(R.id.details_certificate);
+        if (displayedMovie != null) {
+            updateUI();
+        }
+        return view;
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		this.setRetainInstance(true);
-	}
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = sDummyCallbacks;
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		if (displayedMovie != null && displayedMovie.synopsis.equalsIgnoreCase("") && mTask == null) {
-			mTask = new LoadMovieTask(this);
-			mTask.execute(displayedMovie.code);
-		}
-	}
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (!(activity instanceof Callbacks)) {
+            throw new IllegalStateException("Activity must implement fragment's callbacks.");
+        }
+        imageLoader = ImageLoader.getInstance(getActivity());
+        mCallbacks = (Callbacks) activity;
+        mCallbacks.setFragment(this);
+        if (titleToSet) {
+            getActivity().setTitle(displayedMovie.title);
+            titleToSet = false;
+        }
+        if (toFinish) {
+            mCallbacks.finishNoNetwork();
+            toFinish = false;
+        }
+    }
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_details, container, false);
-		title = (TextView) view.findViewById(R.id.details_title);
-		extra = (TextView) view.findViewById(R.id.details_extra);
-		display = (TextView) view.findViewById(R.id.details_display);
-		poster = (ImageView) view.findViewById(R.id.details_poster);
-		pressRating = (RatingBar) view.findViewById(R.id.details_pressrating);
-		pressRatingText = (TextView) view.findViewById(R.id.details_pressrating_text);
-		userRating = (RatingBar) view.findViewById(R.id.details_userrating);
-		userRatingText = (TextView) view.findViewById(R.id.details_userrating_text);
-		synopsis = (TextView) view.findViewById(R.id.details_synopsis);
-		certificate = (TextView) view.findViewById(R.id.details_certificate);
-		if (displayedMovie != null) {
-			updateUI();
-		}
-		return view;
-	}
+    public void shareMovie() {
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, displayedMovie.getSharingText(theater));
 
-	@Override
-	public void onDetach() {
-		super.onDetach();
-		mCallbacks = sDummyCallbacks;
-	}
+        startActivity(Intent.createChooser(sharingIntent, "Partager le film..."));
+    }
 
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		if (!(activity instanceof Callbacks)) {
-			throw new IllegalStateException("Activity must implement fragment's callbacks.");
-		}
-		imageLoader = ImageLoader.getInstance(getActivity());
-		mCallbacks = (Callbacks) activity;
-		mCallbacks.setFragment(this);
-		if (titleToSet) {
-			getActivity().setTitle(displayedMovie.title);
-			titleToSet = false;
-		}
-		if (toFinish) {
-			mCallbacks.finishNoNetwork();
-			toFinish = false;
-		}
-	}
+    public void displayTrailer() {
+        class RetrieveTrailerTask extends AsyncTask<Movie, Void, String> {
+            @Override
+            protected String doInBackground(Movie... movies) {
+                return new APIHelper().downloadTrailerUrl(movies[0]);
+            }
 
-	public void shareMovie() {
-		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-		sharingIntent.setType("text/plain");
-		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, displayedMovie.getSharingText(theater));
+            @Override
+            protected void onPostExecute(String trailerUrl) {
 
-		startActivity(Intent.createChooser(sharingIntent, "Partager le film..."));
-	}
+                // Dismiss dialog
+                if (dialog != null) {
+                    try {
+                        dialog.dismiss();
+                    } catch (Exception e) {
 
-	public void displayTrailer() {
-		class RetrieveTrailerTask extends AsyncTask<Movie, Void, String> {
-			@Override
-			protected String doInBackground(Movie... movies) {
-				return new APIHelper().downloadTrailerUrl(movies[0]);
-			}
+                    }
+                }
 
-			@Override
-			protected void onPostExecute(String trailerUrl) {
+                if (trailerUrl == null && getActivity() != null) {
+                    Toast.makeText(getActivity(), "Woops ! La bande annonce ne semble pas disponible...", Toast.LENGTH_SHORT).show();
+                } else {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(getActivity(), "Vous devez avoir un lecteur vidéo pour afficher la bande-annonce de ce film.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }
 
-				// Dismiss dialog
-				if (dialog != null) {
-					try {
-						dialog.dismiss();
-					} catch (Exception e) {
+        new RetrieveTrailerTask().execute(DetailsFragment.displayedMovie);
+        dialog = new ProgressDialog(getActivity());
+        dialog.setMessage("Chargement de la bande annonce...");
+        dialog.show();
+    }
 
-					}
-				}
+    public void updateUI() {
+        title.setText(displayedMovie.title);
 
-				if (trailerUrl == null && getActivity() != null) {
-					Toast.makeText(getActivity(), "Woops ! La bande annonce ne semble pas disponible...", Toast.LENGTH_SHORT).show();
-				} else {
-					try {
-						Intent intent = new Intent(Intent.ACTION_VIEW);
-						intent.setDataAndType(Uri.parse(trailerUrl), "video/mp4");
-						startActivity(intent);
-					} catch (ActivityNotFoundException e) {
-						Toast.makeText(getActivity(), "Vous devez avoir un lecteur vidéo pour afficher la bande-annonce de ce film.", Toast.LENGTH_SHORT).show();
-					}
-				}
-			}
-		}
+        String extraString = "";
+        extraString += "<strong>Durée</strong> : " + displayedMovie.getDuration() + "<br />";
 
-		new RetrieveTrailerTask().execute(DetailsFragment.displayedMovie);
-		dialog = new ProgressDialog(getActivity());
-		dialog.setMessage("Chargement de la bande annonce...");
-		dialog.show();
-	}
+        if (!displayedMovie.directors.equals(""))
+            extraString += "<strong>Directeur</strong> : " + displayedMovie.directors + "<br />";
+        if (!displayedMovie.actors.equals(""))
+            extraString += "<strong>Acteurs</strong> : " + displayedMovie.actors + "<br />";
+        extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
+        extra.setText(Html.fromHtml(extraString));
+        display.setText(Html.fromHtml("<strong>" + theater + "</strong><br>" + displayedMovie.getDisplays()));
+        if (displayedMovie.certificateString.equals(""))
+            certificate.setVisibility(View.GONE);
+        else
+            certificate.setText(displayedMovie.certificateString);
+        imageLoader.DisplayImage(displayedMovie.poster, poster, 2);
+        poster.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallbacks.onItemSelected(-1, DetailsFragment.this, v);
+            }
+        });
 
-	public void updateUI() {
-		title.setText(displayedMovie.title);
+        pressRating.setProgress(displayedMovie.getPressRating());
+        if (displayedMovie.pressRating.equals("0"))
+            pressRatingText.setText("");
+        else if (displayedMovie.pressRating.length() > 3)
+            pressRatingText.setText(displayedMovie.pressRating.substring(0, 3));
+        else
+            pressRatingText.setText(displayedMovie.pressRating);
 
-		String extraString = "";
-		extraString += "<strong>Durée</strong> : " + displayedMovie.getDuration() + "<br />";
+        userRating.setProgress(displayedMovie.getUserRating());
+        if (displayedMovie.userRating.equals("0"))
+            userRatingText.setText("");
+        else if (displayedMovie.userRating.length() > 3)
+            userRatingText.setText(displayedMovie.userRating.substring(0, 3));
+        else
+            userRatingText.setText(displayedMovie.userRating);
 
-		if (!displayedMovie.directors.equals(""))
-			extraString += "<strong>Directeur</strong> : " + displayedMovie.directors + "<br />";
-		if (!displayedMovie.actors.equals(""))
-			extraString += "<strong>Acteurs</strong> : " + displayedMovie.actors + "<br />";
-		extraString += "<strong>Genre</strong> : " + displayedMovie.genres;
-		extra.setText(Html.fromHtml(extraString));
-		display.setText(Html.fromHtml("<strong>" + theater + "</strong><br>" + displayedMovie.getDisplays()));
-		if (displayedMovie.certificateString.equals(""))
-			certificate.setVisibility(View.GONE);
-		else
-			certificate.setText(displayedMovie.certificateString);
-		imageLoader.DisplayImage(displayedMovie.poster, poster, 2);
-		poster.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mCallbacks.onItemSelected(-1, DetailsFragment.this, v);
-			}
-		});
+        synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html.fromHtml(displayedMovie.synopsis));
+        if (getActivity() != null) {
+            getActivity().setTitle(displayedMovie.title);
+        } else {
+            titleToSet = true;
+        }
+    }
 
-		pressRating.setProgress(displayedMovie.getPressRating());
-		if (displayedMovie.pressRating.equals("0"))
-			pressRatingText.setText("");
-		else if (displayedMovie.pressRating.length() > 3)
-			pressRatingText.setText(displayedMovie.pressRating.substring(0, 3));
-		else
-			pressRatingText.setText(displayedMovie.pressRating);
+    @Override
+    public void updateListView(ArrayList<Movie> movies) {
+        // TODO Auto-generated method stub
+    }
 
-		userRating.setProgress(displayedMovie.getUserRating());
-		if (displayedMovie.userRating.equals("0"))
-			userRatingText.setText("");
-		else if (displayedMovie.userRating.length() > 3)
-			userRatingText.setText(displayedMovie.userRating.substring(0, 3));
-		else
-			userRatingText.setText(displayedMovie.userRating);
+    @Override
+    public void finishNoNetwork() {
+        mCallbacks.finishNoNetwork();
+    }
 
-		synopsis.setText(displayedMovie.synopsis.equals("") ? "Chargement du synopsis..." : Html.fromHtml(displayedMovie.synopsis));
-		if (getActivity() != null) {
-			getActivity().setTitle(displayedMovie.title);
-		} else {
-			titleToSet = true;
-		}
-	}
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+        if (getArguments().containsKey(ARG_ITEM_ID)) {
+            idItem = getArguments().getInt(ARG_ITEM_ID);
+            displayedMovie = MoviesFragment.getMovies().get(idItem);
+        }
+        if (getArguments().containsKey(ARG_THEATER_NAME)) {
+            theater = getArguments().getString(ARG_THEATER_NAME);
+        }
+    }
 
-	private class LoadMovieTask extends AsyncTask<String, Void, Movie> {
-		private SharedPreferences preferences;
-		private Context ctx;
+    private class LoadMovieTask extends AsyncTask<String, Void, Movie> {
+        private SharedPreferences preferences;
+        private Context ctx;
 
-		public LoadMovieTask(DetailsFragment fragment) {
-			super();
-			this.ctx = fragment.getActivity();
-			this.preferences = ctx.getSharedPreferences("synopsis", Context.MODE_PRIVATE);
-			mCallbacks.setIsLoading(true);
-		}
+        public LoadMovieTask(DetailsFragment fragment) {
+            super();
+            this.ctx = fragment.getActivity();
+            this.preferences = ctx.getSharedPreferences("synopsis", Context.MODE_PRIVATE);
+            mCallbacks.setIsLoading(true);
+        }
 
-		@Override
-		@SuppressLint("NewApi")
-		protected Movie doInBackground(String... queries) {
-			// Try to read synopsis from cache
-			String movieCode = displayedMovie.code;
-			String cache = preferences.getString(movieCode, "");
-			if (!cache.equals("")) {
-				Log.i("cache-hit", "Getting synopsis from cache for " + movieCode);
-				displayedMovie.synopsis = cache;
-			} else {
-				Log.i("cache-miss", "Remote loading synopsis for " + movieCode);
-				displayedMovie = (new APIHelper()).findMovie(displayedMovie);
-				String synopsis = displayedMovie.synopsis;
-				SharedPreferences.Editor ed = preferences.edit();
-				ed.putString(movieCode, synopsis);
-				ed.commit();
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-					new BackupManager(ctx).dataChanged();
-				}
-			}
+        @Override
+        @SuppressLint("NewApi")
+        protected Movie doInBackground(String... queries) {
+            // Try to read synopsis from cache
+            String movieCode = displayedMovie.code;
+            String cache = preferences.getString(movieCode, "");
+            if (!cache.equals("")) {
+                Log.i("cache-hit", "Getting synopsis from cache for " + movieCode);
+                displayedMovie.synopsis = cache;
+            } else {
+                Log.i("cache-miss", "Remote loading synopsis for " + movieCode);
+                displayedMovie = (new APIHelper()).findMovie(displayedMovie);
+                String synopsis = displayedMovie.synopsis;
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(movieCode, synopsis);
+                ed.commit();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                    new BackupManager(ctx).dataChanged();
+                }
+            }
 
-			return displayedMovie;
-		}
+            return displayedMovie;
+        }
 
-		@Override
-		protected void onPostExecute(Movie resultsList) {
-			mCallbacks.setIsLoading(false);
-			displayedMovie = resultsList;
-			updateUI();
-		}
-	}
-
-	@Override
-	public void updateListView(ArrayList<Movie> movies) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void finishNoNetwork() {
-		mCallbacks.finishNoNetwork();
-	}
-
-	@Override
-	public void setArguments(Bundle args) {
-		super.setArguments(args);
-		if (getArguments().containsKey(ARG_ITEM_ID)) {
-			idItem = getArguments().getInt(ARG_ITEM_ID);
-			displayedMovie = MoviesFragment.getMovies().get(idItem);
-		}
-		if (getArguments().containsKey(ARG_THEATER_NAME)) {
-			theater = getArguments().getString(ARG_THEATER_NAME);
-		}
-	}
+        @Override
+        protected void onPostExecute(Movie resultsList) {
+            mCallbacks.setIsLoading(false);
+            displayedMovie = resultsList;
+            updateUI();
+        }
+    }
 }

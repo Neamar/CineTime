@@ -1,10 +1,5 @@
 package fr.neamar.cinetime;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-import org.apache.http.client.ClientProtocolException;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,117 +13,123 @@ import android.provider.Settings;
 import android.text.format.Time;
 import android.view.Menu;
 import android.widget.TextView;
+
+import org.apache.http.client.ClientProtocolException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
 import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.objects.Theater;
 
 public class TheatersSearchGeoActivity extends TheatersActivity {
-	static final int WAITING_TO_ENABLE_LOCATION_PROVIDER = 0;
+    static final int WAITING_TO_ENABLE_LOCATION_PROVIDER = 0;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		((TextView) findViewById(android.R.id.empty)).setText("Aucun cinéma à proximité, utilisez la recherche.");
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ((TextView) findViewById(android.R.id.empty)).setText("Aucun cinéma à proximité, utilisez la recherche.");
 
-		setTitle("Cinémas à proximité");
+        setTitle("Cinémas à proximité");
 
-		if (hasRestoredFromNonConfigurationInstance) {
-			return;
-		}
+        if (hasRestoredFromNonConfigurationInstance) {
+            return;
+        }
 
-		retrieveLocation();
-	}
+        retrieveLocation();
+    }
 
-	public void retrieveLocation() {
-		final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		final boolean locationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    public void retrieveLocation() {
+        final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        final boolean locationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-		if (!hasLocationSupport()) {
-			return;
-		}
+        if (!hasLocationSupport()) {
+            return;
+        }
 
-		// Check location is enabled
-		if (!locationEnabled) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			Resources res = getResources();
-			builder.setMessage(res.getString(R.string.location_dialog_mess)).setCancelable(true).setPositiveButton(res.getString(R.string.location_dialog_ok), new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.cancel();
-					Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-					startActivityForResult(settingsIntent, WAITING_TO_ENABLE_LOCATION_PROVIDER);
-				}
-			}).setNegativeButton(res.getString(R.string.location_dialog_cancel), new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int id) {
-					onSearchRequested();
-					((TextView) findViewById(android.R.id.empty)).setText("Aucune information de localisation, utilisez la recherche.");
-					dialog.cancel();
-				}
-			});
-			builder.create().show();
-			return;
-		}
+        // Check location is enabled
+        if (!locationEnabled) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            Resources res = getResources();
+            builder.setMessage(res.getString(R.string.location_dialog_mess)).setCancelable(true).setPositiveButton(res.getString(R.string.location_dialog_ok), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                    Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivityForResult(settingsIntent, WAITING_TO_ENABLE_LOCATION_PROVIDER);
+                }
+            }).setNegativeButton(res.getString(R.string.location_dialog_cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    onSearchRequested();
+                    ((TextView) findViewById(android.R.id.empty)).setText("Aucune information de localisation, utilisez la recherche.");
+                    dialog.cancel();
+                }
+            });
+            builder.create().show();
+            return;
+        }
 
-		Location oldLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		Time t = new Time();
-		t.setToNow();
-		if (oldLocation != null && ((oldLocation.getTime() - t.toMillis(true)) < 3 * 60 * 60 * 1000)) {
-			new LoadTheatersTask().execute(String.valueOf(oldLocation.getLatitude()), String.valueOf(oldLocation.getLongitude()));
-		} else {
-			((TextView) findViewById(android.R.id.empty)).setText("Récupération de la position. Vous pouvez aussi effectuer directement une recherche pour un nom de cinéma.");
-			LocationListener listener = new LocationListener() {
-				@Override
-				public void onLocationChanged(Location location) {
-					new LoadTheatersTask().execute(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
-					locationManager.removeUpdates(this);
-				}
+        Location oldLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        Time t = new Time();
+        t.setToNow();
+        if (oldLocation != null && ((oldLocation.getTime() - t.toMillis(true)) < 3 * 60 * 60 * 1000)) {
+            new LoadTheatersTask().execute(String.valueOf(oldLocation.getLatitude()), String.valueOf(oldLocation.getLongitude()));
+        } else {
+            ((TextView) findViewById(android.R.id.empty)).setText("Récupération de la position. Vous pouvez aussi effectuer directement une recherche pour un nom de cinéma.");
+            LocationListener listener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    new LoadTheatersTask().execute(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+                    locationManager.removeUpdates(this);
+                }
 
-				@Override
-				public void onProviderDisabled(String provider) {
-				}
+                @Override
+                public void onProviderDisabled(String provider) {
+                }
 
-				@Override
-				public void onProviderEnabled(String provider) {
-				}
+                @Override
+                public void onProviderEnabled(String provider) {
+                }
 
-				@Override
-				public void onStatusChanged(String provider, int status, Bundle extras) {
-				}
-			};
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, listener);
-		}
-	}
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                }
+            };
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, listener);
+        }
+    }
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == WAITING_TO_ENABLE_LOCATION_PROVIDER) {
-			retrieveLocation();
-		}
-	}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == WAITING_TO_ENABLE_LOCATION_PROVIDER) {
+            retrieveLocation();
+        }
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		menu.findItem(R.id.menu_search_geo).setVisible(false);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.findItem(R.id.menu_search_geo).setVisible(false);
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	protected ArrayList<Theater> retrieveResults(String... queries) {
-		String lat = queries[0];
-		String lon = queries[1];
+    @Override
+    protected ArrayList<Theater> retrieveResults(String... queries) {
+        String lat = queries[0];
+        String lon = queries[1];
 
-		try {
-			return (new APIHelper().findTheatersGeo(lat, lon));
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        try {
+            return (new APIHelper().findTheatersGeo(lat, lon));
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-		return null;
-	}
+        return null;
+    }
 }

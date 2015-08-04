@@ -1,94 +1,94 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="fr.neamar.cinetime"
-    android:versionCode="33"
-    android:versionName="1.14" >
+<manifest package="fr.neamar.cinetime"
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          android:versionCode="33"
+          android:versionName="1.14">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <uses-feature
         android:name="android.hardware.location"
-        android:required="false" />
+        android:required="false"/>
     <uses-feature
         android:name="android.hardware.location.network"
-        android:required="false" />
+        android:required="false"/>
     <uses-feature
         android:name="android.hardware.touchscreen"
-        android:required="false" />
+        android:required="false"/>
 
     <application
         android:allowBackup="true"
         android:backupAgent=".CineTimeBackupHelper"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.backup.api_key"
-            android:value="AEdPqrEAAAAI6xma2ebswQfdPWQoetnvR-THa1FsUxOrkJOALA" />
+            android:value="AEdPqrEAAAAI6xma2ebswQfdPWQoetnvR-THa1FsUxOrkJOALA"/>
 
         <activity
             android:name=".TheatersFavoritesActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
             <meta-data
                 android:name="android.app.default_searchable"
-                android:value=".TheatersSearchActivity" />
+                android:value=".TheatersSearchActivity"/>
         </activity>
         <activity
             android:name=".TheatersSearchGeoActivity"
-            android:label="Theaters around me" >
+            android:label="Theaters around me">
             <meta-data
                 android:name="android.app.default_searchable"
-                android:value=".TheatersSearchActivity" />
+                android:value=".TheatersSearchActivity"/>
         </activity>
         <activity
             android:name=".TheatersSearchActivity"
             android:label="Search for theaters"
             android:launchMode="singleTop"
-            android:parentActivityName="fr.neamar.cinetime.TheatersFavoritesActivity" >
+            android:parentActivityName="fr.neamar.cinetime.TheatersFavoritesActivity">
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
+                <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
 
             <meta-data
                 android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
+                android:resource="@xml/searchable"/>
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="fr.neamar.cinetime.TheatersFavoritesActivity" />
+                android:value="fr.neamar.cinetime.TheatersFavoritesActivity"/>
         </activity>
         <activity
             android:name=".MoviesActivity"
             android:exported="true"
             android:label="@string/title_activity_movies"
-            android:parentActivityName="fr.neamar.cinetime.TheatersFavoritesActivity" >
+            android:parentActivityName="fr.neamar.cinetime.TheatersFavoritesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="fr.neamar.cinetime.TheatersFavoritesActivity" />
+                android:value="fr.neamar.cinetime.TheatersFavoritesActivity"/>
         </activity>
         <activity
             android:name=".DetailsActivity"
-            android:label="@string/title_activity_details" >
+            android:label="@string/title_activity_details">
         </activity>
         <activity
             android:name=".PosterViewerActivity"
-            android:label="@string/title_activity_details" >
+            android:label="@string/title_activity_details">
         </activity>
         <activity
             android:name=".ShortcutActivity"
             android:label="Accès direct aux séances"
-            android:theme="@android:style/Theme.Dialog" >
+            android:theme="@android:style/Theme.Dialog">
             <intent-filter>
-                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <action android:name="android.intent.action.CREATE_SHORTCUT"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
     </application>

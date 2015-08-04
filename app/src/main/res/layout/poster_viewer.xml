@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="@android:color/black" >
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/black"
+                android:gravity="center"
+                android:orientation="vertical">
 
     <ImageView
         android:id="@+id/posterView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/stub"
+        android:layout_gravity="center"
         android:scaleType="fitCenter"
-        android:transitionName="moviePoster"
-        android:layout_gravity="center"/>
+        android:src="@drawable/stub"
+        android:transitionName="moviePoster"/>
 
     <ProgressBar
         android:id="@+id/spinner"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_margin="15dp"
-        android:layout_height="50dp"
-        android:layout_width="50dp" 
         android:visibility="invisible"/>
 
 </RelativeLayout>
