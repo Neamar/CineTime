@@ -160,11 +160,6 @@ public class ImageLoader {
         return false;
     }
 
-    public void clearCache() {
-        posterCache.evictAll();
-        fileCache.clear();
-    }
-
     private String makeUrl(String baseUrl, int level) {
         String url = null;
         switch (level) {

@@ -1,4 +1,4 @@
-package fr.neamar.cinetime;
+package fr.neamar.cinetime.adapters;
 
 import android.content.Context;
 import android.text.Html;
@@ -13,6 +13,7 @@ import android.widget.Toast;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.db.DBHelper;
 import fr.neamar.cinetime.objects.Theater;
 

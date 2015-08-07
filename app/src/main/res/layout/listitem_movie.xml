@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="horizontal"
               android:padding="16dp">
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
-        android:orientation="vertical">
 
         <TextView
             android:id="@+id/listitem_movie_title"
@@ -17,12 +11,11 @@
             android:layout_height="wrap_content"
             android:text="@string/stub_title"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:transitionName="movieName"/>
+            android:transitionName="movieName"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/listitem_movie_poster"
+            android:layout_toStartOf="@+id/listitem_movie_poster"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
 
             <RatingBar
                 android:id="@+id/listitem_movie_rating"
@@ -35,32 +28,48 @@
                 android:numStars="5"
                 android:progressDrawable="@drawable/ratingbar_yellow"
                 android:rating="3"
-                android:stepSize="0.5"/>
+                android:stepSize="0.5"
+                android:layout_below="@+id/listitem_movie_title"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
 
             <TextView
                 android:id="@+id/listitem_movie_extra"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.00"
                 android:gravity="right"
-                android:text="@string/stub_extra"/>
-        </LinearLayout>
+                android:text="@string/stub_extra"
+                android:layout_below="@+id/listitem_movie_title"
+                android:layout_toLeftOf="@+id/listitem_movie_rating"
+                android:layout_alignRight="@+id/listitem_movie_title"
+                android:layout_alignEnd="@+id/listitem_movie_title"
+                android:layout_alignBottom="@+id/listitem_movie_rating"
+                android:layout_toRightOf="@+id/listitem_movie_rating"
+                android:layout_toEndOf="@+id/listitem_movie_rating"/>
 
         <TextView
             android:id="@+id/listitem_movie_display"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/stub_display"
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
-    </LinearLayout>
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_below="@+id/listitem_movie_rating"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:paddingTop="8dp"
+            android:layout_toLeftOf="@+id/listitem_movie_poster"
+            android:layout_toStartOf="@+id/listitem_movie_poster"/>
 
     <ImageView
         android:id="@+id/listitem_movie_poster"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:contentDescription="@string/content_description_poster"
         android:src="@drawable/stub"
-        android:transitionName="moviePoster"/>
+        android:transitionName="moviePoster"
+        android:layout_marginLeft="8dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"/>
 
-</LinearLayout>
+</RelativeLayout>

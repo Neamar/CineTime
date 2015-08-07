@@ -20,6 +20,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.neamar.cinetime.adapters.TheaterAdapter;
 import fr.neamar.cinetime.objects.Theater;
 
 public abstract class TheatersActivity extends ListActivity {
