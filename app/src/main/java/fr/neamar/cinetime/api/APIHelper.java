@@ -3,24 +3,24 @@ package fr.neamar.cinetime.api;
 import android.content.Context;
 import android.util.Log;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 
+import fr.neamar.cinetime.BuildConfig;
 import fr.neamar.cinetime.objects.Display;
 import fr.neamar.cinetime.objects.DisplayList;
 import fr.neamar.cinetime.objects.Movie;
@@ -47,37 +47,45 @@ public class APIHelper {
      * @param url
      * @return
      * @throws IOException
-     * @throws ClientProtocolException
      */
-    protected String downloadUrl(String url) throws ClientProtocolException, IOException {
+    protected String downloadUrl(String url) throws IOException {
         Log.v(TAG, "Downloading " + url);
 
-        // Create a new HTTP Client
-        DefaultHttpClient defaultClient = new DefaultHttpClient();
         // Setup the get request
-        HttpGet httpGetRequest = new HttpGet(url);
+        URL httpGetRequest = new URL(url);
 
-        // Execute the request in the client
-        HttpResponse httpResponse = defaultClient.execute(httpGetRequest);
+        HttpURLConnection urlConnection = (HttpURLConnection) httpGetRequest.openConnection();
+        InputStream is = urlConnection.getInputStream();
 
         // Grab the response
-        BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), "UTF-8"));
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 
-        StringBuilder builder = new StringBuilder();
-        String aux = "";
-        while ((aux = reader.readLine()) != null) {
-            builder.append(aux);
+            StringBuilder builder = new StringBuilder();
+            String aux = "";
+            while ((aux = reader.readLine()) != null) {
+                builder.append(aux);
+            }
+
+            return builder.toString();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
 
-        return builder.toString();
+        return "";
     }
 
-    protected JSONArray downloadTheatersList(String query) throws ClientProtocolException, IOException {
+    protected JSONArray downloadTheatersList(String query) throws IOException {
         String url;
         try {
             url = getBaseUrl("search") + "&filter=theater&q=" + URLEncoder.encode(query, "UTF-8") + "&count=25&format=json";
         } catch (UnsupportedEncodingException e1) {
             url = getBaseUrl("search") + "&filter=theater&q=" + query + "&count=25&format=json";
+        }
+
+        if(BuildConfig.USE_MOCKS) {
+            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinemas-search.json";
         }
 
         try {
@@ -99,12 +107,16 @@ public class APIHelper {
         }
     }
 
-    protected JSONArray downloadTheatersListGeo(String lat, String lon) throws ClientProtocolException, IOException {
+    protected JSONArray downloadTheatersListGeo(String lat, String lon) throws IOException {
         String url;
         try {
             url = getBaseUrl("theaterlist") + "&lat=" + URLEncoder.encode(lat, "UTF-8") + "&long=" + URLEncoder.encode(lon, "UTF-8") + "&radius=50" + "&count=25&format=json";
         } catch (UnsupportedEncodingException e1) {
             url = getBaseUrl("theaterlist") + "&lat=" + lat + "&long=" + lon + "&radius=25" + "&count=25&format=json";
+        }
+
+        if(BuildConfig.USE_MOCKS) {
+            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinemas-gps.json";
         }
 
         try {
@@ -133,9 +145,15 @@ public class APIHelper {
      * @return
      */
     public DisplayList downloadMoviesList(String theaterCode) {
+
         DisplayList displayList = new DisplayList();
 
         String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
+
+        if(BuildConfig.USE_MOCKS) {
+            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinema.json";
+        }
+
         String json;
         try {
             json = downloadUrl(url);
@@ -179,14 +197,14 @@ public class APIHelper {
             }
         } catch (JSONException e) {
             Log.e("JSON", "Error parsing JSON for " + theaterCode);
+            e.printStackTrace();
             // Keep our default empty array for displayList.jsonArray
         }
 
         return displayList;
     }
 
-    public ArrayList<Theater> findTheaters(String query) throws ClientProtocolException, IOException {
-
+    public ArrayList<Theater> findTheaters(String query) throws IOException {
         ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
         JSONArray jsonResults = downloadTheatersList(query);
@@ -210,7 +228,7 @@ public class APIHelper {
         return resultsList;
     }
 
-    public ArrayList<Theater> findTheatersGeo(String lat, String lon) throws ClientProtocolException, IOException {
+    public ArrayList<Theater> findTheatersGeo(String lat, String lon) throws IOException {
 
         ArrayList<Theater> resultsList = new ArrayList<Theater>();
 
@@ -238,6 +256,10 @@ public class APIHelper {
 
     protected JSONObject downloadMovie(String movieCode) {
         String url = getBaseUrl("movie") + "&code=" + movieCode + "&profile=small&format=json";
+
+        if(BuildConfig.USE_MOCKS) {
+            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/film.json";
+        }
 
         try {
             String json = downloadUrl(url);

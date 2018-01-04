@@ -124,9 +124,7 @@ public abstract class TheatersActivity extends ListActivity {
     protected void setTheaters(ArrayList<Theater> theaters) {
         setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            invalidateOptionsMenu();
-        }
+        invalidateOptionsMenu();
     }
 
     protected abstract ArrayList<Theater> retrieveResults(String... queries);
@@ -134,10 +132,7 @@ public abstract class TheatersActivity extends ListActivity {
     @SuppressLint("InlinedApi")
     protected boolean hasLocationSupport() {
         PackageManager pm = getPackageManager();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-            return pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
-        }
-        return false;
+        return pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
     }
 
     protected class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
