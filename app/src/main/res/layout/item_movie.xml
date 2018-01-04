@@ -63,8 +63,8 @@
 
     <ImageView
         android:id="@+id/listitem_movie_poster"
-        android:layout_width="100dp"
-        android:layout_height="150dp"
+        android:layout_width="@dimen/poster_size_full"
+        android:layout_height="@dimen/poster_size_height_list"
         android:contentDescription="@string/content_description_poster"
         android:src="@drawable/stub"
         android:transitionName="moviePoster"

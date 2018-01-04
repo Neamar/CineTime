@@ -78,7 +78,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         }
 
         movieExtra.setText(Html.fromHtml(description));
-        imageLoader.displayImage(movie.getPosterUrl(1), moviePoster);
+        imageLoader.displayImage(movie.getPosterUrl(2), moviePoster);
         return v;
     }
 

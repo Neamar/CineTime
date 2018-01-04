@@ -19,7 +19,7 @@
 
             <ImageView
                 android:id="@+id/details_poster"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/poster_size_full"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:adjustViewBounds="true"
