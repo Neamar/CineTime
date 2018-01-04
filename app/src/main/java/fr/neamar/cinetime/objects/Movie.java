@@ -103,7 +103,7 @@ public class Movie implements Comparable<Movie> {
                 url = "http://images.allocine.fr/r_150_500" + poster;
                 break;
             case 2:
-                url = "http://images.allocine.fr/r_200_666" + poster;
+                url = "http://images.allocine.fr/r_300_999" + poster;
                 break;
             case 3:
                 url = "http://images.allocine.fr/r_720_2400" + poster;
