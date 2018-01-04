@@ -27,6 +27,7 @@ import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
+    static final String TAG = "APIHelper";
 
     protected Context ctx;
 
@@ -49,6 +50,8 @@ public class APIHelper {
      * @throws ClientProtocolException
      */
     protected String downloadUrl(String url) throws ClientProtocolException, IOException {
+        Log.v(TAG, "Downloading " + url);
+
         // Create a new HTTP Client
         DefaultHttpClient defaultClient = new DefaultHttpClient();
         // Setup the get request

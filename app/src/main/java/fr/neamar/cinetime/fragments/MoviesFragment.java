@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import fr.neamar.cinetime.MovieAdapter;
+import fr.neamar.cinetime.adapters.MovieAdapter;
 import fr.neamar.cinetime.MoviesActivity;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;

@@ -1,4 +1,4 @@
-package fr.neamar.cinetime;
+package fr.neamar.cinetime.adapters;
 
 import android.content.Context;
 import android.text.Html;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.ui.ImageLoader;
 
