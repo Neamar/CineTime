@@ -44,7 +44,7 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
-        if (requestCode == ON_LOCATION_PERMISSION_CHANGED) {
+        if (requestCode == ON_LOCATION_PERMISSION_CHANGED && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             retrieveLocation();
         }
     }
