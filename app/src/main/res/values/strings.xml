@@ -34,5 +34,6 @@
     <string name="aucune_connexion_internet">Aucune connexion Internet :\\</string>
     <string name="aucune_info_localisation">Aucune information de localisation, utilisez la recherche.</string>
     <string name="recuperation_position">Récupération de la position. Vous pouvez aussi effectuer directement une recherche pour un nom de cinéma.</string>
+    <string name="aucune_seance">Aucune séance.</string>
 
 </resources>
