@@ -1,11 +1,7 @@
 package fr.neamar.cinetime;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -13,15 +9,12 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import fr.neamar.cinetime.fragments.DetailsFragment;
 
 public class PosterViewerActivity extends Activity {
-
-    public static String POSTER_LOADED = "fr.neamar.cinetime.POSTER_LOADED";
-    public ImageLoader imageLoader;
-
-    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,19 +25,26 @@ public class PosterViewerActivity extends Activity {
         ImageView poster = findViewById(R.id.posterView);
         findViewById(R.id.spinner).setVisibility(View.VISIBLE);
 
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        ImageLoader.getInstance().displayImage(DetailsFragment.displayedMovie.getPosterUrl(3), poster, new ImageLoadingListener() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                findViewById(R.id.spinner).setVisibility(View.INVISIBLE);
-                try {
-                    unregisterReceiver(this);
-                } catch (IllegalArgumentException e) {
-                    // Nothing
-                }
+            public void onLoadingStarted(String imageUri, View view) {
+
             }
 
-        };
-        registerReceiver(receiver, new IntentFilter(POSTER_LOADED));
-        ImageLoader.getInstance().displayImage(DetailsFragment.displayedMovie.getPosterUrl(3), poster);
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                findViewById(R.id.spinner).setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                findViewById(R.id.spinner).setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+
+            }
+        });
     }
 }
