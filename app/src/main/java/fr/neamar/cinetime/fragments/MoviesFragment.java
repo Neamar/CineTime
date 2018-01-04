@@ -210,7 +210,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
         MoviesFragment.currentMovies = movies;
         this.movies = movies;
         if (getActivity() != null) {
-            setListAdapter(new MovieAdapter(getActivity(), R.layout.listitem_theater, movies));
+            setListAdapter(new MovieAdapter(getActivity(), R.layout.item_theater, movies));
         } else {
             toUpdate = true;
         }

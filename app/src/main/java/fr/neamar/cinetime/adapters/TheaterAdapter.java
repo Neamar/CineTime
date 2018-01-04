@@ -38,7 +38,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
         View v = convertView;
 
         if (v == null) {
-            v = inflater.inflate(R.layout.listitem_theater, null);
+            v = inflater.inflate(R.layout.item_theater, null);
         }
 
         final Theater theater = theaters.get(position);

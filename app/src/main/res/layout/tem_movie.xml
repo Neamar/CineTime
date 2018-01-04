@@ -14,7 +14,8 @@
             android:transitionName="movieName"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@+id/listitem_movie_poster"
-            android:layout_toStartOf="@+id/listitem_movie_poster"/>
+            android:layout_toStartOf="@+id/listitem_movie_poster"
+            android:layout_alignParentStart="true" />
 
 
             <RatingBar
@@ -26,7 +27,6 @@
                 android:isIndicator="true"
                 android:max="5"
                 android:numStars="5"
-                android:progressDrawable="@drawable/ratingbar_yellow"
                 android:rating="3"
                 android:stepSize="0.5"
                 android:layout_below="@+id/listitem_movie_title"
@@ -37,7 +37,7 @@
                 android:id="@+id/listitem_movie_extra"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="right"
+                android:gravity="end"
                 android:text="@string/stub_extra"
                 android:layout_below="@+id/listitem_movie_title"
                 android:layout_toLeftOf="@+id/listitem_movie_rating"
@@ -45,7 +45,8 @@
                 android:layout_alignEnd="@+id/listitem_movie_title"
                 android:layout_alignBottom="@+id/listitem_movie_rating"
                 android:layout_toRightOf="@+id/listitem_movie_rating"
-                android:layout_toEndOf="@+id/listitem_movie_rating"/>
+                android:layout_toEndOf="@+id/listitem_movie_rating"
+                android:layout_toStartOf="@+id/listitem_movie_rating" />
 
         <TextView
             android:id="@+id/listitem_movie_display"
@@ -70,6 +71,8 @@
         android:transitionName="moviePoster"
         android:layout_marginLeft="8dp"
         android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="8dp"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

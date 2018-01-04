@@ -37,7 +37,7 @@ public abstract class TheatersActivity extends ListActivity {
 
         ArrayList<Theater> theaters = (ArrayList<Theater>) getLastNonConfigurationInstance();
         if (theaters != null) {
-            setListAdapter(new TheaterAdapter(this, R.layout.listitem_theater, theaters));
+            setListAdapter(new TheaterAdapter(this, R.layout.item_theater, theaters));
             hasRestoredFromNonConfigurationInstance = true;
         }
     }
@@ -122,7 +122,7 @@ public abstract class TheatersActivity extends ListActivity {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     protected void setTheaters(ArrayList<Theater> theaters) {
-        setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+        setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.item_theater, theaters));
 
         invalidateOptionsMenu();
     }

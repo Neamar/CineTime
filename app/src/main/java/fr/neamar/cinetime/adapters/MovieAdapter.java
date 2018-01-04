@@ -44,7 +44,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
         if (v == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.listitem_movie, null);
+            v = vi.inflate(R.layout.tem_movie, null);
         }
 
         Movie movie = movies.get(position);
