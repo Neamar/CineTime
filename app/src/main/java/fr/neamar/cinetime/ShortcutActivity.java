@@ -24,7 +24,7 @@ public class ShortcutActivity extends ListActivity {
         theaters = DBHelper.getFavorites(this);
 
         if (theaters.size() > 0) {
-            setListAdapter(new ArrayAdapter<Theater>(this, android.R.layout.simple_list_item_1, theaters));
+            setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, theaters));
         } else {
             Toast.makeText(this, "Ajoutez un cinéma aux favoris pour l'ajouter directement à l'écran d'accueil.", Toast.LENGTH_LONG).show();
             finish();

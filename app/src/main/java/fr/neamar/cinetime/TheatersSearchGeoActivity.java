@@ -4,17 +4,18 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.format.Time;
 import android.view.Menu;
 import android.widget.TextView;
-
-import org.apache.http.client.ClientProtocolException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import fr.neamar.cinetime.objects.Theater;
 
 public class TheatersSearchGeoActivity extends TheatersActivity {
     static final int WAITING_TO_ENABLE_LOCATION_PROVIDER = 0;
+    static final int ON_LOCATION_PERMISSION_CHANGED = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +41,20 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
         retrieveLocation();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        if (requestCode == ON_LOCATION_PERMISSION_CHANGED) {
+            retrieveLocation();
+        }
+    }
+
     public void retrieveLocation() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, ON_LOCATION_PERMISSION_CHANGED);
+            return;
+        }
+
         final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         final boolean locationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
@@ -62,7 +77,7 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {
                     onSearchRequested();
-                    ((TextView) findViewById(android.R.id.empty)).setText("Aucune information de localisation, utilisez la recherche.");
+                    ((TextView) findViewById(android.R.id.empty)).setText(R.string.aucune_info_localisation);
                     dialog.cancel();
                 }
             });
@@ -76,7 +91,7 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
         if (oldLocation != null && ((oldLocation.getTime() - t.toMillis(true)) < 3 * 60 * 60 * 1000)) {
             new LoadTheatersTask().execute(String.valueOf(oldLocation.getLatitude()), String.valueOf(oldLocation.getLongitude()));
         } else {
-            ((TextView) findViewById(android.R.id.empty)).setText("Récupération de la position. Vous pouvez aussi effectuer directement une recherche pour un nom de cinéma.");
+            ((TextView) findViewById(android.R.id.empty)).setText(R.string.recuperation_position);
             LocationListener listener = new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
@@ -122,9 +137,6 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
 
         try {
             return (new APIHelper().findTheatersGeo(lat, lon));
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

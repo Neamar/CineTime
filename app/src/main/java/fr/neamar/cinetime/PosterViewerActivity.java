@@ -19,7 +19,6 @@ public class PosterViewerActivity extends Activity {
 
     public static String POSTER_LOADED = "fr.neamar.cinetime.POSTER_LOADED";
     public ImageLoader imageLoader;
-    private ImageView poster;
 
     @SuppressLint("NewApi")
     @Override
@@ -30,7 +29,7 @@ public class PosterViewerActivity extends Activity {
 
         setContentView(R.layout.poster_viewer);
         imageLoader = ImageLoader.getInstance(this);
-        poster = (ImageView) findViewById(R.id.posterView);
+        ImageView poster = findViewById(R.id.posterView);
         findViewById(R.id.spinner).setVisibility(View.VISIBLE);
 
         BroadcastReceiver receiver = new BroadcastReceiver() {

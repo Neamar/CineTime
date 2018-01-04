@@ -9,8 +9,6 @@ import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import org.apache.http.client.ClientProtocolException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -63,9 +61,6 @@ public class TheatersSearchActivity extends TheatersActivity {
     protected ArrayList<Theater> retrieveResults(String... queries) {
         try {
             return (new APIHelper().findTheaters(queries[0]));
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
