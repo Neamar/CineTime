@@ -8,12 +8,17 @@ public class Display implements Comparable<Display> {
     public Boolean isOriginalLanguage;
     public Boolean is3D = false;
     public Boolean isIMAX = false;
+    private String cachedDisplay = null;
 
     public String getDisplayDetails() {
         return (theater != null ? "<small>" + theater + "</small>" : "") + (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
     }
 
     public String getDisplay() {
+        if(cachedDisplay != null) {
+            return cachedDisplay;
+        }
+
         String optimisedDisplay = display;
         // "Séances du"
         optimisedDisplay = optimisedDisplay.replaceAll("Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-zéû]+ 20[0-9]{2} :", "$1 $2 :");
@@ -62,6 +67,7 @@ public class Display implements Comparable<Display> {
             optimisedDisplay = optimisedDisplay.substring(0, optimisedDisplay.length() - 4);
         }
 
+        cachedDisplay = optimisedDisplay;
         return optimisedDisplay;
     }
 
