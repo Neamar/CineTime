@@ -20,6 +20,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.neamar.cinetime.adapters.TheaterAdapter;
 import fr.neamar.cinetime.objects.Theater;
 
 public abstract class TheatersActivity extends ListActivity {
@@ -36,7 +37,7 @@ public abstract class TheatersActivity extends ListActivity {
 
         ArrayList<Theater> theaters = (ArrayList<Theater>) getLastNonConfigurationInstance();
         if (theaters != null) {
-            setListAdapter(new TheaterAdapter(this, R.layout.listitem_theater, theaters));
+            setListAdapter(new TheaterAdapter(this, R.layout.item_theater, theaters));
             hasRestoredFromNonConfigurationInstance = true;
         }
     }
@@ -66,7 +67,7 @@ public abstract class TheatersActivity extends ListActivity {
                 ArrayList<Theater> theaters = getTheaters();
                 List<Theater> unified = theaters.subList(0, Math.min(7, theaters.size()));
 
-                ArrayList<String> codes = new ArrayList<String>();
+                ArrayList<String> codes = new ArrayList<>();
                 for (Theater t : unified) {
                     codes.add(t.code);
                 }
@@ -115,17 +116,15 @@ public abstract class TheatersActivity extends ListActivity {
         if (adapter != null) {
             return adapter.theaters;
         } else {
-            return new ArrayList<Theater>();
+            return new ArrayList<>();
         }
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     protected void setTheaters(ArrayList<Theater> theaters) {
-        setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.listitem_theater, theaters));
+        setListAdapter(new TheaterAdapter(TheatersActivity.this, R.layout.item_theater, theaters));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            invalidateOptionsMenu();
-        }
+        invalidateOptionsMenu();
     }
 
     protected abstract ArrayList<Theater> retrieveResults(String... queries);
@@ -133,14 +132,11 @@ public abstract class TheatersActivity extends ListActivity {
     @SuppressLint("InlinedApi")
     protected boolean hasLocationSupport() {
         PackageManager pm = getPackageManager();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-            return pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
-        }
-        return false;
+        return pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
     }
 
     protected class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
-        public LoadTheatersTask() {
+        LoadTheatersTask() {
             super();
         }
 
@@ -168,7 +164,7 @@ public abstract class TheatersActivity extends ListActivity {
             if (theaters != null) {
                 setTheaters(theaters);
             } else {
-                ((TextView) findViewById(android.R.id.empty)).setText("Aucune connexion Internet :\\");
+                ((TextView) findViewById(android.R.id.empty)).setText(R.string.aucune_connexion_internet);
             }
         }
     }

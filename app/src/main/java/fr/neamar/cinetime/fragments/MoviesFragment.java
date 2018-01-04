@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import fr.neamar.cinetime.MovieAdapter;
+import fr.neamar.cinetime.adapters.MovieAdapter;
 import fr.neamar.cinetime.MoviesActivity;
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.api.APIHelper;
@@ -104,7 +104,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
         TextView text = new TextView(getActivity());
         text.setText(Html.fromHtml("<small><strong>TLJ</strong> : Tous Les Jours (jusqu'à mardi inclus)"));
         text.setGravity(Gravity.CENTER_HORIZONTAL);
-        ListView list = (ListView) getActivity().findViewById(android.R.id.list);
+        ListView list = getActivity().findViewById(android.R.id.list);
         list.addFooterView(text, null, false);
 
         if (movies == null && mTask == null) {
@@ -210,7 +210,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
         MoviesFragment.currentMovies = movies;
         this.movies = movies;
         if (getActivity() != null) {
-            setListAdapter(new MovieAdapter(getActivity(), R.layout.listitem_theater, movies));
+            setListAdapter(new MovieAdapter(getActivity(), R.layout.item_theater, movies));
         } else {
             toUpdate = true;
         }
@@ -245,7 +245,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
         private Boolean remoteDataHasChangedFromLocalCache = true;
 
-        public LoadMoviesTask(MoviesFragment fragment, String theaterCode) {
+        LoadMoviesTask(MoviesFragment fragment, String theaterCode) {
             super();
             this.fragment = fragment;
             this.ctx = fragment.getActivity();
@@ -279,7 +279,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
 
         @Override
         protected DisplayList doInBackground(String... queries) {
-            if (theaterCode != queries[0]) {
+            if (!theaterCode.equals(queries[0])) {
                 throw new RuntimeException("Fragment misuse: theaterCode differs");
             }
             DisplayList displayList = (new APIHelper()).downloadMoviesList(theaterCode);
@@ -298,7 +298,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
                 SharedPreferences.Editor ed = ctx.getSharedPreferences("theater-cache", Context.MODE_PRIVATE).edit();
                 ed.putString(theaterCode, jsonResults.toString());
                 ed.putLong(theaterCode + "-date", new Date().getTime());
-                ed.commit();
+                ed.apply();
                 remoteDataHasChangedFromLocalCache = true;
             }
 
@@ -335,7 +335,7 @@ public class MoviesFragment extends ListFragment implements TaskMoviesCallbacks 
                     remoteDataHasChangedFromLocalCache = false;
                 } else {
                     TextView emptyText = (TextView) getActivity().findViewById(android.R.id.empty);
-                    emptyText.setText("Aucune connexion Internet.");
+                    emptyText.setText(R.string.aucune_connexion_internet);
                 }
             }
 

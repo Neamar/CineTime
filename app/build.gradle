@@ -1,23 +1,25 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.0.0"
+    compileSdkVersion 27
 
     defaultConfig {
         applicationId "fr.neamar.cinetime"
-        minSdkVersion 7
-        targetSdkVersion 21
+        minSdkVersion 14
+        targetSdkVersion 27
+        buildConfigField "Boolean", "USE_MOCKS", "false"
     }
 
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
+            buildConfigField "Boolean", "USE_MOCKS", "false"
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:21.0.0'
+    compile 'com.android.support:support-v4:27.0.2'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 }

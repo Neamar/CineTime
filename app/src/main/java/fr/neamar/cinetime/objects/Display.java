@@ -8,12 +8,17 @@ public class Display implements Comparable<Display> {
     public Boolean isOriginalLanguage;
     public Boolean is3D = false;
     public Boolean isIMAX = false;
+    private String cachedDisplay = null;
 
     public String getDisplayDetails() {
         return (theater != null ? "<small>" + theater + "</small>" : "") + (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
     }
 
     public String getDisplay() {
+        if(cachedDisplay != null) {
+            return cachedDisplay;
+        }
+
         String optimisedDisplay = display;
         // "Séances du"
         optimisedDisplay = optimisedDisplay.replaceAll("Séances du ([a-z]{2})[a-z]+ ([0-9]+) [a-zéû]+ 20[0-9]{2} :", "$1 $2 :");
@@ -48,13 +53,13 @@ public class Display implements Comparable<Display> {
 
             days = optimisedDisplay.split("\r\n");
             optimisedDisplay = "";
-            for (int i = 0; i < days.length; i++) {
-                if (!days[i].contains(" " + today + " :")) {
-                    optimisedDisplay += lowlightDay(days[i]) + "<br>";
+            for (String day : days) {
+                if (!day.contains(" " + today + " :")) {
+                    optimisedDisplay += lowlightDay(day) + "<br>";
                 } else {
                     // Note : it isn't "+=", but "=" : we remove past entries.
                     // Space required to fixing trimming bug.
-                    optimisedDisplay = lowlightHour(days[i]) + " <br>";
+                    optimisedDisplay = lowlightHour(day) + " <br>";
                 }
             }
 
@@ -62,14 +67,15 @@ public class Display implements Comparable<Display> {
             optimisedDisplay = optimisedDisplay.substring(0, optimisedDisplay.length() - 4);
         }
 
+        cachedDisplay = optimisedDisplay;
         return optimisedDisplay;
     }
 
-    protected String lowlightDay(String day) {
+    private String lowlightDay(String day) {
         return "<font color=\"silver\">" + day + "</font>";
     }
 
-    protected String lowlightHour(String day) {
+    private String lowlightHour(String day) {
         // Today : lowlight display in the past hours
         Calendar now = Calendar.getInstance();
         int current_hour = now.get(Calendar.HOUR_OF_DAY);
@@ -78,12 +84,12 @@ public class Display implements Comparable<Display> {
         String[] hours = day.replaceAll(".+ : ", "").split(" ");
 
         String nextVisibleDisplay = "$"; // By default, last one.
-        for (int j = 0; j < hours.length; j++) {
-            String[] parts = hours[j].split(":");
+        for (String hour1 : hours) {
+            String[] parts = hour1.split(":");
             int hour = Integer.parseInt(parts[0]);
             int minute = Integer.parseInt(parts[1]);
             if (hour > current_hour || (hour == current_hour && minute > current_minute)) {
-                nextVisibleDisplay = hours[j];
+                nextVisibleDisplay = hour1;
                 break;
             }
         }
@@ -97,7 +103,7 @@ public class Display implements Comparable<Display> {
      *
      * @return abstract value for comparison
      */
-    public int toInteger() {
+    private int toInteger() {
         int v = 0;
         v += this.isIMAX ? 10 : 0;
         v += this.is3D ? 100 : 0;

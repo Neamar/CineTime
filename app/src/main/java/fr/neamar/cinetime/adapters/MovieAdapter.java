@@ -1,4 +1,4 @@
-package fr.neamar.cinetime;
+package fr.neamar.cinetime.adapters;
 
 import android.content.Context;
 import android.text.Html;
@@ -10,18 +10,20 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import java.util.ArrayList;
 
+import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.objects.Movie;
-import fr.neamar.cinetime.ui.ImageLoader;
 
 public class MovieAdapter extends ArrayAdapter<Movie> {
+    ImageLoader imageLoader;
 
-    public ImageLoader imageLoader;
     /**
      * Array list containing all the movies currently displayed
      */
-    public ArrayList<Movie> movies = new ArrayList<Movie>();
+    private ArrayList<Movie> movies = new ArrayList<Movie>();
     private Context context;
 
     @SuppressWarnings("unchecked")
@@ -29,7 +31,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         super(ac, textViewResourceId, movies);
         this.context = ac;
         this.movies = (ArrayList<Movie>) movies.clone();
-        imageLoader = ImageLoader.getInstance(getContext());
+        imageLoader = ImageLoader.getInstance();
     }
 
     @Override
@@ -43,16 +45,16 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
         if (v == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.listitem_movie, null);
+            v = vi.inflate(R.layout.item_movie, null);
         }
 
         Movie movie = movies.get(position);
 
-        TextView movieTitle = (TextView) v.findViewById(R.id.listitem_movie_title);
-        TextView movieExtra = (TextView) v.findViewById(R.id.listitem_movie_extra);
-        RatingBar movieRating = (RatingBar) v.findViewById(R.id.listitem_movie_rating);
-        TextView movieDisplay = (TextView) v.findViewById(R.id.listitem_movie_display);
-        ImageView moviePoster = (ImageView) v.findViewById(R.id.listitem_movie_poster);
+        TextView movieTitle = v.findViewById(R.id.listitem_movie_title);
+        TextView movieExtra = v.findViewById(R.id.listitem_movie_extra);
+        RatingBar movieRating = v.findViewById(R.id.listitem_movie_rating);
+        TextView movieDisplay = v.findViewById(R.id.listitem_movie_display);
+        ImageView moviePoster = v.findViewById(R.id.listitem_movie_poster);
 
         movieTitle.setText(movie.title);
 
@@ -76,8 +78,8 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         }
 
         movieExtra.setText(Html.fromHtml(description));
-        imageLoader.DisplayImage(movie.poster, moviePoster, 1);
-
+        moviePoster.setImageResource(R.drawable.stub);
+        imageLoader.displayImage(movie.getPosterUrl(2), moviePoster);
         return v;
     }
 

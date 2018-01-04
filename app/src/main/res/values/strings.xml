@@ -31,5 +31,9 @@
     <string name="stub_rating">3.2</string>
     <string name="stub_certificate">Déconseillé au moins de 10 ans.</string>
     <string name="stub_synopsis">Les aventures de Bilbon Sacquet, entraîné dans une quête héroïque pour reprendre le Royaume perdu des nains d’Erebor, conquis longtemps auparavant par le dragon Smaug.</string>
+    <string name="aucune_connexion_internet">Aucune connexion Internet :\\</string>
+    <string name="aucune_info_localisation">Aucune information de localisation, utilisez la recherche.</string>
+    <string name="recuperation_position">Récupération de la position. Vous pouvez aussi effectuer directement une recherche pour un nom de cinéma.</string>
+    <string name="aucune_seance">Aucune séance.</string>
 
 </resources>

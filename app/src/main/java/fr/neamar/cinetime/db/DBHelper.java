@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 
 import java.util.ArrayList;
 
@@ -25,8 +24,6 @@ public class DBHelper {
      * Insert new item into favorites
      *
      * @param context
-     * @param query
-     * @param record
      */
     @SuppressLint("NewApi")
     public static void insertFavorite(Context context, String code, String title, String location) {
@@ -41,17 +38,11 @@ public class DBHelper {
             db.close();
         }
         favCodes.add(code);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-            new BackupManager(context).dataChanged();
-        }
+        new BackupManager(context).dataChanged();
     }
 
     /**
      * Retrieve favorites
-     *
-     * @param context
-     * @param limit
-     * @return
      */
     public static ArrayList<Theater> getFavorites(Context context) {
 
@@ -93,9 +84,7 @@ public class DBHelper {
             db.close();
         }
         favCodes.remove(code);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-            new BackupManager(context).dataChanged();
-        }
+        new BackupManager(context).dataChanged();
     }
 
     public static boolean isFavorite(String code) {

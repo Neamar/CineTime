@@ -35,7 +35,7 @@ public class Movie implements Comparable<Movie> {
             return "NC";
     }
 
-    public String getShortCertificate() {
+    private String getShortCertificate() {
         switch (this.certificate) {
             case 14004:
                 return "-18";
@@ -96,12 +96,28 @@ public class Movie implements Comparable<Movie> {
         return (certificate != 0 ? " <font color=\"#8B0000\">" + getShortCertificate() + "</font>" : "");
     }
 
+    public String getPosterUrl(int level) {
+        String url = null;
+        switch (level) {
+            case 1:
+                url = "http://images.allocine.fr/r_215_290" + poster;
+                break;
+            case 2:
+                url = "http://images.allocine.fr/r_300_999" + poster;
+                break;
+            case 3:
+                url = "http://images.allocine.fr/r_1280_2000" + poster;
+                break;
+            default:
+                url = "";
+                break;
+        }
+        return url;
+    }
+
     /**
      * Generate a short text to be shared. Needs the theater this instance
      * refers to.
-     *
-     * @param theater
-     * @return
      */
     public String getSharingText(String theater) {
         String sharingText = "";
