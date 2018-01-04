@@ -21,4 +21,5 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:27.0.2'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 }

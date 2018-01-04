@@ -10,15 +10,16 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import java.util.ArrayList;
 
 import fr.neamar.cinetime.R;
 import fr.neamar.cinetime.objects.Movie;
-import fr.neamar.cinetime.ui.ImageLoader;
 
 public class MovieAdapter extends ArrayAdapter<Movie> {
+    ImageLoader imageLoader;
 
-    private ImageLoader imageLoader;
     /**
      * Array list containing all the movies currently displayed
      */
@@ -30,7 +31,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         super(ac, textViewResourceId, movies);
         this.context = ac;
         this.movies = (ArrayList<Movie>) movies.clone();
-        imageLoader = ImageLoader.getInstance(getContext());
+        imageLoader = ImageLoader.getInstance();
     }
 
     @Override
@@ -77,8 +78,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         }
 
         movieExtra.setText(Html.fromHtml(description));
-        imageLoader.DisplayImage(movie.poster, moviePoster, 1);
-
+        imageLoader.displayImage(movie.getPosterUrl(1), moviePoster);
         return v;
     }
 
