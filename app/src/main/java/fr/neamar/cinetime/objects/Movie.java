@@ -35,7 +35,7 @@ public class Movie implements Comparable<Movie> {
             return "NC";
     }
 
-    public String getShortCertificate() {
+    private String getShortCertificate() {
         switch (this.certificate) {
             case 14004:
                 return "-18";
@@ -99,9 +99,6 @@ public class Movie implements Comparable<Movie> {
     /**
      * Generate a short text to be shared. Needs the theater this instance
      * refers to.
-     *
-     * @param theater
-     * @return
      */
     public String getSharingText(String theater) {
         String sharingText = "";

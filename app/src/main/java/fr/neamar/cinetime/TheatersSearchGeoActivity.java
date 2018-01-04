@@ -77,7 +77,7 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {
                     onSearchRequested();
-                    ((TextView) findViewById(android.R.id.empty)).setText("Aucune information de localisation, utilisez la recherche.");
+                    ((TextView) findViewById(android.R.id.empty)).setText(R.string.aucune_info_localisation);
                     dialog.cancel();
                 }
             });
@@ -91,7 +91,7 @@ public class TheatersSearchGeoActivity extends TheatersActivity {
         if (oldLocation != null && ((oldLocation.getTime() - t.toMillis(true)) < 3 * 60 * 60 * 1000)) {
             new LoadTheatersTask().execute(String.valueOf(oldLocation.getLatitude()), String.valueOf(oldLocation.getLongitude()));
         } else {
-            ((TextView) findViewById(android.R.id.empty)).setText("Récupération de la position. Vous pouvez aussi effectuer directement une recherche pour un nom de cinéma.");
+            ((TextView) findViewById(android.R.id.empty)).setText(R.string.recuperation_position);
             LocationListener listener = new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {

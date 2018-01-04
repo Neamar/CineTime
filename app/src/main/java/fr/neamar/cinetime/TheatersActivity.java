@@ -67,7 +67,7 @@ public abstract class TheatersActivity extends ListActivity {
                 ArrayList<Theater> theaters = getTheaters();
                 List<Theater> unified = theaters.subList(0, Math.min(7, theaters.size()));
 
-                ArrayList<String> codes = new ArrayList<String>();
+                ArrayList<String> codes = new ArrayList<>();
                 for (Theater t : unified) {
                     codes.add(t.code);
                 }
@@ -116,7 +116,7 @@ public abstract class TheatersActivity extends ListActivity {
         if (adapter != null) {
             return adapter.theaters;
         } else {
-            return new ArrayList<Theater>();
+            return new ArrayList<>();
         }
     }
 
@@ -136,7 +136,7 @@ public abstract class TheatersActivity extends ListActivity {
     }
 
     protected class LoadTheatersTask extends AsyncTask<String, Void, ArrayList<Theater>> {
-        public LoadTheatersTask() {
+        LoadTheatersTask() {
             super();
         }
 
@@ -164,7 +164,7 @@ public abstract class TheatersActivity extends ListActivity {
             if (theaters != null) {
                 setTheaters(theaters);
             } else {
-                ((TextView) findViewById(android.R.id.empty)).setText("Aucune connexion Internet :\\");
+                ((TextView) findViewById(android.R.id.empty)).setText(R.string.aucune_connexion_internet);
             }
         }
     }

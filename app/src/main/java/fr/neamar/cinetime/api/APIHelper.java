@@ -1,6 +1,5 @@
 package fr.neamar.cinetime.api;
 
-import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -27,28 +26,21 @@ import fr.neamar.cinetime.objects.Movie;
 import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
-    static final String TAG = "APIHelper";
-
-    protected Context ctx;
+    private static final String TAG = "APIHelper";
 
     /**
      * Retrieve base URL.
      *
-     * @param page
-     * @return
      */
-    protected String getBaseUrl(String page) {
+    private String getBaseUrl(String page) {
         return "http://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
     }
 
     /**
      * Download an url using GET.
      *
-     * @param url
-     * @return
-     * @throws IOException
      */
-    protected String downloadUrl(String url) throws IOException {
+    private String downloadUrl(String url) throws IOException {
         Log.v(TAG, "Downloading " + url);
 
         // Setup the get request
@@ -58,12 +50,12 @@ public class APIHelper {
         InputStream is = urlConnection.getInputStream();
 
         // Grab the response
-        BufferedReader reader = null;
+        BufferedReader reader;
         try {
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 
             StringBuilder builder = new StringBuilder();
-            String aux = "";
+            String aux;
             while ((aux = reader.readLine()) != null) {
                 builder.append(aux);
             }
@@ -76,7 +68,7 @@ public class APIHelper {
         return "";
     }
 
-    protected JSONArray downloadTheatersList(String query) throws IOException {
+    private JSONArray downloadTheatersList(String query) throws IOException {
         String url;
         try {
             url = getBaseUrl("search") + "&filter=theater&q=" + URLEncoder.encode(query, "UTF-8") + "&count=25&format=json";
@@ -107,7 +99,7 @@ public class APIHelper {
         }
     }
 
-    protected JSONArray downloadTheatersListGeo(String lat, String lon) throws IOException {
+    private JSONArray downloadTheatersListGeo(String lat, String lon) throws IOException {
         String url;
         try {
             url = getBaseUrl("theaterlist") + "&lat=" + URLEncoder.encode(lat, "UTF-8") + "&long=" + URLEncoder.encode(lon, "UTF-8") + "&radius=50" + "&count=25&format=json";
@@ -142,7 +134,6 @@ public class APIHelper {
      * Download all movies for the specified theater.
      *
      * @param theaterCode Code, or a comma separated list of code to load.
-     * @return
      */
     public DisplayList downloadMoviesList(String theaterCode) {
 
@@ -151,7 +142,7 @@ public class APIHelper {
         String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
 
         if(BuildConfig.USE_MOCKS) {
-            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinema.json";
+            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/6f2ae30320e9e93807268f3a3772cdd8bba90987/cinema.json";
         }
 
         String json;
@@ -205,7 +196,7 @@ public class APIHelper {
     }
 
     public ArrayList<Theater> findTheaters(String query) throws IOException {
-        ArrayList<Theater> resultsList = new ArrayList<Theater>();
+        ArrayList<Theater> resultsList = new ArrayList<>();
 
         JSONArray jsonResults = downloadTheatersList(query);
 
@@ -230,7 +221,7 @@ public class APIHelper {
 
     public ArrayList<Theater> findTheatersGeo(String lat, String lon) throws IOException {
 
-        ArrayList<Theater> resultsList = new ArrayList<Theater>();
+        ArrayList<Theater> resultsList = new ArrayList<>();
 
         JSONArray jsonResults = downloadTheatersListGeo(lat, lon);
 
@@ -254,7 +245,7 @@ public class APIHelper {
         return resultsList;
     }
 
-    protected JSONObject downloadMovie(String movieCode) {
+    private JSONObject downloadMovie(String movieCode) {
         String url = getBaseUrl("movie") + "&code=" + movieCode + "&profile=small&format=json";
 
         if(BuildConfig.USE_MOCKS) {
@@ -276,7 +267,7 @@ public class APIHelper {
     }
 
     public ArrayList<Movie> formatMoviesList(JSONArray jsonResults, String theaterCode) {
-        HashMap<String, Movie> moviesHash = new HashMap<String, Movie>();
+        HashMap<String, Movie> moviesHash = new HashMap<>();
 
         for (int i = 0; i < jsonResults.length(); i++) {
             JSONObject jsonMovie, jsonShow;
@@ -360,7 +351,7 @@ public class APIHelper {
         }
 
         // Build final ArrayList, to be used in adapter
-        ArrayList<Movie> resultsList = new ArrayList<Movie>(moviesHash.values());
+        ArrayList<Movie> resultsList = new ArrayList<>(moviesHash.values());
 
         // Sort displays
         for (Movie movie : resultsList) {

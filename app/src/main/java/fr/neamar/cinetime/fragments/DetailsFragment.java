@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
@@ -61,7 +60,6 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
     public ImageLoader imageLoader;
     protected String theater = "";
     private Callbacks mCallbacks = sDummyCallbacks;
-    private int idItem;
     private TextView title;
     private TextView extra;
     private TextView display;
@@ -97,16 +95,16 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_details, container, false);
-        title = (TextView) view.findViewById(R.id.details_title);
-        extra = (TextView) view.findViewById(R.id.details_extra);
-        display = (TextView) view.findViewById(R.id.details_display);
-        poster = (ImageView) view.findViewById(R.id.details_poster);
-        pressRating = (RatingBar) view.findViewById(R.id.details_pressrating);
-        pressRatingText = (TextView) view.findViewById(R.id.details_pressrating_text);
-        userRating = (RatingBar) view.findViewById(R.id.details_userrating);
-        userRatingText = (TextView) view.findViewById(R.id.details_userrating_text);
-        synopsis = (TextView) view.findViewById(R.id.details_synopsis);
-        certificate = (TextView) view.findViewById(R.id.details_certificate);
+        title = view.findViewById(R.id.details_title);
+        extra = view.findViewById(R.id.details_extra);
+        display = view.findViewById(R.id.details_display);
+        poster = view.findViewById(R.id.details_poster);
+        pressRating = view.findViewById(R.id.details_pressrating);
+        pressRatingText = view.findViewById(R.id.details_pressrating_text);
+        userRating = view.findViewById(R.id.details_userrating);
+        userRatingText = view.findViewById(R.id.details_userrating_text);
+        synopsis = view.findViewById(R.id.details_synopsis);
+        certificate = view.findViewById(R.id.details_certificate);
         if (displayedMovie != null) {
             updateUI();
         }
@@ -161,7 +159,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
                     try {
                         dialog.dismiss();
                     } catch (Exception e) {
-
+                        e.printStackTrace();
                     }
                 }
 
@@ -248,7 +246,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
     public void setArguments(Bundle args) {
         super.setArguments(args);
         if (getArguments().containsKey(ARG_ITEM_ID)) {
-            idItem = getArguments().getInt(ARG_ITEM_ID);
+            int idItem = getArguments().getInt(ARG_ITEM_ID);
             displayedMovie = MoviesFragment.getMovies().get(idItem);
         }
         if (getArguments().containsKey(ARG_THEATER_NAME)) {
@@ -282,10 +280,8 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
                 String synopsis = displayedMovie.synopsis;
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(movieCode, synopsis);
-                ed.commit();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-                    new BackupManager(ctx).dataChanged();
-                }
+                ed.apply();
+                new BackupManager(ctx).dataChanged();
             }
 
             return displayedMovie;

@@ -18,11 +18,11 @@ import fr.neamar.cinetime.ui.ImageLoader;
 
 public class MovieAdapter extends ArrayAdapter<Movie> {
 
-    public ImageLoader imageLoader;
+    private ImageLoader imageLoader;
     /**
      * Array list containing all the movies currently displayed
      */
-    public ArrayList<Movie> movies = new ArrayList<Movie>();
+    private ArrayList<Movie> movies = new ArrayList<Movie>();
     private Context context;
 
     @SuppressWarnings("unchecked")
@@ -49,11 +49,11 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
         Movie movie = movies.get(position);
 
-        TextView movieTitle = (TextView) v.findViewById(R.id.listitem_movie_title);
-        TextView movieExtra = (TextView) v.findViewById(R.id.listitem_movie_extra);
-        RatingBar movieRating = (RatingBar) v.findViewById(R.id.listitem_movie_rating);
-        TextView movieDisplay = (TextView) v.findViewById(R.id.listitem_movie_display);
-        ImageView moviePoster = (ImageView) v.findViewById(R.id.listitem_movie_poster);
+        TextView movieTitle = v.findViewById(R.id.listitem_movie_title);
+        TextView movieExtra = v.findViewById(R.id.listitem_movie_extra);
+        RatingBar movieRating = v.findViewById(R.id.listitem_movie_rating);
+        TextView movieDisplay = v.findViewById(R.id.listitem_movie_display);
+        ImageView moviePoster = v.findViewById(R.id.listitem_movie_poster);
 
         movieTitle.setText(movie.title);
 

@@ -136,9 +136,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
             if (DetailsFragment.displayedMovie == null || DetailsFragment.displayedMovie.trailerCode.isEmpty() && trailerItem != null) {
                 trailerItem.setEnabled(false);
                 trailerItem.setVisible(false);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    invalidateOptionsMenu();
-                }
+                invalidateOptionsMenu();
             }
         }
     }
@@ -146,7 +144,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void setTheaterLocation(Theater theater) {
         theaterLocation = theater.title + ", " + theater.location + " " + theater.zipCode;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && !mTwoPane) {
+        if (!mTwoPane) {
             invalidateOptionsMenu();
         }
     }
@@ -209,7 +207,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
             trailerItem.setVisible(true);
             trailerItem.setEnabled(true);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && rebuild) {
+        if (rebuild) {
             invalidateOptionsMenu();
         }
     }
@@ -224,7 +222,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
             trailerItem.setEnabled(false);
             trailerItem.setVisible(false);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && rebuild) {
+        if (rebuild) {
             invalidateOptionsMenu();
         }
     }
