@@ -7,7 +7,7 @@ android {
         applicationId "fr.neamar.cinetime"
         minSdkVersion 14
         targetSdkVersion 27
-        buildConfigField "Boolean", "USE_MOCKS", "true"
+        buildConfigField "Boolean", "USE_MOCKS", "false"
     }
 
     buildTypes {
