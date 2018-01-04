@@ -1,6 +1,5 @@
 package fr.neamar.cinetime;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityOptions;
 import android.content.ActivityNotFoundException;
@@ -34,7 +33,6 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
     private MenuItem shareItem;
     private MenuItem trailerItem;
 
-    @TargetApi(14)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -71,7 +69,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
             shareItem = menu.findItem(R.id.menu_share);
             trailerItem = menu.findItem(R.id.menu_play);
             if (detailsFragment == null) {
-                desactivateDetailsMenu(false);
+                deactivateDetailsMenu(false);
             } else {
                 activateDetailsMenu(false);
             }
@@ -92,7 +90,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
         if (mTwoPane) {
             if (detailsFragment == null) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
-                desactivateDetailsMenu(true);
+                deactivateDetailsMenu(true);
             } else {
                 activateDetailsMenu(true);
             }
@@ -125,7 +123,6 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void setFragment(Fragment fragment) {
         if (fragment instanceof MoviesFragment) {
@@ -141,7 +138,6 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void setTheaterLocation(Theater theater) {
         theaterLocation = theater.title + ", " + theater.location + " " + theater.zipCode;
         if (!mTwoPane) {
@@ -154,7 +150,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
         if (mTwoPane && detailsFragment != null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.file_detail_container, new DetailsEmptyFragment()).commit();
             detailsFragment = null;
-            desactivateDetailsMenu(true);
+            deactivateDetailsMenu(true);
         } else {
             moviesFragment.clear();
             super.onBackPressed();
@@ -197,7 +193,6 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
         finish();
     }
 
-    @SuppressLint("NewApi")
     private void activateDetailsMenu(boolean rebuild) {
         if (shareItem != null) {
             shareItem.setVisible(true);
@@ -212,8 +207,7 @@ public class MoviesActivity extends FragmentActivity implements MoviesFragment.C
         }
     }
 
-    @SuppressLint("NewApi")
-    private void desactivateDetailsMenu(boolean rebuild) {
+    private void deactivateDetailsMenu(boolean rebuild) {
         if (shareItem != null) {
             shareItem.setEnabled(false);
             shareItem.setVisible(false);
