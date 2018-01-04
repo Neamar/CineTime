@@ -12,8 +12,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import fr.neamar.cinetime.fragments.DetailsFragment;
-import fr.neamar.cinetime.ui.ImageLoader;
 
 public class PosterViewerActivity extends Activity {
 
@@ -28,7 +29,6 @@ public class PosterViewerActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.poster_viewer);
-        imageLoader = ImageLoader.getInstance(this);
         ImageView poster = findViewById(R.id.posterView);
         findViewById(R.id.spinner).setVisibility(View.VISIBLE);
 
@@ -45,6 +45,6 @@ public class PosterViewerActivity extends Activity {
 
         };
         registerReceiver(receiver, new IntentFilter(POSTER_LOADED));
-        imageLoader.DisplayImage(DetailsFragment.displayedMovie.poster, poster, 3);
+        ImageLoader.getInstance().displayImage(DetailsFragment.displayedMovie.getPosterUrl(3), poster);
     }
 }

@@ -23,6 +23,8 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import java.util.ArrayList;
 
 import fr.neamar.cinetime.R;
@@ -30,7 +32,6 @@ import fr.neamar.cinetime.api.APIHelper;
 import fr.neamar.cinetime.callbacks.TaskMoviesCallbacks;
 import fr.neamar.cinetime.fragments.MoviesFragment.Callbacks;
 import fr.neamar.cinetime.objects.Movie;
-import fr.neamar.cinetime.ui.ImageLoader;
 
 public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
 
@@ -57,7 +58,6 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
             toFinish = true;
         }
     };
-    public ImageLoader imageLoader;
     protected String theater = "";
     private Callbacks mCallbacks = sDummyCallbacks;
     private TextView title;
@@ -123,7 +123,6 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
         if (!(activity instanceof Callbacks)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
-        imageLoader = ImageLoader.getInstance(getActivity());
         mCallbacks = (Callbacks) activity;
         mCallbacks.setFragment(this);
         if (titleToSet) {
@@ -200,7 +199,7 @@ public class DetailsFragment extends Fragment implements TaskMoviesCallbacks {
             certificate.setVisibility(View.GONE);
         else
             certificate.setText(displayedMovie.certificateString);
-        imageLoader.DisplayImage(displayedMovie.poster, poster, 2);
+        ImageLoader.getInstance().displayImage(displayedMovie.getPosterUrl(2), poster);
         poster.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
