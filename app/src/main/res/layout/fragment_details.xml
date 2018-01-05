@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView android:id="@+id/details_scroll"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context=".DetailsActivity">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/details_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DetailsActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,7 +26,7 @@
                 android:contentDescription="@string/content_description_poster"
                 android:maxWidth="150dp"
                 android:src="@drawable/stub"
-                android:transitionName="moviePoster"/>
+                android:transitionName="moviePoster" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -40,14 +40,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/stub_title"
                     android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:transitionName="movieName"/>
+                    android:transitionName="movieName" />
 
                 <TextView
                     android:id="@+id/details_extra"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/stub_cast"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
         </LinearLayout>
 
@@ -57,7 +57,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/stub_certificate"
-            android:textColor="#C09853"/>
+            android:textColor="#C09853" />
 
         <TextView
             android:id="@+id/details_section_review"
@@ -66,7 +66,7 @@
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/ic_ratings"
             android:drawablePadding="5dp"
-            android:text="@string/content_title_rating"/>
+            android:text="@string/content_title_rating" />
 
         <TableLayout
             android:id="@+id/details_ratings"
@@ -84,7 +84,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/content_rating_press"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <TextView
                     android:id="@+id/details_pressrating_text"
@@ -93,7 +93,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:text="@string/stub_rating"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <RatingBar
                     android:id="@+id/details_pressrating"
@@ -104,7 +104,7 @@
                     android:isIndicator="true"
                     android:max="5"
                     android:rating="3.1"
-                    android:stepSize="0.1"/>
+                    android:stepSize="0.1" />
 
             </TableRow>
 
@@ -118,7 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/content_rating_user"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <TextView
                     android:id="@+id/details_userrating_text"
@@ -127,7 +127,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:text="@string/stub_rating"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <RatingBar
                     android:id="@+id/details_userrating"
@@ -136,9 +136,9 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/content_rating_user"
                     android:isIndicator="true"
-                    android:max="10"
+                    android:max="5"
                     android:rating="3.1"
-                    android:stepSize=".1"/>
+                    android:stepSize=".1" />
 
             </TableRow>
         </TableLayout>
@@ -150,7 +150,7 @@
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/ic_display"
             android:drawablePadding="5dp"
-            android:text="@string/content_title_display"/>
+            android:text="@string/content_title_display" />
 
         <TextView
             android:id="@+id/details_display"
@@ -158,7 +158,7 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:text="@string/stub_display"
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
             android:id="@+id/details_section_synopsis"
@@ -167,7 +167,7 @@
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/ic_synopsis"
             android:drawablePadding="5dp"
-            android:text="@string/content_title_synopsis"/>
+            android:text="@string/content_title_synopsis" />
 
         <TextView
             android:id="@+id/details_synopsis"
@@ -175,7 +175,7 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:text="@string/stub_synopsis"
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
     </LinearLayout>
 

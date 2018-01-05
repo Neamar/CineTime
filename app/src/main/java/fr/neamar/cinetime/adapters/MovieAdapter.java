@@ -64,6 +64,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         int rating = movie.getRating();
         if (rating > 0) {
             movieRating.setVisibility(View.VISIBLE);
+            movieRating.setMax(50);
             movieRating.setProgress(movie.getRating());
         } else {
             movieRating.setVisibility(View.INVISIBLE);
