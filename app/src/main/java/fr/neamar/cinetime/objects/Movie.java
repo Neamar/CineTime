@@ -76,11 +76,7 @@ public class Movie implements Comparable<Movie> {
     public String getDisplays() {
         String ret = "";
         for (int i = 0; i < displays.size(); i++) {
-            String displayDetails = displays.get(i).getDisplayDetails();
-            if (displayDetails.equals("")) {
-                displayDetails = "VF";
-            }
-            displayDetails = "<u>" + displayDetails + "</u> :<br>";
+            String displayDetails = displays.get(i).getDisplayDetails(false);
 
             ret += displayDetails;
             ret += displays.get(i).getDisplay();

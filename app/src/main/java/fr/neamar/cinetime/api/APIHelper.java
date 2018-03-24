@@ -336,6 +336,9 @@ public class APIHelper {
                     display.is3D = jsonMovie.getJSONObject("screenFormat").getString("$").contains("3D");
                     display.isIMAX = jsonMovie.getJSONObject("screenFormat").getString("$").contains("IMAX");
                 }
+                if(jsonMovie.has("screen") && jsonMovie.getJSONObject("screen").has("$")) {
+                    display.screen = jsonMovie.getJSONObject("screen").getString("$");
+                }
 
                 if (jsonMovie.has("theater")) {
                     // displaying unified view, need to remind the display of

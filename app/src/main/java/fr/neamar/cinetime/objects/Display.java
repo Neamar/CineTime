@@ -4,14 +4,31 @@ import java.util.Calendar;
 
 public class Display implements Comparable<Display> {
     public String display;
+    public String screen = "";
     public String theater = null;
     public Boolean isOriginalLanguage;
     public Boolean is3D = false;
     public Boolean isIMAX = false;
     private String cachedDisplay = null;
 
-    public String getDisplayDetails() {
-        return (theater != null ? "<small>" + theater + "</small>" : "") + (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
+    public String getDisplayDetails(boolean shortDisplay) {
+        String details = (theater != null ? "<small>" + theater + "</small>" : "") + (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
+        if (details.equals("")) {
+            details = "VF";
+        }
+
+        if(!shortDisplay) {
+            details = "<u>" + details + "</u>";
+        }
+        if(!screen.equals("")) {
+            details += " <small><font color=\"silver\">(salle " + screen + ")</font></small>";
+        }
+
+        if(!shortDisplay) {
+            details += " :<br>";
+        }
+
+        return details;
     }
 
     public String getDisplay() {

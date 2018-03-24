@@ -72,7 +72,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
         if (movie.displays.size() == 1 && movie.displays.get(0).theater == null) {
             // Optimize layout when only one display available
-            description += movie.displays.get(0).getDisplayDetails();
+            description += movie.displays.get(0).getDisplayDetails(true);
             movieDisplay.setText(Html.fromHtml(movie.displays.get(0).getDisplay()));
         } else {
             movieDisplay.setText(Html.fromHtml(movie.getDisplays()));
