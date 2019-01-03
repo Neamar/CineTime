@@ -205,10 +205,12 @@ public class APIHelper {
             try {
                 jsonTheater = jsonResults.getJSONObject(i);
 
+
                 Theater theater = new Theater();
                 theater.code = jsonTheater.getString("code");
                 theater.title = jsonTheater.getString("name");
                 theater.location = jsonTheater.getString("address");
+                theater.city = jsonTheater.getString("city");
 
                 resultsList.add(theater);
 

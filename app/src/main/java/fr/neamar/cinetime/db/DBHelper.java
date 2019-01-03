@@ -26,7 +26,7 @@ public class DBHelper {
      * @param context
      */
     @SuppressLint("NewApi")
-    public static void insertFavorite(Context context, String code, String title, String location) {
+    public static void insertFavorite(Context context, String code, String title, String location, String city) {
         synchronized (DBHelper.sDataLock) {
             SQLiteDatabase db = getDatabase(context);
 
@@ -34,6 +34,7 @@ public class DBHelper {
             values.put("code", code);
             values.put("title", title);
             values.put("location", location);
+            values.put("city", city);
             db.insert("favorites", null, values);
             db.close();
         }
@@ -55,7 +56,7 @@ public class DBHelper {
             // Cursor query (boolean distinct, String table, String[] columns,
             // String selection, String[] selectionArgs, String groupBy, String
             // having, String orderBy, String limit)
-            Cursor cursor = db.query(true, "favorites", new String[]{"code", "title", "location"}, null, null, null, null, "_id DESC", "100");
+            Cursor cursor = db.query(true, "favorites", new String[]{"code", "title", "location", "city"}, null, null, null, null, "_id DESC", "100");
 
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
@@ -64,6 +65,7 @@ public class DBHelper {
                 entry.code = cursor.getString(0);
                 entry.title = cursor.getString(1);
                 entry.location = cursor.getString(2);
+                entry.city = cursor.getString(3);
 
                 favorites.add(entry);
                 favCodes.add(entry.code);
