@@ -237,6 +237,7 @@ public class APIHelper {
                 theater.title = jsonTheater.getString("name");
                 theater.location = jsonTheater.getString("address");
                 theater.distance = jsonTheater.getDouble("distance");
+                theater.city = jsonTheater.getString("city");
 
                 resultsList.add(theater);
 
