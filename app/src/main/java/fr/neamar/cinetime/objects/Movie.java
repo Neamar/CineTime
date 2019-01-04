@@ -96,13 +96,13 @@ public class Movie implements Comparable<Movie> {
         String url = null;
         switch (level) {
             case 1:
-                url = "http://images.allocine.fr/r_215_290" + poster;
+                url = "https://images.allocine.fr/r_215_290" + poster;
                 break;
             case 2:
-                url = "http://images.allocine.fr/r_300_999" + poster;
+                url = "https://images.allocine.fr/r_300_999" + poster;
                 break;
             case 3:
-                url = "http://images.allocine.fr/r_1280_2000" + poster;
+                url = "https://images.allocine.fr/r_1280_2000" + poster;
                 break;
             default:
                 url = "";

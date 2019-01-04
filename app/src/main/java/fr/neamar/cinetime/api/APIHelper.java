@@ -33,7 +33,7 @@ public class APIHelper {
      *
      */
     private String getBaseUrl(String page) {
-        return "http://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
+        return "https://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
     }
 
     /**
