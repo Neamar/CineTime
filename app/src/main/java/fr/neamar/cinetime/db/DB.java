@@ -3,6 +3,7 @@ package fr.neamar.cinetime.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DB extends SQLiteOpenHelper {
 
@@ -28,6 +29,7 @@ public class DB extends SQLiteOpenHelper {
     }
 
     private void upgradeV2(SQLiteDatabase database) {
+        Log.i("DB", "Upgrading database");
         database.execSQL("ALTER TABLE favorites ADD COLUMN city TEXT NOT NULL DEFAULT ''");
     }
 }

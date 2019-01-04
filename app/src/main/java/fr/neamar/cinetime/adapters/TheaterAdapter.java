@@ -62,7 +62,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
                 theaterLocation.setText(theater.location);
             }
             else {
-                theaterLocation.setText(String.format("%s- %s", theater.location, theater.city));
+                theaterLocation.setText(String.format("%s – %s", theater.location, theater.city));
             }
         }
 
