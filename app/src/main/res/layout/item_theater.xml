@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:descendantFocusability="blocksDescendants"
-                android:orientation="horizontal"
-                android:padding="10dp">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="horizontal"
+    >
 
     <CheckBox
         android:id="@+id/listitem_theater_fav"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:button="@drawable/star"
-        android:layout_marginLeft="10dp"
-        android:padding="5dp"/>
+        android:paddingLeft="10dp"
+        android:paddingTop="15dp"
+        android:paddingRight="15dp"
+        android:paddingBottom="15dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="15dp" />
 
     <TextView
         android:id="@+id/listitem_theater_name"
@@ -26,9 +31,11 @@
         android:layout_toLeftOf="@+id/listitem_theater_fav"
         android:ellipsize="end"
         android:singleLine="true"
-        android:text="Theater name"
+        tools:text="Theater name"
         android:textStyle="bold"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_toStartOf="@+id/listitem_theater_fav"
+        android:layout_alignParentStart="true" />
 
 
     <TextView
@@ -41,8 +48,10 @@
         android:layout_toLeftOf="@+id/listitem_theater_fav"
         android:ellipsize="marquee"
         android:singleLine="true"
-        android:text="Theater location"
+        tools:text="Theater location"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@android:color/tertiary_text_dark"/>
+        android:textColor="@android:color/tertiary_text_dark"
+        android:layout_toStartOf="@+id/listitem_theater_fav"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
