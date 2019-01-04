@@ -43,7 +43,6 @@
                 android:layout_toLeftOf="@+id/listitem_movie_rating"
                 android:layout_alignRight="@+id/listitem_movie_title"
                 android:layout_alignEnd="@+id/listitem_movie_title"
-                android:layout_alignBottom="@+id/listitem_movie_rating"
                 android:layout_toRightOf="@+id/listitem_movie_rating"
                 android:layout_toEndOf="@+id/listitem_movie_rating"
                 android:layout_toStartOf="@+id/listitem_movie_rating" />
