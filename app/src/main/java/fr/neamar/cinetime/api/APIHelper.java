@@ -33,7 +33,7 @@ public class APIHelper {
      *
      */
     private String getBaseUrl(String page) {
-        return "http://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
+        return "https://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
     }
 
     /**
@@ -205,10 +205,12 @@ public class APIHelper {
             try {
                 jsonTheater = jsonResults.getJSONObject(i);
 
+
                 Theater theater = new Theater();
                 theater.code = jsonTheater.getString("code");
                 theater.title = jsonTheater.getString("name");
                 theater.location = jsonTheater.getString("address");
+                theater.city = jsonTheater.getString("city");
 
                 resultsList.add(theater);
 
@@ -235,6 +237,7 @@ public class APIHelper {
                 theater.title = jsonTheater.getString("name");
                 theater.location = jsonTheater.getString("address");
                 theater.distance = jsonTheater.getDouble("distance");
+                theater.city = jsonTheater.getString("city");
 
                 resultsList.add(theater);
 

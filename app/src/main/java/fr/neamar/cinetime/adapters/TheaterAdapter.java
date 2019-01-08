@@ -58,7 +58,12 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
             }
             theaterLocation.setText(Html.fromHtml("<b>" + distance + "</b> - " + theater.location));
         } else {
-            theaterLocation.setText(theater.location);
+            if (theater.city.equals("")) {
+                theaterLocation.setText(theater.location);
+            }
+            else {
+                theaterLocation.setText(String.format("%s – %s", theater.location, theater.city));
+            }
         }
 
         final CheckBox fav = (CheckBox) v.findViewById(R.id.listitem_theater_fav);
@@ -68,7 +73,7 @@ public class TheaterAdapter extends ArrayAdapter<Theater> {
             @Override
             public void onClick(View v) {
                 if (fav.isChecked()) {
-                    DBHelper.insertFavorite(v.getContext(), theater.code, theater.title, theater.location);
+                    DBHelper.insertFavorite(v.getContext(), theater.code, theater.title, theater.location, theater.city);
                     Toast.makeText(getContext(), "Cinéma ajouté aux favoris", Toast.LENGTH_SHORT).show();
                 } else {
                     DBHelper.removeFavorite(v.getContext(), theater.code);
