@@ -1,7 +1,7 @@
 <manifest package="fr.neamar.cinetime"
           xmlns:android="http://schemas.android.com/apk/res/android"
-          android:versionCode="35"
-          android:versionName="1.16">
+          android:versionCode="36"
+          android:versionName="1.17">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -23,7 +23,7 @@
         android:required="false"/>
     <uses-feature
         android:name="android.hardware.touchscreen"
-        android:required="false"/>"
+        android:required="false"/>
 
     <application
         android:name=".CinetimeApplication"
