@@ -163,6 +163,7 @@ public class APIHelper {
             for (int i = 0; i < theaters.length(); i++) {
                 JSONObject theater = theaters.getJSONObject(i);
                 String theaterName = theater.getJSONObject("place").getJSONObject("theater").getString("name");
+                String city = theater.getJSONObject("place").getJSONObject("theater").getString("city");
 
                 if (theater.has("movieShowtimes")) {
                     JSONArray showtimes = theater.getJSONArray("movieShowtimes");
@@ -172,6 +173,7 @@ public class APIHelper {
                         if (theaters.length() > 1) {
                             // Add theater name when multiple theaters returned
                             showtime.put("theater", theaterName);
+                            showtime.put("city", city);
                         }
                         displayList.jsonArray.put(showtime);
                     }
@@ -347,6 +349,10 @@ public class APIHelper {
                     // displaying unified view, need to remind the display of
                     // the theater.
                     display.theater = jsonMovie.getString("theater");
+                }
+
+                if (jsonMovie.has("city")) {
+                    display.city = jsonMovie.getString("city");
                 }
                 movie.displays.add(display);
                 moviesHash.put(code, movie);

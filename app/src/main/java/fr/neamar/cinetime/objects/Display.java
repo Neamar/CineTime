@@ -6,13 +6,14 @@ public class Display implements Comparable<Display> {
     public String display;
     public String screen = "";
     public String theater = null;
+    public String city = null;
     public Boolean isOriginalLanguage;
     public Boolean is3D = false;
     public Boolean isIMAX = false;
     private String cachedDisplay = null;
 
     public String getDisplayDetails(boolean shortDisplay) {
-        String details = (theater != null ? "<small>" + theater + "</small>" : "") + (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
+        String details = (theater != null ? "<small>" + theater + "</small>" : "") + (city != null ? "<small> – " + city + "</small>" : "")  + (isOriginalLanguage ? " <i>VO</i>" : "") + (is3D ? " <strong>3D</strong>" : "") + (isIMAX ? " <strong>IMAX</strong>" : "");
         if (details.equals("")) {
             details = "VF";
         }
