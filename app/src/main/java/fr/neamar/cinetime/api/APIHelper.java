@@ -1,5 +1,8 @@
 package fr.neamar.cinetime.api;
 
+import android.annotation.SuppressLint;
+import android.net.Uri;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -14,10 +17,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import fr.neamar.cinetime.BuildConfig;
 import fr.neamar.cinetime.objects.Display;
@@ -27,22 +36,59 @@ import fr.neamar.cinetime.objects.Theater;
 
 public class APIHelper {
     private static final String TAG = "APIHelper";
-
-    /**
-     * Retrieve base URL.
-     *
-     */
-    private String getBaseUrl(String page) {
-        return "https://api.allocine.fr/rest/v3/" + page + "?partner=YW5kcm9pZC12M3M";
-    }
+    private static final String PARTNER_KEY = "100ED" + "1DA33EB";
+    private static final String SECRET_KEY = "1a1ed8c1bed24d60" + "ae3472eed1da33eb";
+    private static final String BASE_URL = "https://api.allocine.fr/rest/v3/";
 
     /**
      * Download an url using GET.
      *
      */
-    private String downloadUrl(String url) throws IOException {
-        Log.v(TAG, "Downloading " + url);
+    @SuppressLint("SimpleDateFormat")
+    private String downloadUrl(String method, Map<String, String> params, String mockUrl) throws IOException {
+        Log.v(TAG, "Downloading " + method);
+        params.put("sed", new SimpleDateFormat("YYYYMMdd").format(Calendar.getInstance().getTime()));
+        params.put("partner", PARTNER_KEY);
+        params.put("format", "json");
 
+        StringBuilder payload = new StringBuilder();
+        boolean firstLoop = true;
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if(firstLoop) {
+                firstLoop = false;
+            }
+            else {
+                payload.append('&');
+            }
+
+            payload
+                    .append(entry.getKey())
+                    .append("=")
+                    .append(Uri.encode(entry.getValue()));
+        }
+
+        // base64_encode(sha1($method . http_build_query($params) . $this->_secret_key, true));
+        String toSign = method + payload + SECRET_KEY;
+        Log.e("WTF", toSign);
+        MessageDigest messageDigest = null;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-1");
+            messageDigest.update(toSign.getBytes("UTF-8"));
+            byte[] bytes = messageDigest.digest();
+            String encoded = Uri.encode(Base64.encodeToString(bytes, Base64.DEFAULT));
+            String fixedEncoding = encoded.replaceAll("%0A$", "");
+            payload.append("&sig=").append(fixedEncoding);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return "";
+        }
+
+        String url = BASE_URL + method + '?' + payload;
+        if(BuildConfig.USE_MOCKS) {
+            url = mockUrl;
+        }
+
+        Log.i(TAG, "URL: " + url);
         // Setup the get request
         URL httpGetRequest = new URL(url);
 
@@ -59,7 +105,7 @@ public class APIHelper {
             while ((aux = reader.readLine()) != null) {
                 builder.append(aux);
             }
-
+            
             return builder.toString();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -69,19 +115,13 @@ public class APIHelper {
     }
 
     private JSONArray downloadTheatersList(String query) throws IOException {
-        String url;
-        try {
-            url = getBaseUrl("search") + "&filter=theater&q=" + URLEncoder.encode(query, "UTF-8") + "&count=25&format=json";
-        } catch (UnsupportedEncodingException e1) {
-            url = getBaseUrl("search") + "&filter=theater&q=" + query + "&count=25&format=json";
-        }
-
-        if(BuildConfig.USE_MOCKS) {
-            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinemas-search.json";
-        }
+        Map<String, String> params = new HashMap<>();
+        params.put("filter", "theater");
+        params.put("q", query);
+        params.put("count", "25");
 
         try {
-            String json = downloadUrl(url);
+            String json = downloadUrl("search", params, "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinemas-search.json");
 
             // Instantiate a JSON object from the request response
             JSONObject jsonObject = new JSONObject(json);
@@ -100,19 +140,14 @@ public class APIHelper {
     }
 
     private JSONArray downloadTheatersListGeo(String lat, String lon) throws IOException {
-        String url;
-        try {
-            url = getBaseUrl("theaterlist") + "&lat=" + URLEncoder.encode(lat, "UTF-8") + "&long=" + URLEncoder.encode(lon, "UTF-8") + "&radius=50" + "&count=25&format=json";
-        } catch (UnsupportedEncodingException e1) {
-            url = getBaseUrl("theaterlist") + "&lat=" + lat + "&long=" + lon + "&radius=25" + "&count=25&format=json";
-        }
-
-        if(BuildConfig.USE_MOCKS) {
-            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinemas-gps.json";
-        }
+        Map<String, String> params = new HashMap<>();
+        params.put("lat", lat);
+        params.put("long", lon);
+        params.put("radius", "50");
+        params.put("count", "25");
 
         try {
-            String json = downloadUrl(url);
+            String json = downloadUrl("theaterlist", params, "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinemas-gps.json");
 
             // Instantiate a JSON object from the request response
             JSONObject jsonObject = new JSONObject(json);
@@ -136,18 +171,14 @@ public class APIHelper {
      * @param theaterCode Code, or a comma separated list of code to load.
      */
     public DisplayList downloadMoviesList(String theaterCode) {
+        Map<String, String> params = new HashMap<>();
+        params.put("theaters", theaterCode);
 
         DisplayList displayList = new DisplayList();
 
-        String url = getBaseUrl("showtimelist") + "&theaters=" + theaterCode + "&format=json";
-
-        if(BuildConfig.USE_MOCKS) {
-            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/6f2ae30320e9e93807268f3a3772cdd8bba90987/cinema.json";
-        }
-
         String json;
         try {
-            json = downloadUrl(url);
+            json = downloadUrl("showtimelist", params, "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/6f2ae30320e9e93807268f3a3772cdd8bba90987/cinema.json");
         } catch (Exception e) {
             displayList.noDataConnection = true;
             return displayList;
@@ -249,14 +280,12 @@ public class APIHelper {
     }
 
     private JSONObject downloadMovie(String movieCode) {
-        String url = getBaseUrl("movie") + "&code=" + movieCode + "&profile=small&format=json";
-
-        if(BuildConfig.USE_MOCKS) {
-            url = "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/film.json";
-        }
+        Map<String, String> params = new HashMap<>();
+        params.put("code", movieCode);
+        params.put("profile", "small");
 
         try {
-            String json = downloadUrl(url);
+            String json = downloadUrl("movie", params, "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/film.json");
 
             // Instantiate a JSON object from the request response
             JSONObject jsonObject = new JSONObject(json);
@@ -378,10 +407,12 @@ public class APIHelper {
     public String downloadTrailerUrl(Movie movie) {
         if (movie.trailerCode.equals(""))
             return null;
+        Map<String, String> params = new HashMap<>();
+        params.put("mediafmt", "mp4-lc");
+        params.put("code", movie.trailerCode);
 
-        String url = getBaseUrl("media") + "&mediafmt=mp4-lc&code=" + movie.trailerCode + "&format=json";
         try {
-            String json = downloadUrl(url);
+            String json = downloadUrl("media", params, "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinemas-search.json");
             JSONObject jsonTrailer = new JSONObject(json).getJSONObject("media");
             if (jsonTrailer.has("rendition"))
                 return jsonTrailer.getJSONArray("rendition").getJSONObject(0).getString("href");
