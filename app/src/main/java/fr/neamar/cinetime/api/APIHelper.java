@@ -47,7 +47,7 @@ public class APIHelper {
     @SuppressLint("SimpleDateFormat")
     private String downloadUrl(String method, Map<String, String> params, String mockUrl) throws IOException {
         Log.v(TAG, "Downloading " + method);
-        params.put("sed", new SimpleDateFormat("YYYYMMdd").format(Calendar.getInstance().getTime()));
+        params.put("sed", new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime()));
         params.put("partner", PARTNER_KEY);
         params.put("format", "json");
 
@@ -105,7 +105,7 @@ public class APIHelper {
             while ((aux = reader.readLine()) != null) {
                 builder.append(aux);
             }
-            
+
             return builder.toString();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

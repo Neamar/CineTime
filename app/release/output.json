@@ -1,1 +1,1 @@
-[{"outputType":{"type":"APK"},"apkInfo":{"type":"MAIN","splits":[],"versionCode":36},"path":"app-release.apk","properties":{"packageId":"fr.neamar.cinetime","split":"","minSdkVersion":"14"}}]
+[{"outputType":{"type":"APK"},"apkData":{"type":"MAIN","splits":[],"versionCode":39,"versionName":"1.20","enabled":true,"outputFile":"app-release.apk","fullName":"release","baseName":"release","dirName":""},"path":"app-release.apk","properties":{}}]
