@@ -82,7 +82,7 @@ class _TheatersPageState extends State<TheatersPage> {
                 if (snapshot.data.isEmpty)
                   return IconMessage(
                     icon: IconMessage.iconSad,
-                    message: 'Aucun résultats',
+                    message: 'Aucun résultat',
                   );
 
                 // Has data
