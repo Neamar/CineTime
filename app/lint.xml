@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<lint>
-    <issue id="HardcodedText">
-        <ignore path="res/layout/activity_details.xml"/>
-    </issue>
-    <issue id="TypographyDashes" severity="ignore"/>
-</lint>
