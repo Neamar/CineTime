@@ -270,26 +270,20 @@ class WebServices {
   }
 }
 
-class CtCacheManager extends BaseCacheManager {
+class CtCacheManager extends CacheManager {
   static const key = "CtCache";
 
   static CtCacheManager _instance;
 
   factory CtCacheManager() {
-    if (_instance == null) {
-      _instance = new CtCacheManager._();
-    }
+    _instance ??= CtCacheManager._();
     return _instance;
   }
 
-  CtCacheManager._() : super(key, maxAgeCacheObject: Duration(days: 7));
-
-  final _defaultCacheManager = DefaultCacheManager();
-
-  @override
-  Future<String> getFilePath() async {
-    return _defaultCacheManager.getFilePath();
-  }
+  CtCacheManager._() : super(Config(
+    key,
+    stalePeriod: Duration(days: 7),
+  ));
 
   @override
   Future<FileInfo> getFileFromCache(String url, {bool ignoreMemCache = false}) async {
@@ -300,9 +294,9 @@ class CtCacheManager extends BaseCacheManager {
   }
 
   @override
-  Future<FileInfo> downloadFile(String url, {Map<String, String> authHeaders, bool force = false}) async {
+  Future<FileInfo> downloadFile(String url, {String key, Map<String, String> authHeaders, bool force = false}) async {
     print('WS.server (?) [$url]');
-    final fileInfo = await super.downloadFile(url, authHeaders: authHeaders, force: force);
+    final fileInfo = await super.downloadFile(url, key: key, authHeaders: authHeaders, force: force);
     print('WS.server (✓) [$url]');
     return fileInfo;
   }
