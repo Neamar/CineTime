@@ -165,7 +165,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                   ),
                 ),
                 slivers: <Widget>[
-                      () {
+                  () {
                     if (snapshot.hasError)
                       return SliverFillRemaining(
                         child: IconMessage(
@@ -187,7 +187,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                     return SliverFixedExtentList(
                       itemExtent: 100,
                       delegate: SliverChildBuilderDelegate(
-                            (context, index) {
+                        (context, index) {
                           var movieShowTimes = snapshot.data.elementAt(index);
 
                           return MovieTile(
@@ -214,7 +214,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
             ),
           ],
         );
-      }
+      },
     );
   }
 
