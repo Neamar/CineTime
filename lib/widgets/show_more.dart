@@ -18,7 +18,7 @@ class _ShowMoreTextState extends State<ShowMoreText> {
   Widget build(BuildContext context) {
     return GestureDetector(
       child: AnimatedSwitcher(
-        duration: AppResources.DurationAnimationMedium,
+        duration: AppResources.durationAnimationMedium,
         child: Text(
           widget.text,
           key: ValueKey(isExpanded),

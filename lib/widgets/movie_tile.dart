@@ -67,14 +67,14 @@ class MovieTile extends StatelessWidget {
                             ),
                             if (movieShowTimes.movie.rating != null && movieShowTimes.movie.rating > 0)
                               ...[
-                                AppResources.WidgetSpacerLarge,
+                                AppResources.spacerLarge,
                                 StarRating(
                                   rating: movieShowTimes.movie.rating,
                                 )
                               ],
                           ],
                         ),
-                        AppResources.WidgetSpacerTiny,
+                        AppResources.spacerTiny,
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
@@ -99,7 +99,7 @@ class MovieTile extends StatelessWidget {
                                       overflow: TextOverflow.fade,
                                     ),
                                   ),
-                                  AppResources.WidgetSpacerMedium,
+                                  AppResources.spacerMedium,
                                   Text(
                                     theaterShowTimes.showTimesSummary,
                                     style: Theme.of(context).textTheme.caption,
