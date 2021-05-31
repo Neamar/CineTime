@@ -116,7 +116,7 @@ extension ExtendedDateTimeIterable on Iterable<DateTime> {
     };
 
     // Fill a list of formatted weekday string
-    var weekdaysString = List<String>();
+    final weekdaysString = <String>[];
     for (var weekday in weekdays) {
       // Add formatted string to list
       weekdaysString.add(formatDate(weekday));

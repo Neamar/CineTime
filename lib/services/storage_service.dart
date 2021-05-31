@@ -17,9 +17,9 @@ class StorageService {
 
   static Iterable<Theater> readFavoriteTheaters() {
     //Read json
-    var theatersString = _storage.getString(_FavoriteTheatersKey);
+    final theatersString = _storage.getString(_FavoriteTheatersKey);
     if (theatersString?.isNotEmpty != true)
-      return List<Theater>();
+      return [];
 
     //Decode json
     List<dynamic> usersJson = json.decode(theatersString);

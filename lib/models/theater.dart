@@ -34,11 +34,11 @@ class Theater extends Identifiable {
   }) : super(code);
 
   String get fullAddress {
-    final lines = List<String>();
+    final lines = <String>[];
     if (street?.isNotEmpty == true)
       lines.add(street);
 
-    final line2parts = List<String>();
+    final line2parts = <String>[];
     if (zipCode?.isNotEmpty == true)
       line2parts.add(zipCode);
     if (city?.isNotEmpty == true)

@@ -31,11 +31,11 @@ class MovieShowTimes {
       : theatersShowTimes;
 
   MovieShowTimes(this.movie, {Iterable<TheaterShowTimes> theatersShowTimes, Iterable<TheaterShowTimes> filteredTheatersShowTimes}) :
-    this.theatersShowTimes = theatersShowTimes ?? List<TheaterShowTimes>(),
-    this.filteredTheatersShowTimes = filteredTheatersShowTimes ?? List<TheaterShowTimes>();
+    this.theatersShowTimes = theatersShowTimes ?? <TheaterShowTimes>[],
+    this.filteredTheatersShowTimes = filteredTheatersShowTimes ?? <TheaterShowTimes>[];
 
   String toFullString(bool applyFilters) {
-    var lines = List<String>();
+    final lines = <String>[];
 
     // Movie name
     lines.add("Séances pour '${movie.title}'");
@@ -50,8 +50,8 @@ class MovieShowTimes {
 
       // For each room
       for (var roomsShowTimes in theaterShowTimes.roomsShowTimes) {
-        var roomShowTimes = roomsShowTimes.showTimesDisplay;
-        var header = "[${roomsShowTimes.tags.join(' ')}] ";
+        final roomShowTimes = roomsShowTimes.showTimesDisplay;
+        final header = "[${roomsShowTimes.tags.join(' ')}] ";
 
         // for each ShowTimes
         for (var showTimes in roomShowTimes)
@@ -73,16 +73,16 @@ class TheaterShowTimes {
   final List<RoomShowTimes> roomsShowTimes;
 
   TheaterShowTimes(this.theater, {Iterable<RoomShowTimes> showTimes}) :
-    this.roomsShowTimes = showTimes ?? List<RoomShowTimes>();
+    this.roomsShowTimes = showTimes ?? <RoomShowTimes>[];
 
   String _showTimesSummary;
   String get showTimesSummary {
     if (_showTimesSummary == null) {
-      var now = WebServices.mockedNow;
-      var nextWednesday = now.getNextWednesday();
+      final now = WebServices.mockedNow;
+      final nextWednesday = now.getNextWednesday();
 
       // Get all date with a show, from [now], without duplicates, sorted.
-      var daysWithShow = roomsShowTimes
+      final daysWithShow = roomsShowTimes
         .expand((roomShowTime) => roomShowTime.showTimesRaw)
         .where((dateTime) => dateTime.isAfter(now))     //TODO use https://github.com/jogboms/time.dart (for all project)
         .map((dateTime) => dateTime.toDate)
@@ -95,7 +95,7 @@ class TheaterShowTimes {
         return 'Prochaine séance le ${daysWithShow.first.toWeekdayString(withDay: true, withMonth: true)}';
 
       // Get all dates with a show before next wednesday
-      var currentWeekShowTimes = daysWithShow.where((date) => date.isBefore(nextWednesday));
+      final currentWeekShowTimes = daysWithShow.where((date) => date.isBefore(nextWednesday));
 
       // Format string & cache data
       _showTimesSummary = currentWeekShowTimes.toShortWeekdaysString(now);
@@ -151,21 +151,21 @@ class RoomShowTimes {
     // Build a Map<Date, Set<Time>> : one list of Time per Date
     var datesShowTimes = Map<Date, Set<Time>>();
     for (var showTime in showTimesRaw) {
-      var date = showTime.toDate;
-      var time = showTime.toTime;
+      final date = showTime.toDate;
+      final time = showTime.toTime;
 
-      var dateShowTimes = datesShowTimes.putIfAbsent(date, () => Set<Time>());
+      final dateShowTimes = datesShowTimes.putIfAbsent(date, () => Set<Time>());
       dateShowTimes.add(time);
     }
 
     // List of coupled Dates and Times
-    var showTimesList = List<ShowTimes>();
+    final showTimesList = <ShowTimes>[];
 
     // Group dates that have the exact same times
     for (var dateShowTimesEntry in datesShowTimes.entries) {
       // Get day list with exact same times
       // TODO force grouping if missing times are passed (Exemple : we are wednesday 11h, ignore showtime before 11h when grouping)
-      var showTimes = showTimesList.firstWhere((showTimes) => dateShowTimesEntry.value.containsSame(showTimes.times), orElse: () => null);
+      final showTimes = showTimesList.firstWhere((showTimes) => dateShowTimesEntry.value.containsSame(showTimes.times), orElse: () => null);
       if (showTimes != null)
         showTimes.dates.add(dateShowTimesEntry.key);
       else
@@ -173,23 +173,23 @@ class RoomShowTimes {
     }
 
     // Build the header
-    var timesHeader = datesShowTimes.values
+    final timesHeader = datesShowTimes.values
         .expand((times) => times)
         .toSet()
         .toList(growable: false)
       ..sort();
 
-    var columnCount = 1 + timesHeader.length;
+    final columnCount = 1 + timesHeader.length;
 
     // Build the double list of formatted strings
-    var lines = List<List<String>>(showTimesList.length);
+    final lines = List<List<String>>.filled(showTimesList.length, null, growable: false);
     for (var y = 0; y < showTimesList.length; y++) {
-      var showTime = showTimesList[y];
-      var cells = List<String>(columnCount);
+      final showTime = showTimesList[y];
+      final cells = List<String>.filled(columnCount, null, growable: false);
       cells[0] = showTime.datesDisplay;
 
       for (var x = 1; x < columnCount; x ++) {
-        var timeHeader = timesHeader[x - 1];
+        final timeHeader = timesHeader[x - 1];
         cells[x] = showTime.times.contains(timeHeader) ? timeHeader.toString() : null;
       }
 

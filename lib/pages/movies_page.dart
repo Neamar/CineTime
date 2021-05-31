@@ -556,12 +556,12 @@ class MoviesPageBloc with Disposable {
   }
 
   void applyFilterAndSort() {
-    final displayList = List<MovieShowTimes>();
+    final displayList = <MovieShowTimes>[];
 
     // ---- Filter ----
-    var movieRelatedFilterEnabled = filterRatingEnabled;
-    var deepFilterEnabled = filterHourEnabled;
-    var areFiltersEnabled = movieRelatedFilterEnabled || deepFilterEnabled;
+    final movieRelatedFilterEnabled = filterRatingEnabled;
+    final deepFilterEnabled = filterHourEnabled;
+    final areFiltersEnabled = movieRelatedFilterEnabled || deepFilterEnabled;
 
     for (var movieShowTimes in _theatersShowTimes.moviesShowTimes) {
       movieShowTimes.filteredTheatersShowTimes.clear();
@@ -569,11 +569,11 @@ class MoviesPageBloc with Disposable {
       // If there is deep-data-related filters
       if (deepFilterEnabled) {
         for (var theaterShowTimes in movieShowTimes.theatersShowTimes) {
-          var filteredRoomsShowTimes = List<RoomShowTimes>();
+          final filteredRoomsShowTimes = <RoomShowTimes>[];
 
           for (var roomShowTimes in theaterShowTimes.roomsShowTimes) {
-            var filteredShowTimesRaw = roomShowTimes.showTimesRaw.where((showTime) {
-              var time = showTime.toTime;
+            final filteredShowTimesRaw = roomShowTimes.showTimesRaw.where((showTime) {
+              final time = showTime.toTime;
               return time.hour >= filterHourMin && time.hour <= filterHourMax;
             });
 

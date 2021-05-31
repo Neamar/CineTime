@@ -33,7 +33,7 @@ class _MoviePageState extends State<MoviePage> {
   Widget build(BuildContext context) {
     const double contentPadding = 16;
     const double overlapContentHeight = 50;
-    var bloc = Provider.of<MoviesPageBloc>(context);    //TODO remove ?
+    final bloc = Provider.of<MoviesPageBloc>(context);    //TODO remove ?
 
     return Scaffold(
       //backgroundColor: Colors.blueGrey,
@@ -53,7 +53,7 @@ class _MoviePageState extends State<MoviePage> {
             overlapContent: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                FlatButton(
+                TextButton(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -70,7 +70,7 @@ class _MoviePageState extends State<MoviePage> {
                   ),
                   onPressed: () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerCode)),
                 ),
-                FlatButton(
+                TextButton(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -123,7 +123,7 @@ class _MoviePageState extends State<MoviePage> {
                               children: <Widget>[
                                 Text(
                                   widget.movieShowTimes.movie.title,
-                                  style: Theme.of(context).textTheme.title,
+                                  style: Theme.of(context).textTheme.headline6,
                                 ),
                                 if (widget.movieShowTimes.movie.directors != null)
                                   TextWithLabel(
@@ -261,23 +261,17 @@ class _MoviePageState extends State<MoviePage> {
                                   ),
                                 ),
                               );
-                            }
+                            },
                           ),
                         ],
                       ),
                     );
-                  }
+                  },
                 ),
               ],
             ),
-          )
+          ),
         ],
-      ),
-    );
-
-    return Scaffold(
-      body: SafeArea(
-        child: Text('r'),
       ),
     );
   }
@@ -428,7 +422,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
           children: <Widget>[
             Text(
               theaterShowTimes.theater.name,
-              style: Theme.of(context).textTheme.title,
+              style: Theme.of(context).textTheme.headline6,
             ),
             ...List.generate(theaterShowTimes.roomsShowTimes.length, (index) => _buildRoomSection(
                 context, theaterShowTimes.roomsShowTimes[index]
