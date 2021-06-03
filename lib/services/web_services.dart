@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cinetime/helpers/tools.dart';
 import 'package:cinetime/models/_models.dart';
@@ -54,9 +53,9 @@ class WebServices {
     responseJson = responseJson['feed'];
     List<dynamic> theatersJson = responseJson['theater'];
 
-    var theaters = List<Theater>();
+    final theaters = <Theater>[];
     for (Map<String, dynamic> theaterJson in theatersJson) {
-      var poster = ((theaterJson['poster'] ?? theaterJson['picture']) as Map<String, dynamic>)?.elementAt('path');   // Return 'poster' with 'search' and 'picture' with 'theaterlist'
+      final poster = ((theaterJson['poster'] ?? theaterJson['picture']) as Map<String, dynamic>)?.elementAt('path');   // Return 'poster' with 'search' and 'picture' with 'theaterlist'
 
       theaters.add(Theater(
         code: theaterJson['code'],
@@ -104,7 +103,7 @@ class WebServices {
         if (showTimesDaysJson?.isNotEmpty != true)
           continue;
 
-        var showTimesRaw = List<DateTime>();
+        final showTimesRaw = <DateTime>[];
         for (Map<String, dynamic> showTimesDayJson in showTimesDaysJson) {
           String showDayString = showTimesDayJson['d'];
           List<dynamic> showTimesHoursJson = showTimesDayJson['t'];
@@ -121,7 +120,7 @@ class WebServices {
         String screenFormatString = screenFormatJson['\$'] ?? '';
         Map<String, dynamic> screenJson = movieShowTimesJson['screen'] ?? Map();
 
-        var showTime = RoomShowTimes(
+        final showTime = RoomShowTimes(
           screen: screenJson['\$'],
           seatCount: movieShowTimesJson['seatCount'],
           isOriginalLanguage: movieShowTimesJson['version']['original'] == 'true',
@@ -132,12 +131,12 @@ class WebServices {
 
         // Build Movie info
         Map<String, dynamic> movieJson = movieShowTimesJson['onShow']['movie'];
-        var movieCode = (movieJson['code'] as int).toString();
+        final movieCode = (movieJson['code'] as int).toString();
         var movie = moviesShowTimesMap.keys.firstWhere((m) => m.code == movieCode, orElse: () => null);
         if (movie == null) {
           Map<String, dynamic> castingJson = movieJson['castingShort'] ?? Map();
           Map<String, dynamic> releaseJson = movieJson['release'] ?? Map();
-          List<dynamic> genresJson = movieJson['genre'] ?? List();
+          List<dynamic> genresJson = movieJson['genre'] ?? [];
           Map<String, dynamic> certificateJson = movieJson['movieCertificate'] ?? Map();
           certificateJson = certificateJson['certificate'];
           Map<String, dynamic> posterJson = movieJson['poster'] ?? Map();
@@ -166,7 +165,7 @@ class WebServices {
         }
 
         // Get or create MovieShowTimes
-        var movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie));
+        final movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie));
 
         // Update or create TheaterShowTimes
         var theaterShowTimes = movieShowTimes.theatersShowTimes.firstWhere((t) => t.theater == theater, orElse: () => null);

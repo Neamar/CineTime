@@ -55,7 +55,7 @@ class MovieTile extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       movieShowTimes.movie.title,
-                                      style: Theme.of(context).textTheme.title,
+                                      style: Theme.of(context).textTheme.headline6,
                                       overflow: TextOverflow.fade,
                                       softWrap: false,
                                     ),

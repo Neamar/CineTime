@@ -289,10 +289,10 @@ class TheatersPageBloc with Disposable {
     await _searchTheaters(
       () async {
         // Get geo-position
-        var position = await getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 15));
+        final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 15));
 
         // Get local theaters
-        var theaters = await WebServices.searchTheatersGeo(position.latitude, position.longitude);
+        final theaters = await WebServices.searchTheatersGeo(position.latitude, position.longitude);
 
         return theaters;
       }
