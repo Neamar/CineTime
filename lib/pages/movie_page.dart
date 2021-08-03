@@ -44,6 +44,7 @@ class _MoviePageState extends State<MoviePage> {
             title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
               path: widget.movieShowTimes.movie.poster,
+              onPressed: () => navigateTo(context, () => PosterPage(widget.movieShowTimes.movie.poster)),
               isThumbnail: false,
               applyDarken: true,
             ),
