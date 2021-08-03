@@ -281,7 +281,7 @@ class CtCacheManager extends CacheManager {
 
   CtCacheManager._() : super(Config(
     key,
-    stalePeriod: Duration(days: 7),
+    stalePeriod: Duration(days: 1),
   ));
 
   @override
