@@ -15,6 +15,8 @@ class PosterPage extends StatelessWidget {
       backgroundColor: Colors.black,
       body: PhotoView(
         imageProvider: CachedNetworkImageProvider(WebServices.getImageUrl(posterPath, false)),
+        minScale: PhotoViewComputedScale.contained,
+        maxScale: PhotoViewComputedScale.contained * 1.5,
       ),
     );
   }
