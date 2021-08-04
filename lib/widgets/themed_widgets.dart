@@ -19,12 +19,13 @@ class CtCachedImage extends StatelessWidget {
   final String path;
   final bool isThumbnail;
   final bool applyDarken;   //TODO find better name
+  final VoidCallback onPressed;
 
-  const CtCachedImage({Key key, this.path, this.isThumbnail, this.applyDarken}) : super(key: key);
+  const CtCachedImage({Key key, this.path, this.isThumbnail, this.applyDarken, this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var errorWidget = Center(
+    final errorWidget = Center(
       child: Icon(Icons.image),
     );
 
@@ -33,11 +34,17 @@ class CtCachedImage extends StatelessWidget {
 
     return CachedNetworkImage(
       imageUrl: WebServices.getImageUrl(path, isThumbnail),
+      imageBuilder: (_, image) => GestureDetector(
+        onTap: onPressed,
+        child: Image(
+          image: image,
+          fit: BoxFit.cover,
+          color: applyDarken == true ? Colors.black.withOpacity(0.3) : null,
+          colorBlendMode: BlendMode.srcATop,
+        ),
+      ),
       placeholder: (_, url) => CtProgressIndicator(),
       errorWidget: (_, url, error) => errorWidget,
-      fit: BoxFit.cover,
-      color: applyDarken == true ? Colors.black.withOpacity(0.3) : null,
-      colorBlendMode: BlendMode.srcATop,
     );
   }
 }

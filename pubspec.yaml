@@ -18,37 +18,38 @@ dependencies:
   json_annotation: ^4.0.1
 
   # Widgets / UI
-  flash: ^2.0.0
-  font_awesome_flutter: ^9.0.0
+  flash: ^2.0.1
+  font_awesome_flutter: ^9.1.0
   flutter_spinkit: ^5.0.0
   scaling_header: ^1.1.1
   marquee_widget: ^1.0.0
   shimmer: ^2.0.0
-  flutter_layout_grid: ^1.0.1
+  flutter_layout_grid: ^1.0.3
   fading_edge_scrollview: ^2.0.0
   flutter_easyrefresh: ^2.2.1
   flutter_xlider: ^3.4.0
   smooth_star_rating: ^1.1.1
-  video_player: ^2.1.4
-  chewie: ^1.2.0
+  photo_view: ^0.12.0
+  video_player: ^2.1.12
+  chewie: ^1.2.2
 
   # Web
   http: ^0.13.3
-  flutter_cache_manager: ^3.1.0
-  cached_network_image: ^3.0.0
+  flutter_cache_manager: ^3.1.2
+  cached_network_image: ^3.1.0
   crypto: ^3.0.1
 
   # Device
   url_launcher: ^6.0.4
-  share_plus: ^2.1.2
-  geolocator: ^7.0.3
+  share_plus: ^2.1.4
+  geolocator: ^7.3.1
 
   # Internationalization
   intl: ^0.17.0
-  timeago: ^3.0.2
+  timeago: ^3.1.0
 
 dev_dependencies:
-  build_runner: ^2.0.4
+  build_runner: ^2.1.0
   json_serializable: ^4.1.3
 
   # The following section is specific to Flutter.

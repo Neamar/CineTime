@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cinetime/helpers/tools.dart';
 import 'package:cinetime/models/_models.dart';
@@ -281,7 +282,7 @@ class CtCacheManager extends CacheManager {
 
   CtCacheManager._() : super(Config(
     key,
-    stalePeriod: Duration(days: 7),
+    stalePeriod: Duration(days: 1),
   ));
 
   @override
