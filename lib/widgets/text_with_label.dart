@@ -17,7 +17,7 @@ class TextWithLabel extends StatelessWidget {
             label,
             style: Theme.of(context).textTheme.caption,
           ),
-          AppResources.WidgetSpacerTiny,
+          AppResources.spacerTiny,
           Flexible(
             child: Text(
               text,

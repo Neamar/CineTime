@@ -38,7 +38,7 @@ class IconMessage extends StatelessWidget {
           color: redIcon == true ? Colors.red : null,
           size: inline == true ? 25 : 50,
         ),
-        AppResources.WidgetSpacerLarge,
+        AppResources.spacerLarge,
         Center(child: text),
       ],
     );

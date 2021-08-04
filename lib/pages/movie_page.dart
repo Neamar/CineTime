@@ -116,7 +116,7 @@ class _MoviePageState extends State<MoviePage> {
                               ),
                             ),
                           ),
-                          AppResources.WidgetSpacerMedium,
+                          AppResources.spacerMedium,
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -160,7 +160,7 @@ class _MoviePageState extends State<MoviePage> {
                       ),
 
                       // Rating
-                      AppResources.WidgetSpacerMedium,
+                      AppResources.spacerMedium,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
@@ -172,7 +172,7 @@ class _MoviePageState extends State<MoviePage> {
                       ),
 
                       // Synopsis
-                      AppResources.WidgetSpacerMedium,
+                      AppResources.spacerMedium,
                       SynopsisWidget(
                         movieCode: widget.movieShowTimes.movie.code,
                       ),
@@ -182,7 +182,7 @@ class _MoviePageState extends State<MoviePage> {
                 ),
 
                 // Show times
-                AppResources.WidgetSpacerMedium,
+                AppResources.spacerMedium,
                 BehaviorStreamBuilder<bool>(
                   subject: areShowtimesFiltered,
                   builder: (context, snapshot) {
@@ -289,13 +289,13 @@ class _MoviePageState extends State<MoviePage> {
             Text(
               title
             ),
-            AppResources.WidgetSpacerSmall,
+            AppResources.spacerSmall,
             Row(
               children: <Widget>[
                 StarRating(
                   rating: rating,
                 ),
-                AppResources.WidgetSpacerSmall,
+                AppResources.spacerSmall,
                 Text(
                   rating.toStringAsFixed(1)
                 ),
@@ -345,7 +345,7 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
       future: fetchFuture,
       builder: (context, snapshot) {
         return AnimatedSwitcher(
-          duration: AppResources.DurationAnimationMedium,
+          duration: AppResources.durationAnimationMedium,
           child: () {
 
             // Valid
@@ -427,7 +427,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
             ...List.generate(theaterShowTimes.roomsShowTimes.length, (index) => _buildRoomSection(
                 context, theaterShowTimes.roomsShowTimes[index]
             ))
-          ].insertBetween(AppResources.WidgetSpacerSmall),
+          ].insertBetween(AppResources.spacerSmall),
         ),
       ),
     );
@@ -465,7 +465,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
                     label: tag,
                   )).toList(growable: false),
                 ),
-              ].insertBetween(AppResources.WidgetSpacerExtraTiny),
+              ].insertBetween(AppResources.spacerExtraTiny),
             ),
           ),
 
@@ -513,11 +513,11 @@ class TheaterShowTimesWidget extends StatelessWidget {
               return Column(
                 crossAxisAlignment: column == 0 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
                 children: lines.map<Widget>((line) => Text(line[column] ?? '-')).toList()
-                  ..insertBetween(AppResources.WidgetSpacerExtraTiny),
+                  ..insertBetween(AppResources.spacerExtraTiny),
               );
-            })..insertBetween(AppResources.WidgetSpacerTiny)
+            })..insertBetween(AppResources.spacerTiny)
               ..insert(1, Expanded(
-                  child: AppResources.WidgetSpacerMedium
+                  child: AppResources.spacerMedium
               ));
           } (),
         ],
