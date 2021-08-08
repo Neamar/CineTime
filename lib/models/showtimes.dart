@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/services/web_services.dart';
 import 'package:cinetime/helpers/tools.dart';
@@ -9,7 +11,7 @@ part 'showtimes.g.dart';
 @JsonSerializable()
 class MoviesShowTimes {
   final bool fromCache;
-  final Iterable<MovieShowTimes> moviesShowTimes;
+  final List<MovieShowTimes> moviesShowTimes;
 
   @JsonKey(fromJson: StorageService.dateFromString, toJson: StorageService.dateToString)
   final DateTime fetchedAt;
@@ -69,28 +71,37 @@ class MovieShowTimes {
 
 @JsonSerializable()
 class TheaterShowTimes {
+  /// Theater data
   final Theater theater;
+
   final List<RoomShowTimes> roomsShowTimes;   // TODO to remove
+
+  /// List of showtimes, sorted by date
   final List<ShowTime> showTimes;
 
   TheaterShowTimes(this.theater, { Iterable<RoomShowTimes> roomsShowTimes, Iterable<ShowTime> showTimes }) :
     this.roomsShowTimes = roomsShowTimes ?? <RoomShowTimes>[],
     this.showTimes = showTimes ?? <ShowTime>[];
 
+  /// Simple cache for [showTimesSummary]
   String _showTimesSummary;
+
+  /// Return a short summary of the next showtimes
+  /// Examples :
+  /// - 'Me Je Ve Sa Di'
+  /// - 'Prochaine séance le Me 25 mars'
   String get showTimesSummary {
     if (_showTimesSummary == null) {
       final now = WebServices.mockedNow;
       final nextWednesday = now.getNextWednesday();
 
       // Get all date with a show, from [now], without duplicates, sorted.
-      final daysWithShow = roomsShowTimes
-        .expand((roomShowTime) => roomShowTime.showTimesRaw)
-        .where((dateTime) => dateTime.isAfter(now))     //TODO use https://github.com/jogboms/time.dart (for all project)
-        .map((dateTime) => dateTime.toDate)
-        .toSet()    //OPTI not needed for the first return, move after (but will add a .toList) ?
+      final daysWithShow = showTimes
+        .where((s) => s.time.isAfter(now))     //TODO use https://github.com/jogboms/time.dart (for all project)
+        .map((s) => s.time.toDate)
+        .toSet()
         .toList(growable: false)
-      ..sort();  //OPTI already sorted ?
+      ..sort();
 
       // If there are no date before next wednesday
       if (daysWithShow.first.isAfter(nextWednesday))
@@ -106,9 +117,28 @@ class TheaterShowTimes {
     return _showTimesSummary;
   }
 
+  /// Simple cache for [showTimesMap]
+  SplayTreeMap<Date, List<ShowTime>> _showTimesMap;
+
+  /// Sorted map of showtimes, where keys are the day.
+  SplayTreeMap<Date, List<ShowTime>> get showTimesMap {
+    if (_showTimesMap == null) {
+      _showTimesMap = SplayTreeMap();
+
+      for (final showTime in showTimes) {
+        final date = showTime.time.toDate;
+        final st = _showTimesMap.putIfAbsent(date, () => []);
+        st.add(showTime);
+      }
+    }
+
+    return _showTimesMap;
+  }
+
   TheaterShowTimes copyWith({List<RoomShowTimes> roomsShowTimes}) => TheaterShowTimes(
     theater,
     roomsShowTimes: roomsShowTimes ?? this.roomsShowTimes,
+    showTimes: showTimes ?? this.showTimes,
   );
 
   factory TheaterShowTimes.fromJson(Map<String, dynamic> json) => _$TheaterShowTimesFromJson(json);
@@ -225,14 +255,20 @@ class ShowTimes {
 
 @JsonSerializable()
 class ShowTime {
-  const ShowTime(this.time, this.screen, this.seatCount, this.tags);
+  const ShowTime(this.time, { this.screen, this.seatCount, this.tags });
 
+  /// Date and Time
   final DateTime time;
 
-  final String screen;    // Theater room name
-  final int seatCount;    // Theater room seat capacity
+  /// Theater room name
+  final String screen;
 
-  final List<String> tags;    // Can be ('VO' or 'VF'), '3D', 'IMAX'
+  /// Theater room seat capacity
+  final int seatCount;
+
+  /// Specs
+  /// Can be ('VO' or 'VF'), '3D', 'IMAX'
+  final List<String> tags;
 
   factory ShowTime.fromJson(Map<String, dynamic> json) => _$ShowTimeFromJson(json);
   Map<String, dynamic> toJson() => _$ShowTimeToJson(this);

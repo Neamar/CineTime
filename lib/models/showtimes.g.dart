@@ -122,9 +122,9 @@ Map<String, dynamic> _$RoomShowTimesToJson(RoomShowTimes instance) {
 ShowTime _$ShowTimeFromJson(Map<String, dynamic> json) {
   return ShowTime(
     json['time'] == null ? null : DateTime.parse(json['time'] as String),
-    json['screen'] as String,
-    json['seatCount'] as int,
-    (json['tags'] as List)?.map((e) => e as String)?.toList(),
+    screen: json['screen'] as String,
+    seatCount: json['seatCount'] as int,
+    tags: (json['tags'] as List)?.map((e) => e as String)?.toList(),
   );
 }
 

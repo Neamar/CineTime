@@ -99,37 +99,6 @@ class WebServices {
       final List<dynamic> moviesShowTimesJson = theaterShowtimesJson['movieShowtimes'];
       for (Map<String, dynamic> movieShowTimesJson in moviesShowTimesJson) {
 
-        // Build ShowTimes raw
-        final List<dynamic> showTimesDaysJson = movieShowTimesJson['scr'];
-        if (showTimesDaysJson?.isNotEmpty != true)
-          continue;
-
-        final showTimesRaw = <DateTime>[];
-        for (Map<String, dynamic> showTimesDayJson in showTimesDaysJson) {
-          String showDayString = showTimesDayJson['d'];
-          List<dynamic> showTimesHoursJson = showTimesDayJson['t'];
-
-          for (Map<String, dynamic> showTimesHourJson in showTimesHoursJson) {
-            String showHourString = showTimesHourJson['\$'];
-
-            showTimesRaw.add(DateTime.parse('$showDayString $showHourString'));
-          }
-        }
-
-        // Build ShowTime info
-        Map<String, dynamic> screenFormatJson = movieShowTimesJson['screenFormat'] ?? {};
-        String screenFormatString = screenFormatJson['\$'] ?? '';
-        Map<String, dynamic> screenJson = movieShowTimesJson['screen'] ?? {};
-
-        final showTime = RoomShowTimes(
-          screen: screenJson['\$'],
-          seatCount: movieShowTimesJson['seatCount'],
-          isOriginalLanguage: movieShowTimesJson['version']['original'] == 'true',
-          is3D: screenFormatString.contains('3D'),
-          isIMAX: screenFormatString.contains('IMAX'),
-          showTimesRaw: showTimesRaw..sort(),
-        );
-
         // Build Movie info
         Map<String, dynamic> movieJson = movieShowTimesJson['onShow']['movie'];
         final movieCode = (movieJson['code'] as int).toString();
@@ -165,6 +134,45 @@ class WebServices {
           );
         }
 
+        // Build ShowTime info
+        final Map<String, dynamic> screenFormatJson = movieShowTimesJson['screenFormat'] ?? {};
+        final String screenFormatString = screenFormatJson['\$'] ?? '';
+        final Map<String, dynamic> screenJson = movieShowTimesJson['screen'] ?? {};
+
+        final String screen = screenJson['\$'];
+        final int seatCount = movieShowTimesJson['seatCount'];
+        final bool isOriginalLanguage = movieShowTimesJson['version']['original'] == 'true';
+        final bool is3D = screenFormatString.contains('3D');
+        final bool isIMAX = screenFormatString.contains('IMAX');
+        final tags = <String>[
+          isOriginalLanguage == true ? 'VO' : 'VF',
+          if (is3D) '3D',
+          if (isIMAX) 'IMAX',
+        ];
+
+        // Build ShowTimes
+        final List<dynamic> showTimesDaysJson = movieShowTimesJson['scr'];
+        if (showTimesDaysJson?.isNotEmpty != true)
+          continue;
+
+        final showTimes = <ShowTime>[];
+        for (Map<String, dynamic> showTimesDayJson in showTimesDaysJson) {
+          final String showDayString = showTimesDayJson['d'];
+          final List<dynamic> showTimesHoursJson = showTimesDayJson['t'];
+
+          for (Map<String, dynamic> showTimesHourJson in showTimesHoursJson) {
+            final String showHourString = showTimesHourJson['\$'];
+            final showTimeDate = DateTime.parse('$showDayString $showHourString');
+
+            showTimes.add(ShowTime(
+              showTimeDate,
+              screen: screen,
+              seatCount: seatCount,
+              tags: tags,
+            ));
+          }
+        }
+
         // Get or create MovieShowTimes
         final movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie));
 
@@ -174,14 +182,19 @@ class WebServices {
           theaterShowTimes = TheaterShowTimes(theater);
           movieShowTimes.theatersShowTimes.add(theaterShowTimes);
         }
-        theaterShowTimes.roomsShowTimes.add(showTime);
+        theaterShowTimes.showTimes.addAll(showTimes);
       }
     }
 
+    // Sort ShowTimes
+    final moviesShowTimes = moviesShowTimesMap.values.toList(growable: false);
+    moviesShowTimes.forEach((m) => m.theatersShowTimes.forEach((t) => t.showTimes..sort((s1, s2) => s1.time.compareTo(s2.time))));
+
+    // Return data
     return MoviesShowTimes(
       fetchedAt: DateTime.now(),  // TODO save this value to shared pref and restore it ?
       fromCache: false,   // TODO remove that field
-      moviesShowTimes: moviesShowTimesMap.values,
+      moviesShowTimes: moviesShowTimes,
     );
   }
 
