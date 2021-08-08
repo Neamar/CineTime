@@ -43,22 +43,24 @@ class MovieShowTimes {
     lines.add("Séances pour '${movie.title}'");
 
     // For each theater
-    for (var theaterShowTimes in getTheatersShowTimesDisplay(applyFilters == true)) {
+    for (final theaterShowTimes in getTheatersShowTimesDisplay(applyFilters == true)) {
       // Separator
       lines.add('');
 
       // Theater's name
       lines.add(theaterShowTimes.theater.name);
 
+      lines.add('TODO');    // TODO
+      /* TODO
       // For each room
-      for (var roomsShowTimes in theaterShowTimes.roomsShowTimes) {
+      for (final roomsShowTimes in theaterShowTimes.roomsShowTimes) {
         final roomShowTimes = roomsShowTimes.showTimesDisplay;
         final header = "[${roomsShowTimes.tags.join(' ')}] ";
 
         // for each ShowTimes
-        for (var showTimes in roomShowTimes)
+        for (final showTimes in roomShowTimes)
           lines.add(header + showTimes.where((s) => s != null).join(' '));
-      }
+      }*/
     }
 
     // Return formatted string
@@ -74,13 +76,10 @@ class TheaterShowTimes {
   /// Theater data
   final Theater theater;
 
-  final List<RoomShowTimes> roomsShowTimes;   // TODO to remove
-
   /// List of showtimes, sorted by date
   final List<ShowTime> showTimes;
 
-  TheaterShowTimes(this.theater, { Iterable<RoomShowTimes> roomsShowTimes, Iterable<ShowTime> showTimes }) :
-    this.roomsShowTimes = roomsShowTimes ?? <RoomShowTimes>[],
+  TheaterShowTimes(this.theater, { List<ShowTime> showTimes }) :
     this.showTimes = showTimes ?? <ShowTime>[];
 
   /// Simple cache for [showTimesSummary]
@@ -97,8 +96,8 @@ class TheaterShowTimes {
 
       // Get all date with a show, from [now], without duplicates, sorted.
       final daysWithShow = showTimes
-        .where((s) => s.time.isAfter(now))     //TODO use https://github.com/jogboms/time.dart (for all project)
-        .map((s) => s.time.toDate)
+        .where((s) => s.dateTime.isAfter(now))     //TODO use https://github.com/jogboms/time.dart (for all project)
+        .map((s) => s.dateTime.toDate)
         .toSet()
         .toList(growable: false)
       ..sort();
@@ -126,7 +125,7 @@ class TheaterShowTimes {
       _showTimesMap = SplayTreeMap();
 
       for (final showTime in showTimes) {
-        final date = showTime.time.toDate;
+        final date = showTime.dateTime.toDate;
         final st = _showTimesMap.putIfAbsent(date, () => []);
         st.add(showTime);
       }
@@ -135,9 +134,8 @@ class TheaterShowTimes {
     return _showTimesMap;
   }
 
-  TheaterShowTimes copyWith({List<RoomShowTimes> roomsShowTimes}) => TheaterShowTimes(
+  TheaterShowTimes copyWith({List<ShowTime> showTimes}) => TheaterShowTimes(
     theater,
-    roomsShowTimes: roomsShowTimes ?? this.roomsShowTimes,
     showTimes: showTimes ?? this.showTimes,
   );
 
@@ -255,10 +253,10 @@ class ShowTimes {
 
 @JsonSerializable()
 class ShowTime {
-  const ShowTime(this.time, { this.screen, this.seatCount, this.tags });
+  const ShowTime(this.dateTime, { this.screen, this.seatCount, this.tags });
 
   /// Date and Time
-  final DateTime time;
+  final DateTime dateTime;
 
   /// Theater room name
   final String screen;

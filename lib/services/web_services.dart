@@ -188,7 +188,7 @@ class WebServices {
 
     // Sort ShowTimes
     final moviesShowTimes = moviesShowTimesMap.values.toList(growable: false);
-    moviesShowTimes.forEach((m) => m.theatersShowTimes.forEach((t) => t.showTimes..sort((s1, s2) => s1.time.compareTo(s2.time))));
+    moviesShowTimes.forEach((m) => m.theatersShowTimes.forEach((t) => t.showTimes..sort((s1, s2) => s1.dateTime.compareTo(s2.dateTime))));
 
     // Return data
     return MoviesShowTimes(

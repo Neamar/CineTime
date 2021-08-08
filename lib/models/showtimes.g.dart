@@ -10,8 +10,11 @@ MoviesShowTimes _$MoviesShowTimesFromJson(Map<String, dynamic> json) {
   return MoviesShowTimes(
     fetchedAt: StorageService.dateFromString(json['fetchedAt'] as String),
     fromCache: json['fromCache'] as bool,
-    moviesShowTimes: (json['moviesShowTimes'] as List)?.map((e) =>
-        e == null ? null : MovieShowTimes.fromJson(e as Map<String, dynamic>)),
+    moviesShowTimes: (json['moviesShowTimes'] as List)
+        ?.map((e) => e == null
+            ? null
+            : MovieShowTimes.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 
@@ -25,7 +28,7 @@ Map<String, dynamic> _$MoviesShowTimesToJson(MoviesShowTimes instance) {
   }
 
   writeNotNull('fromCache', instance.fromCache);
-  writeNotNull('moviesShowTimes', instance.moviesShowTimes?.toList());
+  writeNotNull('moviesShowTimes', instance.moviesShowTimes);
   writeNotNull('fetchedAt', StorageService.dateToString(instance.fetchedAt));
   return val;
 }
@@ -65,10 +68,10 @@ TheaterShowTimes _$TheaterShowTimesFromJson(Map<String, dynamic> json) {
     json['theater'] == null
         ? null
         : Theater.fromJson(json['theater'] as Map<String, dynamic>),
-    roomsShowTimes: (json['roomsShowTimes'] as List)?.map((e) =>
-        e == null ? null : RoomShowTimes.fromJson(e as Map<String, dynamic>)),
-    showTimes: (json['showTimes'] as List)?.map(
-        (e) => e == null ? null : ShowTime.fromJson(e as Map<String, dynamic>)),
+    showTimes: (json['showTimes'] as List)
+        ?.map((e) =>
+            e == null ? null : ShowTime.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 
@@ -82,7 +85,6 @@ Map<String, dynamic> _$TheaterShowTimesToJson(TheaterShowTimes instance) {
   }
 
   writeNotNull('theater', instance.theater);
-  writeNotNull('roomsShowTimes', instance.roomsShowTimes);
   writeNotNull('showTimes', instance.showTimes);
   return val;
 }
@@ -121,7 +123,9 @@ Map<String, dynamic> _$RoomShowTimesToJson(RoomShowTimes instance) {
 
 ShowTime _$ShowTimeFromJson(Map<String, dynamic> json) {
   return ShowTime(
-    json['time'] == null ? null : DateTime.parse(json['time'] as String),
+    json['dateTime'] == null
+        ? null
+        : DateTime.parse(json['dateTime'] as String),
     screen: json['screen'] as String,
     seatCount: json['seatCount'] as int,
     tags: (json['tags'] as List)?.map((e) => e as String)?.toList(),
@@ -137,7 +141,7 @@ Map<String, dynamic> _$ShowTimeToJson(ShowTime instance) {
     }
   }
 
-  writeNotNull('time', instance.time?.toIso8601String());
+  writeNotNull('dateTime', instance.dateTime?.toIso8601String());
   writeNotNull('screen', instance.screen);
   writeNotNull('seatCount', instance.seatCount);
   writeNotNull('tags', instance.tags);

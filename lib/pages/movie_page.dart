@@ -445,14 +445,14 @@ class TheaterShowTimesWidget extends StatelessWidget {
       children: [
         // Day
         Text(
-          showtimes.first.time.toDate.toWeekdayString(withDay: true),
+          showtimes.first.dateTime.toDate.toWeekdayString(withDay: true),
         ),
 
         // Times
         AppResources.spacerSmall,
         ...showtimes.map<Widget>((showtime) {
           return Text(
-            showtime.time.toTime.toString(),
+            showtime.dateTime.toTime.toString(),
           );
         }).toList()..insertBetween(AppResources.spacerExtraTiny),
 
