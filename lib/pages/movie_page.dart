@@ -430,8 +430,8 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
             // Showtimes
             Row(
-              children: theaterShowTimes.showTimesMap.keys.map<Widget>((day) => _buildDaySection(
-                context, theaterShowTimes.showTimesMap[day],
+              children: theaterShowTimes.formattedShowTimes.keys.map<Widget>((day) => _buildDaySection(
+                context, day, theaterShowTimes.formattedShowTimes[day],
               )).toList()..insertBetween(AppResources.spacerSmall),
             ),
           ].insertBetween(AppResources.spacerSmall),
@@ -440,19 +440,19 @@ class TheaterShowTimesWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDaySection(BuildContext context, List<ShowTime> showtimes) {
+  Widget _buildDaySection(BuildContext context, Date day, List<ShowTime> showtimes) {
     return Column(
       children: [
         // Day
         Text(
-          showtimes.first.dateTime.toDate.toWeekdayString(withDay: true),
+          day.toWeekdayString(withDay: true),
         ),
 
         // Times
         AppResources.spacerSmall,
         ...showtimes.map<Widget>((showtime) {
           return Text(
-            showtime.dateTime.toTime.toString(),
+            showtime?.dateTime?.toTime?.toString() ?? '-',
           );
         }).toList()..insertBetween(AppResources.spacerExtraTiny),
 

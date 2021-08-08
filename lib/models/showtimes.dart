@@ -116,18 +116,46 @@ class TheaterShowTimes {
     return _showTimesSummary;
   }
 
-  /// Simple cache for [showTimesMap]
+  /// Simple cache for [formattedShowTimes]
   SplayTreeMap<Date, List<ShowTime>> _showTimesMap;
 
-  /// Sorted map of showtimes, where keys are the day.
-  SplayTreeMap<Date, List<ShowTime>> get showTimesMap {
+  /// Formatted & sorted map of showtimes, where keys are the day.
+  /// All showtimes elements in lists are aligned per time.
+  SplayTreeMap<Date, List<ShowTime>> get formattedShowTimes {
     if (_showTimesMap == null) {
+      const aligned = true;
       _showTimesMap = SplayTreeMap();
 
-      for (final showTime in showTimes) {
-        final date = showTime.dateTime.toDate;
-        final st = _showTimesMap.putIfAbsent(date, () => []);
-        st.add(showTime);
+      // Unaligned, simple version
+      if (!aligned) {
+        for (final showTime in showTimes) {
+          final date = showTime.dateTime.toDate;
+          final st = _showTimesMap.putIfAbsent(date, () => []);
+          st.add(showTime);
+        }
+      }
+
+      // Aligned version
+      else {
+        // List all unique times
+        final timesRef = showTimes
+            .map((st) => st.dateTime.toTime)
+            .toSet()
+            .toList(growable: false)
+          ..sort();
+        final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
+
+        // Build map
+        for (final showTime in showTimes) {
+          final date = showTime.dateTime.toDate;
+          final time = showTime.dateTime.toTime;
+
+          // Get day list or create it
+          final showTimes = _showTimesMap.putIfAbsent(date, () => List.filled(timesRef.length, null, growable: false));
+
+          // Insert showTime at right index
+          showTimes[timesRefMap[time]] = showTime;
+        }
       }
     }
 
