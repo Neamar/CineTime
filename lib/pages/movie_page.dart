@@ -421,108 +421,42 @@ class TheaterShowTimesWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+
+            // Theater name
             Text(
               theaterShowTimes.theater.name,
               style: Theme.of(context).textTheme.headline6,
             ),
-            ...List.generate(theaterShowTimes.roomsShowTimes.length, (index) => _buildRoomSection(
-              context, theaterShowTimes.roomsShowTimes[index],
-            ))
+
+            // Showtimes
+            Row(
+              children: theaterShowTimes.showTimesMap.keys.map<Widget>((day) => _buildDaySection(
+                context, theaterShowTimes.showTimesMap[day],
+              )).toList()..insertBetween(AppResources.spacerSmall),
+            ),
           ].insertBetween(AppResources.spacerSmall),
         ),
       ),
     );
   }
 
-  Widget _buildRoomSection(BuildContext context, RoomShowTimes roomShowTimes) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
+  Widget _buildDaySection(BuildContext context, List<ShowTime> showtimes) {
+    return Column(
+      children: [
+        // Day
+        Text(
+          showtimes.first.time.toDate.toWeekdayString(withDay: true),
+        ),
 
-          // Room info
-          SizedBox(
-            width: 60,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
+        // Times
+        AppResources.spacerSmall,
+        ...showtimes.map<Widget>((showtime) {
+          return Text(
+            showtime.time.toTime.toString(),
+          );
+        }).toList()..insertBetween(AppResources.spacerExtraTiny),
 
-                if (roomShowTimes.screen != null)
-                  Text(
-                    'Salle ${roomShowTimes.screen}',
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-
-                if (roomShowTimes.seatCount != null && roomShowTimes.seatCount > 1)
-                  Text(
-                    '${roomShowTimes.seatCount} sièges',
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: roomShowTimes.tags.map((tag) => TinyChip(
-                    label: tag,
-                  )).toList(growable: false),
-                ),
-              ].insertBetween(AppResources.spacerExtraTiny),
-            ),
-          ),
-
-          // Separator
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Container(
-              color: Colors.grey,
-              width: 2,
-            ),
-          ),
-
-          // Show times
-          /** LayoutGrid version.  TODO remove ?
-          Expanded(
-            child:
-              () {
-                var lines = roomShowTimes.showTimesDisplay;
-
-                return LayoutGrid(
-                  templateRowSizes: List.generate(lines.length, (_) => IntrinsicContentTrackSize()),
-                  templateColumnSizes: List.generate(lines.first.length, (_) => IntrinsicContentTrackSize()),
-                  gridFit: GridFit.loose,
-                  columnGap: 8,
-                  rowGap: 2,
-                  children: lines
-                      .expand((line) => line)
-                      .map((text) {
-                        var child = Text(text ?? '-');
-                        if (text != null)
-                          return child;
-                        return Center(
-                          child: child,
-                        );
-                      })
-                      .toList(growable: false),
-                );
-              } (),
-          ),*/
-
-          ...() {
-            var lines = roomShowTimes.showTimesDisplay;
-
-            return List<Widget>.generate(lines.first.length, (column) {
-              return Column(
-                crossAxisAlignment: column == 0 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-                children: lines.map<Widget>((line) => Text(line[column] ?? '-')).toList()
-                  ..insertBetween(AppResources.spacerExtraTiny),
-              );
-            })..insertBetween(AppResources.spacerTiny)
-              ..insert(1, Expanded(
-                  child: AppResources.spacerMedium
-              ));
-          } (),
-        ],
-      ),
+      ],
     );
   }
 }
