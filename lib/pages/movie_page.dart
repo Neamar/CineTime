@@ -193,6 +193,7 @@ class _MoviePageState extends State<MoviePage> {
                     return Material(
                       color: Color(0xFFEFEFEF),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
 
                           // Header
@@ -237,33 +238,25 @@ class _MoviePageState extends State<MoviePage> {
 
 
                           // Content
-                          LayoutBuilder(
-                            builder: (context, box) {
-                              return FadingEdgeScrollView.fromSingleChildScrollView(
-                                gradientFractionOnEnd: 0.2,     //TODO remove fade if content is too small. see https://github.com/mponkin/fading_edge_scrollview/issues/4
-                                child: SingleChildScrollView(
-                                  controller: _horizontalScrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(minWidth: box.maxWidth),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(contentPadding),
-                                      child: IntrinsicWidth(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: theatersShowTimesDisplay.map((theaterShowTimes) {
-                                            return TheaterShowTimesWidget(
-                                              theaterShowTimes: theaterShowTimes,
-                                            );
-                                          }).toList(growable: false),
-                                        ),
-                                      ),
+                          ...theatersShowTimesDisplay.map((theaterShowTimes) {
+                            return FadingEdgeScrollView.fromSingleChildScrollView(
+                              gradientFractionOnEnd: 0.2,
+                              child: SingleChildScrollView(
+                                controller: ScrollController(),
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
+                                    child: TheaterShowTimesWidget(
+                                      theaterShowTimes: theaterShowTimes,
                                     ),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          }).toList(growable: false),
+                          AppResources.spacerMedium,
                         ],
                       ),
                     );
@@ -419,7 +412,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
 
             // Theater name

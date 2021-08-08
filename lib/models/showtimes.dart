@@ -33,8 +33,8 @@ class MovieShowTimes {
       : theatersShowTimes;
 
   MovieShowTimes(this.movie, {Iterable<TheaterShowTimes> theatersShowTimes, Iterable<TheaterShowTimes> filteredTheatersShowTimes}) :
-    this.theatersShowTimes = theatersShowTimes ?? const <TheaterShowTimes>[],
-    this.filteredTheatersShowTimes = filteredTheatersShowTimes ?? const <TheaterShowTimes>[];
+    this.theatersShowTimes = theatersShowTimes ?? <TheaterShowTimes>[],
+    this.filteredTheatersShowTimes = filteredTheatersShowTimes ?? <TheaterShowTimes>[];
 
   String toFullString(bool applyFilters) {
     final lines = <String>[];
@@ -80,7 +80,7 @@ class TheaterShowTimes {
   final List<ShowTime> showTimes;
 
   TheaterShowTimes(this.theater, { List<ShowTime> showTimes }) :
-    this.showTimes = showTimes ?? const <ShowTime>[];
+    this.showTimes = showTimes ?? <ShowTime>[];
 
   /// Simple cache for [showTimesSummary]
   String _showTimesSummary;
