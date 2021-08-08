@@ -1,21 +1,5 @@
 import 'package:cinetime/helpers/tools.dart';
 
-/* TODO remove ?
-class Day {
-  final int year;
-  final int month;
-  final int day;
-  final int weekday;
-
-  //const Day(this.year, this.month, this.day);
-
-  Day.fromDateTime(DateTime dateTime) :
-    year = dateTime.year,
-    month = dateTime.month,
-    day = dateTime.day,
-    weekday = dateTime.weekday;
-}*/
-
 class Date extends DateTime {
   static final _unsupportedError = UnsupportedError("Date class only support date-related fields (without time)");
 

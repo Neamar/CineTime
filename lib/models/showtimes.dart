@@ -51,7 +51,7 @@ class MovieShowTimes {
       lines.add(theaterShowTimes.theater.name);
 
       lines.add('TODO');    // TODO
-      /* TODO
+      /*
       // For each room
       for (final roomsShowTimes in theaterShowTimes.roomsShowTimes) {
         final roomShowTimes = roomsShowTimes.showTimesDisplay;
@@ -169,114 +169,6 @@ class TheaterShowTimes {
 
   factory TheaterShowTimes.fromJson(Map<String, dynamic> json) => _$TheaterShowTimesFromJson(json);
   Map<String, dynamic> toJson() => _$TheaterShowTimesToJson(this);
-}
-
-@JsonSerializable()
-class RoomShowTimes {
-  final String screen;    // Theater room name
-  final int seatCount;    // Theater room seat capacity
-  final bool isOriginalLanguage;
-  final bool is3D;
-  final bool isIMAX;
-
-  final List<DateTime> showTimesRaw;    // Sorted list of DateTime
-
-  const RoomShowTimes({this.screen, this.seatCount, this.isOriginalLanguage, bool is3D, bool isIMAX, this.showTimesRaw}) :
-    this.is3D = is3D ?? false,
-    this.isIMAX = isIMAX ?? false;
-
-  List<String> get tags => [
-    isOriginalLanguage == true ? 'VO' : 'VF',
-    if (is3D) '3D',
-    if (isIMAX) 'IMAX',
-  ];
-
-  /// Return List<List<String>> to build a grid like this :
-  /// {
-  ///    Me Je :                     13:35  15:40  17:45
-  ///    Ve :                 10:50  13:35  15:40
-  ///    Tous les jours :     10:50  13:35  15:40  17:45
-  /// }
-  ///
-  /// First list is lines.
-  /// See toShortWeekdaysString() doc for more info
-  ///
-  List<List<String>> get showTimesDisplay {    //TODO handle simple cache
-    //TODO separate next week and after (multiple lines)
-
-    // Build a Map<Date, Set<Time>> : one list of Time per Date
-    var datesShowTimes = Map<Date, Set<Time>>();
-    for (var showTime in showTimesRaw) {
-      final date = showTime.toDate;
-      final time = showTime.toTime;
-
-      final dateShowTimes = datesShowTimes.putIfAbsent(date, () => Set<Time>());
-      dateShowTimes.add(time);
-    }
-
-    // List of coupled Dates and Times
-    final showTimesList = <ShowTimes>[];
-
-    // Group dates that have the exact same times
-    for (var dateShowTimesEntry in datesShowTimes.entries) {
-      // Get day list with exact same times
-      // TODO force grouping if missing times are passed (Exemple : we are wednesday 11h, ignore showtime before 11h when grouping)
-      final showTimes = showTimesList.firstWhere((showTimes) => dateShowTimesEntry.value.containsSame(showTimes.times), orElse: () => null);
-      if (showTimes != null)
-        showTimes.dates.add(dateShowTimesEntry.key);
-      else
-        showTimesList.add(ShowTimes(Set.from([dateShowTimesEntry.key]), dateShowTimesEntry.value));
-    }
-
-    // Build the header
-    final timesHeader = datesShowTimes.values
-        .expand((times) => times)
-        .toSet()
-        .toList(growable: false)
-      ..sort();
-
-    final columnCount = 1 + timesHeader.length;
-
-    // Build the double list of formatted strings
-    final lines = List<List<String>>.filled(showTimesList.length, null, growable: false);
-    for (var y = 0; y < showTimesList.length; y++) {
-      final showTime = showTimesList[y];
-      final cells = List<String>.filled(columnCount, null, growable: false);
-      cells[0] = showTime.datesDisplay;
-
-      for (var x = 1; x < columnCount; x ++) {
-        final timeHeader = timesHeader[x - 1];
-        cells[x] = showTime.times.contains(timeHeader) ? timeHeader.toString() : null;
-      }
-
-      lines[y] = cells;
-    }
-
-    // Return formatted double list
-    return lines;
-  }
-
-  RoomShowTimes copyWith({List<DateTime> showTimesRaw}) => RoomShowTimes(
-    screen: screen,
-    seatCount: seatCount,
-    isOriginalLanguage: isOriginalLanguage,
-    is3D: is3D,
-    isIMAX: isIMAX,
-    showTimesRaw: showTimesRaw ?? this.showTimesRaw,
-  );
-
-  factory RoomShowTimes.fromJson(Map<String, dynamic> json) => _$RoomShowTimesFromJson(json);
-  Map<String, dynamic> toJson() => _$RoomShowTimesToJson(this);
-}
-
-class ShowTimes {
-  final Set<Date> dates;
-  final Set<Time> times;
-
-  const ShowTimes(this.dates, this.times);
-
-  String get datesDisplay => dates.toShortWeekdaysString(WebServices.mockedNow);
-  String get timesDisplay => times.map((time) => time.toString()).join('  ');
 }
 
 @JsonSerializable()

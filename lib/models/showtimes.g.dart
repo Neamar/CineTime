@@ -89,38 +89,6 @@ Map<String, dynamic> _$TheaterShowTimesToJson(TheaterShowTimes instance) {
   return val;
 }
 
-RoomShowTimes _$RoomShowTimesFromJson(Map<String, dynamic> json) {
-  return RoomShowTimes(
-    screen: json['screen'] as String,
-    seatCount: json['seatCount'] as int,
-    isOriginalLanguage: json['isOriginalLanguage'] as bool,
-    is3D: json['is3D'] as bool,
-    isIMAX: json['isIMAX'] as bool,
-    showTimesRaw: (json['showTimesRaw'] as List)
-        ?.map((e) => e == null ? null : DateTime.parse(e as String))
-        ?.toList(),
-  );
-}
-
-Map<String, dynamic> _$RoomShowTimesToJson(RoomShowTimes instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('screen', instance.screen);
-  writeNotNull('seatCount', instance.seatCount);
-  writeNotNull('isOriginalLanguage', instance.isOriginalLanguage);
-  writeNotNull('is3D', instance.is3D);
-  writeNotNull('isIMAX', instance.isIMAX);
-  writeNotNull('showTimesRaw',
-      instance.showTimesRaw?.map((e) => e?.toIso8601String())?.toList());
-  return val;
-}
-
 ShowTime _$ShowTimeFromJson(Map<String, dynamic> json) {
   return ShowTime(
     json['dateTime'] == null
