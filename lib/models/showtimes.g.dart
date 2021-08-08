@@ -6,8 +6,8 @@ part of 'showtimes.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-TheatersShowTimes _$TheatersShowTimesFromJson(Map<String, dynamic> json) {
-  return TheatersShowTimes(
+MoviesShowTimes _$MoviesShowTimesFromJson(Map<String, dynamic> json) {
+  return MoviesShowTimes(
     fetchedAt: StorageService.dateFromString(json['fetchedAt'] as String),
     fromCache: json['fromCache'] as bool,
     moviesShowTimes: (json['moviesShowTimes'] as List)?.map((e) =>
@@ -15,7 +15,7 @@ TheatersShowTimes _$TheatersShowTimesFromJson(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _$TheatersShowTimesToJson(TheatersShowTimes instance) {
+Map<String, dynamic> _$MoviesShowTimesToJson(MoviesShowTimes instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -38,6 +38,10 @@ MovieShowTimes _$MovieShowTimesFromJson(Map<String, dynamic> json) {
     theatersShowTimes: (json['theatersShowTimes'] as List)?.map((e) => e == null
         ? null
         : TheaterShowTimes.fromJson(e as Map<String, dynamic>)),
+    filteredTheatersShowTimes: (json['filteredTheatersShowTimes'] as List)?.map(
+        (e) => e == null
+            ? null
+            : TheaterShowTimes.fromJson(e as Map<String, dynamic>)),
   );
 }
 
@@ -52,6 +56,7 @@ Map<String, dynamic> _$MovieShowTimesToJson(MovieShowTimes instance) {
 
   writeNotNull('movie', instance.movie);
   writeNotNull('theatersShowTimes', instance.theatersShowTimes);
+  writeNotNull('filteredTheatersShowTimes', instance.filteredTheatersShowTimes);
   return val;
 }
 
@@ -60,6 +65,10 @@ TheaterShowTimes _$TheaterShowTimesFromJson(Map<String, dynamic> json) {
     json['theater'] == null
         ? null
         : Theater.fromJson(json['theater'] as Map<String, dynamic>),
+    roomsShowTimes: (json['roomsShowTimes'] as List)?.map((e) =>
+        e == null ? null : RoomShowTimes.fromJson(e as Map<String, dynamic>)),
+    showTimes: (json['showTimes'] as List)?.map(
+        (e) => e == null ? null : ShowTime.fromJson(e as Map<String, dynamic>)),
   );
 }
 
@@ -73,6 +82,8 @@ Map<String, dynamic> _$TheaterShowTimesToJson(TheaterShowTimes instance) {
   }
 
   writeNotNull('theater', instance.theater);
+  writeNotNull('roomsShowTimes', instance.roomsShowTimes);
+  writeNotNull('showTimes', instance.showTimes);
   return val;
 }
 
@@ -83,7 +94,7 @@ RoomShowTimes _$RoomShowTimesFromJson(Map<String, dynamic> json) {
     isOriginalLanguage: json['isOriginalLanguage'] as bool,
     is3D: json['is3D'] as bool,
     isIMAX: json['isIMAX'] as bool,
-    showTimesRaw: (json['showTimes'] as List)
+    showTimesRaw: (json['showTimesRaw'] as List)
         ?.map((e) => e == null ? null : DateTime.parse(e as String))
         ?.toList(),
   );
@@ -103,7 +114,32 @@ Map<String, dynamic> _$RoomShowTimesToJson(RoomShowTimes instance) {
   writeNotNull('isOriginalLanguage', instance.isOriginalLanguage);
   writeNotNull('is3D', instance.is3D);
   writeNotNull('isIMAX', instance.isIMAX);
-  writeNotNull('showTimes',
+  writeNotNull('showTimesRaw',
       instance.showTimesRaw?.map((e) => e?.toIso8601String())?.toList());
+  return val;
+}
+
+ShowTime _$ShowTimeFromJson(Map<String, dynamic> json) {
+  return ShowTime(
+    json['time'] == null ? null : DateTime.parse(json['time'] as String),
+    json['screen'] as String,
+    json['seatCount'] as int,
+    (json['tags'] as List)?.map((e) => e as String)?.toList(),
+  );
+}
+
+Map<String, dynamic> _$ShowTimeToJson(ShowTime instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('time', instance.time?.toIso8601String());
+  writeNotNull('screen', instance.screen);
+  writeNotNull('seatCount', instance.seatCount);
+  writeNotNull('tags', instance.tags);
   return val;
 }

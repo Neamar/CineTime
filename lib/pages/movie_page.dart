@@ -426,7 +426,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
               style: Theme.of(context).textTheme.headline6,
             ),
             ...List.generate(theaterShowTimes.roomsShowTimes.length, (index) => _buildRoomSection(
-                context, theaterShowTimes.roomsShowTimes[index]
+              context, theaterShowTimes.roomsShowTimes[index],
             ))
           ].insertBetween(AppResources.spacerSmall),
         ),

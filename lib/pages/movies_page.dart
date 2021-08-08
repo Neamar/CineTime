@@ -466,7 +466,7 @@ class MoviesPageBloc with Disposable {
 
   final refresherController = EasyRefreshController();
   bool _useCacheOnNextFetch = false;
-  TheatersShowTimes _theatersShowTimes;     // Fetched data
+  MoviesShowTimes _theatersShowTimes;     // Fetched data
   final moviesShowTimes = BehaviorSubject<Iterable<MovieShowTimes>>();    // Filtered & sorted list
   Object _moviesShowTimesError;     //Workaround while BehaviorSubject.hasError isn't exposed : https://github.com/ReactiveX/rxdart/pull/397
 

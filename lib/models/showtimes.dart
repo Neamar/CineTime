@@ -7,17 +7,17 @@ import '_models.dart';
 part 'showtimes.g.dart';
 
 @JsonSerializable()
-class TheatersShowTimes {
+class MoviesShowTimes {
   final bool fromCache;
   final Iterable<MovieShowTimes> moviesShowTimes;
 
   @JsonKey(fromJson: StorageService.dateFromString, toJson: StorageService.dateToString)
   final DateTime fetchedAt;
 
-  const TheatersShowTimes({this.fetchedAt, this.fromCache, this.moviesShowTimes});
+  const MoviesShowTimes({this.fetchedAt, this.fromCache, this.moviesShowTimes});
 
-  factory TheatersShowTimes.fromJson(Map<String, dynamic> json) => _$TheatersShowTimesFromJson(json);
-  Map<String, dynamic> toJson(instance) => _$TheatersShowTimesToJson(this);
+  factory MoviesShowTimes.fromJson(Map<String, dynamic> json) => _$MoviesShowTimesFromJson(json);
+  Map<String, dynamic> toJson() => _$MoviesShowTimesToJson(this);
 }
 
 @JsonSerializable()
@@ -64,16 +64,18 @@ class MovieShowTimes {
   }
 
   factory MovieShowTimes.fromJson(Map<String, dynamic> json) => _$MovieShowTimesFromJson(json);
-  Map<String, dynamic> toJson(instance) => _$MovieShowTimesToJson(this);
+  Map<String, dynamic> toJson() => _$MovieShowTimesToJson(this);
 }
 
 @JsonSerializable()
 class TheaterShowTimes {
   final Theater theater;
-  final List<RoomShowTimes> roomsShowTimes;
+  final List<RoomShowTimes> roomsShowTimes;   // TODO to remove
+  final List<ShowTime> showTimes;
 
-  TheaterShowTimes(this.theater, {Iterable<RoomShowTimes> showTimes}) :
-    this.roomsShowTimes = showTimes ?? <RoomShowTimes>[];
+  TheaterShowTimes(this.theater, { Iterable<RoomShowTimes> roomsShowTimes, Iterable<ShowTime> showTimes }) :
+    this.roomsShowTimes = roomsShowTimes ?? <RoomShowTimes>[],
+    this.showTimes = showTimes ?? <ShowTime>[];
 
   String _showTimesSummary;
   String get showTimesSummary {
@@ -106,11 +108,11 @@ class TheaterShowTimes {
 
   TheaterShowTimes copyWith({List<RoomShowTimes> roomsShowTimes}) => TheaterShowTimes(
     theater,
-    showTimes: roomsShowTimes ?? this.roomsShowTimes,
+    roomsShowTimes: roomsShowTimes ?? this.roomsShowTimes,
   );
 
   factory TheaterShowTimes.fromJson(Map<String, dynamic> json) => _$TheaterShowTimesFromJson(json);
-  Map<String, dynamic> toJson(instance) => _$TheaterShowTimesToJson(this);
+  Map<String, dynamic> toJson() => _$TheaterShowTimesToJson(this);
 }
 
 @JsonSerializable()
@@ -129,10 +131,8 @@ class RoomShowTimes {
 
   List<String> get tags => [
     isOriginalLanguage == true ? 'VO' : 'VF',
-    if (is3D)
-      '3D',
-    if (isIMAX)
-      'IMAX',
+    if (is3D) '3D',
+    if (isIMAX) 'IMAX',
   ];
 
   /// Return List<List<String>> to build a grid like this :
@@ -210,15 +210,30 @@ class RoomShowTimes {
   );
 
   factory RoomShowTimes.fromJson(Map<String, dynamic> json) => _$RoomShowTimesFromJson(json);
-  Map<String, dynamic> toJson(instance) => _$RoomShowTimesToJson(this);
+  Map<String, dynamic> toJson() => _$RoomShowTimesToJson(this);
 }
 
 class ShowTimes {
   final Set<Date> dates;
   final Set<Time> times;
 
-  ShowTimes(this.dates, this.times);
+  const ShowTimes(this.dates, this.times);
 
   String get datesDisplay => dates.toShortWeekdaysString(WebServices.mockedNow);
   String get timesDisplay => times.map((time) => time.toString()).join('  ');
+}
+
+@JsonSerializable()
+class ShowTime {
+  const ShowTime(this.time, this.screen, this.seatCount, this.tags);
+
+  final DateTime time;
+
+  final String screen;    // Theater room name
+  final int seatCount;    // Theater room seat capacity
+
+  final List<String> tags;    // Can be ('VO' or 'VF'), '3D', 'IMAX'
+
+  factory ShowTime.fromJson(Map<String, dynamic> json) => _$ShowTimeFromJson(json);
+  Map<String, dynamic> toJson() => _$ShowTimeToJson(this);
 }

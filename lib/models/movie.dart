@@ -31,7 +31,7 @@ class Movie extends Identifiable {
   const Movie({String code, this.title, this.poster, this.releaseDate, this.trailerCode, this.directors, this.actors, this.genres, this.synopsis, this.duration, this.certificate, this.pressRating, this.userRating}) : super(code);
 
   factory Movie.fromJson(Map<String, dynamic> json) => _$MovieFromJson(json);
-  Map<String, dynamic> toJson( instance) => _$MovieToJson(this);
+  Map<String, dynamic> toJson() => _$MovieToJson(this);
 }
 
 // TODO use this instead of simple string
@@ -48,5 +48,5 @@ class MovieCertificate extends Identifiable {
   const MovieCertificate({String code, this.description}) : super(code);
 
   factory MovieCertificate.fromJson(Map<String, dynamic> json) => _$MovieCertificateFromJson(json);
-  Map<String, dynamic> toJson( instance) => _$MovieCertificateToJson(this);
+  Map<String, dynamic> toJson() => _$MovieCertificateToJson(this);
 }

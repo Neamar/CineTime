@@ -74,7 +74,7 @@ class WebServices {
 
   /// Get all movies for specified theaters (with showtimes).
   /// [theatersCode] must be a list of theater codes.
-  static Future<TheatersShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
+  static Future<MoviesShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
     // Build params
     final theatersCode = theaters.map((t) => t.code);
     final params = {
@@ -86,21 +86,21 @@ class WebServices {
 
     // Process response
     responseJson = responseJson['feed'];
-    List<dynamic> theatersShowtimesJson = responseJson['theaterShowtimes'];
+    final List<dynamic> theatersShowtimesJson = responseJson['theaterShowtimes'];
 
     // Build movieShowTimes list
-    var moviesShowTimesMap = Map<Movie, MovieShowTimes>();
+    final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
     for (Map<String, dynamic> theaterShowtimesJson in theatersShowtimesJson) {
       // Get theater (should already exist, find by code)
-      String theaterCode = theaterShowtimesJson['place']['theater']['code'];
-      var theater = theaters.firstWhere((t) => t.code == theaterCode);
+      final String theaterCode = theaterShowtimesJson['place']['theater']['code'];
+      final theater = theaters.firstWhere((t) => t.code == theaterCode);
 
       // Get movie info
-      List<dynamic> moviesShowTimesJson = theaterShowtimesJson['movieShowtimes'];
+      final List<dynamic> moviesShowTimesJson = theaterShowtimesJson['movieShowtimes'];
       for (Map<String, dynamic> movieShowTimesJson in moviesShowTimesJson) {
 
         // Build ShowTimes raw
-        List<dynamic> showTimesDaysJson = movieShowTimesJson['scr'];
+        final List<dynamic> showTimesDaysJson = movieShowTimesJson['scr'];
         if (showTimesDaysJson?.isNotEmpty != true)
           continue;
 
@@ -117,9 +117,9 @@ class WebServices {
         }
 
         // Build ShowTime info
-        Map<String, dynamic> screenFormatJson = movieShowTimesJson['screenFormat'] ?? Map();
+        Map<String, dynamic> screenFormatJson = movieShowTimesJson['screenFormat'] ?? {};
         String screenFormatString = screenFormatJson['\$'] ?? '';
-        Map<String, dynamic> screenJson = movieShowTimesJson['screen'] ?? Map();
+        Map<String, dynamic> screenJson = movieShowTimesJson['screen'] ?? {};
 
         final showTime = RoomShowTimes(
           screen: screenJson['\$'],
@@ -135,14 +135,14 @@ class WebServices {
         final movieCode = (movieJson['code'] as int).toString();
         var movie = moviesShowTimesMap.keys.firstWhere((m) => m.code == movieCode, orElse: () => null);
         if (movie == null) {
-          Map<String, dynamic> castingJson = movieJson['castingShort'] ?? Map();
-          Map<String, dynamic> releaseJson = movieJson['release'] ?? Map();
+          Map<String, dynamic> castingJson = movieJson['castingShort'] ?? {};
+          Map<String, dynamic> releaseJson = movieJson['release'] ?? {};
           List<dynamic> genresJson = movieJson['genre'] ?? [];
-          Map<String, dynamic> certificateJson = movieJson['movieCertificate'] ?? Map();
+          Map<String, dynamic> certificateJson = movieJson['movieCertificate'] ?? {};
           certificateJson = certificateJson['certificate'];
-          Map<String, dynamic> posterJson = movieJson['poster'] ?? Map();
-          Map<String, dynamic> trailerJson = movieJson['trailer'] ?? Map();
-          Map<String, dynamic> statisticsJson = movieJson['statistics'] ?? Map();
+          Map<String, dynamic> posterJson = movieJson['poster'] ?? {};
+          Map<String, dynamic> trailerJson = movieJson['trailer'] ?? {};
+          Map<String, dynamic> statisticsJson = movieJson['statistics'] ?? {};
 
           movie = Movie(
             code: movieCode,
@@ -178,7 +178,7 @@ class WebServices {
       }
     }
 
-    return TheatersShowTimes(
+    return MoviesShowTimes(
       fetchedAt: DateTime.now(),  // TODO save this value to shared pref and restore it ?
       fromCache: false,   // TODO remove that field
       moviesShowTimes: moviesShowTimesMap.values,
