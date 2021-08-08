@@ -14,7 +14,10 @@ class TinyChip extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-        child: Text(label),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.caption.copyWith(fontSize: 6),
+        ),
       )
     );
   }

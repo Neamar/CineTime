@@ -33,8 +33,8 @@ class MovieShowTimes {
       : theatersShowTimes;
 
   MovieShowTimes(this.movie, {Iterable<TheaterShowTimes> theatersShowTimes, Iterable<TheaterShowTimes> filteredTheatersShowTimes}) :
-    this.theatersShowTimes = theatersShowTimes ?? <TheaterShowTimes>[],
-    this.filteredTheatersShowTimes = filteredTheatersShowTimes ?? <TheaterShowTimes>[];
+    this.theatersShowTimes = theatersShowTimes ?? const <TheaterShowTimes>[],
+    this.filteredTheatersShowTimes = filteredTheatersShowTimes ?? const <TheaterShowTimes>[];
 
   String toFullString(bool applyFilters) {
     final lines = <String>[];
@@ -80,7 +80,7 @@ class TheaterShowTimes {
   final List<ShowTime> showTimes;
 
   TheaterShowTimes(this.theater, { List<ShowTime> showTimes }) :
-    this.showTimes = showTimes ?? <ShowTime>[];
+    this.showTimes = showTimes ?? const <ShowTime>[];
 
   /// Simple cache for [showTimesSummary]
   String _showTimesSummary;
@@ -281,7 +281,7 @@ class ShowTimes {
 
 @JsonSerializable()
 class ShowTime {
-  const ShowTime(this.dateTime, { this.screen, this.seatCount, this.tags });
+  const ShowTime(this.dateTime, { this.screen, this.seatCount, List<String> tags }) : tags = tags ?? const <String>[];
 
   /// Date and Time
   final DateTime dateTime;

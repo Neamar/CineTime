@@ -451,8 +451,22 @@ class TheaterShowTimesWidget extends StatelessWidget {
         // Times
         AppResources.spacerSmall,
         ...showtimes.map<Widget>((showtime) {
-          return Text(
-            showtime?.dateTime?.toTime?.toString() ?? '-',
+          return Row(
+            children: [
+              // Time
+              Text(
+                showtime?.dateTime?.toTime?.toString() ?? '-',
+              ),
+
+              // Tag
+              if (showtime != null) ...[
+                AppResources.spacerTiny,
+                ...showtime.tags.map((tag) => TinyChip(
+                  label: tag,
+                )).toList(growable: false),
+              ],
+
+            ],
           );
         }).toList()..insertBetween(AppResources.spacerExtraTiny),
 

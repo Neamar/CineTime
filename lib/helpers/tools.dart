@@ -22,6 +22,10 @@ Future<T> navigateTo<T extends Object>(BuildContext context, Widget Function() b
 
 String plural(int count, String input) => '$count $input${count > 1 ? 's' : ''}';
 
+bool isIterableNullOrEmpty<T>(Iterable<T> iterable) => iterable == null || iterable.isEmpty;
+bool isMapNullOrEmpty<K, V>(Map<K, V> map) => map == null || map.isEmpty;
+bool isStringNullOrEmpty(String s) => s == null || s.isEmpty;
+
 DateTime dateFromString(String date) {
   if (date?.isNotEmpty != true)
     return null;
