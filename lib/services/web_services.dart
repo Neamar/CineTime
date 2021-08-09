@@ -145,7 +145,7 @@ class WebServices {
         final bool is3D = screenFormatString.contains('3D');
         final bool isIMAX = screenFormatString.contains('IMAX');
         final tags = <String>[
-          isOriginalLanguage == true ? 'VO' : 'VF',
+          if (isOriginalLanguage) 'VO',
           if (is3D) '3D',
           if (isIMAX) 'IMAX',
         ];
