@@ -69,7 +69,6 @@ public class APIHelper {
 
         // base64_encode(sha1($method . http_build_query($params) . $this->_secret_key, true));
         String toSign = method + payload + SECRET_KEY;
-        Log.e("WTF", toSign);
         MessageDigest messageDigest = null;
         try {
             messageDigest = MessageDigest.getInstance("SHA-1");
