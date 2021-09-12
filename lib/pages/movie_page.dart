@@ -193,6 +193,7 @@ class _MoviePageState extends State<MoviePage> {
                     return Material(
                       color: Color(0xFFEFEFEF),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
 
                           // Header
@@ -237,33 +238,25 @@ class _MoviePageState extends State<MoviePage> {
 
 
                           // Content
-                          LayoutBuilder(
-                            builder: (context, box) {
-                              return FadingEdgeScrollView.fromSingleChildScrollView(
-                                gradientFractionOnEnd: 0.2,     //TODO remove fade if content is too small. see https://github.com/mponkin/fading_edge_scrollview/issues/4
-                                child: SingleChildScrollView(
-                                  controller: _horizontalScrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(minWidth: box.maxWidth),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(contentPadding),
-                                      child: IntrinsicWidth(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: theatersShowTimesDisplay.map((theaterShowTimes) {
-                                            return TheaterShowTimesWidget(
-                                              theaterShowTimes: theaterShowTimes,
-                                            );
-                                          }).toList(growable: false),
-                                        ),
-                                      ),
+                          ...theatersShowTimesDisplay.map((theaterShowTimes) {
+                            return FadingEdgeScrollView.fromSingleChildScrollView(
+                              gradientFractionOnEnd: 0.2,
+                              child: SingleChildScrollView(
+                                controller: ScrollController(),
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
+                                    child: TheaterShowTimesWidget(
+                                      theaterShowTimes: theaterShowTimes,
                                     ),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          }).toList(growable: false),
+                          AppResources.spacerMedium,
                         ],
                       ),
                     );
@@ -419,110 +412,58 @@ class TheaterShowTimesWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+
+            // Theater name
             Text(
               theaterShowTimes.theater.name,
               style: Theme.of(context).textTheme.headline6,
             ),
-            ...List.generate(theaterShowTimes.roomsShowTimes.length, (index) => _buildRoomSection(
-                context, theaterShowTimes.roomsShowTimes[index]
-            ))
+
+            // Showtimes
+            Row(
+              children: theaterShowTimes.formattedShowTimes.keys.map<Widget>((day) => _buildDaySection(
+                context, day, theaterShowTimes.formattedShowTimes[day],
+              )).toList()..insertBetween(AppResources.spacerSmall),
+            ),
           ].insertBetween(AppResources.spacerSmall),
         ),
       ),
     );
   }
 
-  Widget _buildRoomSection(BuildContext context, RoomShowTimes roomShowTimes) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
+  Widget _buildDaySection(BuildContext context, Date day, List<ShowTime> showtimes) {
+    return Column(
+      children: [
+        // Day
+        Text(
+          day.toWeekdayString(withDay: true),
+        ),
 
-          // Room info
-          SizedBox(
-            width: 60,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
+        // Times
+        AppResources.spacerSmall,
+        ...showtimes.map<Widget>((showtime) {
+          return Row(
+            children: [
+              // Time
+              Text(
+                showtime?.dateTime?.toTime?.toString() ?? '-',
+              ),
 
-                if (roomShowTimes.screen != null)
-                  Text(
-                    'Salle ${roomShowTimes.screen}',
-                    style: Theme.of(context).textTheme.caption,
-                  ),
+              // Tag
+              if (showtime != null) ...[
+                AppResources.spacerTiny,
+                ...showtime.tags.map((tag) => TinyChip(
+                  label: tag,
+                )).toList(growable: false),
+              ],
 
-                if (roomShowTimes.seatCount != null && roomShowTimes.seatCount > 1)
-                  Text(
-                    '${roomShowTimes.seatCount} sièges',
-                    style: Theme.of(context).textTheme.caption,
-                  ),
+            ],
+          );
+        }).toList()..insertBetween(AppResources.spacerExtraTiny),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: roomShowTimes.tags.map((tag) => TinyChip(
-                    label: tag,
-                  )).toList(growable: false),
-                ),
-              ].insertBetween(AppResources.spacerExtraTiny),
-            ),
-          ),
-
-          // Separator
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Container(
-              color: Colors.grey,
-              width: 2,
-            ),
-          ),
-
-          // Show times
-          /** LayoutGrid version.  TODO remove ?
-          Expanded(
-            child:
-              () {
-                var lines = roomShowTimes.showTimesDisplay;
-
-                return LayoutGrid(
-                  templateRowSizes: List.generate(lines.length, (_) => IntrinsicContentTrackSize()),
-                  templateColumnSizes: List.generate(lines.first.length, (_) => IntrinsicContentTrackSize()),
-                  gridFit: GridFit.loose,
-                  columnGap: 8,
-                  rowGap: 2,
-                  children: lines
-                      .expand((line) => line)
-                      .map((text) {
-                        var child = Text(text ?? '-');
-                        if (text != null)
-                          return child;
-                        return Center(
-                          child: child,
-                        );
-                      })
-                      .toList(growable: false),
-                );
-              } (),
-          ),*/
-
-          ...() {
-            var lines = roomShowTimes.showTimesDisplay;
-
-            return List<Widget>.generate(lines.first.length, (column) {
-              return Column(
-                crossAxisAlignment: column == 0 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-                children: lines.map<Widget>((line) => Text(line[column] ?? '-')).toList()
-                  ..insertBetween(AppResources.spacerExtraTiny),
-              );
-            })..insertBetween(AppResources.spacerTiny)
-              ..insert(1, Expanded(
-                  child: AppResources.spacerMedium
-              ));
-          } (),
-        ],
-      ),
+      ],
     );
   }
 }

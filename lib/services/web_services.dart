@@ -74,7 +74,7 @@ class WebServices {
 
   /// Get all movies for specified theaters (with showtimes).
   /// [theatersCode] must be a list of theater codes.
-  static Future<TheatersShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
+  static Future<MoviesShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
     // Build params
     final theatersCode = theaters.map((t) => t.code);
     final params = {
@@ -86,63 +86,32 @@ class WebServices {
 
     // Process response
     responseJson = responseJson['feed'];
-    List<dynamic> theatersShowtimesJson = responseJson['theaterShowtimes'];
+    final List<dynamic> theatersShowtimesJson = responseJson['theaterShowtimes'];
 
     // Build movieShowTimes list
-    var moviesShowTimesMap = Map<Movie, MovieShowTimes>();
+    final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
     for (Map<String, dynamic> theaterShowtimesJson in theatersShowtimesJson) {
       // Get theater (should already exist, find by code)
-      String theaterCode = theaterShowtimesJson['place']['theater']['code'];
-      var theater = theaters.firstWhere((t) => t.code == theaterCode);
+      final String theaterCode = theaterShowtimesJson['place']['theater']['code'];
+      final theater = theaters.firstWhere((t) => t.code == theaterCode);
 
       // Get movie info
-      List<dynamic> moviesShowTimesJson = theaterShowtimesJson['movieShowtimes'];
+      final List<dynamic> moviesShowTimesJson = theaterShowtimesJson['movieShowtimes'];
       for (Map<String, dynamic> movieShowTimesJson in moviesShowTimesJson) {
-
-        // Build ShowTimes raw
-        List<dynamic> showTimesDaysJson = movieShowTimesJson['scr'];
-        if (showTimesDaysJson?.isNotEmpty != true)
-          continue;
-
-        final showTimesRaw = <DateTime>[];
-        for (Map<String, dynamic> showTimesDayJson in showTimesDaysJson) {
-          String showDayString = showTimesDayJson['d'];
-          List<dynamic> showTimesHoursJson = showTimesDayJson['t'];
-
-          for (Map<String, dynamic> showTimesHourJson in showTimesHoursJson) {
-            String showHourString = showTimesHourJson['\$'];
-
-            showTimesRaw.add(DateTime.parse('$showDayString $showHourString'));
-          }
-        }
-
-        // Build ShowTime info
-        Map<String, dynamic> screenFormatJson = movieShowTimesJson['screenFormat'] ?? Map();
-        String screenFormatString = screenFormatJson['\$'] ?? '';
-        Map<String, dynamic> screenJson = movieShowTimesJson['screen'] ?? Map();
-
-        final showTime = RoomShowTimes(
-          screen: screenJson['\$'],
-          seatCount: movieShowTimesJson['seatCount'],
-          isOriginalLanguage: movieShowTimesJson['version']['original'] == 'true',
-          is3D: screenFormatString.contains('3D'),
-          isIMAX: screenFormatString.contains('IMAX'),
-          showTimesRaw: showTimesRaw..sort(),
-        );
 
         // Build Movie info
         Map<String, dynamic> movieJson = movieShowTimesJson['onShow']['movie'];
         final movieCode = (movieJson['code'] as int).toString();
         var movie = moviesShowTimesMap.keys.firstWhere((m) => m.code == movieCode, orElse: () => null);
         if (movie == null) {
-          Map<String, dynamic> castingJson = movieJson['castingShort'] ?? Map();
-          Map<String, dynamic> releaseJson = movieJson['release'] ?? Map();
+          Map<String, dynamic> castingJson = movieJson['castingShort'] ?? {};
+          Map<String, dynamic> releaseJson = movieJson['release'] ?? {};
           List<dynamic> genresJson = movieJson['genre'] ?? [];
-          Map<String, dynamic> certificateJson = movieJson['movieCertificate'] ?? Map();
+          Map<String, dynamic> certificateJson = movieJson['movieCertificate'] ?? {};
           certificateJson = certificateJson['certificate'];
-          Map<String, dynamic> posterJson = movieJson['poster'] ?? Map();
-          Map<String, dynamic> trailerJson = movieJson['trailer'] ?? Map();
-          Map<String, dynamic> statisticsJson = movieJson['statistics'] ?? Map();
+          Map<String, dynamic> posterJson = movieJson['poster'] ?? {};
+          Map<String, dynamic> trailerJson = movieJson['trailer'] ?? {};
+          Map<String, dynamic> statisticsJson = movieJson['statistics'] ?? {};
 
           movie = Movie(
             code: movieCode,
@@ -165,6 +134,45 @@ class WebServices {
           );
         }
 
+        // Build ShowTime info
+        final Map<String, dynamic> screenFormatJson = movieShowTimesJson['screenFormat'] ?? {};
+        final String screenFormatString = screenFormatJson['\$'] ?? '';
+        final Map<String, dynamic> screenJson = movieShowTimesJson['screen'] ?? {};
+
+        final String screen = screenJson['\$'];
+        final int seatCount = movieShowTimesJson['seatCount'];
+        final bool isOriginalLanguage = movieShowTimesJson['version']['original'] == 'true';
+        final bool is3D = screenFormatString.contains('3D');
+        final bool isIMAX = screenFormatString.contains('IMAX');
+        final tags = <String>[
+          if (isOriginalLanguage) 'VO',
+          if (is3D) '3D',
+          if (isIMAX) 'IMAX',
+        ];
+
+        // Build ShowTimes
+        final List<dynamic> showTimesDaysJson = movieShowTimesJson['scr'];
+        if (showTimesDaysJson?.isNotEmpty != true)
+          continue;
+
+        final showTimes = <ShowTime>[];
+        for (Map<String, dynamic> showTimesDayJson in showTimesDaysJson) {
+          final String showDayString = showTimesDayJson['d'];
+          final List<dynamic> showTimesHoursJson = showTimesDayJson['t'];
+
+          for (Map<String, dynamic> showTimesHourJson in showTimesHoursJson) {
+            final String showHourString = showTimesHourJson['\$'];
+            final showTimeDate = DateTime.parse('$showDayString $showHourString');
+
+            showTimes.add(ShowTime(
+              showTimeDate,
+              screen: screen,
+              seatCount: seatCount,
+              tags: tags,
+            ));
+          }
+        }
+
         // Get or create MovieShowTimes
         final movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie));
 
@@ -174,14 +182,19 @@ class WebServices {
           theaterShowTimes = TheaterShowTimes(theater);
           movieShowTimes.theatersShowTimes.add(theaterShowTimes);
         }
-        theaterShowTimes.roomsShowTimes.add(showTime);
+        theaterShowTimes.showTimes.addAll(showTimes);
       }
     }
 
-    return TheatersShowTimes(
+    // Sort ShowTimes
+    final moviesShowTimes = moviesShowTimesMap.values.toList(growable: false);
+    moviesShowTimes.forEach((m) => m.theatersShowTimes.forEach((t) => t.showTimes..sort((s1, s2) => s1.dateTime.compareTo(s2.dateTime))));
+
+    // Return data
+    return MoviesShowTimes(
       fetchedAt: DateTime.now(),  // TODO save this value to shared pref and restore it ?
       fromCache: false,   // TODO remove that field
-      moviesShowTimes: moviesShowTimesMap.values,
+      moviesShowTimes: moviesShowTimes,
     );
   }
 

@@ -466,7 +466,7 @@ class MoviesPageBloc with Disposable {
 
   final refresherController = EasyRefreshController();
   bool _useCacheOnNextFetch = false;
-  TheatersShowTimes _theatersShowTimes;     // Fetched data
+  MoviesShowTimes _theatersShowTimes;     // Fetched data
   final moviesShowTimes = BehaviorSubject<Iterable<MovieShowTimes>>();    // Filtered & sorted list
   Object _moviesShowTimesError;     //Workaround while BehaviorSubject.hasError isn't exposed : https://github.com/ReactiveX/rxdart/pull/397
 
@@ -563,31 +563,20 @@ class MoviesPageBloc with Disposable {
     final deepFilterEnabled = filterHourEnabled;
     final areFiltersEnabled = movieRelatedFilterEnabled || deepFilterEnabled;
 
-    for (var movieShowTimes in _theatersShowTimes.moviesShowTimes) {
+    for (final movieShowTimes in _theatersShowTimes.moviesShowTimes) {
       movieShowTimes.filteredTheatersShowTimes.clear();
 
       // If there is deep-data-related filters
       if (deepFilterEnabled) {
-        for (var theaterShowTimes in movieShowTimes.theatersShowTimes) {
-          final filteredRoomsShowTimes = <RoomShowTimes>[];
+        for (final theaterShowTimes in movieShowTimes.theatersShowTimes) {
+          final filteredShowTimes = theaterShowTimes.showTimes.where((showTime) {
+            final time = showTime.dateTime.toTime;
+            return time.hour >= filterHourMin && time.hour <= filterHourMax;
+          });
 
-          for (var roomShowTimes in theaterShowTimes.roomsShowTimes) {
-            final filteredShowTimesRaw = roomShowTimes.showTimesRaw.where((showTime) {
-              final time = showTime.toTime;
-              return time.hour >= filterHourMin && time.hour <= filterHourMax;
-            });
-
-            if (filteredShowTimesRaw.isNotEmpty)
-              filteredRoomsShowTimes.add(
-                roomShowTimes.copyWith(
-                  showTimesRaw: filteredShowTimesRaw.toList(growable: false),
-                )
-              );
-          }
-
-          if (filteredRoomsShowTimes.isNotEmpty)
+          if (filteredShowTimes.isNotEmpty)
             movieShowTimes.filteredTheatersShowTimes.add(
-              theaterShowTimes.copyWith(roomsShowTimes: filteredRoomsShowTimes),
+              theaterShowTimes.copyWith(showTimes: filteredShowTimes.toList(growable: false)),
             );
         }
       }
