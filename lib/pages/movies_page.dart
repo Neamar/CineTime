@@ -7,8 +7,6 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_xlider/flutter_xlider.dart';
-import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:cinetime/services/web_services.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +16,7 @@ import 'package:rxdart/rxdart.dart';
 import '_pages.dart';
 
 class MoviesPage extends StatefulWidget {
-  final Iterable<Theater> selectedTheaters;
+  final Iterable<Theater>? selectedTheaters;
 
   const MoviesPage([this.selectedTheaters]);
 
@@ -27,7 +25,7 @@ class MoviesPage extends StatefulWidget {
 }
 
 class _MoviesPageState extends State<MoviesPage> with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -61,18 +59,18 @@ class _MoviesPageState extends State<MoviesPage> with SingleTickerProviderStateM
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController!.dispose();
     super.dispose();
   }
 }
 
 class MoviesPageController {
-  final TabController _tabController;
+  final TabController? _tabController;
 
   MoviesPageController(this._tabController);
 
   void animateToPage(int index) {
-    _tabController.animateTo(index, duration: Duration(milliseconds: 500));
+    _tabController!.animateTo(index, duration: Duration(milliseconds: 500));
   }
 }
 
@@ -88,7 +86,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
     final bloc = Provider.of<MoviesPageBloc>(context);
     final moviesPageController = Provider.of<MoviesPageController>(context);
 
-    return BehaviorStreamBuilder<Iterable<MovieShowTimes>>(
+    return BehaviorStreamBuilder<Iterable<MovieShowTimes>?>(
       subject: bloc.moviesShowTimes,
       builder: (context, snapshot) {
         return Column(
@@ -107,7 +105,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                         BehaviorStreamBuilder<SplayTreeSet<Theater>>(
                           subject: bloc.theaters,
                           builder: (context, snapshot) {
-                            return Text('Films dans ${snapshot.data.length} cinémas');
+                            return Text('Films dans ${snapshot.data!.length} cinémas');
                           }
                         ),
                         if (bloc.filterHourEnabled)
@@ -188,7 +186,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                       itemExtent: 100,
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          var movieShowTimes = snapshot.data.elementAt(index);
+                          var movieShowTimes = snapshot.data!.elementAt(index);
 
                           return MovieTile(
                             key: ValueKey(index),
@@ -203,7 +201,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                             },
                           );
                         },
-                        childCount: snapshot.data.length,
+                        childCount: snapshot.data!.length,
                       ),
                     );
                   } (),
@@ -223,9 +221,9 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
 }
 
 class FilterPage extends StatefulWidget {
-  final double pinnedSectionHeight;
+  final double? pinnedSectionHeight;
 
-  const FilterPage({Key key, this.pinnedSectionHeight}) : super(key: key);
+  const FilterPage({Key? key, this.pinnedSectionHeight}) : super(key: key);
 
   @override
   _FilterPageState createState() => _FilterPageState();
@@ -256,9 +254,9 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
                         return Text('Aucun cinéma selectioné');
 
                       return Wrap(
-                        children: theaters.map((t) => _TheaterChip(
+                        children: theaters!.map((t) => _TheaterChip(
                           name: t.name,
-                          isFavorite: bloc.favoriteTheaters.isFavorite(t),
+                          isFavorite: bloc.favoriteTheaters!.isFavorite(t),
                           onDeleted: () => bloc.removeTheater(t),
                         )).toList(growable: false),
                       );
@@ -285,6 +283,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
         ),
 
         // Hours
+        /** TODO remove ?
         _FilterSection(
           title: 'Horaires',
           child: FlutterSlider(
@@ -300,7 +299,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
             ),
             onDragCompleted: (_, lowerValue, upperValue) => bloc.updateHourFilter(lowerValue, upperValue),
           ),
-        ),
+        ),*/
 
         // Rating
         _FilterSection(
@@ -311,7 +310,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
               SmoothStarRating(
                 allowHalfRating: false,
                 rating: bloc.filterRatingMin,
-                onRated: bloc.updateRatingFilter,
+                onRatingChanged: bloc.updateRatingFilter,
               ),
             ],
           ),
@@ -331,7 +330,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
             builder: (context, snapshot) {
               return SwitchListTile(
                 title: Text('Mode developpeur'),
-                value: snapshot.data,
+                value: snapshot.data!,
                 onChanged: bloc.isDevModeEnabled.add,
               );
             },
@@ -340,7 +339,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
 
         // Results
         Expanded(
-          child: BehaviorStreamBuilder<Iterable<MovieShowTimes>>(
+          child: BehaviorStreamBuilder<Iterable<MovieShowTimes>?>(
             subject: bloc.moviesShowTimes,
             builder: (context, snapshot) {
               return Column(
@@ -370,10 +369,10 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
 }
 
 class _FilterSection extends StatelessWidget {
-  final String title;
-  final Widget child;
+  final String? title;
+  final Widget? child;
 
-  const _FilterSection({Key key, this.title, this.child}) : super(key: key);
+  const _FilterSection({Key? key, this.title, this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -386,7 +385,7 @@ class _FilterSection extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(3),
             child: Text(
-              title,
+              title!,
               textAlign: TextAlign.center,
             ),
           ),
@@ -401,19 +400,19 @@ class _FilterSection extends StatelessWidget {
 }
 
 class _TheaterChip extends StatelessWidget {
-  final String name;
-  final bool isFavorite;
-  final VoidCallback onDeleted;
+  final String? name;
+  final bool? isFavorite;
+  final VoidCallback? onDeleted;
 
-  const _TheaterChip({Key key, this.name, this.isFavorite, this.onDeleted}) : super(key: key);
+  const _TheaterChip({Key? key, this.name, this.isFavorite, this.onDeleted}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 3),
       child: Chip(
-        label: Text(name),
-        backgroundColor: isFavorite ? Colors.yellow : null,
+        label: Text(name!),
+        backgroundColor: isFavorite! ? Colors.yellow : null,
         deleteIcon: Icon(Icons.close),
         onDeleted: onDeleted,
       ),
@@ -422,10 +421,10 @@ class _TheaterChip extends StatelessWidget {
 }
 
 class _MoviePosters extends StatelessWidget {
-  final Iterable<MovieShowTimes> movies;
+  final Iterable<MovieShowTimes>? movies;
   final _random = Random();
 
-  _MoviePosters({Key key, this.movies}) : super(key: key);
+  _MoviePosters({Key? key, this.movies}) : super(key: key);
   
   @override
   Widget build(BuildContext context) {
@@ -436,7 +435,7 @@ class _MoviePosters extends StatelessWidget {
       builder: (context, constrains) {
         print(constrains);
         return Stack(
-          children: movies.map((m) {
+          children: movies!.map((m) {
             return Positioned(
               left: _random.nextDouble() * constrains.maxWidth,
               top: _random.nextDouble() * constrains.maxHeight,
@@ -444,7 +443,7 @@ class _MoviePosters extends StatelessWidget {
                 alignment: Alignment.center,
                 angle: _random.nextDouble() * pi - pi / 2,
                 child: CachedNetworkImage(
-                  imageUrl: WebServices.getImageUrl(m.movie.poster, true),
+                  imageUrl: WebServices.getImageUrl(m.movie.poster, isThumbnail: true)!,
                   placeholder: (_, url) => CtProgressIndicator(),
                   errorWidget: (_, __, ___) => SizedBox(),
                 ),
@@ -466,9 +465,9 @@ class MoviesPageBloc with Disposable {
 
   final refresherController = EasyRefreshController();
   bool _useCacheOnNextFetch = false;
-  MoviesShowTimes _theatersShowTimes;     // Fetched data
-  final moviesShowTimes = BehaviorSubject<Iterable<MovieShowTimes>>();    // Filtered & sorted list
-  Object _moviesShowTimesError;     //Workaround while BehaviorSubject.hasError isn't exposed : https://github.com/ReactiveX/rxdart/pull/397
+  late MoviesShowTimes _theatersShowTimes;     // Fetched data
+  final moviesShowTimes = BehaviorSubject<Iterable<MovieShowTimes>?>();    // Filtered & sorted list
+  Object? _moviesShowTimesError;     //Workaround while BehaviorSubject.hasError isn't exposed : https://github.com/ReactiveX/rxdart/pull/397
 
   static const DefaultFilterHourMin = 0;
   static const DefaultFilterHourMax = 24;
@@ -480,10 +479,10 @@ class MoviesPageBloc with Disposable {
   double filterRatingMin = DefaultFilterRatingMin;
   bool get filterRatingEnabled => filterRatingMin != DefaultFilterRatingMin;
 
-  MoviesPageBloc(Iterable<Theater> selectedTheaters)  {
+  MoviesPageBloc(Iterable<Theater>? selectedTheaters)  {
     // Init list with the favorites
     //TODO instead of a forced alphabetical sorting, add a reorderable list for the favorites ?
-    theaters.add(SplayTreeSet.from(selectedTheaters ?? favoriteTheaters.theaters, (t1, t2) => t1.name.compareTo(t2.name)));
+    theaters.add(SplayTreeSet.from(selectedTheaters ?? favoriteTheaters!.theaters, (t1, t2) => t1.name.compareTo(t2.name)));
 
     // Update data when theaters list change
     theaters.listen((value) {
@@ -513,7 +512,7 @@ class MoviesPageBloc with Disposable {
   }
 
   void applyFavorite() {
-    theaters.add(theaters.value..clear()..addAll(favoriteTheaters.theaters));
+    theaters.add(theaters.value..clear()..addAll(favoriteTheaters!.theaters));
   }
 
   Future<void> fetch() async {
@@ -522,7 +521,7 @@ class MoviesPageBloc with Disposable {
       moviesShowTimes.add(_moviesShowTimesError = null);
 
     // If theaters list is empty
-    if (theaters.value?.isNotEmpty != true) {
+    if (theaters.valueOrNull?.isNotEmpty != true) {
       moviesShowTimes.add(null);
       return;
     }
@@ -563,14 +562,14 @@ class MoviesPageBloc with Disposable {
     final deepFilterEnabled = filterHourEnabled;
     final areFiltersEnabled = movieRelatedFilterEnabled || deepFilterEnabled;
 
-    for (final movieShowTimes in _theatersShowTimes.moviesShowTimes) {
+    for (final movieShowTimes in _theatersShowTimes.moviesShowTimes!) {
       movieShowTimes.filteredTheatersShowTimes.clear();
 
       // If there is deep-data-related filters
       if (deepFilterEnabled) {
         for (final theaterShowTimes in movieShowTimes.theatersShowTimes) {
           final filteredShowTimes = theaterShowTimes.showTimes.where((showTime) {
-            final time = showTime.dateTime.toTime;
+            final time = showTime.dateTime!.toTime;
             return time.hour >= filterHourMin && time.hour <= filterHourMax;
           });
 
@@ -582,7 +581,7 @@ class MoviesPageBloc with Disposable {
       }
 
       if (!areFiltersEnabled || (
-            (movieShowTimes.movie.rating == null || movieShowTimes.movie.rating >= filterRatingMin) &&
+            (movieShowTimes.movie.rating == null || movieShowTimes.movie.rating! >= filterRatingMin) &&
             (!deepFilterEnabled || movieShowTimes.filteredTheatersShowTimes.isNotEmpty))) {
         displayList.add(movieShowTimes);
       }

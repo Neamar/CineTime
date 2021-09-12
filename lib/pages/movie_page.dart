@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:scaling_header/scaling_header.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,7 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 class MoviePage extends StatefulWidget {
   final MovieShowTimes movieShowTimes;
 
-  const MoviePage({Key key, this.movieShowTimes}) : super(key: key);
+  const MoviePage({Key? key, required this.movieShowTimes}) : super(key: key);
 
   @override
   _MoviePageState createState() => _MoviePageState();
@@ -69,7 +68,9 @@ class _MoviePageState extends State<MoviePage> {
                       )
                     ],
                   ),
-                  onPressed: () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerCode)),
+                  onPressed: widget.movieShowTimes.movie.trailerCode != null
+                      ? () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerCode!))
+                      : null,
                 ),
                 TextButton(
                   child: Row(
@@ -129,24 +130,25 @@ class _MoviePageState extends State<MoviePage> {
                                 if (widget.movieShowTimes.movie.directors != null)
                                   TextWithLabel(
                                     label: 'De',
-                                    text: widget.movieShowTimes.movie.directors,
+                                    text: widget.movieShowTimes.movie.directors!,
                                   ),
                                 if (widget.movieShowTimes.movie.actors != null)
                                   TextWithLabel(
                                     label: 'Avec',
-                                    text: widget.movieShowTimes.movie.actors,
+                                    text: widget.movieShowTimes.movie.actors!,
                                   ),
-                                TextWithLabel(
-                                  label: 'Genre',
-                                  text: widget.movieShowTimes.movie.genres,
-                                ),
+                                if (widget.movieShowTimes.movie.genres != null)
+                                  TextWithLabel(
+                                    label: 'Genre',
+                                    text: widget.movieShowTimes.movie.genres!,
+                                  ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
                                     if (widget.movieShowTimes.movie.releaseDate != null)
                                       TextWithLabel(
                                         label: 'Sortie',
-                                        text: widget.movieShowTimes.movie.releaseDateDisplay,
+                                        text: widget.movieShowTimes.movie.releaseDateDisplay!,
                                       ),
                                     TextWithLabel(
                                       label: 'Durée',
@@ -166,9 +168,9 @@ class _MoviePageState extends State<MoviePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           if (widget.movieShowTimes.movie.pressRating != null)
-                            _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating),
+                            _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
                           if (widget.movieShowTimes.movie.userRating != null)
-                            _buildRatingWidget('Spectateur', widget.movieShowTimes.movie.userRating),
+                            _buildRatingWidget('Spectateur', widget.movieShowTimes.movie.userRating!),
                         ],
                       ),
 
@@ -311,7 +313,7 @@ class _MoviePageState extends State<MoviePage> {
 class SynopsisWidget extends StatefulWidget {
   final String movieCode;
 
-  const SynopsisWidget({Key key, this.movieCode}) : super(key: key);
+  const SynopsisWidget({Key? key, required this.movieCode}) : super(key: key);
 
   @override
   _SynopsisWidgetState createState() => _SynopsisWidgetState();
@@ -319,7 +321,7 @@ class SynopsisWidget extends StatefulWidget {
 
 class _SynopsisWidgetState extends State<SynopsisWidget> {
   static const collapsedMaxLines = 3;
-  Future<String> fetchFuture;
+  Future<String?>? fetchFuture;
 
   @override
   void initState() {
@@ -335,7 +337,7 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
+    return FutureBuilder<String?>(
       future: fetchFuture,
       builder: (context, snapshot) {
         return AnimatedSwitcher(
@@ -345,7 +347,7 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
             // Valid
             if (snapshot.hasData)
               return ShowMoreText(
-                text: snapshot.data,
+                text: snapshot.data!,
                 collapsedMaxLines: collapsedMaxLines,
               );
 
@@ -376,8 +378,8 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
 
                     // If loading, Draw fake animated lines
                     return Shimmer.fromColors(
-                      baseColor: Colors.grey[300],
-                      highlightColor: Colors.grey[100],
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: List.generate(collapsedMaxLines, (index) => Expanded(
@@ -404,7 +406,7 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
 class TheaterShowTimesWidget extends StatelessWidget {
   final TheaterShowTimes theaterShowTimes;
 
-  const TheaterShowTimesWidget({Key key, this.theaterShowTimes}) : super(key: key);
+  const TheaterShowTimesWidget({Key? key, required this.theaterShowTimes}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -423,8 +425,8 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
             // Showtimes
             Row(
-              children: theaterShowTimes.formattedShowTimes.keys.map<Widget>((day) => _buildDaySection(
-                context, day, theaterShowTimes.formattedShowTimes[day],
+              children: theaterShowTimes.formattedShowTimes!.keys.map<Widget>((day) => _buildDaySection(
+                context, day, theaterShowTimes.formattedShowTimes![day]!,
               )).toList()..insertBetween(AppResources.spacerSmall),
             ),
           ].insertBetween(AppResources.spacerSmall),
@@ -433,12 +435,12 @@ class TheaterShowTimesWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDaySection(BuildContext context, Date day, List<ShowTime> showtimes) {
+  Widget _buildDaySection(BuildContext context, Date day, List<ShowTime?> showtimes) {
     return Column(
       children: [
         // Day
         Text(
-          day.toWeekdayString(withDay: true),
+          day.toWeekdayString(withDay: true)!,
         ),
 
         // Times
@@ -448,7 +450,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
             children: [
               // Time
               Text(
-                showtime?.dateTime?.toTime?.toString() ?? '-',
+                showtime?.dateTime?.toTime.toString() ?? '-',
               ),
 
               // Tag

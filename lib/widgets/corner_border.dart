@@ -4,13 +4,13 @@ class CornerBorder extends ShapeBorder {
   const CornerBorder();
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) => _getCornerPath(rect);
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) => _getCornerPath(rect);
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) => _getCornerPath(rect);
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) => _getCornerPath(rect);
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     // Paint nothing
   }
 

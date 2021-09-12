@@ -31,7 +31,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
-      home: FavoriteTheatersHandler.instance.theaters.isEmpty
+      home: FavoriteTheatersHandler.instance!.theaters.isEmpty
         ? TheatersPage()
         : MoviesPage(),
     );

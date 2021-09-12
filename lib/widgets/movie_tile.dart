@@ -9,15 +9,15 @@ import '_widgets.dart';
 
 class MovieTile extends StatelessWidget {
   final MovieShowTimes movieShowTimes;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
-  const MovieTile({Key key, this.movieShowTimes, this.onPressed}) : super(key: key);
+  const MovieTile({Key? key, required this.movieShowTimes, this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // Display release year if movie is more than 6 month old
-    var releaseDate = movieShowTimes.movie.releaseDate;
-    int releaseYear;
+    final releaseDate = movieShowTimes.movie.releaseDate;
+    int? releaseYear;
     if (releaseDate != null && DateTime.now().difference(releaseDate) > Duration(days: 6 * 30))
       releaseYear = releaseDate.year;
 
@@ -65,20 +65,19 @@ class MovieTile extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            if (movieShowTimes.movie.rating != null && movieShowTimes.movie.rating > 0)
-                              ...[
-                                AppResources.spacerLarge,
-                                StarRating(
-                                  rating: movieShowTimes.movie.rating,
-                                )
-                              ],
+                            if (movieShowTimes.movie.rating != null && movieShowTimes.movie.rating! > 0)...[
+                              AppResources.spacerLarge,
+                              StarRating(
+                                rating: movieShowTimes.movie.rating!,
+                              )
+                            ],
                           ],
                         ),
                         AppResources.spacerTiny,
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text(movieShowTimes.movie.genres),    //TODO smaller
+                            Text(movieShowTimes.movie.genres!),    //TODO smaller
                             Text(movieShowTimes.movie.durationDisplay),
                           ],
                         ),
@@ -101,7 +100,7 @@ class MovieTile extends StatelessWidget {
                                   ),
                                   AppResources.spacerMedium,
                                   Text(
-                                    theaterShowTimes.showTimesSummary,
+                                    theaterShowTimes.showTimesSummary!,
                                     style: Theme.of(context).textTheme.caption,
                                   ),
                                 ],

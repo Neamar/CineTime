@@ -6,31 +6,32 @@ part of 'movie.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Movie _$MovieFromJson(Map<String, dynamic> json) {
-  return Movie(
-    code: json['code'] as String,
-    title: json['title'] as String,
-    poster: json['poster'] as String,
-    releaseDate: json['releaseDate'] == null
-        ? null
-        : DateTime.parse(json['releaseDate'] as String),
-    trailerCode: json['trailerCode'] as String,
-    directors: json['directors'] as String,
-    actors: json['actors'] as String,
-    genres: json['genres'] as String,
-    synopsis: json['synopsis'] as String,
-    duration: json['duration'] as int,
-    certificate: json['certificate'] == null
-        ? null
-        : MovieCertificate.fromJson(
-            json['certificate'] as Map<String, dynamic>),
-    pressRating: (json['pressRating'] as num)?.toDouble(),
-    userRating: (json['userRating'] as num)?.toDouble(),
-  );
-}
+Movie _$MovieFromJson(Map<String, dynamic> json) => Movie(
+      code: json['code'] as String,
+      title: json['title'] as String,
+      poster: json['poster'] as String?,
+      releaseDate: json['releaseDate'] == null
+          ? null
+          : DateTime.parse(json['releaseDate'] as String),
+      trailerCode: json['trailerCode'] as String?,
+      directors: json['directors'] as String?,
+      actors: json['actors'] as String?,
+      genres: json['genres'] as String?,
+      synopsis: json['synopsis'] as String?,
+      duration: json['duration'] as int?,
+      certificate: json['certificate'] == null
+          ? null
+          : MovieCertificate.fromJson(
+              json['certificate'] as Map<String, dynamic>),
+      pressRating: (json['pressRating'] as num?)?.toDouble(),
+      userRating: (json['userRating'] as num?)?.toDouble(),
+    );
 
 Map<String, dynamic> _$MovieToJson(Movie instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'code': instance.code,
+    'title': instance.title,
+  };
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -38,8 +39,6 @@ Map<String, dynamic> _$MovieToJson(Movie instance) {
     }
   }
 
-  writeNotNull('code', instance.code);
-  writeNotNull('title', instance.title);
   writeNotNull('poster', instance.poster);
   writeNotNull('releaseDate', instance.releaseDate?.toIso8601String());
   writeNotNull('trailerCode', instance.trailerCode);
@@ -54,15 +53,16 @@ Map<String, dynamic> _$MovieToJson(Movie instance) {
   return val;
 }
 
-MovieCertificate _$MovieCertificateFromJson(Map<String, dynamic> json) {
-  return MovieCertificate(
-    code: json['code'] as String,
-    description: json['description'] as String,
-  );
-}
+MovieCertificate _$MovieCertificateFromJson(Map<String, dynamic> json) =>
+    MovieCertificate(
+      code: json['code'] as String,
+      description: json['description'] as String?,
+    );
 
 Map<String, dynamic> _$MovieCertificateToJson(MovieCertificate instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'code': instance.code,
+  };
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -70,7 +70,6 @@ Map<String, dynamic> _$MovieCertificateToJson(MovieCertificate instance) {
     }
   }
 
-  writeNotNull('code', instance.code);
   writeNotNull('description', instance.description);
   return val;
 }

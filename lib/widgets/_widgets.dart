@@ -6,3 +6,5 @@ export 'star_rating.dart';
 export 'text_with_label.dart';
 export 'show_more.dart';
 export 'tiny_chip.dart';
+export 'scaling_header.dart';
+export 'smooth_star_rating.dart';

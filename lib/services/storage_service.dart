@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class StorageService {
   static const _FavoriteTheatersKey = "favoriteTheaters";
 
-  static SharedPreferences _storage;
+  static late SharedPreferences _storage;
 
   static Future<void> init() async
     => _storage = await SharedPreferences.getInstance();
@@ -22,21 +22,21 @@ class StorageService {
       return [];
 
     //Decode json
-    List<dynamic> usersJson = json.decode(theatersString);
+    List<dynamic> usersJson = json.decode(theatersString!);
 
     //Convert to Theater
     return usersJson.map((json) => Theater.fromJson(json));
   }
 
-  static DateTime dateFromString(String dateString)
+  static DateTime? dateFromString(String? dateString)
     => DateTime.tryParse(dateString ?? '')?.toLocal();
 
-  static String dateToString(DateTime date)
-    => date?.toUtc()?.toIso8601String();
+  static String? dateToString(DateTime? date)
+    => date?.toUtc().toIso8601String();
 }
 
 class FavoriteTheatersHandler {
-  static FavoriteTheatersHandler instance;
+  static FavoriteTheatersHandler? instance;
   static void init() => instance = FavoriteTheatersHandler();
 
   final Set<Theater> _theaters;

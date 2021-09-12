@@ -30,10 +30,10 @@ class ExceptionWithMessage implements Exception {
   final String message;
 
   //Technical details
-  final String details;
+  final String? details;
 
   ExceptionWithMessage(this.message, {this.details});
 
   @override
-  String toString() => message ?? super.toString();
+  String toString() => message;
 }

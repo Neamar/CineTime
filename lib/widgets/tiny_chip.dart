@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TinyChip extends StatelessWidget {
   final String label;
 
-  const TinyChip({Key key, this.label}) : super(key: key);
+  const TinyChip({Key? key, required this.label}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class TinyChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.caption.copyWith(fontSize: 6),
+          style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 6),
         ),
       )
     );

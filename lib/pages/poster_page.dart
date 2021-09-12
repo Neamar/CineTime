@@ -7,14 +7,14 @@ import 'package:photo_view/photo_view.dart';
 class PosterPage extends StatelessWidget {
   const PosterPage(this.posterPath);
 
-  final String posterPath;
+  final String? posterPath;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: PhotoView(
-        imageProvider: CachedNetworkImageProvider(WebServices.getImageUrl(posterPath, false)),
+        imageProvider: CachedNetworkImageProvider(WebServices.getImageUrl(posterPath, isThumbnail: false)!),
         minScale: PhotoViewComputedScale.contained,
         maxScale: PhotoViewComputedScale.contained * 1.5,
       ),

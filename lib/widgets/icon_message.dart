@@ -8,12 +8,12 @@ class IconMessage extends StatelessWidget {
 
   final IconData icon;
   final String message;
-  final String tooltip;
+  final String? tooltip;
   final bool inline;
   final bool redIcon;
-  final Color textColor;
+  final Color? textColor;
 
-  const IconMessage({Key key, this.icon, this.message, this.tooltip, this.inline, this.redIcon, this.textColor}) : super(key: key);
+  const IconMessage({Key? key, required this.icon, required this.message, this.tooltip, this.inline = false, this.redIcon = false, this.textColor}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,17 +26,17 @@ class IconMessage extends StatelessWidget {
     if (tooltip != null)
       text = Tooltip(
         child: text,
-        message: tooltip,
+        message: tooltip!,
       );
 
     return Flex(
-      direction: inline == true ? Axis.horizontal : Axis.vertical,
+      direction: inline ? Axis.horizontal : Axis.vertical,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Icon(
           icon,
-          color: redIcon == true ? Colors.red : null,
-          size: inline == true ? 25 : 50,
+          color: redIcon ? Colors.red : null,
+          size: inline ? 25 : 50,
         ),
         AppResources.spacerLarge,
         Center(child: text),

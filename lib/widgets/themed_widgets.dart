@@ -16,12 +16,12 @@ class CtProgressIndicator extends StatelessWidget {
 
 
 class CtCachedImage extends StatelessWidget {
-  final String path;
+  final String? path;
   final bool isThumbnail;
   final bool applyDarken;   //TODO find better name
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
-  const CtCachedImage({Key key, this.path, this.isThumbnail, this.applyDarken, this.onPressed}) : super(key: key);
+  const CtCachedImage({Key? key, this.path, this.isThumbnail = false, this.applyDarken = false, this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +33,13 @@ class CtCachedImage extends StatelessWidget {
       return errorWidget;
 
     return CachedNetworkImage(
-      imageUrl: WebServices.getImageUrl(path, isThumbnail),
+      imageUrl: WebServices.getImageUrl(path, isThumbnail: isThumbnail)!,
       imageBuilder: (_, image) => GestureDetector(
         onTap: onPressed,
         child: Image(
           image: image,
           fit: BoxFit.cover,
-          color: applyDarken == true ? Colors.black.withOpacity(0.3) : null,
+          color: applyDarken ? Colors.black.withOpacity(0.3) : null,
           colorBlendMode: BlendMode.srcATop,
         ),
       ),

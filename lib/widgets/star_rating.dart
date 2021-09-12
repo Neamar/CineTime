@@ -7,8 +7,8 @@ import 'package:cinetime/helpers/tools.dart';
 class StarRating extends StatelessWidget {
   final double rating;
 
-  const StarRating({Key key, this.rating}) :
-    assert(rating != null && rating > 0),
+  const StarRating({Key? key, required this.rating}) :
+    assert(rating > 0),
     super(key: key);
 
   @override
