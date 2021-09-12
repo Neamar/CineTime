@@ -8,7 +8,7 @@ import '_models.dart';
 
 part 'showtimes.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class MoviesShowTimes {
   final bool? fromCache;
   final List<MovieShowTimes>? moviesShowTimes;
@@ -19,10 +19,9 @@ class MoviesShowTimes {
   const MoviesShowTimes({this.fetchedAt, this.fromCache, this.moviesShowTimes});
 
   factory MoviesShowTimes.fromJson(Map<String, dynamic> json) => _$MoviesShowTimesFromJson(json);
-  Map<String, dynamic> toJson() => _$MoviesShowTimesToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class MovieShowTimes {
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
@@ -68,10 +67,9 @@ class MovieShowTimes {
   }
 
   factory MovieShowTimes.fromJson(Map<String, dynamic> json) => _$MovieShowTimesFromJson(json);
-  Map<String, dynamic> toJson() => _$MovieShowTimesToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class TheaterShowTimes {
   /// Theater data
   final Theater theater;
@@ -168,10 +166,9 @@ class TheaterShowTimes {
   );
 
   factory TheaterShowTimes.fromJson(Map<String, dynamic> json) => _$TheaterShowTimesFromJson(json);
-  Map<String, dynamic> toJson() => _$TheaterShowTimesToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class ShowTime {
   const ShowTime(this.dateTime, { this.screen, this.seatCount, List<String>? tags }) : tags = tags ?? const <String>[];
 
@@ -189,5 +186,4 @@ class ShowTime {
   final List<String> tags;
 
   factory ShowTime.fromJson(Map<String, dynamic> json) => _$ShowTimeFromJson(json);
-  Map<String, dynamic> toJson() => _$ShowTimeToJson(this);
 }

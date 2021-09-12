@@ -5,7 +5,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'movie.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class Movie extends Identifiable {
   final String title;
   final String? poster;    //Path to the image (not full url)
@@ -31,7 +31,6 @@ class Movie extends Identifiable {
   const Movie({required String code, required this.title, this.poster, this.releaseDate, this.trailerCode, this.directors, this.actors, this.genres, this.synopsis, this.duration, this.certificate, this.pressRating, this.userRating}) : super(code);
 
   factory Movie.fromJson(Map<String, dynamic> json) => _$MovieFromJson(json);
-  Map<String, dynamic> toJson() => _$MovieToJson(this);
 }
 
 // TODO use this instead of simple string
@@ -41,12 +40,11 @@ class MovieGenre extends Identifiable {
   const MovieGenre({required String code, this.name}) : super(code);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class MovieCertificate extends Identifiable {
   final String? description;
 
   const MovieCertificate({required String code, this.description}) : super(code);
 
   factory MovieCertificate.fromJson(Map<String, dynamic> json) => _$MovieCertificateFromJson(json);
-  Map<String, dynamic> toJson() => _$MovieCertificateToJson(this);
 }

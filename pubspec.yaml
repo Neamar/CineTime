@@ -43,7 +43,6 @@ dependencies:
   # Internationalization
   intl: ^0.17.0
   timeago: ^3.1.0
-  collection: ^1.15.0-nullsafety.4
 
 dev_dependencies:
   build_runner: ^2.1.2
