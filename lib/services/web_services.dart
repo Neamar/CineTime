@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:cinetime/helpers/tools.dart';
 import 'package:cinetime/models/_models.dart';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -46,7 +48,7 @@ class WebServices {
     return await _getTheatersList('theaterlist', params, "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/cinemas-gps.json");
   }
 
-  static Future<List<Theater>> _getTheatersList(String method, Map<String, String> params, [String mockUrl]) async {
+  static Future<List<Theater>> _getTheatersList(String method, Map<String, String> params, [String? mockUrl]) async {
     // Make request
     var responseJson = await _httpGet(method, params, mockUrl: mockUrl);
 
@@ -56,7 +58,7 @@ class WebServices {
 
     final theaters = <Theater>[];
     for (Map<String, dynamic> theaterJson in theatersJson) {
-      final poster = ((theaterJson['poster'] ?? theaterJson['picture']) as Map<String, dynamic>)?.elementAt('path');   // Return 'poster' with 'search' and 'picture' with 'theaterlist'
+      final poster = ((theaterJson['poster'] ?? theaterJson['picture']) as Map<String, dynamic>?)?.elementAt('path');   // Return 'poster' with 'search' and 'picture' with 'theaterlist'
 
       theaters.add(Theater(
         code: theaterJson['code'],
@@ -92,7 +94,7 @@ class WebServices {
     final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
     for (Map<String, dynamic> theaterShowtimesJson in theatersShowtimesJson) {
       // Get theater (should already exist, find by code)
-      final String theaterCode = theaterShowtimesJson['place']['theater']['code'];
+      final String? theaterCode = theaterShowtimesJson['place']['theater']['code'];
       final theater = theaters.firstWhere((t) => t.code == theaterCode);
 
       // Get movie info
@@ -101,14 +103,14 @@ class WebServices {
 
         // Build Movie info
         Map<String, dynamic> movieJson = movieShowTimesJson['onShow']['movie'];
-        final movieCode = (movieJson['code'] as int).toString();
-        var movie = moviesShowTimesMap.keys.firstWhere((m) => m.code == movieCode, orElse: () => null);
+        final movieCode = (movieJson['code'] as int?).toString();
+        var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.code == movieCode);
         if (movie == null) {
           Map<String, dynamic> castingJson = movieJson['castingShort'] ?? {};
           Map<String, dynamic> releaseJson = movieJson['release'] ?? {};
           List<dynamic> genresJson = movieJson['genre'] ?? [];
           Map<String, dynamic> certificateJson = movieJson['movieCertificate'] ?? {};
-          certificateJson = certificateJson['certificate'];
+          certificateJson = certificateJson['certificate'] ?? {};
           Map<String, dynamic> posterJson = movieJson['poster'] ?? {};
           Map<String, dynamic> trailerJson = movieJson['trailer'] ?? {};
           Map<String, dynamic> statisticsJson = movieJson['statistics'] ?? {};
@@ -123,14 +125,14 @@ class WebServices {
             genres: genresJson.map((genreJson) => genreJson['\$']).join(', '),
             certificate: certificateJson != null
               ? MovieCertificate(
-                  code: (certificateJson['code'] as int)?.toString(),
+                  code: (certificateJson['code'] as int?).toString(),
                   description: certificateJson['\$'],
                 )
               : null,
             poster: posterJson['path'],
             trailerCode: trailerJson['code']?.toString(),
-            pressRating: (statisticsJson['pressRating'] as num)?.toDouble(),
-            userRating: (statisticsJson['userRating'] as num)?.toDouble(),
+            pressRating: (statisticsJson['pressRating'] as num?)?.toDouble(),
+            userRating: (statisticsJson['userRating'] as num?)?.toDouble(),
           );
         }
 
@@ -139,8 +141,8 @@ class WebServices {
         final String screenFormatString = screenFormatJson['\$'] ?? '';
         final Map<String, dynamic> screenJson = movieShowTimesJson['screen'] ?? {};
 
-        final String screen = screenJson['\$'];
-        final int seatCount = movieShowTimesJson['seatCount'];
+        final String? screen = screenJson['\$'];
+        final int? seatCount = movieShowTimesJson['seatCount'];
         final bool isOriginalLanguage = movieShowTimesJson['version']['original'] == 'true';
         final bool is3D = screenFormatString.contains('3D');
         final bool isIMAX = screenFormatString.contains('IMAX');
@@ -151,17 +153,17 @@ class WebServices {
         ];
 
         // Build ShowTimes
-        final List<dynamic> showTimesDaysJson = movieShowTimesJson['scr'];
+        final List<dynamic>? showTimesDaysJson = movieShowTimesJson['scr'];
         if (showTimesDaysJson?.isNotEmpty != true)
           continue;
 
         final showTimes = <ShowTime>[];
-        for (Map<String, dynamic> showTimesDayJson in showTimesDaysJson) {
-          final String showDayString = showTimesDayJson['d'];
+        for (Map<String, dynamic> showTimesDayJson in showTimesDaysJson!) {
+          final String? showDayString = showTimesDayJson['d'];
           final List<dynamic> showTimesHoursJson = showTimesDayJson['t'];
 
           for (Map<String, dynamic> showTimesHourJson in showTimesHoursJson) {
-            final String showHourString = showTimesHourJson['\$'];
+            final String? showHourString = showTimesHourJson['\$'];
             final showTimeDate = DateTime.parse('$showDayString $showHourString');
 
             showTimes.add(ShowTime(
@@ -174,10 +176,10 @@ class WebServices {
         }
 
         // Get or create MovieShowTimes
-        final movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie));
+        final movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie!));
 
         // Update or create TheaterShowTimes
-        var theaterShowTimes = movieShowTimes.theatersShowTimes.firstWhere((t) => t.theater == theater, orElse: () => null);
+        var theaterShowTimes = movieShowTimes.theatersShowTimes.firstWhereOrNull((t) => t.theater == theater);
         if (theaterShowTimes == null) {
           theaterShowTimes = TheaterShowTimes(theater);
           movieShowTimes.theatersShowTimes.add(theaterShowTimes);
@@ -188,7 +190,7 @@ class WebServices {
 
     // Sort ShowTimes
     final moviesShowTimes = moviesShowTimesMap.values.toList(growable: false);
-    moviesShowTimes.forEach((m) => m.theatersShowTimes.forEach((t) => t.showTimes..sort((s1, s2) => s1.dateTime.compareTo(s2.dateTime))));
+    moviesShowTimes.forEach((m) => m.theatersShowTimes.forEach((t) => t.showTimes..sort((s1, s2) => s1.dateTime!.compareTo(s2.dateTime!))));
 
     // Return data
     return MoviesShowTimes(
@@ -199,7 +201,7 @@ class WebServices {
   }
 
   /// Get the synopsis of the movie corresponding to [movieCode]
-  static Future<String> getSynopsis(String movieCode) async {
+  static Future<String?> getSynopsis(String movieCode) async {
     // Build params
     final params = {
       'code': movieCode,
@@ -216,7 +218,7 @@ class WebServices {
     return removeAllHtmlTags(responseJson['synopsisShort']);
   }
 
-  static Future<String> getTrailerUrl(String trailerCode) async {
+  static Future<String?> getTrailerUrl(String trailerCode) async {
     // Build params
     final params = {
       'mediafmt': 'mp4-lc',
@@ -232,19 +234,18 @@ class WebServices {
 
   /// Get the full url or an image from [path].
   /// if [isThumbnail] is true, image will be small. Otherwise it will return full size.
-  static String getImageUrl(String path, bool isThumbnail) {
+  static String? getImageUrl(String? path, {bool isThumbnail = false}) {
     if (path?.isNotEmpty != true) return null;
-    return 'https://images.allocine.fr/' + (isThumbnail == true ? 'r_200_200' : '') + path;
+    return 'https://images.allocine.fr/' + (isThumbnail ? 'r_200_200' : '') + path!;
   }
 
-  static getMovieUrl(String movieCode) => "http://www.allocine.fr/film/fichefilm_gen_cfilm=$movieCode.html";
+  static getMovieUrl(String? movieCode) => "http://www.allocine.fr/film/fichefilm_gen_cfilm=$movieCode.html";
 
   /// Send a http GET request, return decoded response
-  static Future<Map<String, dynamic>> _httpGet(String method, Map<String, String> params, { bool useCache, String mockUrl }) async {
+  static Future<Map<String, dynamic>> _httpGet(String method, Map<String, String> params, { bool? useCache, String? mockUrl }) async {
     useCache ??= false;
 
     // Add parameters
-    params ??= {};
     params.addAll({
       'sed': _signatureDateFormatter.format(DateTime.now()),
       'partner': _partnerKey,
@@ -270,9 +271,9 @@ class WebServices {
     // Get response from cache or server
     File responseFile;
     if (useCache) {
-      responseFile = await _cacheManager.getSingleFile(url);    // TODO because url contains 'sed' that changes every day, cache will just work for one day. Use flutter_cache_manager v2.0 when released and provide a custom key. Then add a mechanism to choose cache duration per request (synopsis can be long, whereas getMoviesList needs to be short).
+      responseFile = await _cacheManager.getSingleFile(url!);    // TODO because url contains 'sed' that changes every day, cache will just work for one day. Use flutter_cache_manager v2.0 when released and provide a custom key. Then add a mechanism to choose cache duration per request (synopsis can be long, whereas getMoviesList needs to be short).
     } else {
-      responseFile = (await _cacheManager.downloadFile(url)).file;
+      responseFile = (await _cacheManager.downloadFile(url!)).file;
     }
 
     // Read response from cached file
@@ -286,11 +287,11 @@ class WebServices {
 class CtCacheManager extends CacheManager {
   static const key = "CtCache";
 
-  static CtCacheManager _instance;
+  static CtCacheManager? _instance;
 
   factory CtCacheManager() {
     _instance ??= CtCacheManager._();
-    return _instance;
+    return _instance!;
   }
 
   CtCacheManager._() : super(Config(
@@ -299,7 +300,7 @@ class CtCacheManager extends CacheManager {
   ));
 
   @override
-  Future<FileInfo> getFileFromCache(String url, {bool ignoreMemCache = false}) async {
+  Future<FileInfo?> getFileFromCache(String url, {bool ignoreMemCache = false}) async {
     print('WS.cache (?) [$url]');
     final fileInfo = await super.getFileFromCache(url, ignoreMemCache: ignoreMemCache);
     print('WS.cache (${fileInfo != null ? '✓' : '☓'}) [$url]');
@@ -307,7 +308,7 @@ class CtCacheManager extends CacheManager {
   }
 
   @override
-  Future<FileInfo> downloadFile(String url, {String key, Map<String, String> authHeaders, bool force = false}) async {
+  Future<FileInfo> downloadFile(String url, {String? key, Map<String, String>? authHeaders, bool force = false}) async {
     print('WS.server (?) [$url]');
     final fileInfo = await super.downloadFile(url, key: key, authHeaders: authHeaders, force: force);
     print('WS.server (✓) [$url]');

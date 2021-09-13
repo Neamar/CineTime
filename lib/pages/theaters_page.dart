@@ -13,7 +13,7 @@ import 'package:rxdart/rxdart.dart';
 import '_pages.dart';
 
 class TheatersPage extends StatefulWidget {
-  final Iterable<Theater> selectedTheaters;
+  final Iterable<Theater>? selectedTheaters;
 
   const TheatersPage({ this.selectedTheaters });
 
@@ -22,7 +22,7 @@ class TheatersPage extends StatefulWidget {
 }
 
 class _TheatersPageState extends State<TheatersPage> {
-  TheatersPageBloc _bloc;
+  late TheatersPageBloc _bloc;
 
   @override
   void initState() {
@@ -54,7 +54,7 @@ class _TheatersPageState extends State<TheatersPage> {
           builder: (context, isBusySnapshot) {
 
             // Is loading
-            if (isBusySnapshot.data)
+            if (isBusySnapshot.data!)
               return CtProgressIndicator();
 
             // Is NOT loading
@@ -79,7 +79,7 @@ class _TheatersPageState extends State<TheatersPage> {
                   );
 
                 // Empty list
-                if (snapshot.data.isEmpty)
+                if (snapshot.data!.isEmpty)
                   return IconMessage(
                     icon: IconMessage.iconSad,
                     message: 'Aucun résultat',
@@ -97,7 +97,7 @@ class _TheatersPageState extends State<TheatersPage> {
                       child: Row(
                         children: <Widget>[
                           _buildStatText(
-                            text: plural(snapshot.data.length, 'résultat'),
+                            text: plural(snapshot.data!.length, 'résultat'),
                             alignment: TextAlign.start,
                           ),
                           _buildStatText(
@@ -106,7 +106,7 @@ class _TheatersPageState extends State<TheatersPage> {
                             onPressed: _bloc.onSelectAll
                           ),
                           _buildStatText(
-                            text: plural(_bloc.favoriteTheaters.theaters.length, 'favori'),
+                            text: plural(_bloc.favoriteTheaters!.theaters.length, 'favori'),
                             alignment: TextAlign.end,
                           ),
                         ],
@@ -117,8 +117,8 @@ class _TheatersPageState extends State<TheatersPage> {
                     Expanded(
                       child: ListView.builder(
                         itemBuilder: (context, index) {
-                          var theater = snapshot.data[index];
-                          var isFavorite = _bloc.favoriteTheaters.isFavorite(theater);
+                          var theater = snapshot.data![index];
+                          var isFavorite = _bloc.favoriteTheaters!.isFavorite(theater);
 
                           return Card(
                             key: ObjectKey(theater),
@@ -155,7 +155,7 @@ class _TheatersPageState extends State<TheatersPage> {
                                               Spacer(),
                                               if (theater.distanceDisplay != null)
                                                 Text(
-                                                  theater.distanceDisplay,
+                                                  theater.distanceDisplay!,
                                                   style: Theme.of(context).textTheme.bodyText2,
                                                 ),
                                               Text(
@@ -203,7 +203,7 @@ class _TheatersPageState extends State<TheatersPage> {
                             ),
                           );
                         },
-                        itemCount: snapshot.data.length,
+                        itemCount: snapshot.data!.length,
                         itemExtent: 100,
                       ),
                     ),
@@ -220,7 +220,7 @@ class _TheatersPageState extends State<TheatersPage> {
                         ),
                         onTap:  selectedCount > 0 ?
                           () {
-                            if (ModalRoute.of(context).isFirst)
+                            if (ModalRoute.of(context)!.isFirst)
                               navigateTo(context, () => MoviesPage(_bloc.selectedTheaters));
                             else
                               Navigator.of(context).pop(_bloc.selectedTheaters);
@@ -238,7 +238,7 @@ class _TheatersPageState extends State<TheatersPage> {
     );
   }
 
-  Widget _buildStatText({String text, TextAlign alignment, VoidCallback onPressed}) {
+  Widget _buildStatText({required String text, TextAlign? alignment, VoidCallback? onPressed}) {
     return Expanded(
       child: InkWell(
         child: Padding(
@@ -268,10 +268,10 @@ class TheatersPageBloc with Disposable {
 
   final isBusySearching = BehaviorSubject.seeded(false);
 
-  TheatersPageBloc(Iterable<Theater> selectedTheaters) {
+  TheatersPageBloc(Iterable<Theater>? selectedTheaters) {
     final initialTheaters = Set.of([
       if (selectedTheaters != null) ...selectedTheaters,
-      ...favoriteTheaters.theaters
+      ...favoriteTheaters!.theaters
     ]);
     theaters.add(initialTheaters.toList(growable: false));
   }
@@ -336,10 +336,10 @@ class TheatersPageBloc with Disposable {
   }
 
   void onFavoriteTap(Theater theater) {
-    if (favoriteTheaters.isFavorite(theater))
-      favoriteTheaters.remove(theater);
+    if (favoriteTheaters!.isFavorite(theater))
+      favoriteTheaters!.remove(theater);
     else
-      favoriteTheaters.add(theater);
+      favoriteTheaters!.add(theater);
 
     _refreshList();
   }

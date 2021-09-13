@@ -2,7 +2,7 @@ import 'package:cinetime/models/date_time.dart';
 import 'package:cinetime/resources/resources.dart';
 import 'package:flutter/material.dart';
 
-Future<T> navigateTo<T extends Object>(BuildContext context, Widget Function() builder, {int removePreviousRoutesAmount, bool clearHistory = false}) async {
+Future<T?> navigateTo<T extends Object>(BuildContext context, Widget Function() builder, {int? removePreviousRoutesAmount, bool clearHistory = false}) async {
   assert(!(clearHistory == true && removePreviousRoutesAmount != null));
 
   var route = MaterialPageRoute<T>(
@@ -22,18 +22,18 @@ Future<T> navigateTo<T extends Object>(BuildContext context, Widget Function() b
 
 String plural(int count, String input) => '$count $input${count > 1 ? 's' : ''}';
 
-bool isIterableNullOrEmpty<T>(Iterable<T> iterable) => iterable == null || iterable.isEmpty;
-bool isMapNullOrEmpty<K, V>(Map<K, V> map) => map == null || map.isEmpty;
-bool isStringNullOrEmpty(String s) => s == null || s.isEmpty;
+bool isIterableNullOrEmpty<T>(Iterable<T>? iterable) => iterable == null || iterable.isEmpty;
+bool isMapNullOrEmpty<K, V>(Map<K, V>? map) => map == null || map.isEmpty;
+bool isStringNullOrEmpty(String? s) => s == null || s.isEmpty;
 
-DateTime dateFromString(String date) {
+DateTime? dateFromString(String? date) {
   if (date?.isNotEmpty != true)
     return null;
 
-  return DateTime.tryParse(date);
+  return DateTime.tryParse(date!);
 }
 
-String removeAllHtmlTags(String htmlText) {
+String? removeAllHtmlTags(String? htmlText) {
   if (htmlText == null)
     return null;
 
@@ -47,7 +47,7 @@ String removeAllHtmlTags(String htmlText) {
 }
 
 extension ExtendedMap<K, V> on Map<K, V> {
-  V elementAt(K key) => this[key];
+  V? elementAt(K key) => this[key];
 }
 
 extension ExtendedWidgetList on List<Widget> {
@@ -78,8 +78,8 @@ extension ExtendedDateTime on DateTime {
   /// Return a Time (without the date part)
   Time get toTime => Time(this.hour, this.minute);
 
-  String toWeekdayString({bool withDay, bool withMonth}) {
-    var formattedDate = AppResources.weekdayNames[this.weekday];
+  String? toWeekdayString({bool? withDay, bool? withMonth}) {
+    var formattedDate = AppResources.weekdayNames[this.weekday]!;
 
     if (withDay != true && withMonth != true)
       return formattedDate;
@@ -120,7 +120,7 @@ extension ExtendedDateTimeIterable on Iterable<DateTime> {
     };
 
     // Fill a list of formatted weekday string
-    final weekdaysString = <String>[];
+    final weekdaysString = <String?>[];
     for (var weekday in weekdays) {
       // Add formatted string to list
       weekdaysString.add(formatDate(weekday));
@@ -163,7 +163,7 @@ extension ExtendedNum on num {
 
 extension ExtendedSet<T> on Set<T> {
   /// Returns whether this Set contains the same elements of [other].
-  bool containsSame(Iterable<T> other) {
+  bool containsSame(Iterable<T>? other) {
     if (other == null || this.length != other.length)
       return false;
 

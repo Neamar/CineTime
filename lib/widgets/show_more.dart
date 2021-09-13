@@ -5,7 +5,7 @@ class ShowMoreText extends StatefulWidget {
   final String text;
   final int collapsedMaxLines;
 
-  ShowMoreText({Key key, this.text, this.collapsedMaxLines = 3}) : super(key: key);
+  ShowMoreText({Key? key, required this.text, this.collapsedMaxLines = 3}) : super(key: key);
 
   @override
   _ShowMoreTextState createState() => _ShowMoreTextState();
@@ -37,7 +37,7 @@ class _ShowMoreTextState extends State<ShowMoreText> {
   }
 
   /// Copied from AnimatedSwitcher.defaultLayoutBuilder
-  Widget animatedSwitcherLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
+  Widget animatedSwitcherLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       children: <Widget>[
         ...previousChildren,

@@ -14,9 +14,9 @@ class TrailerPage extends StatefulWidget {
 }
 
 class _TrailerPageState extends State<TrailerPage> {
-  VideoPlayerController _videoPlayerController;
-  ChewieController _chewieController;
-  Object _error;
+  VideoPlayerController? _videoPlayerController;
+  ChewieController? _chewieController;
+  Object? _error;
 
   @override
   void initState() {
@@ -31,9 +31,9 @@ class _TrailerPageState extends State<TrailerPage> {
 
       // Start video player
       setState(() {
-        _videoPlayerController = VideoPlayerController.network(trailerUrl);
+        _videoPlayerController = VideoPlayerController.network(trailerUrl!);
         _chewieController = ChewieController(
-          videoPlayerController: _videoPlayerController,
+          videoPlayerController: _videoPlayerController!,
           autoInitialize: true,
           autoPlay: true,
           errorBuilder: (_, error) => _buildError(error),
@@ -58,7 +58,7 @@ class _TrailerPageState extends State<TrailerPage> {
         // If video is ready
         if (_chewieController != null)
           return Chewie(
-            controller: _chewieController,
+            controller: _chewieController!,
           );
 
         // If an error occurred
