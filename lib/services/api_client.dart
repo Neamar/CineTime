@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/connectivity_exception.dart';
 import 'package:cinetime/utils/exceptions/detailed_exception.dart';
@@ -9,6 +10,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+
+import 'web_services.dart';
 
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
@@ -28,37 +31,138 @@ class ApiClient {
   //#endregion
 
   //#region Tests
-  Future<void> test() async {
-    // Parameters
-    final body = {
-      "query": r"query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }",
-      "variables": {
-        "id": "VGhlYXRlcjpDMDAyNg==\n",
-        "from": "2021-09-11T00:00:00",
-        "to": "2021-09-12T00:00:00",
-        "hasPreview": false,
-        "order": [
-          "PREVIEW",
-          "REVERSE_RELEASE_DATE",
-          "WEEKLY_POPULARITY"
-        ],
-        "country": "FRANCE"
+  Future<MoviesShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
+    theaters = [theaters.first]; // TODO remove
+
+    // Build movieShowTimes list
+    final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
+
+    // For each theater
+    for (final theater in theaters) {
+      // Parameters
+      final body = {
+        "query": r"query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }",
+        "variables": {
+          "id": 'Theater:${theater.code}'.toBase64(),
+          "from": "2021-09-11T00:00:00",
+          "to": "2021-09-12T00:00:00",
+          "hasPreview": false,
+          "order": [
+            "PREVIEW",
+            "REVERSE_RELEASE_DATE",
+            "WEEKLY_POPULARITY"
+          ],
+          "country": "FRANCE"
+        }
+      };
+
+      // Send request
+      var responseJson = await _send<JsonObject>(bodyJson: body, mockUrl: 'https://gist.githubusercontent.com/Nico04/d6886737ebe58291cd849bcf8119b73f/raw/0606403eca418fd12a2262389059c48a8d2bf5e5/showTimes.json', useCache: useCache);
+
+      // Process response
+      responseJson = responseJson!['data']!;
+
+      // Get movie info
+      final JsonList moviesShowTimesJson = responseJson!['movieShowtimeList']['edges']!;
+      for (JsonObject movieShowTimesJson in moviesShowTimesJson) {
+        movieShowTimesJson = movieShowTimesJson['node']!;
+
+        // Build Movie info
+        JsonObject movieJson = movieShowTimesJson['movie']!;
+        final String movieCode = movieJson['id'];
+        var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.code == movieCode);   // rename code to it, and make code a getter that decodes id ?
+
+        if (movie == null) {
+          JsonList releasesJson = movieJson['releases'] ?? [];
+          JsonList genresJson = movieJson['genres'] ?? [];
+          JsonList videosJson = movieJson['videos'] ?? [];
+          JsonObject statisticsJson = movieJson['stats'] ?? {};
+
+          String? personsFromJson(JsonList? personsJson) {
+            if (personsJson == null) return null;
+            return personsJson.map((json) {
+              json = json['node'];
+              final JsonObject? personJson = json['person'] ?? json['actor'];
+              return '${personJson?['firstName']} ${personJson?['lastName']}';
+            }).join(', ');
+          }
+
+          movie = Movie(
+            code: movieCode,
+            title: movieJson['title'],
+            directors: personsFromJson(movieJson['credits']?['edges']),
+            actors: personsFromJson(movieJson['cast']?['edges']),
+            releaseDate: dateFromString(releasesJson.firstOrNull?['releaseDate']?['date']),
+            duration: movieJson['runtime'],
+            genres: genresJson.join(', '),
+            certificate: null,    // TODO
+            poster: movieJson['poster']?['url'],
+            trailerCode: videosJson.firstOrNull?['internalId'],
+            pressRating: statisticsJson['pressReview']?['score'],
+            userRating: statisticsJson['userRating']?['score'],
+          );
+        }
+
+        // Build ShowTimes
+        final JsonList? showTimesJson = movieShowTimesJson['showtimes'];
+        if (isIterableNullOrEmpty(showTimesJson))
+          continue;
+
+        const versionMap = {
+          'ORIGINAL': ShowVersion.original,
+          'DUBBED': ShowVersion.dubbed,
+        };
+        ShowFormat parseFormat(JsonList? json) {
+          if (isIterableNullOrEmpty(json)) return ShowFormat.f2D;
+          final flat = json!.join('|');
+          if (flat.contains('IMAX'))
+            return flat.contains('3D') ? ShowFormat.IMAX_3D : ShowFormat.IMAX;
+          if (flat.contains('3D'))
+            return ShowFormat.f3D;
+          return ShowFormat.f2D;
+        }
+
+        final showTimes = showTimesJson!.map((showTimeJson) {
+          return ShowTime(
+            DateTime.tryParse(showTimeJson['startsAt']),
+            //screen: screen,   // TODO
+            //seatCount: seatCount,   // TODO
+            version: versionMap[showTimeJson['diffusionVersion']],
+            format: parseFormat(showTimeJson['projection']),
+            tags: [showTimeJson['diffusionVersion']],   // TODO change type
+          );
+        }).toList();
+
+        // Get or create MovieShowTimes
+        final movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie!));
+
+        // Update or create TheaterShowTimes
+        var theaterShowTimes = movieShowTimes.theatersShowTimes.firstWhereOrNull((t) => t.theater == theater);
+        if (theaterShowTimes == null) {
+          theaterShowTimes = TheaterShowTimes(theater);
+          movieShowTimes.theatersShowTimes.add(theaterShowTimes);
+        }
+        theaterShowTimes.showTimes.addAll(showTimes);
       }
-    };
+    }
 
-    // Send request
-    final response = await _send<JsonObject>(bodyJson: body);
-
-    // Return result
-    var test = 1;
+    // Return data
+    return MoviesShowTimes(
+      fetchedAt: DateTime.now(),  // TODO save this value to shared pref and restore it ?
+      fromCache: false,   // TODO remove that field
+      moviesShowTimes: moviesShowTimesMap.values.toList(growable: false),
+    );
   }
   //#endregion
 
   //#region Generics
   /// Send a classic request
-  Future<T?> _send<T>({JsonObject? bodyJson, String? stringBody}) async {
+  Future<T?> _send<T>({JsonObject? bodyJson, String? stringBody, bool? useCache, required String mockUrl}) async {
+    // Build url
+    final url = WebServices.useMocks ? Uri.parse(mockUrl) : _url;
+
     // Create request
-    final request = http.Request('POST', _url);
+    final request = http.Request(WebServices.useMocks ? 'GET' : 'POST', url);
 
     // Set headers
     request.headers.addAll({
@@ -82,12 +186,13 @@ class ApiClient {
     await throwIfNoInternet();
 
     // Set headers
-    request.headers.addAll({
-      'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
-      'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1NzE4NDM5NTcsInVzZXJuYW1lIjoiYW5vbnltb3VzIiwiYXBwbGljYXRpb25fbmFtZSI6Im1vYmlsZSIsInV1aWQiOiJmMDg3YTZiZi05YTdlLTQ3YTUtYjc5YS0zMDNiNWEwOWZkOWYiLCJzY29wZSI6bnVsbCwiZXhwIjoxNjg2NzAwNzk5fQ.oRS_jzmvfFAQ47wH0pU3eKKnlCy93FhblrBXxPZx2iwUUINibd70MBkI8C8wmZ-AeRhVCR8kavW8dLIqs5rUfA6piFwdYpt0lsAhTR417ABOxVrZ8dv0FX3qg1JLIzan-kSN4TwUZ3yeTjls0PB3OtSBKzoywGvFAu2jMYG1IZyBjxnkfi1nf1qGXbYsBfEaSjrj-LDV6Jjq_MPyMVvngNYKWzFNyzVAKIpAZ-UzzAQujAKwNQcg2j3Y3wfImydZEOW_wqkOKCyDOw9sWCWE2D-SObbFOSrjqKBywI-Q9GlfsUz-rW7ptea_HzLnjZ9mymXc6yq7KMzbgG4W9CZd8-qvHejCXVN9oM2RJ7Xrq5tDD345NoZ5plfCmhwSYA0DSZLw21n3SL3xl78fMITNQqpjlUWRPV8YqZA1o-UNgwMpOWIoojLWx-XBX33znnWlwSa174peZ1k60BQ3ZdCt9A7kyOukzvjNn3IOIVVgS04bBxl4holc5lzcEZSgjoP6dDIEJKib1v_AAxA34alVqWngeDYhd0wAO-crYW1HEd8ogtCoBjugwSy7526qrh68mSJxY66nr4Cle21z1wLC5lOsex0FbuwvOeFba0ycaI8NJPTUriOdvtHAjhDRSem4HjypGvKs5AzlZ3LAJACCHICNwo3NzYjcxfT4Wo1ur-M',
-      'host': 'graph.allocine.fr',
-      'user-agent': 'androidapp/0.0.1',
-    });
+    if (!WebServices.useMocks)
+      request.headers.addAll({
+        'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
+        'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1NzE4NDM5NTcsInVzZXJuYW1lIjoiYW5vbnltb3VzIiwiYXBwbGljYXRpb25fbmFtZSI6Im1vYmlsZSIsInV1aWQiOiJmMDg3YTZiZi05YTdlLTQ3YTUtYjc5YS0zMDNiNWEwOWZkOWYiLCJzY29wZSI6bnVsbCwiZXhwIjoxNjg2NzAwNzk5fQ.oRS_jzmvfFAQ47wH0pU3eKKnlCy93FhblrBXxPZx2iwUUINibd70MBkI8C8wmZ-AeRhVCR8kavW8dLIqs5rUfA6piFwdYpt0lsAhTR417ABOxVrZ8dv0FX3qg1JLIzan-kSN4TwUZ3yeTjls0PB3OtSBKzoywGvFAu2jMYG1IZyBjxnkfi1nf1qGXbYsBfEaSjrj-LDV6Jjq_MPyMVvngNYKWzFNyzVAKIpAZ-UzzAQujAKwNQcg2j3Y3wfImydZEOW_wqkOKCyDOw9sWCWE2D-SObbFOSrjqKBywI-Q9GlfsUz-rW7ptea_HzLnjZ9mymXc6yq7KMzbgG4W9CZd8-qvHejCXVN9oM2RJ7Xrq5tDD345NoZ5plfCmhwSYA0DSZLw21n3SL3xl78fMITNQqpjlUWRPV8YqZA1o-UNgwMpOWIoojLWx-XBX33znnWlwSa174peZ1k60BQ3ZdCt9A7kyOukzvjNn3IOIVVgS04bBxl4holc5lzcEZSgjoP6dDIEJKib1v_AAxA34alVqWngeDYhd0wAO-crYW1HEd8ogtCoBjugwSy7526qrh68mSJxY66nr4Cle21z1wLC5lOsex0FbuwvOeFba0ycaI8NJPTUriOdvtHAjhDRSem4HjypGvKs5AzlZ3LAJACCHICNwo3NzYjcxfT4Wo1ur-M',
+        'host': 'graph.allocine.fr',
+        'user-agent': 'androidapp/0.0.1',
+      });
 
     // Log
     _log(request: request);

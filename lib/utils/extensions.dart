@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:collection/collection.dart';
 
 import 'utils.dart';
+
+extension ExtendedString on String {
+  String toBase64() => base64.encode(utf8.encode(this));
+}
 
 extension ExtendedMap<K, V> on Map<K, V> {
   // Allow to use nullable syntax : map?.elementAt('key')
@@ -79,6 +85,17 @@ extension ExtendedIterable<T> on Iterable<T> {
       if (test(element)) return element;
     }
     return null;
+  }
+
+  T? elementAtOrNull(int index) {
+    if (index < 0 || index >= this.length)
+      return null;
+    return this.elementAt(index);
+  }
+
+  T? get firstOrNull {
+    if (this.isEmpty) return null;
+    return this.first;
   }
 }
 

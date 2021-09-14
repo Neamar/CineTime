@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cinetime/helpers/tools.dart';
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -44,14 +45,22 @@ class _MoviesPageState extends State<MoviesPage> with SingleTickerProviderStateM
       dispose: (_, bloc) => bloc.dispose(),
       child: Provider<MoviesPageController>(
         create: (_) => MoviesPageController(_tabController),
-        child: Scaffold(
-          body: TabBarView(
-            controller: _tabController,
-            children: [
-              MoviesPageContent(),
-              FilterPage(),
-            ],
-          ),
+        child: Consumer<MoviesPageBloc>(    //TODO remove
+          builder: (context, bloc, _) {
+            return Scaffold(
+              floatingActionButton: FloatingActionButton(   //TODO remove
+                onPressed: bloc.test,
+                child: Icon(Icons.android),
+              ),
+              body: TabBarView(
+                controller: _tabController,
+                children: [
+                  MoviesPageContent(),
+                  FilterPage(),
+                ],
+              ),
+            );
+          }
         ),
       )
     );
@@ -592,6 +601,15 @@ class MoviesPageBloc with Disposable {
 
     // ---- Update UI ----
     moviesShowTimes.add(displayList);
+  }
+
+  void test() async {
+    try {
+      final r = await ApiClient().getMoviesList([theaters.value.first]);
+      print(r);
+    } catch(e, s) {
+      print(e);
+    }
   }
 
   @override

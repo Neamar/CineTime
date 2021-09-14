@@ -171,6 +171,7 @@ class WebServices {
               screen: screen,
               seatCount: seatCount,
               tags: tags,
+              version: ShowVersion.original, // TODO remove
             ));
           }
         }

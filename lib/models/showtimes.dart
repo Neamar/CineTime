@@ -168,9 +168,18 @@ class TheaterShowTimes {
   factory TheaterShowTimes.fromJson(Map<String, dynamic> json) => _$TheaterShowTimesFromJson(json);
 }
 
+enum ShowVersion { original, dubbed }
+enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
+
 @JsonSerializable(createToJson: false)
 class ShowTime {
-  const ShowTime(this.dateTime, { this.screen, this.seatCount, List<String>? tags }) : tags = tags ?? const <String>[];
+  const ShowTime(this.dateTime, {
+    this.screen,
+    this.seatCount,
+    this.tags = const [],
+    required this.version,
+    this.format = ShowFormat.f2D,
+  });
 
   /// Date and Time
   final DateTime? dateTime;
@@ -183,7 +192,9 @@ class ShowTime {
 
   /// Specs
   /// Can be ('VO' or 'VF'), '3D', 'IMAX'
-  final List<String> tags;
+  final List<String> tags;    // TODO remove
+  final ShowVersion? version;
+  final ShowFormat format;
 
   factory ShowTime.fromJson(Map<String, dynamic> json) => _$ShowTimeFromJson(json);
 }
