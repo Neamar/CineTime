@@ -185,10 +185,10 @@ class ShowTime {
   final DateTime? dateTime;
 
   /// Theater room name
-  final String? screen;
+  final String? screen;    // TODO remove
 
   /// Theater room seat capacity
-  final int? seatCount;
+  final int? seatCount;    // TODO remove
 
   /// Specs
   /// Can be ('VO' or 'VF'), '3D', 'IMAX'

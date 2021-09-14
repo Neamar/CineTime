@@ -16,9 +16,12 @@ import 'web_services.dart';
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
 
+const _httpMethodGet = 'GET';
+const _httpMethodPost = 'POST';
+
 class ApiClient {
   //#region Vars
-  static final _url = Uri.parse('https://graph.allocine.fr/v1/mobile/');
+  static const _graphUrl = 'https://graph.allocine.fr/v1/mobile/';
 
   static const _timeOutDuration = Duration(seconds: 30);
   static const contentTypeJson = 'application/json';
@@ -32,32 +35,41 @@ class ApiClient {
 
   //#region Tests
   Future<MoviesShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
-    theaters = [theaters.first]; // TODO remove
-
     // Build movieShowTimes list
     final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
 
     // For each theater
     for (final theater in theaters) {
-      // Parameters
-      final body = {
-        "query": r"query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }",
-        "variables": {
-          "id": 'Theater:${theater.code}'.toBase64(),
-          "from": "2021-09-11T00:00:00",
-          "to": "2021-09-12T00:00:00",
-          "hasPreview": false,
-          "order": [
-            "PREVIEW",
-            "REVERSE_RELEASE_DATE",
-            "WEEKLY_POPULARITY"
-          ],
-          "country": "FRANCE"
-        }
-      };
-
       // Send request
-      var responseJson = await _send<JsonObject>(bodyJson: body, mockUrl: 'https://gist.githubusercontent.com/Nico04/d6886737ebe58291cd849bcf8119b73f/raw/0606403eca418fd12a2262389059c48a8d2bf5e5/showTimes.json', useCache: useCache);
+      JsonObject? responseJson;
+      if (WebServices.useMocks) {
+        const urls = [
+          'https://gist.githubusercontent.com/Nico04/68c748a39f00e0180558673789cd5c40/raw/a7a548dd4e96060eaecefea892304b53ff0bacc0/showTimes1.json',
+          'https://gist.githubusercontent.com/Nico04/81aa12b3c7078df19cbd32bb9b5b47cf/raw/7f08ed7153f685dd76c41fa0868f28ad28a0d522/showTimes2.json',
+          'https://gist.githubusercontent.com/Nico04/d6886737ebe58291cd849bcf8119b73f/raw/60d0a79060c4a5f7f90a1ddc573e7440b43394e6/showTimes3.json',
+        ];
+
+        responseJson = await _send<JsonObject>(
+          _httpMethodGet,
+          urls.elementAt(theaters.toList(growable: false).indexOf(theater) % urls.length),
+        );
+      } else {
+        responseJson = await _sendGraphQL<JsonObject>(
+          query: r"query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }",
+          variables: {
+            "id": 'Theater:${theater.code}'.toBase64(),
+            "from": "2021-09-11T00:00:00",
+            "to": "2021-09-12T00:00:00",
+            "hasPreview": false,
+            "order": [
+              "PREVIEW",
+              "REVERSE_RELEASE_DATE",
+              "WEEKLY_POPULARITY"
+            ],
+            "country": "FRANCE"
+          },
+        );
+      }
 
       // Process response
       responseJson = responseJson!['data']!;
@@ -156,19 +168,38 @@ class ApiClient {
   //#endregion
 
   //#region Generics
-  /// Send a classic request
-  Future<T?> _send<T>({JsonObject? bodyJson, String? stringBody, bool? useCache, required String mockUrl}) async {
-    // Build url
-    final url = WebServices.useMocks ? Uri.parse(mockUrl) : _url;
+  ///
+  Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
+    // Headers
+    const headers = const {
+      'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
+      'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1NzE4NDM5NTcsInVzZXJuYW1lIjoiYW5vbnltb3VzIiwiYXBwbGljYXRpb25fbmFtZSI6Im1vYmlsZSIsInV1aWQiOiJmMDg3YTZiZi05YTdlLTQ3YTUtYjc5YS0zMDNiNWEwOWZkOWYiLCJzY29wZSI6bnVsbCwiZXhwIjoxNjg2NzAwNzk5fQ.oRS_jzmvfFAQ47wH0pU3eKKnlCy93FhblrBXxPZx2iwUUINibd70MBkI8C8wmZ-AeRhVCR8kavW8dLIqs5rUfA6piFwdYpt0lsAhTR417ABOxVrZ8dv0FX3qg1JLIzan-kSN4TwUZ3yeTjls0PB3OtSBKzoywGvFAu2jMYG1IZyBjxnkfi1nf1qGXbYsBfEaSjrj-LDV6Jjq_MPyMVvngNYKWzFNyzVAKIpAZ-UzzAQujAKwNQcg2j3Y3wfImydZEOW_wqkOKCyDOw9sWCWE2D-SObbFOSrjqKBywI-Q9GlfsUz-rW7ptea_HzLnjZ9mymXc6yq7KMzbgG4W9CZd8-qvHejCXVN9oM2RJ7Xrq5tDD345NoZ5plfCmhwSYA0DSZLw21n3SL3xl78fMITNQqpjlUWRPV8YqZA1o-UNgwMpOWIoojLWx-XBX33znnWlwSa174peZ1k60BQ3ZdCt9A7kyOukzvjNn3IOIVVgS04bBxl4holc5lzcEZSgjoP6dDIEJKib1v_AAxA34alVqWngeDYhd0wAO-crYW1HEd8ogtCoBjugwSy7526qrh68mSJxY66nr4Cle21z1wLC5lOsex0FbuwvOeFba0ycaI8NJPTUriOdvtHAjhDRSem4HjypGvKs5AzlZ3LAJACCHICNwo3NzYjcxfT4Wo1ur-M',
+      'host': 'graph.allocine.fr',
+      'user-agent': 'androidapp/0.0.1',
+    };
 
+    // Body
+    final body = {
+      "query": query,
+      "variables": variables,
+    };
+
+    // Send request
+    return await _send(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body);
+  }
+
+  /// Send a classic request
+  Future<T?> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody}) async {
     // Create request
-    final request = http.Request(WebServices.useMocks ? 'GET' : 'POST', url);
+    final request = http.Request(method, Uri.parse(url));
 
     // Set headers
     request.headers.addAll({
       HttpHeaders.acceptHeader: contentTypeJson,
       if (bodyJson != null) HttpHeaders.contentTypeHeader: contentTypeJson,
     });
+    if (headers != null)
+      request.headers.addAll(headers);
 
     // Set body
     if (bodyJson != null)
@@ -184,15 +215,6 @@ class ApiClient {
   Future<T?> _sendRequest<T>(http.BaseRequest request) async {
     // Check internet
     await throwIfNoInternet();
-
-    // Set headers
-    if (!WebServices.useMocks)
-      request.headers.addAll({
-        'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
-        'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1NzE4NDM5NTcsInVzZXJuYW1lIjoiYW5vbnltb3VzIiwiYXBwbGljYXRpb25fbmFtZSI6Im1vYmlsZSIsInV1aWQiOiJmMDg3YTZiZi05YTdlLTQ3YTUtYjc5YS0zMDNiNWEwOWZkOWYiLCJzY29wZSI6bnVsbCwiZXhwIjoxNjg2NzAwNzk5fQ.oRS_jzmvfFAQ47wH0pU3eKKnlCy93FhblrBXxPZx2iwUUINibd70MBkI8C8wmZ-AeRhVCR8kavW8dLIqs5rUfA6piFwdYpt0lsAhTR417ABOxVrZ8dv0FX3qg1JLIzan-kSN4TwUZ3yeTjls0PB3OtSBKzoywGvFAu2jMYG1IZyBjxnkfi1nf1qGXbYsBfEaSjrj-LDV6Jjq_MPyMVvngNYKWzFNyzVAKIpAZ-UzzAQujAKwNQcg2j3Y3wfImydZEOW_wqkOKCyDOw9sWCWE2D-SObbFOSrjqKBywI-Q9GlfsUz-rW7ptea_HzLnjZ9mymXc6yq7KMzbgG4W9CZd8-qvHejCXVN9oM2RJ7Xrq5tDD345NoZ5plfCmhwSYA0DSZLw21n3SL3xl78fMITNQqpjlUWRPV8YqZA1o-UNgwMpOWIoojLWx-XBX33znnWlwSa174peZ1k60BQ3ZdCt9A7kyOukzvjNn3IOIVVgS04bBxl4holc5lzcEZSgjoP6dDIEJKib1v_AAxA34alVqWngeDYhd0wAO-crYW1HEd8ogtCoBjugwSy7526qrh68mSJxY66nr4Cle21z1wLC5lOsex0FbuwvOeFba0ycaI8NJPTUriOdvtHAjhDRSem4HjypGvKs5AzlZ3LAJACCHICNwo3NzYjcxfT4Wo1ur-M',
-        'host': 'graph.allocine.fr',
-        'user-agent': 'androidapp/0.0.1',
-      });
 
     // Log
     _log(request: request);
