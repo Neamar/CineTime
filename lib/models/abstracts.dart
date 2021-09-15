@@ -10,6 +10,7 @@ mixin Disposable {
 }
 
 abstract class Identifiable {
+  // TODO replace by 'id' : use base64 encoded ids. + Add method 'code' that decode it ?
   final String code;      // API codes are often int, but sometimes are String (for instance, for a theater : "P0671")
 
   const Identifiable(this.code);

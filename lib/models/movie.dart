@@ -48,3 +48,24 @@ class MovieCertificate extends Identifiable {
 
   factory MovieCertificate.fromJson(Map<String, dynamic> json) => _$MovieCertificateFromJson(json);
 }
+
+class MovieVideo {
+  const MovieVideo({
+    this.quality,
+    required this.height,
+    required this.url,
+    required this.size,
+  });
+
+  final String? quality;
+  final int height;
+  final String url;
+  final int size;
+
+  factory MovieVideo.fromJson(Map<String, dynamic> json) => MovieVideo(
+    quality: json["quality"],
+    height: json["height"],
+    url: json["url"],
+    size: json["size"],
+  );
+}

@@ -1,7 +1,7 @@
 import 'dart:collection';
 
+import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/storage_service.dart';
-import 'package:cinetime/services/web_services.dart';
 import 'package:cinetime/helpers/tools.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '_models.dart';
@@ -89,7 +89,7 @@ class TheaterShowTimes {
   /// - 'Prochaine séance le Me 25 mars'
   String? get showTimesSummary {
     if (_showTimesSummary == null) {
-      final now = WebServices.mockedNow;
+      final now = ApiClient.mockedNow;
       final nextWednesday = now.getNextWednesday();
 
       // Get all date with a show, from [now], without duplicates, sorted.

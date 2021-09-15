@@ -21,6 +21,8 @@ const _httpMethodPost = 'POST';
 
 class ApiClient {
   //#region Vars
+  static DateTime get mockedNow => WebServices.useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
+
   static const _graphUrl = 'https://graph.allocine.fr/v1/mobile/';
 
   static const _timeOutDuration = Duration(seconds: 30);
@@ -33,7 +35,47 @@ class ApiClient {
   final http.Client _client;
   //#endregion
 
-  //#region Tests
+  //#region Requests
+  /// Get theaters around geo-position
+  Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) async {
+    // Send request
+    JsonObject? responseJson;
+    if (WebServices.useMocks) {
+      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/c09a01a9f62c8bc922549220415d4400/raw/3927fc7bf5e3b252baeba42f5c45a774f7f677a6/theaters-gps.json');
+    } else {
+      responseJson = await _sendGraphQL<JsonObject>(
+        query: r'query TheatersList($after: String, $location: CoordinateType, $radius: Float, $card: [LoyaltyCard], $country: CountryCode) { theaterList(location: $location, radius: $radius, after: $after, loyaltyCard:$card, countries: [$country], order: [CLOSEST]) { __typename pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename ...TheaterFragment } } } } fragment TheaterFragment on Theater { __typename id internalId experience flags { __typename hasPreview hasBooking } poster { __typename id url } name coordinates { __typename distance(from: $location, unit: \"km\") latitude longitude } theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename activity company { __typename id internalId name } } location { __typename address zip city country region } tags { __typename list } }',
+        variables: {
+          "location": {
+            "lat": latitude,
+            "lon": longitude,
+          },
+          "radius": 20000,
+          "card": [],
+          "country": "FRANCE"
+        },
+      );
+    }
+
+    // Process result
+    final JsonList theatersJson = responseJson!['data']!['theaterList']!['edges']!;
+    return theatersJson.map((theaterJson) {
+      theaterJson = theaterJson['node']!;
+      final JsonObject? address = theaterJson['location'];
+      String? posterUrl = theaterJson['poster']?['url'];
+
+      return Theater(
+        code: theaterJson['id'],
+        name: theaterJson['name'],
+        street: address?['address'],
+        zipCode: address?['zip'],
+        city: address?['city'],
+        poster: getPathFromUrl(posterUrl),
+        distance: theaterJson['coordinates']?['distance'],
+      );
+    }).toList(growable: false);
+  }
+
   Future<MoviesShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
     // Build movieShowTimes list
     final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
@@ -87,6 +129,7 @@ class ApiClient {
         if (movie == null) {
           JsonList releasesJson = movieJson['releases'] ?? [];
           JsonList genresJson = movieJson['genres'] ?? [];
+          String? posterUrl = movieJson['poster']?['url'];
           JsonList videosJson = movieJson['videos'] ?? [];
           JsonObject statisticsJson = movieJson['stats'] ?? {};
 
@@ -108,8 +151,8 @@ class ApiClient {
             duration: movieJson['runtime'],
             genres: genresJson.join(', '),
             certificate: null,    // TODO
-            poster: movieJson['poster']?['url'],
-            trailerCode: videosJson.firstOrNull?['internalId'],
+            poster: getPathFromUrl(posterUrl),
+            trailerCode: videosJson.firstOrNull?['id'],
             pressRating: statisticsJson['pressReview']?['score'],
             userRating: statisticsJson['userRating']?['score'],
           );
@@ -165,10 +208,62 @@ class ApiClient {
       moviesShowTimes: moviesShowTimesMap.values.toList(growable: false),
     );
   }
+
+  /// Get the synopsis of the movie corresponding to [movieCode]
+  Future<String?> getSynopsis(String movieId) async {
+    // Send request
+    JsonObject? responseJson;
+    if (WebServices.useMocks) {
+      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/d31cd58a64f9d9fc17d6f9384d2d1d78/raw/ebc120d74a768572685b04d2945692de5f994b47/movie.json');
+    } else {
+      responseJson = await _sendGraphQL<JsonObject>(
+        query: r"query MovieMoreInfoQuery($id: String, $country: CountryCode) { movie(id: $id) { __typename id internalId title originalTitle genres type poster { __typename id internalId url } synopsis(long: true) mainRelease { __typename type } movieOperation: operation { __typename target { __typename main { __typename code } data } } countries { __typename id name localizedName } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } certificate { __typename label } } dvdReleases: releases(type: [DVD_RELEASE], country: $country) { __typename releaseDate { __typename date } } blueRayReleases: releases(type: [BLU_RAY_RELEASE], country: $country) { __typename releaseDate { __typename date } } VODReleases: releases(type: [VOD_RELEASE], country: $country) { __typename releaseDate { __typename date } } releaseFlags { __typename ...ReleaseUpcomingFragment } data { __typename productionYear budget } format { __typename color audio } languages boxOfficeFR: boxOffice(type: ENTRY, country: FRANCE, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } boxOfficeUS: boxOffice(type: PROFIT, country: USA, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } relatedTags { __typename internalId name } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } }",
+        variables: {
+          "id": movieId,
+          "country": "FRANCE"
+        },
+      );
+    }
+
+    // Return result
+    return responseJson!['data']!['movie']!['synopsis'];
+  }
+
+  Future<String?> getVideoUrl(String videoId) async {
+    // Send request
+    JsonObject? responseJson;
+    if (WebServices.useMocks) {
+      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/799b8f245708ff679f6b9f3236919737/raw/c860d3b779feae230d333d0217f4900705a6559d/video.json');
+    } else {
+      responseJson = await _sendGraphQL<JsonObject>(
+        query: r"query Video($id: String!, $country: CountryCode) { video(id: $id) { __typename id internalId title type duration language publication { __typename startsAt } relatedEntities { __typename ... on Movie { id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename internalId id countries { __typename id } } } } } releases(type: [RELEASED, SVOD_RELEASE], country: $country) { __typename releaseDate { __typename date } certificate { __typename label } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id internalId name } } } releaseFlags { __typename ...ReleaseUpcomingFragment } credits(department: DIRECTION, first: 5) { __typename edges { __typename node { __typename person { __typename id firstName lastName countries { __typename id } } position { __typename name } } } } data { __typename productionYear } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } relatedTags { __typename id internalId name scope } } ... on Series { ...VideoSeries } ... on Season { internalId series { __typename ...VideoSeries } } ... on Episode { internalId season { __typename series { __typename ...VideoSeries } } } } files { __typename quality height url size } snapshot { __typename id url } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } } fragment VideoSeries on Series { __typename id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId countries { __typename id } } } } } direction: credits(department: DIRECTION) { __typename edges { __typename node { __typename position { __typename name } person { __typename id firstName lastName countries { __typename id } } } } } releaseFlags { __typename ...ReleaseUpcomingFragment } releases(country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } relatedTags { __typename id internalId scope } }",
+        variables: {
+          "id": videoId,
+          "country": "FRANCE"
+        },
+      );
+    }
+
+    // Process result
+    responseJson = responseJson!['data']!['video'];
+    final JsonList? videosJson = responseJson!['files'];
+    if (isIterableNullOrEmpty(videosJson)) return null;
+    if (videosJson!.length == 1) return MovieVideo.fromJson(videosJson.first).url;
+
+    // Find highest quality video, but not greater than 720p
+    final videos = videosJson.map((json) => MovieVideo.fromJson(json)).toList();
+    videos.sort((v1, v2) => v1.height.compareTo(v2.height));
+    var bestVideo = videos.firstWhereOrNull((video) => video.height > 700);
+    if (bestVideo == null) bestVideo = videos.last;
+    return bestVideo.url;
+  }
+
   //#endregion
 
   //#region Generics
-  ///
+  static String? getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
+
+  /// Send a graphQL request
   Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
     // Headers
     const headers = const {

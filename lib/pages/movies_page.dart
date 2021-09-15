@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cinetime/helpers/tools.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -538,9 +539,7 @@ class MoviesPageBloc with Disposable {
     // Fetch data
     try {
       //TODO handle cache
-      print('fetch');
-      await Future.delayed(Duration(seconds: 2)); //TODO remove
-      _theatersShowTimes = await WebServices.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
+      _theatersShowTimes = await AppService.api.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
     } catch (e) {
       moviesShowTimes.addError(e);
       return;
@@ -605,7 +604,7 @@ class MoviesPageBloc with Disposable {
 
   void test() async {
     try {
-      final r = await ApiClient().getMoviesList([theaters.value.first]);
+      final r = await ApiClient().searchTheatersGeo(45.7640417, 4.8356583);
       print(r);
     } catch(e, s) {
       print(e);
