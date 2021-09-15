@@ -302,17 +302,17 @@ class CtCacheManager extends CacheManager {
 
   @override
   Future<FileInfo?> getFileFromCache(String url, {bool ignoreMemCache = false}) async {
-    print('WS.cache (?) [$url]');
+    debugPrint('WS.cache (?) [$url]');
     final fileInfo = await super.getFileFromCache(url, ignoreMemCache: ignoreMemCache);
-    print('WS.cache (${fileInfo != null ? '✓' : '☓'}) [$url]');
+    debugPrint('WS.cache (${fileInfo != null ? '✓' : '☓'}) [$url]');
     return fileInfo;
   }
 
   @override
   Future<FileInfo> downloadFile(String url, {String? key, Map<String, String>? authHeaders, bool force = false}) async {
-    print('WS.server (?) [$url]');
+    debugPrint('WS.server (?) [$url]');
     final fileInfo = await super.downloadFile(url, key: key, authHeaders: authHeaders, force: force);
-    print('WS.server (✓) [$url]');
+    debugPrint('WS.server (✓) [$url]');
     return fileInfo;
   }
 }

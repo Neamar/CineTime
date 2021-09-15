@@ -326,7 +326,7 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
   @override
   void initState() {
     fetchFuture = () async {
-      print('fetch');
+      debugPrint('fetch');
       await Future.delayed(Duration(seconds: 2));     //TODO remove
       //throw ExceptionWithMessage(message: 'Test');
       return (await WebServices.getSynopsis(widget.movieCode));

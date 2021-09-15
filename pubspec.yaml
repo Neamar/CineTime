@@ -39,7 +39,7 @@ dependencies:
   # Device
   url_launcher: ^6.0.10
   share_plus: ^2.1.4
-  geolocator: ^7.6.0
+  geolocator: ^7.6.1
 
   # Internationalization
   intl: ^0.17.0

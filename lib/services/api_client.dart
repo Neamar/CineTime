@@ -10,6 +10,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
@@ -19,7 +20,7 @@ const _httpMethodPost = 'POST';
 
 class ApiClient {
   //#region Vars
-  static const useMocks = !kReleaseMode;
+  static const useMocks = false;//!kReleaseMode;
   static DateTime get mockedNow => useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
 
   static const _graphUrl = 'https://graph.allocine.fr/v1/mobile/';
@@ -27,7 +28,7 @@ class ApiClient {
   static const _timeOutDuration = Duration(seconds: 30);
   static const contentTypeJson = 'application/json';
 
-  static const _logHeaders = true;
+  static const _logHeaders = false;
 
   ApiClient() : _client = http.Client();
 
@@ -69,7 +70,7 @@ class ApiClient {
       responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/c09a01a9f62c8bc922549220415d4400/raw/3927fc7bf5e3b252baeba42f5c45a774f7f677a6/theaters-gps.json');
     } else {
       responseJson = await _sendGraphQL<JsonObject>(
-        query: r'query TheatersList($after: String, $location: CoordinateType, $radius: Float, $card: [LoyaltyCard], $country: CountryCode) { theaterList(location: $location, radius: $radius, after: $after, loyaltyCard:$card, countries: [$country], order: [CLOSEST]) { __typename pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename ...TheaterFragment } } } } fragment TheaterFragment on Theater { __typename id internalId experience flags { __typename hasPreview hasBooking } poster { __typename id url } name coordinates { __typename distance(from: $location, unit: \"km\") latitude longitude } theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename activity company { __typename id internalId name } } location { __typename address zip city country region } tags { __typename list } }',
+        query: r"query TheatersList($after: String, $location: CoordinateType, $radius: Float, $card: [LoyaltyCard], $country: CountryCode) { theaterList(location: $location, radius: $radius, after: $after, loyaltyCard:$card, countries: [$country], order: [CLOSEST]) { __typename pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename ...TheaterFragment } } } } fragment TheaterFragment on Theater { __typename id internalId experience flags { __typename hasPreview hasBooking } poster { __typename id url } name coordinates { __typename distance(from: $location, " + "unit: \"km\") latitude longitude } theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename activity company { __typename id internalId name } } location { __typename address zip city country region } tags { __typename list } }",
         variables: {
           "location": {
             "lat": latitude,
@@ -95,7 +96,7 @@ class ApiClient {
         street: address?['address'],
         zipCode: address?['zip'],
         city: address?['city'],
-        poster: getPathFromUrl(posterUrl),
+        poster: _getPathFromUrl(posterUrl),
         distance: theaterJson['coordinates']?['distance'],
       );
     }).toList(growable: false);
@@ -125,8 +126,8 @@ class ApiClient {
           query: r"query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }",
           variables: {
             "id": 'Theater:${theater.code}'.toBase64(),
-            "from": "2021-09-11T00:00:00",
-            "to": "2021-09-12T00:00:00",
+            "from": _dateToString(mockedNow),
+            "to": _dateToString(mockedNow.add(Duration(days: 8))),
             "hasPreview": false,
             "order": [
               "PREVIEW",
@@ -176,7 +177,7 @@ class ApiClient {
             duration: movieJson['runtime'],
             genres: genresJson.join(', '),
             certificate: null,    // TODO
-            poster: getPathFromUrl(posterUrl),
+            poster: _getPathFromUrl(posterUrl),
             trailerCode: videosJson.firstOrNull?['id'],
             pressRating: statisticsJson['pressReview']?['score'],
             userRating: statisticsJson['userRating']?['score'],
@@ -286,7 +287,13 @@ class ApiClient {
   //#endregion
 
   //#region Generics
-  static String? getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
+  static final _dateFormat = DateFormat('yyyy-MM-dd');
+
+  /// Return correctly formatted date
+  static String _dateToString(DateTime date) => '${_dateFormat.format(date)}T00:00:00';
+
+  /// Return the path part of an url
+  static String? _getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
 
   /// Send a graphQL request
   Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables}) async {

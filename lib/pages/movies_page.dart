@@ -443,7 +443,6 @@ class _MoviePosters extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constrains) {
-        print(constrains);
         return Stack(
           children: movies!.map((m) {
             return Positioned(
@@ -540,7 +539,7 @@ class MoviesPageBloc with Disposable {
     try {
       //TODO handle cache
       _theatersShowTimes = await AppService.api.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
-    } catch (e) {
+    } catch (e, s) {
       moviesShowTimes.addError(e);
       return;
     } finally {
@@ -605,9 +604,9 @@ class MoviesPageBloc with Disposable {
   void test() async {
     try {
       final r = await ApiClient().searchTheaters('ugc');
-      print(r);
+      debugPrint('r');
     } catch(e, s) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 

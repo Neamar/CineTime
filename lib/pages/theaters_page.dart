@@ -288,7 +288,7 @@ class TheatersPageBloc with Disposable {
     await _searchTheaters(
       () async {
         // Get geo-position
-        final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 15));
+        final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: const Duration(seconds: 10));
 
         // Get local theaters
         final theaters = await AppService.api.searchTheatersGeo(position.latitude, position.longitude);
@@ -312,7 +312,7 @@ class TheatersPageBloc with Disposable {
       theaters.add(result);
     }
     catch (e) {
-      print('SearchPage.searchTheaters.Error : $e');
+      debugPrint('SearchPage.searchTheaters.Error : $e');
 
       if (!theaters.isClosed)
         theaters.addError(e);
