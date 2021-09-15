@@ -9,7 +9,6 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:cinetime/services/web_services.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -46,22 +45,14 @@ class _MoviesPageState extends State<MoviesPage> with SingleTickerProviderStateM
       dispose: (_, bloc) => bloc.dispose(),
       child: Provider<MoviesPageController>(
         create: (_) => MoviesPageController(_tabController),
-        child: Consumer<MoviesPageBloc>(    //TODO remove
-          builder: (context, bloc, _) {
-            return Scaffold(
-              floatingActionButton: FloatingActionButton(   //TODO remove
-                onPressed: bloc.test,
-                child: Icon(Icons.android),
-              ),
-              body: TabBarView(
-                controller: _tabController,
-                children: [
-                  MoviesPageContent(),
-                  FilterPage(),
-                ],
-              ),
-            );
-          }
+        child: Scaffold(
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              MoviesPageContent(),
+              FilterPage(),
+            ],
+          ),
         ),
       )
     );
@@ -333,7 +324,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
         ),
 
         // Dev
-        _FilterSection(
+        /*_FilterSection(
           title: 'Paramètres',
           child: BehaviorStreamBuilder<bool>(
             subject: bloc.isDevModeEnabled,
@@ -345,7 +336,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
               );
             },
           ),
-        ),
+        ),*/
 
         // Results
         Expanded(
@@ -467,8 +458,6 @@ class _MoviePosters extends StatelessWidget {
 
 
 class MoviesPageBloc with Disposable {
-  final isDevModeEnabled = BehaviorSubject.seeded(WebServices.useMocks);
-
   final theaters = BehaviorSubject<SplayTreeSet<Theater>>();
   final favoriteTheaters = FavoriteTheatersHandler.instance;
 
@@ -501,9 +490,6 @@ class MoviesPageBloc with Disposable {
 
     // TODO remove when https://github.com/ReactiveX/rxdart/pull/397 is closed
     moviesShowTimes.stream.listen(null, onError: (error) => _moviesShowTimesError = error);
-
-    // Listen for dev mode stream
-    isDevModeEnabled.listen((value) => WebServices.useMocks = value);
   }
 
   removeTheater(Theater t) {
@@ -601,18 +587,8 @@ class MoviesPageBloc with Disposable {
     moviesShowTimes.add(displayList);
   }
 
-  void test() async {
-    try {
-      final r = await ApiClient().searchTheaters('ugc');
-      debugPrint('r');
-    } catch(e, s) {
-      debugPrint(e.toString());
-    }
-  }
-
   @override
   void dispose() {
-    isDevModeEnabled.close();
     theaters.close();
     moviesShowTimes.close();
     super.dispose();
