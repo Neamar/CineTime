@@ -456,12 +456,15 @@ class TheaterShowTimesWidget extends StatelessWidget {
               ),
 
               // Tag
-              if (showtime != null) ...[
-                AppResources.spacerTiny,
-                ...showtime.tags.map((tag) => TinyChip(
-                  label: tag,
-                )).toList(growable: false),
-              ],
+              if (showtime != null && showtime.version != null)
+                TinyChip(
+                  label: showtime.versionDisplay!,
+                ),
+
+              if (showtime != null && showtime.format != ShowFormat.f2D)
+                TinyChip(
+                  label: showtime.formatDisplay,
+                ),
 
             ],
           );

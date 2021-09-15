@@ -153,14 +153,23 @@ class TheaterShowTimes {
   );
 }
 
-enum ShowVersion { original, dubbed }
+enum ShowVersion { original, dubbed, local }
+const _versionMap = {
+  ShowVersion.original: 'VO',
+  ShowVersion.dubbed: 'VF',
+  ShowVersion.local: 'VF',
+};
+
 enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
+const _formatMap = {
+  ShowFormat.f2D: '2D',
+  ShowFormat.f3D: '3D',
+  ShowFormat.IMAX: 'IMAX',
+  ShowFormat.IMAX_3D: 'IMAX 3D',
+};
 
 class ShowTime {
   const ShowTime(this.dateTime, {
-    this.screen,
-    this.seatCount,
-    this.tags = const [],
     required this.version,
     this.format = ShowFormat.f2D,
   });
@@ -168,15 +177,10 @@ class ShowTime {
   /// Date and Time
   final DateTime? dateTime;
 
-  /// Theater room name
-  final String? screen;    // TODO remove
-
-  /// Theater room seat capacity
-  final int? seatCount;    // TODO remove
-
   /// Specs
-  /// Can be ('VO' or 'VF'), '3D', 'IMAX'
-  final List<String> tags;    // TODO remove
   final ShowVersion? version;
   final ShowFormat format;
+
+  String? get versionDisplay => _versionMap[version];
+  String get formatDisplay => _formatMap[format] ?? '';
 }

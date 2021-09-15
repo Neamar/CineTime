@@ -192,6 +192,7 @@ class ApiClient {
         const versionMap = {
           'ORIGINAL': ShowVersion.original,
           'DUBBED': ShowVersion.dubbed,
+          'LOCAL': ShowVersion.local,
         };
         ShowFormat parseFormat(JsonList? json) {
           if (isIterableNullOrEmpty(json)) return ShowFormat.f2D;
@@ -206,11 +207,8 @@ class ApiClient {
         final showTimes = showTimesJson!.map((showTimeJson) {
           return ShowTime(
             DateTime.tryParse(showTimeJson['startsAt']),
-            //screen: screen,   // TODO
-            //seatCount: seatCount,   // TODO
             version: versionMap[showTimeJson['diffusionVersion']],
             format: parseFormat(showTimeJson['projection']),
-            tags: [showTimeJson['diffusionVersion']],   // TODO change type
           );
         }).toList();
 
@@ -413,7 +411,7 @@ class ApiClient {
   /// Log a request or a response
   /// Only provide either one, not both
   static void _log({http.BaseRequest? request, _ResponseHandler? responseHandler}) {
-    if (request == null && responseHandler == null) return;
+    if (kReleaseMode || request == null && responseHandler == null) return;
     const includeBody = true;
 
     // Common properties
@@ -449,6 +447,9 @@ class ApiClient {
       typeSymbol = '?';
       if (includeBody) {
         body = request is http.Request ? request.body : '';
+
+        // Crop string if it's a GraphQL request body
+        body = body.replaceAllMapped(RegExp(r'("query .+?\()(.+")(,.+?variables":)', dotAll: true), (match) => '${match.group(1)}...)${match.group(3)}');
       }
       if (_logHeaders) {
         headers = request.headers.toString();
