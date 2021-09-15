@@ -69,8 +69,8 @@ class _MoviePageState extends State<MoviePage> {
                       )
                     ],
                   ),
-                  onPressed: widget.movieShowTimes.movie.trailerCode != null
-                      ? () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerCode!))
+                  onPressed: widget.movieShowTimes.movie.trailerId != null
+                      ? () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerId!))
                       : null,
                 ),
                 TextButton(
@@ -178,7 +178,7 @@ class _MoviePageState extends State<MoviePage> {
                       // Synopsis
                       AppResources.spacerMedium,
                       SynopsisWidget(
-                        movieCode: widget.movieShowTimes.movie.code,
+                        movieId: widget.movieShowTimes.movie.id,
                       ),
 
                     ],
@@ -312,9 +312,9 @@ class _MoviePageState extends State<MoviePage> {
 }
 
 class SynopsisWidget extends StatefulWidget {
-  final String movieCode;
+  final String movieId;
 
-  const SynopsisWidget({Key? key, required this.movieCode}) : super(key: key);
+  const SynopsisWidget({Key? key, required this.movieId}) : super(key: key);
 
   @override
   _SynopsisWidgetState createState() => _SynopsisWidgetState();
@@ -330,7 +330,7 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
       debugPrint('fetch');
       await Future.delayed(Duration(seconds: 2));     //TODO remove
       //throw ExceptionWithMessage(message: 'Test');
-      return (await AppService.api.getSynopsis(widget.movieCode));
+      return (await AppService.api.getSynopsis(widget.movieId));
     } ();
 
     super.initState();

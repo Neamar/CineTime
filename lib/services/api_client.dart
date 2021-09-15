@@ -52,7 +52,7 @@ class ApiClient {
       final JsonObject theaterInfo = theaterJson['data']!;
 
       return Theater(
-        code: theaterInfo['id'],
+        id: theaterInfo['id'],
         name: theaterJson['label'],
         street: theaterInfo['address'],
         zipCode: theaterInfo['zip'],
@@ -91,7 +91,7 @@ class ApiClient {
       String? posterUrl = theaterJson['poster']?['url'];
 
       return Theater(
-        code: theaterJson['id'],
+        id: theaterJson['id'],
         name: theaterJson['name'],
         street: address?['address'],
         zipCode: address?['zip'],
@@ -125,7 +125,7 @@ class ApiClient {
         responseJson = await _sendGraphQL<JsonObject>(
           query: r"query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }",
           variables: {
-            "id": 'Theater:${theater.code}'.toBase64(),
+            "id": theater.id,
             "from": _dateToString(mockedNow),
             "to": _dateToString(mockedNow.add(Duration(days: 8))),
             "hasPreview": false,
@@ -149,8 +149,8 @@ class ApiClient {
 
         // Build Movie info
         JsonObject movieJson = movieShowTimesJson['movie']!;
-        final String movieCode = movieJson['id'];
-        var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.code == movieCode);   // rename code to it, and make code a getter that decodes id ?
+        final String movieId = movieJson['id'];
+        var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.id == movieId);
 
         if (movie == null) {
           JsonList releasesJson = movieJson['releases'] ?? [];
@@ -169,16 +169,15 @@ class ApiClient {
           }
 
           movie = Movie(
-            code: movieCode,
+            id: movieId,
             title: movieJson['title'],
             directors: personsFromJson(movieJson['credits']?['edges']),
             actors: personsFromJson(movieJson['cast']?['edges']),
             releaseDate: dateFromString(releasesJson.firstOrNull?['releaseDate']?['date']),
             duration: movieJson['runtime'],
             genres: genresJson.join(', '),
-            certificate: null,    // TODO
             poster: _getPathFromUrl(posterUrl),
-            trailerCode: videosJson.firstOrNull?['id'],
+            trailerId: videosJson.firstOrNull?['id'],
             pressRating: statisticsJson['pressReview']?['score'],
             userRating: statisticsJson['userRating']?['score'],
           );

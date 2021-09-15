@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class TrailerPage extends StatefulWidget {
-  final String trailerCode;
+  const TrailerPage(this.trailerId);
 
-  const TrailerPage(this.trailerCode);
+  final String trailerId;
 
   @override
   _TrailerPageState createState() => _TrailerPageState();
@@ -27,7 +27,7 @@ class _TrailerPageState extends State<TrailerPage> {
   Future<void> fetchTrailerUrl() async {
     try {
       // Fetch trailer url
-      var trailerUrl = await AppService.api.getVideoUrl(widget.trailerCode);
+      var trailerUrl = await AppService.api.getVideoUrl(widget.trailerId);
 
       // Start video player
       setState(() {

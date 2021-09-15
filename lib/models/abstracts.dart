@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cinetime/utils/_utils.dart';
 
 mixin Disposable {
   bool isDisposed = false;
@@ -10,10 +11,21 @@ mixin Disposable {
 }
 
 abstract class Identifiable {
-  // TODO replace by 'id' : use base64 encoded ids. + Add method 'code' that decode it ?
-  final String code;      // API codes are often int, but sometimes are String (for instance, for a theater : "P0671")
+  const Identifiable.fromId(this.id);
 
-  const Identifiable(this.code);
+  /// Base64 encoded [code]
+  /// Decoded examples : 'Movie:133392', 'Theater:C0026', 'Video:brand.video_legacy.AC.19589606'
+  final String id;
+
+  /// API codes may be int or string.
+  /// Examples : 133392 (movie), 'P0671' (theater)
+  String get code => _codeFromId(id);
+
+  /// Convert id to code
+  static String _codeFromId(String id) {
+    final decoded = id.decodeBase64();
+    return decoded.substring(decoded.indexOf(':') + 1);
+  }
 
   @override
   bool operator ==(Object other) =>

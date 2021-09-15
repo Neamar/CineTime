@@ -7,7 +7,7 @@ part of 'theater.dart';
 // **************************************************************************
 
 Theater _$TheaterFromJson(Map<String, dynamic> json) => Theater(
-      code: json['code'] as String,
+      id: json['id'] as String,
       name: json['name'] as String,
       poster: json['poster'] as String?,
       street: json['street'] as String?,
@@ -17,7 +17,7 @@ Theater _$TheaterFromJson(Map<String, dynamic> json) => Theater(
 
 Map<String, dynamic> _$TheaterToJson(Theater instance) {
   final val = <String, dynamic>{
-    'code': instance.code,
+    'id': instance.id,
     'name': instance.name,
   };
 

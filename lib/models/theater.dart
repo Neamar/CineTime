@@ -5,6 +5,16 @@ part 'theater.g.dart';
 
 @JsonSerializable()
 class Theater extends Identifiable {
+  const Theater({
+    required String id,
+    required this.name,
+    this.poster,
+    this.street,
+    this.zipCode,
+    this.city,
+    this.distance,
+  }) : super.fromId(id);
+
   final String name;
   final String? poster;    // Path to the image (not full url)
   final String? street;
@@ -22,16 +32,6 @@ class Theater extends Identifiable {
 
     return '${distance!.toStringAsFixed(1)}km';
   }
-
-  const Theater({
-    required String code,
-    required this.name,
-    this.poster,
-    this.street,
-    this.zipCode,
-    this.city,
-    this.distance,
-  }) : super(code);
 
   String get fullAddress {
     final lines = <String?>[];
