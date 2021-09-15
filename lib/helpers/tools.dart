@@ -2,6 +2,8 @@ import 'package:cinetime/models/date_time.dart';
 import 'package:cinetime/resources/resources.dart';
 import 'package:flutter/material.dart';
 
+// TODO delete file
+
 Future<T?> navigateTo<T extends Object>(BuildContext context, Widget Function() builder, {int? removePreviousRoutesAmount, bool clearHistory = false}) async {
   assert(!(clearHistory == true && removePreviousRoutesAmount != null));
 

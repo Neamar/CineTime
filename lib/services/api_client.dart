@@ -251,7 +251,8 @@ class ApiClient {
     }
 
     // Return result
-    return responseJson!['data']!['movie']!['synopsis'];
+    final String synopsis = responseJson!['data']!['movie']!['synopsis'];
+    return convertBasicHtmlTags(synopsis);
   }
 
   Future<String?> getVideoUrl(String videoId) async {

@@ -85,3 +85,18 @@ String? dateToString(DateTime? date) => date?.toIso8601String();
 /// Use this on [JsonKey.toJson] to ignore serialisation for this field
 /// @JsonKey(toJson: toEmptyJsonValue)
 String? toEmptyJsonValue<T>(T? value) => null;
+
+String? convertBasicHtmlTags(String? htmlText) {
+  if (htmlText == null)
+    return null;
+
+  htmlText = htmlText.replaceAll('<br>', '\n');
+
+  RegExp exp = RegExp(
+    r"<[^>]*>",
+    multiLine: true,
+    caseSensitive: true,
+  );
+
+  return htmlText.replaceAll(exp, '');
+}
