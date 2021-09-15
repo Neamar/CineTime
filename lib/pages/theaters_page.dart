@@ -1,8 +1,7 @@
 import 'package:cinetime/helpers/tools.dart';
 import 'package:cinetime/models/_models.dart';
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
-import 'package:cinetime/services/web_services.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
@@ -280,7 +279,7 @@ class TheatersPageBloc with Disposable {
     await _searchTheaters(
       () async {
         // Get Theater list from server
-        return await WebServices.searchTheaters(query);
+        return await AppService.api.searchTheaters(query);
       }
     );
   }
@@ -292,7 +291,7 @@ class TheatersPageBloc with Disposable {
         final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 15));
 
         // Get local theaters
-        final theaters = await WebServices.searchTheatersGeo(position.latitude, position.longitude);
+        final theaters = await AppService.api.searchTheatersGeo(position.latitude, position.longitude);
 
         return theaters;
       }

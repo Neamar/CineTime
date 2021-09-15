@@ -11,8 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
-import 'web_services.dart';
-
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
 
@@ -21,7 +19,8 @@ const _httpMethodPost = 'POST';
 
 class ApiClient {
   //#region Vars
-  static DateTime get mockedNow => WebServices.useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
+  static const useMocks = !kReleaseMode;
+  static DateTime get mockedNow => useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
 
   static const _graphUrl = 'https://graph.allocine.fr/v1/mobile/';
 
@@ -36,11 +35,37 @@ class ApiClient {
   //#endregion
 
   //#region Requests
+  /// Get theaters that match [query] (free text query)
+  Future<List<Theater>> searchTheaters(String query) async {
+    // Send request
+    JsonObject? responseJson;
+    if (useMocks) {
+      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/be59b0f453dcc6c4efbb8bb659a7d96b/raw/4074465c4602086d45fd5d5a42b0238152f15a56/theaters-search.json');
+    } else {
+      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://www.allocine.fr/_/autocomplete/mobile/theater/$query');
+    }
+
+    // Process result
+    final JsonList theatersJson = responseJson!['results']!;
+    return theatersJson.map((theaterJson) {
+      final JsonObject theaterInfo = theaterJson['data']!;
+
+      return Theater(
+        code: theaterInfo['id'],
+        name: theaterJson['label'],
+        street: theaterInfo['address'],
+        zipCode: theaterInfo['zip'],
+        city: theaterInfo['city'],
+        poster: theaterInfo['poster_path'],
+      );
+    }).toList(growable: false);
+  }
+
   /// Get theaters around geo-position
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) async {
     // Send request
     JsonObject? responseJson;
-    if (WebServices.useMocks) {
+    if (useMocks) {
       responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/c09a01a9f62c8bc922549220415d4400/raw/3927fc7bf5e3b252baeba42f5c45a774f7f677a6/theaters-gps.json');
     } else {
       responseJson = await _sendGraphQL<JsonObject>(
@@ -84,7 +109,7 @@ class ApiClient {
     for (final theater in theaters) {
       // Send request
       JsonObject? responseJson;
-      if (WebServices.useMocks) {
+      if (useMocks) {
         const urls = [
           'https://gist.githubusercontent.com/Nico04/68c748a39f00e0180558673789cd5c40/raw/a7a548dd4e96060eaecefea892304b53ff0bacc0/showTimes1.json',
           'https://gist.githubusercontent.com/Nico04/81aa12b3c7078df19cbd32bb9b5b47cf/raw/7f08ed7153f685dd76c41fa0868f28ad28a0d522/showTimes2.json',
@@ -213,7 +238,7 @@ class ApiClient {
   Future<String?> getSynopsis(String movieId) async {
     // Send request
     JsonObject? responseJson;
-    if (WebServices.useMocks) {
+    if (useMocks) {
       responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/d31cd58a64f9d9fc17d6f9384d2d1d78/raw/ebc120d74a768572685b04d2945692de5f994b47/movie.json');
     } else {
       responseJson = await _sendGraphQL<JsonObject>(
@@ -232,7 +257,7 @@ class ApiClient {
   Future<String?> getVideoUrl(String videoId) async {
     // Send request
     JsonObject? responseJson;
-    if (WebServices.useMocks) {
+    if (useMocks) {
       responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/799b8f245708ff679f6b9f3236919737/raw/c860d3b779feae230d333d0217f4900705a6559d/video.json');
     } else {
       responseJson = await _sendGraphQL<JsonObject>(
@@ -270,7 +295,6 @@ class ApiClient {
       'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
       'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1NzE4NDM5NTcsInVzZXJuYW1lIjoiYW5vbnltb3VzIiwiYXBwbGljYXRpb25fbmFtZSI6Im1vYmlsZSIsInV1aWQiOiJmMDg3YTZiZi05YTdlLTQ3YTUtYjc5YS0zMDNiNWEwOWZkOWYiLCJzY29wZSI6bnVsbCwiZXhwIjoxNjg2NzAwNzk5fQ.oRS_jzmvfFAQ47wH0pU3eKKnlCy93FhblrBXxPZx2iwUUINibd70MBkI8C8wmZ-AeRhVCR8kavW8dLIqs5rUfA6piFwdYpt0lsAhTR417ABOxVrZ8dv0FX3qg1JLIzan-kSN4TwUZ3yeTjls0PB3OtSBKzoywGvFAu2jMYG1IZyBjxnkfi1nf1qGXbYsBfEaSjrj-LDV6Jjq_MPyMVvngNYKWzFNyzVAKIpAZ-UzzAQujAKwNQcg2j3Y3wfImydZEOW_wqkOKCyDOw9sWCWE2D-SObbFOSrjqKBywI-Q9GlfsUz-rW7ptea_HzLnjZ9mymXc6yq7KMzbgG4W9CZd8-qvHejCXVN9oM2RJ7Xrq5tDD345NoZ5plfCmhwSYA0DSZLw21n3SL3xl78fMITNQqpjlUWRPV8YqZA1o-UNgwMpOWIoojLWx-XBX33znnWlwSa174peZ1k60BQ3ZdCt9A7kyOukzvjNn3IOIVVgS04bBxl4holc5lzcEZSgjoP6dDIEJKib1v_AAxA34alVqWngeDYhd0wAO-crYW1HEd8ogtCoBjugwSy7526qrh68mSJxY66nr4Cle21z1wLC5lOsex0FbuwvOeFba0ycaI8NJPTUriOdvtHAjhDRSem4HjypGvKs5AzlZ3LAJACCHICNwo3NzYjcxfT4Wo1ur-M',
       'host': 'graph.allocine.fr',
-      'user-agent': 'androidapp/0.0.1',
     };
 
     // Body
@@ -292,6 +316,7 @@ class ApiClient {
     request.headers.addAll({
       HttpHeaders.acceptHeader: contentTypeJson,
       if (bodyJson != null) HttpHeaders.contentTypeHeader: contentTypeJson,
+      'user-agent': 'androidapp/0.0.1',
     });
     if (headers != null)
       request.headers.addAll(headers);

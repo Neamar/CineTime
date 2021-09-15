@@ -604,7 +604,7 @@ class MoviesPageBloc with Disposable {
 
   void test() async {
     try {
-      final r = await ApiClient().searchTheatersGeo(45.7640417, 4.8356583);
+      final r = await ApiClient().searchTheaters('ugc');
       print(r);
     } catch(e, s) {
       print(e);
