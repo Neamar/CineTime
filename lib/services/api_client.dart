@@ -52,7 +52,7 @@ class ApiClient {
       final JsonObject theaterInfo = theaterJson['data']!;
 
       return Theater(
-        id: theaterInfo['id'],
+        id: ApiId(theaterInfo['id'], ApiId.TypeTheater),
         name: theaterJson['label'],
         street: theaterInfo['address'],
         zipCode: theaterInfo['zip'],
@@ -91,7 +91,7 @@ class ApiClient {
       String? posterUrl = theaterJson['poster']?['url'];
 
       return Theater(
-        id: theaterJson['id'],
+        id: ApiId.fromEncoded(theaterJson['id']),
         name: theaterJson['name'],
         street: address?['address'],
         zipCode: address?['zip'],
@@ -125,7 +125,7 @@ class ApiClient {
         responseJson = await _sendGraphQL<JsonObject>(
           query: r"query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }",
           variables: {
-            "id": theater.id,
+            "id": theater.id.encodedId,
             "from": _dateToString(mockedNow),
             "to": _dateToString(mockedNow.add(Duration(days: 8))),
             "hasPreview": false,
@@ -150,13 +150,14 @@ class ApiClient {
         // Build Movie info
         JsonObject movieJson = movieShowTimesJson['movie']!;
         final String movieId = movieJson['id'];
-        var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.id == movieId);
+        var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.id.id == movieId);
 
         if (movie == null) {
           JsonList releasesJson = movieJson['releases'] ?? [];
           JsonList genresJson = movieJson['genres'] ?? [];
           String? posterUrl = movieJson['poster']?['url'];
           JsonList videosJson = movieJson['videos'] ?? [];
+          String trailerId = videosJson.firstOrNull?['id'];
           JsonObject statisticsJson = movieJson['stats'] ?? {};
 
           String? personsFromJson(JsonList? personsJson) {
@@ -169,7 +170,7 @@ class ApiClient {
           }
 
           movie = Movie(
-            id: movieId,
+            id: ApiId.fromEncoded(movieId),
             title: movieJson['title'],
             directors: personsFromJson(movieJson['credits']?['edges']),
             actors: personsFromJson(movieJson['cast']?['edges']),
@@ -177,7 +178,7 @@ class ApiClient {
             duration: movieJson['runtime'],
             genres: genresJson.join(', '),
             poster: _getPathFromUrl(posterUrl),
-            trailerId: videosJson.firstOrNull?['id'],
+            trailerId: isStringNullOrEmpty(trailerId) ? null : ApiId.fromEncoded(trailerId),
             pressRating: statisticsJson['pressReview']?['score'],
             userRating: statisticsJson['userRating']?['score'],
           );
@@ -255,7 +256,7 @@ class ApiClient {
     return convertBasicHtmlTags(synopsis);
   }
 
-  Future<String?> getVideoUrl(String videoId) async {
+  Future<String?> getVideoUrl(ApiId videoId) async {
     // Send request
     JsonObject? responseJson;
     if (useMocks) {
@@ -264,7 +265,7 @@ class ApiClient {
       responseJson = await _sendGraphQL<JsonObject>(
         query: r"query Video($id: String!, $country: CountryCode) { video(id: $id) { __typename id internalId title type duration language publication { __typename startsAt } relatedEntities { __typename ... on Movie { id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename internalId id countries { __typename id } } } } } releases(type: [RELEASED, SVOD_RELEASE], country: $country) { __typename releaseDate { __typename date } certificate { __typename label } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id internalId name } } } releaseFlags { __typename ...ReleaseUpcomingFragment } credits(department: DIRECTION, first: 5) { __typename edges { __typename node { __typename person { __typename id firstName lastName countries { __typename id } } position { __typename name } } } } data { __typename productionYear } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } relatedTags { __typename id internalId name scope } } ... on Series { ...VideoSeries } ... on Season { internalId series { __typename ...VideoSeries } } ... on Episode { internalId season { __typename series { __typename ...VideoSeries } } } } files { __typename quality height url size } snapshot { __typename id url } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } } fragment VideoSeries on Series { __typename id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId countries { __typename id } } } } } direction: credits(department: DIRECTION) { __typename edges { __typename node { __typename position { __typename name } person { __typename id firstName lastName countries { __typename id } } } } } releaseFlags { __typename ...ReleaseUpcomingFragment } releases(country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } relatedTags { __typename id internalId scope } }",
         variables: {
-          "id": videoId,
+          "id": videoId.encodedId,
           "country": "FRANCE"
         },
       );
@@ -292,7 +293,7 @@ class ApiClient {
   }
 
   /// Return the external url of the movie
-  static getMovieUrl(String? movieCode) => "http://www.allocine.fr/film/fichefilm_gen_cfilm=$movieCode.html";
+  static getMovieUrl(ApiId movieId) => "http://www.allocine.fr/film/fichefilm_gen_cfilm=${movieId.id}.html";
   //#endregion
 
   //#region Generics

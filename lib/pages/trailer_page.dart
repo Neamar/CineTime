@@ -1,4 +1,5 @@
 import 'package:chewie/chewie.dart';
+import 'package:cinetime/models/api_id.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ import 'package:video_player/video_player.dart';
 class TrailerPage extends StatefulWidget {
   const TrailerPage(this.trailerId);
 
-  final String trailerId;
+  final ApiId trailerId;
 
   @override
   _TrailerPageState createState() => _TrailerPageState();

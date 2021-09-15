@@ -88,7 +88,7 @@ class _MoviePageState extends State<MoviePage> {
                       )
                     ],
                   ),
-                  onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.code)),
+                  onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
                 )
               ],
             ),

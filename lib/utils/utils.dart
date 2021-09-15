@@ -90,8 +90,13 @@ String? convertBasicHtmlTags(String? htmlText) {
   if (htmlText == null)
     return null;
 
+  // Replace all double line break with single line break
+  htmlText = htmlText.replaceAll('<br><br>', '\n');
+
+  // Replace all remaining line break
   htmlText = htmlText.replaceAll('<br>', '\n');
 
+  // Remove other tags
   RegExp exp = RegExp(
     r"<[^>]*>",
     multiLine: true,

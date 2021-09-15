@@ -8,7 +8,7 @@ part 'movie.g.dart';
 @JsonSerializable(createToJson: false)
 class Movie extends Identifiable {
   const Movie({
-    required String id,
+    required ApiId id,
     required this.title,
     this.poster,
     this.releaseDate,
@@ -20,7 +20,7 @@ class Movie extends Identifiable {
     this.duration,
     this.pressRating,
     this.userRating,
-  }) : super.fromId(id);
+  }) : super(id);
 
   final String title;
   final String? poster;    //Path to the image (not full url)
@@ -28,7 +28,7 @@ class Movie extends Identifiable {
   final DateTime? releaseDate;
   String? get releaseDateDisplay => releaseDate != null ? AppResources.formatterDate.format(releaseDate!) : null;
 
-  final String? trailerId;
+  final ApiId? trailerId;
   final String? directors;
   final String? actors;
   final String? genres;

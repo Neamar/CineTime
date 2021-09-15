@@ -6,14 +6,14 @@ part 'theater.g.dart';
 @JsonSerializable()
 class Theater extends Identifiable {
   const Theater({
-    required String id,
+    required ApiId id,
     required this.name,
     this.poster,
     this.street,
     this.zipCode,
     this.city,
     this.distance,
-  }) : super.fromId(id);
+  }) : super(id);
 
   final String name;
   final String? poster;    // Path to the image (not full url)
