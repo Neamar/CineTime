@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:cinetime/services/api_client.dart';
-import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/helpers/tools.dart';
 import '_models.dart';
 
@@ -16,7 +15,7 @@ class MoviesShowTimes {
 class MovieShowTimes {
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
-  final List<TheaterShowTimes> filteredTheatersShowTimes;
+  final List<TheaterShowTimes> filteredTheatersShowTimes;   // TODO remove ?
   List<TheaterShowTimes> getTheatersShowTimesDisplay(bool applyFilter) =>
     applyFilter == true && filteredTheatersShowTimes.isNotEmpty
       ? filteredTheatersShowTimes

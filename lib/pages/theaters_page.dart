@@ -121,6 +121,7 @@ class _TheatersPageState extends State<TheatersPage> {
 
                           return Card(
                             key: ObjectKey(theater),
+                            clipBehavior: Clip.antiAlias,
                             color: _bloc.isSelected(theater) ? Colors.lightBlueAccent : null,
                             child: Stack(
                               fit: StackFit.expand,
@@ -176,7 +177,7 @@ class _TheatersPageState extends State<TheatersPage> {
                                   right: 0,
                                   child: Material(
                                     color: isFavorite ? Colors.redAccent : Colors.white,
-                                    shape: CornerBorder(),
+                                    shape: CornerBorder(CornerBorderPosition.topRight),
                                     clipBehavior: Clip.antiAlias,
                                     elevation: 2,
                                     child: SizedBox.fromSize(
@@ -197,7 +198,36 @@ class _TheatersPageState extends State<TheatersPage> {
                                       ),
                                     ),
                                   ),
-                                )
+                                ),
+
+                                // Delete button
+                                /*Positioned(   // TODO remove ?
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Material(
+                                    color: Colors.grey,
+                                    shape: CornerBorder(CornerBorderPosition.bottomRight),
+                                    clipBehavior: Clip.antiAlias,
+                                    elevation: 2,
+                                    child: SizedBox.fromSize(
+                                      size: Size.square(30),
+                                      child: InkWell(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(2),
+                                          child: Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Icon(
+                                              Icons.delete_forever,
+                                              color: Colors.white,
+                                              size: 15,
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: () => _bloc.onDeleteTap(theater),
+                                      ),
+                                    ),
+                                  ),
+                                ),*/
                               ],
                             ),
                           );
@@ -214,7 +244,7 @@ class _TheatersPageState extends State<TheatersPage> {
                         child: Center(
                           child: Padding(
                             padding: const EdgeInsets.all(15),
-                            child: Text('Ajouter les ${plural(selectedCount, 'cinéma')} aux filtres'),
+                            child: Text('Appliquer'),
                           )
                         ),
                         onTap:  selectedCount > 0 ?
@@ -272,7 +302,8 @@ class TheatersPageBloc with Disposable {
       if (selectedTheaters != null) ...selectedTheaters,
       ...favoriteTheaters!.theaters
     ]);
-    theaters.add(initialTheaters.toList(growable: false));
+    theaters.add(initialTheaters.toList());
+    this.selectedTheaters.addAll(selectedTheaters ?? []);
   }
 
   Future<void> onSearch(String query) async {
@@ -341,6 +372,15 @@ class TheatersPageBloc with Disposable {
       favoriteTheaters!.add(theater);
 
     _refreshList();
+  }
+
+  void onDeleteTap(Theater theater) {
+    if (favoriteTheaters!.isFavorite(theater))
+      favoriteTheaters!.remove(theater);
+    if (isSelected(theater))
+      selectedTheaters.remove(theater);
+
+    theaters.add(theaters.value..remove(theater));
   }
 
   void onSelectAll() {

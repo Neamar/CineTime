@@ -16,62 +16,20 @@ import 'package:rxdart/rxdart.dart';
 
 import '_pages.dart';
 
-class MoviesPage extends StatefulWidget {
-  final Iterable<Theater>? selectedTheaters;
-
+class MoviesPage extends StatelessWidget {
   const MoviesPage([this.selectedTheaters]);
 
-  @override
-  _MoviesPageState createState() => _MoviesPageState();
-}
-
-class _MoviesPageState extends State<MoviesPage> with SingleTickerProviderStateMixin {
-  TabController? _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(
-      initialIndex: 0,
-      length: 2,
-      vsync: this,
-    );
-  }
+  final Iterable<Theater>? selectedTheaters;
 
   @override
   Widget build(BuildContext context) {
     return Provider<MoviesPageBloc>(
-      create: (_) => MoviesPageBloc(widget.selectedTheaters),
+      create: (_) => MoviesPageBloc(selectedTheaters),
       dispose: (_, bloc) => bloc.dispose(),
-      child: Provider<MoviesPageController>(
-        create: (_) => MoviesPageController(_tabController),
-        child: Scaffold(
-          body: TabBarView(
-            controller: _tabController,
-            children: [
-              MoviesPageContent(),
-              FilterPage(),
-            ],
-          ),
-        ),
-      )
+      child: Scaffold(
+        body: MoviesPageContent(),
+      ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tabController!.dispose();
-    super.dispose();
-  }
-}
-
-class MoviesPageController {
-  final TabController? _tabController;
-
-  MoviesPageController(this._tabController);
-
-  void animateToPage(int index) {
-    _tabController!.animateTo(index, duration: Duration(milliseconds: 500));
   }
 }
 
@@ -85,7 +43,6 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
   Widget build(BuildContext context) {
     super.build(context);
     final bloc = Provider.of<MoviesPageBloc>(context);
-    final moviesPageController = Provider.of<MoviesPageController>(context);
 
     return BehaviorStreamBuilder<Iterable<MovieShowTimes>?>(
       subject: bloc.moviesShowTimes,
@@ -117,7 +74,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                     ),
                   ),
                 ),
-                onTap: () => moviesPageController.animateToPage(1),
+                onTap: () => bloc.goToTheatersPage(context),
               ),
             ),
 
@@ -221,7 +178,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
   bool get wantKeepAlive => true;
 }
 
-class FilterPage extends StatefulWidget {
+class FilterPage extends StatefulWidget {   // TODO remove
   final double? pinnedSectionHeight;
 
   const FilterPage({Key? key, this.pinnedSectionHeight}) : super(key: key);
@@ -503,7 +460,7 @@ class MoviesPageBloc with Disposable {
       return;
 
     // Add result to selection & Update UI
-    theaters.add(theaters.value..addAll(selectedTheaters));
+    theaters.add(theaters.value..clear()..addAll(selectedTheaters));
   }
 
   void applyFavorite() {

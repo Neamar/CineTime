@@ -25,8 +25,6 @@ class MoviePage extends StatefulWidget {
 }
 
 class _MoviePageState extends State<MoviePage> {
-  final _horizontalScrollController = ScrollController();
-
   final areShowtimesFiltered = BehaviorSubject.seeded(true);
 
   @override
@@ -216,7 +214,7 @@ class _MoviePageState extends State<MoviePage> {
                                 Spacer(),
 
                                 // Filter Button
-                                Tooltip(
+                                /*Tooltip(    // TODO remove ?
                                   child: IconButton(
                                     icon: FaIcon(
                                       FontAwesomeIcons.filter,
@@ -225,7 +223,7 @@ class _MoviePageState extends State<MoviePage> {
                                     onPressed: () => areShowtimesFiltered.add(!applyFilter),
                                   ),
                                   message: 'Filtres ${applyFilter ? 'appliqués' : 'ignorés'}',
-                                ),
+                                ),*/
 
                                 // Share Button
                                 Tooltip(
