@@ -1,9 +1,7 @@
 import 'package:cinetime/utils/_utils.dart';
-
 class ApiId {
   static const TypeTheater = 'Theater';
 
-  ApiId._(this.encodedId, this.id);   // TODO remove
   ApiId(this.id, String type) : encodedId = '$type:$id'.toBase64();
   ApiId.fromEncoded(this.encodedId) : id = _decodeId(encodedId);
 

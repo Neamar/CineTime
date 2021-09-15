@@ -1,9 +1,5 @@
-import 'package:json_annotation/json_annotation.dart';
 import '_models.dart';
 
-part 'theater.g.dart';
-
-@JsonSerializable()
 class Theater extends Identifiable {
   const Theater({
     required ApiId id,
@@ -21,7 +17,6 @@ class Theater extends Identifiable {
   final String? zipCode;
   final String? city;
 
-  @JsonKey(ignore: true)
   final double? distance;  // Distance to user's position when searching, in km
   String? get distanceDisplay {
     if (distance == null)
@@ -51,6 +46,20 @@ class Theater extends Identifiable {
     return lines.join('\n');
   }
 
-  factory Theater.fromJson(Map<String, dynamic> json) => _$TheaterFromJson(json);
-  Map<String, dynamic> toJson() => _$TheaterToJson(this);
+  factory Theater.fromJson(Map<String, dynamic> json) => Theater(
+    id: ApiId.fromEncoded(json['id']),
+    name: json['name'],
+    poster: json['poster'],
+    street: json['street'],
+    zipCode: json['zipCode'],
+    city: json['city'],
+  );
+  Map<String, dynamic> toJson() => {
+    'id': id.encodedId,
+    'name': name,
+    'poster': poster,
+    'street': street,
+    'zipCode': zipCode,
+    'city': city,
+  };
 }

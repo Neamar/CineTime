@@ -3,25 +3,16 @@ import 'dart:collection';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/helpers/tools.dart';
-import 'package:json_annotation/json_annotation.dart';
 import '_models.dart';
 
-part 'showtimes.g.dart';
-
-@JsonSerializable(createToJson: false)
 class MoviesShowTimes {
   final bool? fromCache;
   final List<MovieShowTimes>? moviesShowTimes;
-
-  @JsonKey(fromJson: StorageService.dateFromString, toJson: StorageService.dateToString)
   final DateTime? fetchedAt;
 
   const MoviesShowTimes({this.fetchedAt, this.fromCache, this.moviesShowTimes});
-
-  factory MoviesShowTimes.fromJson(Map<String, dynamic> json) => _$MoviesShowTimesFromJson(json);
 }
 
-@JsonSerializable(createToJson: false)
 class MovieShowTimes {
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
@@ -65,11 +56,8 @@ class MovieShowTimes {
     // Return formatted string
     return lines.join('\n');
   }
-
-  factory MovieShowTimes.fromJson(Map<String, dynamic> json) => _$MovieShowTimesFromJson(json);
 }
 
-@JsonSerializable(createToJson: false)
 class TheaterShowTimes {
   /// Theater data
   final Theater theater;
@@ -164,14 +152,11 @@ class TheaterShowTimes {
     theater,
     showTimes: showTimes ?? this.showTimes,
   );
-
-  factory TheaterShowTimes.fromJson(Map<String, dynamic> json) => _$TheaterShowTimesFromJson(json);
 }
 
 enum ShowVersion { original, dubbed }
 enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
 
-@JsonSerializable(createToJson: false)
 class ShowTime {
   const ShowTime(this.dateTime, {
     this.screen,
@@ -195,6 +180,4 @@ class ShowTime {
   final List<String> tags;    // TODO remove
   final ShowVersion? version;
   final ShowFormat format;
-
-  factory ShowTime.fromJson(Map<String, dynamic> json) => _$ShowTimeFromJson(json);
 }

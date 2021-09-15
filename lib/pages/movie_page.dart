@@ -51,46 +51,49 @@ class _MoviePageState extends State<MoviePage> {
             overlapContentHeight: overlapContentHeight,
             overlapContentRadius: overlapContentHeight / 2,
             overlapContentBackgroundColor: Colors.redAccent,
-            overlapContent: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                TextButton(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      FaIcon(
-                        FontAwesomeIcons.video,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: 8.0),
-                      Text(
-                        'Bande annonce',
-                        style: TextStyle(color: Colors.white),
-                      )
-                    ],
+            overlapContent: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  TextButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        FaIcon(
+                          FontAwesomeIcons.video,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          'Bande annonce',
+                          style: TextStyle(color: Colors.white),
+                        )
+                      ],
+                    ),
+                    onPressed: widget.movieShowTimes.movie.trailerId != null
+                        ? () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerId!))
+                        : null,
                   ),
-                  onPressed: widget.movieShowTimes.movie.trailerId != null
-                      ? () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerId!))
-                      : null,
-                ),
-                TextButton(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      FaIcon(
-                        FontAwesomeIcons.externalLinkAlt,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: 8.0),
-                      Text(
-                        'Fiche',
-                        style: TextStyle(color: Colors.white)
-                      )
-                    ],
-                  ),
-                  onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
-                )
-              ],
+                  TextButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        FaIcon(
+                          FontAwesomeIcons.externalLinkAlt,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          'Fiche',
+                          style: TextStyle(color: Colors.white)
+                        )
+                      ],
+                    ),
+                    onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
+                  )
+                ],
+              ),
             ),
           ),
           SliverToBoxAdapter(
@@ -312,7 +315,7 @@ class _MoviePageState extends State<MoviePage> {
 }
 
 class SynopsisWidget extends StatefulWidget {
-  final String movieId;
+  final ApiId movieId;
 
   const SynopsisWidget({Key? key, required this.movieId}) : super(key: key);
 

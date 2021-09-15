@@ -1,11 +1,7 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/helpers/tools.dart';
-import 'package:json_annotation/json_annotation.dart';
 
-part 'movie.g.dart';
-
-@JsonSerializable(createToJson: false)
 class Movie extends Identifiable {
   const Movie({
     required ApiId id,
@@ -40,8 +36,6 @@ class Movie extends Identifiable {
   final double? pressRating;
   final double? userRating;
   double? get rating => (pressRating != null && userRating != null ? (pressRating! + userRating!) / 2 : pressRating) ?? userRating;
-
-  factory Movie.fromJson(Map<String, dynamic> json) => _$MovieFromJson(json);
 }
 
 class MovieVideo {
@@ -58,9 +52,9 @@ class MovieVideo {
   final int size;
 
   factory MovieVideo.fromJson(Map<String, dynamic> json) => MovieVideo(
-    quality: json["quality"],
-    height: json["height"],
-    url: json["url"],
-    size: json["size"],
+    quality: json['quality'],
+    height: json['height'],
+    url: json['url'],
+    size: json['size'],
   );
 }

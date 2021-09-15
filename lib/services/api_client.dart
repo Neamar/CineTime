@@ -179,8 +179,8 @@ class ApiClient {
             genres: genresJson.join(', '),
             poster: _getPathFromUrl(posterUrl),
             trailerId: isStringNullOrEmpty(trailerId) ? null : ApiId.fromEncoded(trailerId),
-            pressRating: statisticsJson['pressReview']?['score'],
-            userRating: statisticsJson['userRating']?['score'],
+            pressRating: (statisticsJson['pressReview']?['score'] as num?)?.toDouble(),
+            userRating: (statisticsJson['userRating']?['score'] as num?)?.toDouble(),
           );
         }
 
@@ -236,7 +236,7 @@ class ApiClient {
   }
 
   /// Get the synopsis of the movie corresponding to [movieCode]
-  Future<String?> getSynopsis(String movieId) async {
+  Future<String?> getSynopsis(ApiId movieId) async {
     // Send request
     JsonObject? responseJson;
     if (useMocks) {
@@ -245,7 +245,7 @@ class ApiClient {
       responseJson = await _sendGraphQL<JsonObject>(
         query: r"query MovieMoreInfoQuery($id: String, $country: CountryCode) { movie(id: $id) { __typename id internalId title originalTitle genres type poster { __typename id internalId url } synopsis(long: true) mainRelease { __typename type } movieOperation: operation { __typename target { __typename main { __typename code } data } } countries { __typename id name localizedName } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } certificate { __typename label } } dvdReleases: releases(type: [DVD_RELEASE], country: $country) { __typename releaseDate { __typename date } } blueRayReleases: releases(type: [BLU_RAY_RELEASE], country: $country) { __typename releaseDate { __typename date } } VODReleases: releases(type: [VOD_RELEASE], country: $country) { __typename releaseDate { __typename date } } releaseFlags { __typename ...ReleaseUpcomingFragment } data { __typename productionYear budget } format { __typename color audio } languages boxOfficeFR: boxOffice(type: ENTRY, country: FRANCE, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } boxOfficeUS: boxOffice(type: PROFIT, country: USA, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } relatedTags { __typename internalId name } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } }",
         variables: {
-          "id": movieId,
+          "id": movieId.encodedId,
           "country": "FRANCE"
         },
       );
