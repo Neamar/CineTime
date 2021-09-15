@@ -1,7 +1,8 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/resources/resources.dart';
-import 'package:cinetime/services/web_services.dart';
+import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/helpers/tools.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
@@ -87,7 +88,7 @@ class _MoviePageState extends State<MoviePage> {
                       )
                     ],
                   ),
-                  onPressed: () => launch(WebServices.getMovieUrl(widget.movieShowTimes.movie.code)),
+                  onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.code)),
                 )
               ],
             ),
@@ -329,7 +330,7 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
       debugPrint('fetch');
       await Future.delayed(Duration(seconds: 2));     //TODO remove
       //throw ExceptionWithMessage(message: 'Test');
-      return (await WebServices.getSynopsis(widget.movieCode));
+      return (await AppService.api.getSynopsis(widget.movieCode));
     } ();
 
     super.initState();

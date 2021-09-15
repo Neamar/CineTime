@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:intl/intl.dart';
 
-class WebServices {
+class WebServices {   // TODO remove
   static bool useMocks = !kReleaseMode;
   static DateTime get mockedNow => useMocks ? DateTime(2020, 3, 11, 11, 55) : DateTime.now();
 

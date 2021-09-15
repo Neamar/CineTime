@@ -284,6 +284,15 @@ class ApiClient {
     return bestVideo.url;
   }
 
+  /// Get the full url or an image from [path].
+  /// if [isThumbnail] is true, image will be small. Otherwise it will return full size.
+  static String? getImageUrl(String? path, {bool isThumbnail = false}) {
+    if (path?.isNotEmpty != true) return null;
+    return 'https://images.allocine.fr/' + (isThumbnail ? 'r_200_200' : '') + path!;
+  }
+
+  /// Return the external url of the movie
+  static getMovieUrl(String? movieCode) => "http://www.allocine.fr/film/fichefilm_gen_cfilm=$movieCode.html";
   //#endregion
 
   //#region Generics

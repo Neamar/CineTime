@@ -452,7 +452,7 @@ class _MoviePosters extends StatelessWidget {
                 alignment: Alignment.center,
                 angle: _random.nextDouble() * pi - pi / 2,
                 child: CachedNetworkImage(
-                  imageUrl: WebServices.getImageUrl(m.movie.poster, isThumbnail: true)!,
+                  imageUrl: ApiClient.getImageUrl(m.movie.poster, isThumbnail: true)!,
                   placeholder: (_, url) => CtProgressIndicator(),
                   errorWidget: (_, __, ___) => SizedBox(),
                 ),
