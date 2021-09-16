@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:cinetime/services/api_client.dart';
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
 class MoviesShowTimes {

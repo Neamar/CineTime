@@ -1,8 +1,6 @@
-import 'package:cinetime/resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/utils/_utils.dart';
 
 class StarRating extends StatelessWidget {
   final double rating;
@@ -22,7 +20,7 @@ class StarRating extends StatelessWidget {
           _buildStar(FontAwesomeIcons.starHalfAlt),
         for (var i = rating.round(); i < 5; i ++)
           _buildStar(FontAwesomeIcons.star),
-      ].insertBetween(
+      ]..insertBetween(
         const SizedBox(width: 2, height: 2),
       ),
     );

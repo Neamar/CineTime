@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
@@ -154,7 +154,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                             key: ValueKey(index),
                             movieShowTimes: movieShowTimes,
                             onPressed: () {
-                              navigateTo<Iterable<Theater>>(context, () => Provider.value(    //TODO remove Provider ?
+                              navigateTo<Iterable<Theater>>(context, (_) => Provider.value(    //TODO remove Provider ?
                                 value: bloc,
                                 child: MoviePage(
                                   movieShowTimes: movieShowTimes,
@@ -459,7 +459,7 @@ class MoviesPageBloc with Disposable {
 
   void goToTheatersPage(BuildContext context) async {
     // Go to TheatersPage
-    var selectedTheaters = await navigateTo<Iterable<Theater>>(context, () => TheatersPage(selectedTheaters: theaters.value));
+    var selectedTheaters = await navigateTo<Iterable<Theater>>(context, (_) => TheatersPage(selectedTheaters: theaters.value));
     if (selectedTheaters == null)
       return;
 

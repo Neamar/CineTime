@@ -4,7 +4,7 @@ import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -42,7 +42,7 @@ class _MoviePageState extends State<MoviePage> {
             title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
               path: widget.movieShowTimes.movie.poster,
-              onPressed: () => navigateTo(context, () => PosterPage(widget.movieShowTimes.movie.poster)),
+              onPressed: () => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster)),
               isThumbnail: false,
               applyDarken: true,
             ),
@@ -70,7 +70,7 @@ class _MoviePageState extends State<MoviePage> {
                       ],
                     ),
                     onPressed: widget.movieShowTimes.movie.trailerId != null
-                        ? () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerId!))
+                        ? () => navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!))
                         : null,
                   ),
                   TextButton(
@@ -431,7 +431,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
                 context, day, theaterShowTimes.formattedShowTimes![day]!,
               )).toList()..insertBetween(AppResources.spacerSmall),
             ),
-          ].insertBetween(AppResources.spacerSmall),
+          ]..insertBetween(AppResources.spacerSmall),
         ),
       ),
     );

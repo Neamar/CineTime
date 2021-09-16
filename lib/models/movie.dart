@@ -1,6 +1,6 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/resources.dart';
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/utils/_utils.dart';
 
 class Movie extends Identifiable {
   const Movie({
