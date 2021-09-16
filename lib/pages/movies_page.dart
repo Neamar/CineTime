@@ -39,6 +39,8 @@ class MoviesPageContent extends StatefulWidget {
 }
 
 class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKeepAliveClientMixin {
+  final _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -82,6 +84,8 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
             Expanded(
               child: EasyRefresh.custom(    // TODO try pull_to_refresh package instead ?
                 controller: bloc.refresherController,
+                scrollController: _scrollController,
+
                 firstRefresh: true,
                 header: ClassicalHeader(
                   refreshText: 'Tirez pour rafraichir',

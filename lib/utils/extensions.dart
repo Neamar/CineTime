@@ -10,6 +10,8 @@ import 'utils.dart';
 extension ExtendedString on String {
   String decodeBase64() => utf8.decode(base64.decode(this));
   String toBase64() => base64.encode(utf8.encode(this));
+
+  String plural(int count) => '$count ${this}${count > 1 ? 's' : ''}';
 }
 
 extension ExtendedMap<K, V> on Map<K, V> {

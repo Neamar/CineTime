@@ -33,6 +33,13 @@ class App extends StatelessWidget {
   // Default locale
   static const defaultLocale = Locale('fr');
 
+  /// Global key for the App's main navigator
+  static GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  /// The [BuildContext] of the main navigator.
+  /// We may use this on showMessage, showError, openDialog, etc.
+  static BuildContext get navigatorContext => _navigatorKey.currentContext!;
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -41,6 +48,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
+      navigatorKey: _navigatorKey,
       home: FavoriteTheatersHandler.instance!.theaters.isEmpty
         ? TheatersPage()
         : MoviesPage(),

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:cinetime/helpers/tools.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/resources.dart';
 import 'package:flutter/material.dart';

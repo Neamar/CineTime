@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cinetime/utils/_utils.dart';
 
 mixin Disposable {
   bool isDisposed = false;
