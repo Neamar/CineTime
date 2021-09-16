@@ -177,7 +177,7 @@ public class APIHelper {
 
         String json;
         try {
-            json = downloadUrl("showtimelist", params, "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/6f2ae30320e9e93807268f3a3772cdd8bba90987/cinema.json");
+            json = downloadUrl("showtimelist", params, "https://gist.githubusercontent.com/Neamar/9713818694c4c37f583c4d5cf4046611/raw/53cb6f5bd2657ae6be1289d498f4cd47eb6b921d/cinemas2.json");
         } catch (Exception e) {
             displayList.noDataConnection = true;
             return displayList;
