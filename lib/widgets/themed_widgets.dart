@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cinetime/services/web_services.dart';
+import 'package:cinetime/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -33,7 +33,7 @@ class CtCachedImage extends StatelessWidget {
       return errorWidget;
 
     return CachedNetworkImage(
-      imageUrl: WebServices.getImageUrl(path, isThumbnail: isThumbnail)!,
+      imageUrl: ApiClient.getImageUrl(path, isThumbnail: isThumbnail)!,
       imageBuilder: (_, image) => GestureDetector(
         onTap: onPressed,
         child: Image(

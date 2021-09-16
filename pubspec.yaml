@@ -3,7 +3,7 @@ description: CinéTime
 version: 2.0.0+40
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.14.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -31,6 +31,7 @@ dependencies:
 
   # Web
   http: ^0.13.3
+  connectivity_plus: ^1.1.0
   flutter_cache_manager: ^3.1.2
   cached_network_image: ^3.1.0
   crypto: ^3.0.1
@@ -38,15 +39,11 @@ dependencies:
   # Device
   url_launcher: ^6.0.10
   share_plus: ^2.1.4
-  geolocator: ^7.6.0
+  geolocator: ^7.6.1
 
   # Internationalization
   intl: ^0.17.0
   timeago: ^3.1.0
-
-dev_dependencies:
-  build_runner: ^2.1.2
-  json_serializable: ^5.0.0
 
   # The following section is specific to Flutter.
 flutter:

@@ -1,4 +1,4 @@
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/utils/_utils.dart';
 
 class Date extends DateTime {
   static final _unsupportedError = UnsupportedError("Date class only support date-related fields (without time)");

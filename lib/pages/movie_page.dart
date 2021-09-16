@@ -1,9 +1,10 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/resources/resources.dart';
-import 'package:cinetime/services/web_services.dart';
+import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -24,8 +25,6 @@ class MoviePage extends StatefulWidget {
 }
 
 class _MoviePageState extends State<MoviePage> {
-  final _horizontalScrollController = ScrollController();
-
   final areShowtimesFiltered = BehaviorSubject.seeded(true);
 
   @override
@@ -43,53 +42,56 @@ class _MoviePageState extends State<MoviePage> {
             title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
               path: widget.movieShowTimes.movie.poster,
-              onPressed: () => navigateTo(context, () => PosterPage(widget.movieShowTimes.movie.poster)),
+              onPressed: () => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster)),
               isThumbnail: false,
               applyDarken: true,
             ),
             overlapContentHeight: overlapContentHeight,
             overlapContentRadius: overlapContentHeight / 2,
             overlapContentBackgroundColor: Colors.redAccent,
-            overlapContent: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                TextButton(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      FaIcon(
-                        FontAwesomeIcons.video,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: 8.0),
-                      Text(
-                        'Bande annonce',
-                        style: TextStyle(color: Colors.white),
-                      )
-                    ],
+            overlapContent: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  TextButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        FaIcon(
+                          FontAwesomeIcons.video,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          'Bande annonce',
+                          style: TextStyle(color: Colors.white),
+                        )
+                      ],
+                    ),
+                    onPressed: widget.movieShowTimes.movie.trailerId != null
+                        ? () => navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!))
+                        : null,
                   ),
-                  onPressed: widget.movieShowTimes.movie.trailerCode != null
-                      ? () => navigateTo(context, () => TrailerPage(widget.movieShowTimes.movie.trailerCode!))
-                      : null,
-                ),
-                TextButton(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      FaIcon(
-                        FontAwesomeIcons.externalLinkAlt,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: 8.0),
-                      Text(
-                        'Fiche',
-                        style: TextStyle(color: Colors.white)
-                      )
-                    ],
-                  ),
-                  onPressed: () => launch(WebServices.getMovieUrl(widget.movieShowTimes.movie.code)),
-                )
-              ],
+                  TextButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        FaIcon(
+                          FontAwesomeIcons.externalLinkAlt,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          'Fiche',
+                          style: TextStyle(color: Colors.white)
+                        )
+                      ],
+                    ),
+                    onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
+                  )
+                ],
+              ),
             ),
           ),
           SliverToBoxAdapter(
@@ -177,7 +179,7 @@ class _MoviePageState extends State<MoviePage> {
                       // Synopsis
                       AppResources.spacerMedium,
                       SynopsisWidget(
-                        movieCode: widget.movieShowTimes.movie.code,
+                        movieId: widget.movieShowTimes.movie.id,
                       ),
 
                     ],
@@ -212,7 +214,7 @@ class _MoviePageState extends State<MoviePage> {
                                 Spacer(),
 
                                 // Filter Button
-                                Tooltip(
+                                /*Tooltip(    // TODO remove ?
                                   child: IconButton(
                                     icon: FaIcon(
                                       FontAwesomeIcons.filter,
@@ -221,7 +223,7 @@ class _MoviePageState extends State<MoviePage> {
                                     onPressed: () => areShowtimesFiltered.add(!applyFilter),
                                   ),
                                   message: 'Filtres ${applyFilter ? 'appliqués' : 'ignorés'}',
-                                ),
+                                ),*/
 
                                 // Share Button
                                 Tooltip(
@@ -311,9 +313,9 @@ class _MoviePageState extends State<MoviePage> {
 }
 
 class SynopsisWidget extends StatefulWidget {
-  final String movieCode;
+  final ApiId movieId;
 
-  const SynopsisWidget({Key? key, required this.movieCode}) : super(key: key);
+  const SynopsisWidget({Key? key, required this.movieId}) : super(key: key);
 
   @override
   _SynopsisWidgetState createState() => _SynopsisWidgetState();
@@ -326,10 +328,10 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
   @override
   void initState() {
     fetchFuture = () async {
-      print('fetch');
+      debugPrint('fetch');
       await Future.delayed(Duration(seconds: 2));     //TODO remove
       //throw ExceptionWithMessage(message: 'Test');
-      return (await WebServices.getSynopsis(widget.movieCode));
+      return (await AppService.api.getSynopsis(widget.movieId));
     } ();
 
     super.initState();
@@ -429,7 +431,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
                 context, day, theaterShowTimes.formattedShowTimes![day]!,
               )).toList()..insertBetween(AppResources.spacerSmall),
             ),
-          ].insertBetween(AppResources.spacerSmall),
+          ]..insertBetween(AppResources.spacerSmall),
         ),
       ),
     );
@@ -454,12 +456,15 @@ class TheaterShowTimesWidget extends StatelessWidget {
               ),
 
               // Tag
-              if (showtime != null) ...[
-                AppResources.spacerTiny,
-                ...showtime.tags.map((tag) => TinyChip(
-                  label: tag,
-                )).toList(growable: false),
-              ],
+              if (showtime != null && showtime.version != null)
+                TinyChip(
+                  label: showtime.versionDisplay!,
+                ),
+
+              if (showtime != null && showtime.format != ShowFormat.f2D)
+                TinyChip(
+                  label: showtime.formatDisplay,
+                ),
 
             ],
           );

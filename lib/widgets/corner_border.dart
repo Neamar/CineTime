@@ -1,7 +1,11 @@
 import 'package:flutter/painting.dart';
 
+enum CornerBorderPosition { topRight, bottomRight }
+
 class CornerBorder extends ShapeBorder {
-  const CornerBorder();
+  const CornerBorder(this.position);
+
+  final CornerBorderPosition position;
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) => _getCornerPath(rect);
@@ -15,17 +19,25 @@ class CornerBorder extends ShapeBorder {
   }
 
   Path _getCornerPath(Rect rect) {
-    //TODO use Path().addPolygon() instead ?
-    return Path()
-      ..moveTo(rect.right, rect.top)
-      ..lineTo(rect.right, rect.height)
-      ..lineTo(rect.left, rect.top)
-      ..close();
+    if (position == CornerBorderPosition.topRight) {
+      return Path()
+        ..moveTo(rect.right, rect.top)
+        ..lineTo(rect.right, rect.height)
+        ..lineTo(rect.left, rect.top)
+        ..close();
+    } else if (position == CornerBorderPosition.bottomRight) {
+      return Path()
+        ..moveTo(rect.right, rect.bottom)
+        ..lineTo(rect.left, rect.bottom)
+        ..lineTo(rect.right, rect.top)
+        ..close();
+    }
+    throw UnimplementedError();
   }
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
 
   @override
-  ShapeBorder scale(double t) => CornerBorder();
+  ShapeBorder scale(double t) => this;
 }

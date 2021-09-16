@@ -2,12 +2,13 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:cinetime/services/web_services.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,62 +16,20 @@ import 'package:rxdart/rxdart.dart';
 
 import '_pages.dart';
 
-class MoviesPage extends StatefulWidget {
-  final Iterable<Theater>? selectedTheaters;
-
+class MoviesPage extends StatelessWidget {
   const MoviesPage([this.selectedTheaters]);
 
-  @override
-  _MoviesPageState createState() => _MoviesPageState();
-}
-
-class _MoviesPageState extends State<MoviesPage> with SingleTickerProviderStateMixin {
-  TabController? _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(
-      initialIndex: 0,
-      length: 2,
-      vsync: this,
-    );
-  }
+  final Iterable<Theater>? selectedTheaters;
 
   @override
   Widget build(BuildContext context) {
     return Provider<MoviesPageBloc>(
-      create: (_) => MoviesPageBloc(widget.selectedTheaters),
+      create: (_) => MoviesPageBloc(selectedTheaters),
       dispose: (_, bloc) => bloc.dispose(),
-      child: Provider<MoviesPageController>(
-        create: (_) => MoviesPageController(_tabController),
-        child: Scaffold(
-          body: TabBarView(
-            controller: _tabController,
-            children: [
-              MoviesPageContent(),
-              FilterPage(),
-            ],
-          ),
-        ),
-      )
+      child: Scaffold(
+        body: MoviesPageContent(),
+      ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tabController!.dispose();
-    super.dispose();
-  }
-}
-
-class MoviesPageController {
-  final TabController? _tabController;
-
-  MoviesPageController(this._tabController);
-
-  void animateToPage(int index) {
-    _tabController!.animateTo(index, duration: Duration(milliseconds: 500));
   }
 }
 
@@ -80,11 +39,12 @@ class MoviesPageContent extends StatefulWidget {
 }
 
 class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKeepAliveClientMixin {
+  final _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final bloc = Provider.of<MoviesPageBloc>(context);
-    final moviesPageController = Provider.of<MoviesPageController>(context);
 
     return BehaviorStreamBuilder<Iterable<MovieShowTimes>?>(
       subject: bloc.moviesShowTimes,
@@ -116,7 +76,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                     ),
                   ),
                 ),
-                onTap: () => moviesPageController.animateToPage(1),
+                onTap: () => bloc.goToTheatersPage(context),
               ),
             ),
 
@@ -124,6 +84,8 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
             Expanded(
               child: EasyRefresh.custom(    // TODO try pull_to_refresh package instead ?
                 controller: bloc.refresherController,
+                scrollController: _scrollController,
+
                 firstRefresh: true,
                 header: ClassicalHeader(
                   refreshText: 'Tirez pour rafraichir',
@@ -192,7 +154,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                             key: ValueKey(index),
                             movieShowTimes: movieShowTimes,
                             onPressed: () {
-                              navigateTo<Iterable<Theater>>(context, () => Provider.value(    //TODO remove Provider ?
+                              navigateTo<Iterable<Theater>>(context, (_) => Provider.value(    //TODO remove Provider ?
                                 value: bloc,
                                 child: MoviePage(
                                   movieShowTimes: movieShowTimes,
@@ -220,7 +182,7 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
   bool get wantKeepAlive => true;
 }
 
-class FilterPage extends StatefulWidget {
+class FilterPage extends StatefulWidget {   // TODO remove
   final double? pinnedSectionHeight;
 
   const FilterPage({Key? key, this.pinnedSectionHeight}) : super(key: key);
@@ -323,7 +285,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
         ),
 
         // Dev
-        _FilterSection(
+        /*_FilterSection(
           title: 'Paramètres',
           child: BehaviorStreamBuilder<bool>(
             subject: bloc.isDevModeEnabled,
@@ -335,7 +297,7 @@ class _FilterPageState extends State<FilterPage> with AutomaticKeepAliveClientMi
               );
             },
           ),
-        ),
+        ),*/
 
         // Results
         Expanded(
@@ -433,7 +395,6 @@ class _MoviePosters extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constrains) {
-        print(constrains);
         return Stack(
           children: movies!.map((m) {
             return Positioned(
@@ -443,7 +404,7 @@ class _MoviePosters extends StatelessWidget {
                 alignment: Alignment.center,
                 angle: _random.nextDouble() * pi - pi / 2,
                 child: CachedNetworkImage(
-                  imageUrl: WebServices.getImageUrl(m.movie.poster, isThumbnail: true)!,
+                  imageUrl: ApiClient.getImageUrl(m.movie.poster, isThumbnail: true)!,
                   placeholder: (_, url) => CtProgressIndicator(),
                   errorWidget: (_, __, ___) => SizedBox(),
                 ),
@@ -458,8 +419,6 @@ class _MoviePosters extends StatelessWidget {
 
 
 class MoviesPageBloc with Disposable {
-  final isDevModeEnabled = BehaviorSubject.seeded(WebServices.useMocks);
-
   final theaters = BehaviorSubject<SplayTreeSet<Theater>>();
   final favoriteTheaters = FavoriteTheatersHandler.instance;
 
@@ -492,9 +451,6 @@ class MoviesPageBloc with Disposable {
 
     // TODO remove when https://github.com/ReactiveX/rxdart/pull/397 is closed
     moviesShowTimes.stream.listen(null, onError: (error) => _moviesShowTimesError = error);
-
-    // Listen for dev mode stream
-    isDevModeEnabled.listen((value) => WebServices.useMocks = value);
   }
 
   removeTheater(Theater t) {
@@ -503,12 +459,12 @@ class MoviesPageBloc with Disposable {
 
   void goToTheatersPage(BuildContext context) async {
     // Go to TheatersPage
-    var selectedTheaters = await navigateTo<Iterable<Theater>>(context, () => TheatersPage(selectedTheaters: theaters.value));
+    var selectedTheaters = await navigateTo<Iterable<Theater>>(context, (_) => TheatersPage(selectedTheaters: theaters.value));
     if (selectedTheaters == null)
       return;
 
     // Add result to selection & Update UI
-    theaters.add(theaters.value..addAll(selectedTheaters));
+    theaters.add(theaters.value..clear()..addAll(selectedTheaters));
   }
 
   void applyFavorite() {
@@ -529,10 +485,8 @@ class MoviesPageBloc with Disposable {
     // Fetch data
     try {
       //TODO handle cache
-      print('fetch');
-      await Future.delayed(Duration(seconds: 2)); //TODO remove
-      _theatersShowTimes = await WebServices.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
-    } catch (e) {
+      _theatersShowTimes = await AppService.api.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
+    } catch (e, s) {
       moviesShowTimes.addError(e);
       return;
     } finally {
@@ -596,7 +550,6 @@ class MoviesPageBloc with Disposable {
 
   @override
   void dispose() {
-    isDevModeEnabled.close();
     theaters.close();
     moviesShowTimes.close();
     super.dispose();

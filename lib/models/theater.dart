@@ -1,17 +1,22 @@
-import 'package:json_annotation/json_annotation.dart';
 import '_models.dart';
 
-part 'theater.g.dart';
-
-@JsonSerializable()
 class Theater extends Identifiable {
+  const Theater({
+    required ApiId id,
+    required this.name,
+    this.poster,
+    this.street,
+    this.zipCode,
+    this.city,
+    this.distance,
+  }) : super(id);
+
   final String name;
   final String? poster;    // Path to the image (not full url)
   final String? street;
   final String? zipCode;
   final String? city;
 
-  @JsonKey(ignore: true)
   final double? distance;  // Distance to user's position when searching, in km
   String? get distanceDisplay {
     if (distance == null)
@@ -22,16 +27,6 @@ class Theater extends Identifiable {
 
     return '${distance!.toStringAsFixed(1)}km';
   }
-
-  const Theater({
-    required String code,
-    required this.name,
-    this.poster,
-    this.street,
-    this.zipCode,
-    this.city,
-    this.distance,
-  }) : super(code);
 
   String get fullAddress {
     final lines = <String?>[];
@@ -51,6 +46,20 @@ class Theater extends Identifiable {
     return lines.join('\n');
   }
 
-  factory Theater.fromJson(Map<String, dynamic> json) => _$TheaterFromJson(json);
-  Map<String, dynamic> toJson() => _$TheaterToJson(this);
+  factory Theater.fromJson(Map<String, dynamic> json) => Theater(
+    id: ApiId.fromEncoded(json['id']),
+    name: json['name'],
+    poster: json['poster'],
+    street: json['street'],
+    zipCode: json['zipCode'],
+    city: json['city'],
+  );
+  Map<String, dynamic> toJson() => {
+    'id': id.encodedId,
+    'name': name,
+    'poster': poster,
+    'street': street,
+    'zipCode': zipCode,
+    'city': city,
+  };
 }

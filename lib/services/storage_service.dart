@@ -55,4 +55,6 @@ class FavoriteTheatersHandler {
     _theaters.remove(theater);
     await StorageService.saveFavoriteTheaters(_theaters);
   }
+
+  int get length => _theaters.length;
 }

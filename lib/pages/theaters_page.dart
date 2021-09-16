@@ -1,8 +1,8 @@
-import 'package:cinetime/helpers/tools.dart';
+import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
-import 'package:cinetime/services/web_services.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
@@ -97,16 +97,16 @@ class _TheatersPageState extends State<TheatersPage> {
                       child: Row(
                         children: <Widget>[
                           _buildStatText(
-                            text: plural(snapshot.data!.length, 'résultat'),
+                            text: 'résultat'.plural(snapshot.data!.length),
                             alignment: TextAlign.start,
                           ),
                           _buildStatText(
-                            text: plural(selectedCount, 'selectionné'),
+                            text: 'selectionné'.plural(selectedCount),
                             alignment: TextAlign.center,
                             onPressed: _bloc.onSelectAll
                           ),
                           _buildStatText(
-                            text: plural(_bloc.favoriteTheaters!.theaters.length, 'favori'),
+                            text: 'favori'.plural(_bloc.favoriteTheaters!.theaters.length),
                             alignment: TextAlign.end,
                           ),
                         ],
@@ -122,6 +122,7 @@ class _TheatersPageState extends State<TheatersPage> {
 
                           return Card(
                             key: ObjectKey(theater),
+                            clipBehavior: Clip.antiAlias,
                             color: _bloc.isSelected(theater) ? Colors.lightBlueAccent : null,
                             child: Stack(
                               fit: StackFit.expand,
@@ -177,7 +178,7 @@ class _TheatersPageState extends State<TheatersPage> {
                                   right: 0,
                                   child: Material(
                                     color: isFavorite ? Colors.redAccent : Colors.white,
-                                    shape: CornerBorder(),
+                                    shape: CornerBorder(CornerBorderPosition.topRight),
                                     clipBehavior: Clip.antiAlias,
                                     elevation: 2,
                                     child: SizedBox.fromSize(
@@ -198,7 +199,36 @@ class _TheatersPageState extends State<TheatersPage> {
                                       ),
                                     ),
                                   ),
-                                )
+                                ),
+
+                                // Delete button
+                                /*Positioned(   // TODO remove ?
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Material(
+                                    color: Colors.grey,
+                                    shape: CornerBorder(CornerBorderPosition.bottomRight),
+                                    clipBehavior: Clip.antiAlias,
+                                    elevation: 2,
+                                    child: SizedBox.fromSize(
+                                      size: Size.square(30),
+                                      child: InkWell(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(2),
+                                          child: Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Icon(
+                                              Icons.delete_forever,
+                                              color: Colors.white,
+                                              size: 15,
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: () => _bloc.onDeleteTap(theater),
+                                      ),
+                                    ),
+                                  ),
+                                ),*/
                               ],
                             ),
                           );
@@ -215,16 +245,21 @@ class _TheatersPageState extends State<TheatersPage> {
                         child: Center(
                           child: Padding(
                             padding: const EdgeInsets.all(15),
-                            child: Text('Ajouter les ${plural(selectedCount, 'cinéma')} aux filtres'),
+                            child: Text('Appliquer'),
                           )
                         ),
-                        onTap:  selectedCount > 0 ?
-                          () {
-                            if (ModalRoute.of(context)!.isFirst)
-                              navigateTo(context, () => MoviesPage(_bloc.selectedTheaters));
-                            else
-                              Navigator.of(context).pop(_bloc.selectedTheaters);
-                          }
+                        onTap:  selectedCount > 0
+                          ? () {
+                              if (selectedCount > TheatersPageBloc._max) {
+                                showMessage(context, 'Maximum ${TheatersPageBloc._max}', isError: true);
+                                return;
+                              }
+                              if (ModalRoute.of(context)!.isFirst) {
+                                navigateTo(context, (_) => MoviesPage(_bloc.selectedTheaters));
+                              } else {
+                                Navigator.of(context).pop(_bloc.selectedTheaters);
+                              }
+                            }
                           : null,
                       ),
                     ),
@@ -261,6 +296,7 @@ class _TheatersPageState extends State<TheatersPage> {
 }
 
 class TheatersPageBloc with Disposable {
+  static const _max = 5;
   final favoriteTheaters = FavoriteTheatersHandler.instance;
   final selectedTheaters = Set<Theater>();
 
@@ -273,14 +309,15 @@ class TheatersPageBloc with Disposable {
       if (selectedTheaters != null) ...selectedTheaters,
       ...favoriteTheaters!.theaters
     ]);
-    theaters.add(initialTheaters.toList(growable: false));
+    theaters.add(initialTheaters.toList());
+    this.selectedTheaters.addAll(selectedTheaters ?? []);
   }
 
   Future<void> onSearch(String query) async {
     await _searchTheaters(
       () async {
         // Get Theater list from server
-        return await WebServices.searchTheaters(query);
+        return await AppService.api.searchTheaters(query);
       }
     );
   }
@@ -289,10 +326,10 @@ class TheatersPageBloc with Disposable {
     await _searchTheaters(
       () async {
         // Get geo-position
-        final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 15));
+        final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: const Duration(seconds: 10));
 
         // Get local theaters
-        final theaters = await WebServices.searchTheatersGeo(position.latitude, position.longitude);
+        final theaters = await AppService.api.searchTheatersGeo(position.latitude, position.longitude);
 
         return theaters;
       }
@@ -313,7 +350,7 @@ class TheatersPageBloc with Disposable {
       theaters.add(result);
     }
     catch (e) {
-      print('SearchPage.searchTheaters.Error : $e');
+      debugPrint('SearchPage.searchTheaters.Error : $e');
 
       if (!theaters.isClosed)
         theaters.addError(e);
@@ -336,13 +373,27 @@ class TheatersPageBloc with Disposable {
   }
 
   void onFavoriteTap(Theater theater) {
-    if (favoriteTheaters!.isFavorite(theater))
+    if (favoriteTheaters!.isFavorite(theater)) {
       favoriteTheaters!.remove(theater);
-    else
-      favoriteTheaters!.add(theater);
+    } else {
+      if (favoriteTheaters!.length >= _max) {
+        showMessage(App.navigatorContext, 'Maximum $_max', isError: true);
+      } else {
+        favoriteTheaters!.add(theater);
+      }
+    }
 
     _refreshList();
   }
+
+  /*void onDeleteTap(Theater theater) {  // TODO remove ?
+    if (favoriteTheaters!.isFavorite(theater))
+      favoriteTheaters!.remove(theater);
+    if (isSelected(theater))
+      selectedTheaters.remove(theater);
+
+    theaters.add(theaters.value..remove(theater));
+  }*/
 
   void onSelectAll() {
     //Add all to selection
@@ -350,6 +401,7 @@ class TheatersPageBloc with Disposable {
       selectedTheaters.addAll(theaters.value);
 
     //clear selection
+    else
       selectedTheaters.clear();
 
     _refreshList();

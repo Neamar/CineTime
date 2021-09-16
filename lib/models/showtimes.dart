@@ -1,31 +1,21 @@
 import 'dart:collection';
 
-import 'package:cinetime/services/storage_service.dart';
-import 'package:cinetime/services/web_services.dart';
-import 'package:cinetime/helpers/tools.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
-part 'showtimes.g.dart';
-
-@JsonSerializable(createToJson: false)
 class MoviesShowTimes {
   final bool? fromCache;
   final List<MovieShowTimes>? moviesShowTimes;
-
-  @JsonKey(fromJson: StorageService.dateFromString, toJson: StorageService.dateToString)
   final DateTime? fetchedAt;
 
   const MoviesShowTimes({this.fetchedAt, this.fromCache, this.moviesShowTimes});
-
-  factory MoviesShowTimes.fromJson(Map<String, dynamic> json) => _$MoviesShowTimesFromJson(json);
 }
 
-@JsonSerializable(createToJson: false)
 class MovieShowTimes {
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
-  final List<TheaterShowTimes> filteredTheatersShowTimes;
+  final List<TheaterShowTimes> filteredTheatersShowTimes;   // TODO remove ?
   List<TheaterShowTimes> getTheatersShowTimesDisplay(bool applyFilter) =>
     applyFilter == true && filteredTheatersShowTimes.isNotEmpty
       ? filteredTheatersShowTimes
@@ -65,11 +55,8 @@ class MovieShowTimes {
     // Return formatted string
     return lines.join('\n');
   }
-
-  factory MovieShowTimes.fromJson(Map<String, dynamic> json) => _$MovieShowTimesFromJson(json);
 }
 
-@JsonSerializable(createToJson: false)
 class TheaterShowTimes {
   /// Theater data
   final Theater theater;
@@ -89,7 +76,7 @@ class TheaterShowTimes {
   /// - 'Prochaine séance le Me 25 mars'
   String? get showTimesSummary {
     if (_showTimesSummary == null) {
-      final now = WebServices.mockedNow;
+      final now = ApiClient.mockedNow;
       final nextWednesday = now.getNextWednesday();
 
       // Get all date with a show, from [now], without duplicates, sorted.
@@ -164,26 +151,36 @@ class TheaterShowTimes {
     theater,
     showTimes: showTimes ?? this.showTimes,
   );
-
-  factory TheaterShowTimes.fromJson(Map<String, dynamic> json) => _$TheaterShowTimesFromJson(json);
 }
 
-@JsonSerializable(createToJson: false)
+enum ShowVersion { original, dubbed, local }
+const _versionMap = {
+  ShowVersion.original: 'VO',
+  ShowVersion.dubbed: 'VF',
+  ShowVersion.local: 'VF',
+};
+
+enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
+const _formatMap = {
+  ShowFormat.f2D: '2D',
+  ShowFormat.f3D: '3D',
+  ShowFormat.IMAX: 'IMAX',
+  ShowFormat.IMAX_3D: 'IMAX 3D',
+};
+
 class ShowTime {
-  const ShowTime(this.dateTime, { this.screen, this.seatCount, List<String>? tags }) : tags = tags ?? const <String>[];
+  const ShowTime(this.dateTime, {
+    required this.version,
+    this.format = ShowFormat.f2D,
+  });
 
   /// Date and Time
   final DateTime? dateTime;
 
-  /// Theater room name
-  final String? screen;
-
-  /// Theater room seat capacity
-  final int? seatCount;
-
   /// Specs
-  /// Can be ('VO' or 'VF'), '3D', 'IMAX'
-  final List<String> tags;
+  final ShowVersion? version;
+  final ShowFormat format;
 
-  factory ShowTime.fromJson(Map<String, dynamic> json) => _$ShowTimeFromJson(json);
+  String? get versionDisplay => _versionMap[version];
+  String get formatDisplay => _formatMap[format] ?? '';
 }
