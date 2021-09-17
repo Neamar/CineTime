@@ -1,0 +1,33 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+class AppResources {
+  static const locale = 'fr';
+
+  // Widgets
+  static const spacerLarge = SizedBox(width: 20, height: 20);
+  static const spacerMedium = SizedBox(width: 15, height: 15);
+  static const spacerSmall = SizedBox(width: 10, height: 10);
+  static const spacerTiny = SizedBox(width: 5, height: 5);
+  static const spacerExtraTiny = SizedBox(width: 2, height: 2);
+
+  // Duration
+  static const durationAnimationShort = Duration(milliseconds: 150);
+  static const durationAnimationMedium = Duration(milliseconds: 250);
+  static const durationAnimationLong = Duration(milliseconds: 500);
+
+  // Formatter
+  static final formatterDate = DateFormat("dd MMMM yyyy", locale);
+  static final formatterMonth = DateFormat("MMM", locale);
+
+  // Translations
+  static const weekdayNames = {
+    DateTime.monday: 'Lu',
+    DateTime.tuesday: 'Ma',
+    DateTime.wednesday: 'Me',
+    DateTime.thursday: 'Je',
+    DateTime.friday: 'Ve',
+    DateTime.saturday: 'Sa',
+    DateTime.sunday: 'Di',
+  };
+}
