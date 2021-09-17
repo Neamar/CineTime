@@ -152,10 +152,11 @@ class _MoviePageState extends State<MoviePage> {
                                         label: 'Sortie',
                                         text: widget.movieShowTimes.movie.releaseDateDisplay!,
                                       ),
-                                    TextWithLabel(
-                                      label: 'Durée',
-                                      text: widget.movieShowTimes.movie.durationDisplay,
-                                    ),
+                                    if (widget.movieShowTimes.movie.duration != null)
+                                      TextWithLabel(
+                                        label: 'Durée',
+                                        text: widget.movieShowTimes.movie.duration!,
+                                      ),
                                   ],
                                 ),
                               ],

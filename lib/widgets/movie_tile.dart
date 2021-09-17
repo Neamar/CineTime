@@ -77,7 +77,8 @@ class MovieTile extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Text(movieShowTimes.movie.genres!),    //TODO smaller
-                            Text(movieShowTimes.movie.durationDisplay),
+                            if (movieShowTimes.movie.duration != null)
+                              Text(movieShowTimes.movie.duration!),
                           ],
                         ),
                         Spacer(),
