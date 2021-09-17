@@ -101,7 +101,7 @@ class _TheatersPageState extends State<TheatersPage> {
                             alignment: TextAlign.start,
                           ),
                           _buildStatText(
-                            text: 'selectionné'.plural(selectedCount),
+                            text: 'sélectionné'.plural(selectedCount),
                             alignment: TextAlign.center,
                             onPressed: _bloc.onSelectAll
                           ),

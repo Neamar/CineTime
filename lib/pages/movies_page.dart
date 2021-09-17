@@ -65,7 +65,15 @@ class _MoviesPageContentState extends State<MoviesPageContent> with AutomaticKee
                         BehaviorStreamBuilder<SplayTreeSet<Theater>>(
                           subject: bloc.theaters,
                           builder: (context, snapshot) {
-                            return Text('Films dans ${snapshot.data!.length} cinémas');
+                            final theaters = snapshot.data;
+                            final theatersCount = theaters?.length ?? 0;
+                            return Text(
+                              () {
+                                if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                                if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
+                                return 'Films dans $theatersCount cinémas';
+                              } (),
+                            );
                           }
                         ),
                         if (bloc.filterHourEnabled)
