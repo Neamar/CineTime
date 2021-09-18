@@ -36,7 +36,7 @@ class _TheatersPageState extends State<TheatersPage> {
       appBar: AppBar(
         title: TextField(
           decoration: InputDecoration(
-            hintText: 'Nom ou adresse',
+            hintText: 'Nom ou adresse de cinéma',
           ),
           textInputAction: TextInputAction.search,
           onSubmitted: _bloc.onSearch,
@@ -75,7 +75,7 @@ class _TheatersPageState extends State<TheatersPage> {
                 if (snapshot.data == null)
                   return IconMessage(
                     icon: FontAwesomeIcons.search,
-                    message: 'Cherchez par nom ou par localisation',
+                    message: 'Cherchez un cinéma par nom ou localisation',
                   );
 
                 // Empty list
@@ -309,13 +309,15 @@ class TheatersPageBloc with Disposable {
       if (selectedTheaters != null) ...selectedTheaters,
       ...favoriteTheaters!.theaters
     ]);
-    theaters.add(initialTheaters.toList());
+    if (initialTheaters.isNotEmpty) theaters.add(initialTheaters.toList());
     this.selectedTheaters.addAll(selectedTheaters ?? []);
   }
 
   Future<void> onSearch(String query) async {
     await _searchTheaters(
       () async {
+        if (isStringNullOrEmpty(query)) return [];
+
         // Get Theater list from server
         return await AppService.api.searchTheaters(query);
       }
@@ -344,7 +346,7 @@ class TheatersPageBloc with Disposable {
       isBusySearching.add(true);
 
       // Get Theater list from server
-      var result = await task();
+      final result = await task();
 
       // Build Theater list
       theaters.add(result);
