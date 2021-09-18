@@ -21,14 +21,9 @@ class TheatersPage extends StatefulWidget {
   _TheatersPageState createState() => _TheatersPageState();
 }
 
-class _TheatersPageState extends State<TheatersPage> {
-  late TheatersPageBloc _bloc;
-
+class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersPage, TheatersPageBloc> {
   @override
-  void initState() {
-    _bloc = TheatersPageBloc(widget.selectedTheaters);
-    super.initState();
-  }
+  initBloc() => TheatersPageBloc(widget.selectedTheaters);
 
   @override
   Widget build(BuildContext context) {
@@ -39,18 +34,18 @@ class _TheatersPageState extends State<TheatersPage> {
             hintText: 'Nom ou adresse de cinéma',
           ),
           textInputAction: TextInputAction.search,
-          onSubmitted: _bloc.onSearch,
+          onSubmitted: bloc.onSearch,
         ),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.my_location),
-            onPressed: _bloc.getGeoLocation,
+            onPressed: bloc.getGeoLocation,
           ),
         ],
       ),
       body: SafeArea(
         child: BehaviorStreamBuilder<bool>(
-          subject: _bloc.isBusySearching,
+          subject: bloc.isBusySearching,
           builder: (context, isBusySnapshot) {
 
             // Is loading
@@ -59,7 +54,7 @@ class _TheatersPageState extends State<TheatersPage> {
 
             // Is NOT loading
             return BehaviorStreamBuilder<List<Theater>>(
-              subject: _bloc.theaters,
+              subject: bloc.theaters,
               builder: (context, snapshot) {
 
                 // Error
@@ -86,7 +81,7 @@ class _TheatersPageState extends State<TheatersPage> {
                   );
 
                 // Has data
-                var selectedCount = _bloc.selectedTheaters.length;
+                final selectedCount = bloc.selectedTheaters.length;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
@@ -103,10 +98,10 @@ class _TheatersPageState extends State<TheatersPage> {
                           _buildStatText(
                             text: 'sélectionné'.plural(selectedCount),
                             alignment: TextAlign.center,
-                            onPressed: _bloc.onSelectAll
+                            onPressed: bloc.onSelectAll
                           ),
                           _buildStatText(
-                            text: 'favori'.plural(_bloc.favoriteTheaters!.theaters.length),
+                            text: 'favori'.plural(bloc.favoriteTheaters!.theaters.length),
                             alignment: TextAlign.end,
                           ),
                         ],
@@ -118,12 +113,12 @@ class _TheatersPageState extends State<TheatersPage> {
                       child: ListView.builder(
                         itemBuilder: (context, index) {
                           var theater = snapshot.data![index];
-                          var isFavorite = _bloc.favoriteTheaters!.isFavorite(theater);
+                          var isFavorite = bloc.favoriteTheaters!.isFavorite(theater);
 
                           return Card(
                             key: ObjectKey(theater),
                             clipBehavior: Clip.antiAlias,
-                            color: _bloc.isSelected(theater) ? Colors.lightBlueAccent : null,
+                            color: bloc.isSelected(theater) ? Colors.lightBlueAccent : null,
                             child: Stack(
                               fit: StackFit.expand,
                               children: <Widget>[
@@ -169,7 +164,7 @@ class _TheatersPageState extends State<TheatersPage> {
                                       ),
                                     ],
                                   ),
-                                  onTap: () => _bloc.onSelected(theater),
+                                  onTap: () => bloc.onSelected(theater),
                                 ),
 
                                 // Star button
@@ -195,7 +190,7 @@ class _TheatersPageState extends State<TheatersPage> {
                                             ),
                                           ),
                                         ),
-                                        onTap: () => _bloc.onFavoriteTap(theater),
+                                        onTap: () => bloc.onFavoriteTap(theater),
                                       ),
                                     ),
                                   ),
@@ -224,7 +219,7 @@ class _TheatersPageState extends State<TheatersPage> {
                                             ),
                                           ),
                                         ),
-                                        onTap: () => _bloc.onDeleteTap(theater),
+                                        onTap: () => bloc.onDeleteTap(theater),
                                       ),
                                     ),
                                   ),
@@ -255,9 +250,9 @@ class _TheatersPageState extends State<TheatersPage> {
                                 return;
                               }
                               if (ModalRoute.of(context)!.isFirst) {
-                                navigateTo(context, (_) => MoviesPage(_bloc.selectedTheaters));
+                                navigateTo(context, (_) => MoviesPage(bloc.selectedTheaters));
                               } else {
-                                Navigator.of(context).pop(_bloc.selectedTheaters);
+                                Navigator.of(context).pop(bloc.selectedTheaters);
                               }
                             }
                           : null,
@@ -287,13 +282,8 @@ class _TheatersPageState extends State<TheatersPage> {
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _bloc.dispose();
-    super.dispose();
-  }
 }
+
 
 class TheatersPageBloc with Disposable {
   static const _max = 5;
@@ -418,12 +408,3 @@ class TheatersPageBloc with Disposable {
     super.dispose();
   }
 }
-
-/*
-class SelectableItem<T> {
-  final T item;
-  bool isSelected = false;
-  bool isFavorite = false;
-
-  SelectableItem(this.item);
-}*/
