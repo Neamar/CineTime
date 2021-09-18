@@ -203,8 +203,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                           Padding(
                             padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
+                              children: <Widget>[
 
                                 // Title
                                 Text(
@@ -214,10 +213,23 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
                                 // Filters
                                 AppResources.spacerSmall,
-                                _TagFilterSelector(
-                                  options: widget.movieShowTimes.showTimesSpecOptions,
-                                  selected: filter,
-                                  onChanged: bloc.selectedSpec.add,
+                                Expanded(
+                                  child: FillRemainsScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+                                    builder: (context, child) => FadingEdgeScrollView.fromSingleChildScrollView(
+                                      // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
+                                      gradientFractionOnEnd: 0.5,
+                                      child: child,
+                                    ),
+                                    child: Center(
+                                      child: _TagFilterSelector(
+                                        options: [...widget.movieShowTimes.showTimesSpecOptions, ...widget.movieShowTimes.showTimesSpecOptions],
+                                        selected: filter,
+                                        onChanged: bloc.selectedSpec.add,
+                                      ),
+                                    ),
+                                  ),
                                 ),
 
                                 // Share Button
@@ -240,7 +252,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                             return FadingEdgeScrollView.fromSingleChildScrollView(
                               gradientFractionOnEnd: 0.2,
                               child: SingleChildScrollView(
-                                controller: ScrollController(),
+                                controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
                                 scrollDirection: Axis.horizontal,
                                 child: ConstrainedBox(
                                   constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),

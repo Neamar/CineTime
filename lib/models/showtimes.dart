@@ -90,7 +90,7 @@ class TheaterShowTimes {
   /// Theater data
   final Theater theater;
 
-  /// List of showtimes, sorted by date
+  /// Unfiltered list of showtimes, sorted by date
   final List<ShowTime> showTimes;
 
   /// Simple cache for [showTimesSummary]
@@ -129,6 +129,7 @@ class TheaterShowTimes {
 
   /// Formatted & sorted map of showtimes, where keys are the day.
   /// All showtimes elements in lists are aligned per time.
+  /// OPTI: Compute & store all FormattedShowTimes per filter value (low quantity) at object creation.
   FormattedShowTimes getFormattedShowTimes(ShowTimeSpec filter) {
     const aligned = true;
     final filteredShowTimes = showTimes.where((showTime) => showTime.spec == filter).toList(growable: false);
