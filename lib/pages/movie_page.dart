@@ -174,9 +174,9 @@ class _MoviePageState extends State<MoviePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           if (widget.movieShowTimes.movie.pressRating != null)
-                            _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
+                            _buildRatingWidget('Presse', FontAwesomeIcons.newspaper, widget.movieShowTimes.movie.pressRating!),
                           if (widget.movieShowTimes.movie.userRating != null)
-                            _buildRatingWidget('Spectateur', widget.movieShowTimes.movie.userRating!),
+                            _buildRatingWidget('Spectateur', FontAwesomeIcons.users, widget.movieShowTimes.movie.userRating!),
                         ],
                       ),
 
@@ -278,32 +278,25 @@ class _MoviePageState extends State<MoviePage> {
     );
   }
 
-  Widget _buildRatingWidget(String title, double rating) {
-    // TODO test with in-row icons instead of title
-    // https://fontawesome.com/icons/newspaper?style=regular
-    // https://fontawesome.com/icons/users?style=solid
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: <Widget>[
-            Text(
-              title
-            ),
-            AppResources.spacerSmall,
-            Row(
-              children: <Widget>[
-                StarRating(
-                  rating: rating,
-                ),
-                AppResources.spacerSmall,
-                Text(
-                  rating.toStringAsFixed(1)
-                ),
-              ],
-            )
-          ],
+  Widget _buildRatingWidget(String title, IconData icon, double rating) {
+    return Tooltip(
+      message: '$title : ${rating.toStringAsFixed(1)}',
+      triggerMode: TooltipTriggerMode.tap,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                icon,
+                size: 20,
+              ),
+              AppResources.spacerSmall,
+              StarRating(
+                rating: rating,
+              ),
+            ],
+          ),
         ),
       ),
     );
