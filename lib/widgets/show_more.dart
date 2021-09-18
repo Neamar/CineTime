@@ -19,14 +19,31 @@ class _ShowMoreTextState extends State<ShowMoreText> {
     return GestureDetector(
       child: AnimatedSwitcher(
         duration: AppResources.durationAnimationMedium,
-        child: Text(
-          widget.text,
-          key: ValueKey(isExpanded),
-          textAlign: TextAlign.justify,
-          maxLines: isExpanded ? 100 : widget.collapsedMaxLines,
-          overflow: TextOverflow.ellipsis,
-        ),
-        layoutBuilder: animatedSwitcherLayoutBuilder,
+        layoutBuilder: _animatedSwitcherLayoutBuilder,
+        child: () {
+          final text =  Text(
+            widget.text,
+            textAlign: TextAlign.justify,
+            maxLines: isExpanded ? 100 : widget.collapsedMaxLines,
+            overflow: TextOverflow.ellipsis,
+          );
+
+          if (isExpanded) {
+            return text;
+          } else {
+            return ShaderMask(
+              shaderCallback: (rect) {
+                return const LinearGradient(
+                  begin: Alignment.center,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black, Colors.transparent],
+                ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+              },
+              blendMode: BlendMode.dstIn,
+              child: text,
+            );
+          }
+        } (),
       ),
       onTap: () {
         setState(() {
@@ -37,7 +54,7 @@ class _ShowMoreTextState extends State<ShowMoreText> {
   }
 
   /// Copied from AnimatedSwitcher.defaultLayoutBuilder
-  Widget animatedSwitcherLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+  static Widget _animatedSwitcherLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       children: <Widget>[
         ...previousChildren,
