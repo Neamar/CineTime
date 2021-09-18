@@ -309,7 +309,7 @@ class TheatersPageBloc with Disposable {
       if (selectedTheaters != null) ...selectedTheaters,
       ...favoriteTheaters!.theaters
     ]);
-    theaters.add(initialTheaters.toList());
+    if (initialTheaters.isNotEmpty) theaters.add(initialTheaters.toList());
     this.selectedTheaters.addAll(selectedTheaters ?? []);
   }
 
@@ -344,7 +344,7 @@ class TheatersPageBloc with Disposable {
       isBusySearching.add(true);
 
       // Get Theater list from server
-      var result = await task();
+      final result = await task();
 
       // Build Theater list
       theaters.add(result);
