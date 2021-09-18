@@ -22,13 +22,28 @@ class MovieShowTimes {
   List<ShowTimeSpec>? _showTimesSpecOptions;
   List<ShowTimeSpec> get showTimesSpecOptions {
     if (_showTimesSpecOptions == null) {
+      // Build options set
       final options = <ShowTimeSpec>{};
       for (final theaterShowTimes in theatersShowTimes) {
         for (final showTime in theaterShowTimes.showTimes) {
           options.add(showTime.spec);
         }
       }
-      _showTimesSpecOptions = options.toList(growable: false);
+
+      // Sort list
+      final optionList = options.toList(growable: false);
+      optionList.sort((o1, o2) {
+        final s1 = o1.toString();
+        final s2 = o2.toString();
+
+        // Compare length first
+        final lengthComparison = s1.length.compareTo(s2.length);
+        if (lengthComparison != 0) return lengthComparison;
+
+        // Compare alpha
+        return s2.compareTo(s1);
+      });
+      _showTimesSpecOptions = optionList;
     }
     return _showTimesSpecOptions!;
   }
