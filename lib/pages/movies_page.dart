@@ -71,7 +71,8 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                 child: EasyRefresh.custom(    // TODO try pull_to_refresh package instead ?
                   controller: bloc.refresherController,
                   scrollController: _scrollController,
-
+                  onRefresh: bloc.fetch,
+                  bottomBouncing: false,
                   firstRefresh: true,
                   header: ClassicalHeader(
                     refreshText: 'Tirez pour rafraichir',
@@ -144,8 +145,6 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       );
                     } (),
                   ],
-                  onRefresh: bloc.fetch,
-                  bottomBouncing: false,
                 ),
               ),
             ],

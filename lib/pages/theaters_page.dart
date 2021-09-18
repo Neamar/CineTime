@@ -329,7 +329,7 @@ class TheatersPageBloc with Disposable {
         }
 
         // Get local theaters
-        return await AppService.api.searchTheatersGeo(position!.latitude, position.longitude);
+        return await AppService.api.searchTheatersGeo(position.latitude, position.longitude);
       }
     );
   }
