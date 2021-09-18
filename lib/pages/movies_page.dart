@@ -48,27 +48,20 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          BehaviorStreamBuilder<SplayTreeSet<Theater>>(
-                            subject: bloc.theaters,
-                            builder: (context, snapshot) {
-                              final theaters = snapshot.data;
-                              final theatersCount = theaters?.length ?? 0;
-                              return Text(
-                                    () {
-                                  if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                                  if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
-                                  return 'Films dans $theatersCount cinémas';
-                                } (),
-                              );
-                            },
-                          ),
-                          if (bloc.filterHourEnabled)
-                            Text('Entre ${bloc.filterHourMin}h et ${bloc.filterHourMax}h'),
-                          if (bloc.filterRatingEnabled)
-                            Text('Avec une note minimale de ${bloc.filterRatingMin} / 5'),
-                        ],
+                      child: BehaviorStreamBuilder<SplayTreeSet<Theater>>(
+                        subject: bloc.theaters,
+                        builder: (context, snapshot) {
+                          final theaters = snapshot.data;
+                          final theatersCount = theaters?.length ?? 0;
+                          return Text(
+                            () {
+                              if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                              if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
+                              return 'Films dans $theatersCount cinémas';
+                            } (),
+                            textAlign: TextAlign.center,
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -187,19 +180,8 @@ class MoviesPageBloc with Disposable {
   final moviesShowTimes = BehaviorSubject<Iterable<MovieShowTimes>?>();    // Filtered & sorted list
   Object? _moviesShowTimesError;     //Workaround while BehaviorSubject.hasError isn't exposed : https://github.com/ReactiveX/rxdart/pull/397
 
-  static const DefaultFilterHourMin = 0;
-  static const DefaultFilterHourMax = 24;
-  int filterHourMin = DefaultFilterHourMin;
-  int filterHourMax = DefaultFilterHourMax;
-  bool get filterHourEnabled => filterHourMin != DefaultFilterHourMin || filterHourMax != DefaultFilterHourMax;
-
-  static const double DefaultFilterRatingMin = 0;
-  double filterRatingMin = DefaultFilterRatingMin;
-  bool get filterRatingEnabled => filterRatingMin != DefaultFilterRatingMin;
-
   MoviesPageBloc(Iterable<Theater>? selectedTheaters)  {
     // Init list with the favorites
-    //TODO instead of a forced alphabetical sorting, add a reorderable list for the favorites ?
     theaters.add(SplayTreeSet.from(selectedTheaters ?? favoriteTheaters!.theaters, (t1, t2) => t1.name.compareTo(t2.name)));
 
     // Update data when theaters list change
@@ -212,10 +194,6 @@ class MoviesPageBloc with Disposable {
     moviesShowTimes.stream.listen(null, onError: (error) => _moviesShowTimesError = error);
   }
 
-  removeTheater(Theater t) {
-    theaters.add(theaters.value..remove(t));
-  }
-
   void goToTheatersPage(BuildContext context) async {
     // Go to TheatersPage
     var selectedTheaters = await navigateTo<Iterable<Theater>>(context, (_) => TheatersPage(selectedTheaters: theaters.value));
@@ -224,10 +202,6 @@ class MoviesPageBloc with Disposable {
 
     // Add result to selection & Update UI
     theaters.add(theaters.value..clear()..addAll(selectedTheaters));
-  }
-
-  void applyFavorite() {
-    theaters.add(theaters.value..clear()..addAll(favoriteTheaters!.theaters));
   }
 
   Future<void> fetch() async {
@@ -253,55 +227,14 @@ class MoviesPageBloc with Disposable {
     }
 
     // Update UI
-    applyFilterAndSort();
+    applySort();
   }
 
-  void updateHourFilter(num lowerValue, num upperValue) {
-    filterHourMin = lowerValue.toInt();
-    filterHourMax = upperValue.toInt();
-    applyFilterAndSort();
-  }
-
-  void updateRatingFilter(double rating) {
-    filterRatingMin = rating;
-    applyFilterAndSort();
-  }
-
-  void applyFilterAndSort() {
-    final displayList = <MovieShowTimes>[];
-
-    // ---- Filter ----
-    final movieRelatedFilterEnabled = filterRatingEnabled;
-    final deepFilterEnabled = filterHourEnabled;
-    final areFiltersEnabled = movieRelatedFilterEnabled || deepFilterEnabled;
-
-    for (final movieShowTimes in _theatersShowTimes.moviesShowTimes!) {
-      movieShowTimes.filteredTheatersShowTimes.clear();
-
-      // If there is deep-data-related filters
-      if (deepFilterEnabled) {
-        for (final theaterShowTimes in movieShowTimes.theatersShowTimes) {
-          final filteredShowTimes = theaterShowTimes.showTimes.where((showTime) {
-            final time = showTime.dateTime!.toTime;
-            return time.hour >= filterHourMin && time.hour <= filterHourMax;
-          });
-
-          if (filteredShowTimes.isNotEmpty)
-            movieShowTimes.filteredTheatersShowTimes.add(
-              theaterShowTimes.copyWith(showTimes: filteredShowTimes.toList(growable: false)),
-            );
-        }
-      }
-
-      if (!areFiltersEnabled || (
-            (movieShowTimes.movie.rating == null || movieShowTimes.movie.rating! >= filterRatingMin) &&
-            (!deepFilterEnabled || movieShowTimes.filteredTheatersShowTimes.isNotEmpty))) {
-        displayList.add(movieShowTimes);
-      }
-    }
+  void applySort() {
+    final displayList = _theatersShowTimes.moviesShowTimes!;
 
     // ---- Sort ----
-    //TODO displayList.sort();
+    displayList.sort((mst1, mst2) => (mst2.movie.userRating ?? 0).compareTo(mst1.movie.userRating ?? 0));
 
     // ---- Update UI ----
     moviesShowTimes.add(displayList);
