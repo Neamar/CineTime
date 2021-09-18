@@ -8,14 +8,12 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MoviePage extends StatelessWidget {
-  const MoviePage({Key? key, required this.movieShowTimes}) : super(key: key);
+  const MoviePage(this.movieShowTimes);
   
   final MovieShowTimes movieShowTimes;
 

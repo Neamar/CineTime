@@ -1,9 +1,7 @@
 import 'dart:collection';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
-import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
@@ -11,7 +9,6 @@ import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '_pages.dart';
@@ -136,20 +133,10 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       return SliverFixedExtentList(
                         itemExtent: 100,
                         delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                            var movieShowTimes = snapshot.data!.elementAt(index);
-
+                          (context, index) {
                             return MovieTile(
                               key: ValueKey(index),
-                              movieShowTimes: movieShowTimes,
-                              onPressed: () {
-                                navigateTo<Iterable<Theater>>(context, (_) => Provider.value(    //TODO remove Provider ?
-                                  value: bloc,
-                                  child: MoviePage(
-                                    movieShowTimes: movieShowTimes,
-                                  ),
-                                ));
-                              },
+                              movieShowTimes: snapshot.data!.elementAt(index),
                             );
                           },
                           childCount: snapshot.data!.length,

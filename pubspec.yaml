@@ -11,7 +11,6 @@ dependencies:
 
   # Framework Tools
   rxdart: ^0.27.2
-  provider: ^5.0.0    # TODO to be removed
 
   # Data management
   shared_preferences: ^2.0.8

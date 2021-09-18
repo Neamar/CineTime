@@ -1,16 +1,17 @@
 import 'dart:math' as math;
 
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/pages/movie_page.dart';
 import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
 import '_widgets.dart';
 
 class MovieTile extends StatelessWidget {
   final MovieShowTimes movieShowTimes;
-  final VoidCallback? onPressed;
 
-  const MovieTile({Key? key, required this.movieShowTimes, this.onPressed}) : super(key: key);
+  const MovieTile({Key? key, required this.movieShowTimes}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +116,7 @@ class MovieTile extends StatelessWidget {
             );
           }
         ),
-        onTap: onPressed,
+        onTap: () => navigateTo(context, (_) => MoviePage(movieShowTimes)),
       ),
     );
   }
