@@ -148,23 +148,31 @@ class TheaterShowTimes {
 }
 
 enum ShowVersion { original, dubbed, local }
-const _versionMap = {
-  ShowVersion.original: 'VO',
-  ShowVersion.dubbed: 'VF',
-  ShowVersion.local: 'VF',
-};
+extension ExtendedShowVersion on ShowVersion {
+  static const _versionMap = {
+    ShowVersion.original: 'VO',
+    ShowVersion.dubbed: 'VF',
+    ShowVersion.local: 'VF',
+  };
+
+  String toDisplayString() => _versionMap[this]!;
+}
 
 enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
-const _formatMap = {
-  ShowFormat.f2D: '2D',
-  ShowFormat.f3D: '3D',
-  ShowFormat.IMAX: 'IMAX',
-  ShowFormat.IMAX_3D: 'IMAX 3D',
-};
+extension ExtendedShowFormat on ShowFormat {
+  static const _formatMap = {
+    ShowFormat.f2D: '',
+    ShowFormat.f3D: '3D',
+    ShowFormat.IMAX: 'IMAX',
+    ShowFormat.IMAX_3D: 'IMAX 3D',
+  };
+
+  String toDisplayString() => _formatMap[this]!;
+}
 
 class ShowTime {
   const ShowTime(this.dateTime, {
-    required this.version,
+    this.version = ShowVersion.original,
     this.format = ShowFormat.f2D,
   });
 
@@ -172,9 +180,6 @@ class ShowTime {
   final DateTime? dateTime;
 
   /// Specs
-  final ShowVersion? version;
+  final ShowVersion version;
   final ShowFormat format;
-
-  String? get versionDisplay => _versionMap[version];
-  String get formatDisplay => _formatMap[format] ?? '';
 }
