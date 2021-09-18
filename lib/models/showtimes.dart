@@ -81,15 +81,17 @@ class MovieShowTimes {
   }
 }
 
+typedef FormattedShowTimes = SplayTreeMap<Date, List<ShowTime?>>;
+
 class TheaterShowTimes {
+  TheaterShowTimes(this.theater, { List<ShowTime>? showTimes }) :
+    this.showTimes = showTimes ?? <ShowTime>[];
+
   /// Theater data
   final Theater theater;
 
   /// List of showtimes, sorted by date
   final List<ShowTime> showTimes;
-
-  TheaterShowTimes(this.theater, { List<ShowTime>? showTimes }) :
-    this.showTimes = showTimes ?? <ShowTime>[];
 
   /// Simple cache for [showTimesSummary]
   String? _showTimesSummary;
@@ -125,50 +127,46 @@ class TheaterShowTimes {
     return _showTimesSummary;
   }
 
-  /// Simple cache for [formattedShowTimes]
-  SplayTreeMap<Date, List<ShowTime?>>? _showTimesMap;
-
   /// Formatted & sorted map of showtimes, where keys are the day.
   /// All showtimes elements in lists are aligned per time.
-  SplayTreeMap<Date, List<ShowTime?>>? get formattedShowTimes {
-    if (_showTimesMap == null) {
-      const aligned = true;
-      _showTimesMap = SplayTreeMap();
+  FormattedShowTimes getFormattedShowTimes(ShowTimeSpec filter) {
+    const aligned = true;
+    final filteredShowTimes = showTimes.where((showTime) => showTime.spec == filter).toList(growable: false);
+    final showTimesMap = FormattedShowTimes();
 
-      // Unaligned, simple version
-      if (!aligned) {
-        for (final showTime in showTimes) {
-          final date = showTime.dateTime!.toDate;
-          final st = _showTimesMap!.putIfAbsent(date, () => []);
-          st.add(showTime);
-        }
-      }
-
-      // Aligned version
-      else {
-        // List all unique times
-        final timesRef = showTimes
-            .map((st) => st.dateTime!.toTime)
-            .toSet()
-            .toList(growable: false)
-          ..sort();
-        final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
-
-        // Build map
-        for (final showTime in showTimes) {
-          final date = showTime.dateTime!.toDate;
-          final time = showTime.dateTime!.toTime;
-
-          // Get day list or create it
-          final showTimes = _showTimesMap!.putIfAbsent(date, () => List.filled(timesRef.length, null, growable: false));
-
-          // Insert showTime at right index
-          showTimes[timesRefMap[time]!] = showTime;
-        }
+    // Unaligned, simple version
+    if (!aligned) {
+      for (final showTime in filteredShowTimes) {
+        final date = showTime.dateTime!.toDate;
+        final st = showTimesMap.putIfAbsent(date, () => []);
+        st.add(showTime);
       }
     }
 
-    return _showTimesMap;
+    // Aligned version
+    else {
+      // List all unique times
+      final timesRef = filteredShowTimes
+          .map((st) => st.dateTime!.toTime)
+          .toSet()
+          .toList(growable: false)
+        ..sort();
+      final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
+
+      // Build map
+      for (final showTime in filteredShowTimes) {
+        final date = showTime.dateTime!.toDate;
+        final time = showTime.dateTime!.toTime;
+
+        // Get day list or create it
+        final showTimes = showTimesMap.putIfAbsent(date, () => List.filled(timesRef.length, null, growable: false));
+
+        // Insert showTime at right index
+        showTimes[timesRefMap[time]!] = showTime;
+      }
+    }
+
+    return showTimesMap;
   }
 
   TheaterShowTimes copyWith({List<ShowTime>? showTimes}) => TheaterShowTimes(

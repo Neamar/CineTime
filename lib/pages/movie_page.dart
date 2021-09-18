@@ -189,76 +189,79 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
                 // Show times
                 AppResources.spacerMedium,
-                Material(
-                  color: Color(0xFFEFEFEF),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
+                BehaviorSubjectBuilder<ShowTimeSpec>(
+                  subject: bloc.selectedSpec,
+                  builder: (context, snapshot) {
+                    final filter = snapshot.data!;
+                    return Material(
+                      color: const Color(0xFFEFEFEF),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
 
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
+                          // Header
+                          Padding(
+                            padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
 
-                            // Title
-                            Text(
-                              'Séances',
-                              style: Theme.of(context).textTheme.headline6,
-                            ),
-
-                            // Filters
-                            AppResources.spacerSmall,
-                            BehaviorSubjectBuilder<ShowTimeSpec>(
-                              subject: bloc.selectedSpec,
-                              builder: (context, snapshot) {
-                                return _TagFilterSelector(
-                                  options: widget.movieShowTimes.showTimesSpecOptions,
-                                  selected: snapshot.data!,
-                                  onChanged: bloc.selectedSpec.add,
-                                );
-                              },
-                            ),
-
-                            // Share Button
-                            AppResources.spacerSmall,
-                            Tooltip(
-                              child: IconButton(
-                                icon: FaIcon(FontAwesomeIcons.shareAlt),
-                                onPressed: () => Share.share(widget.movieShowTimes.toFullString()),
-                              ),
-                              message: 'Partager les séances',
-                            ),
-
-                          ],
-                        ),
-                      ),
-
-
-                      // Content
-                      ...widget.movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
-                        return FadingEdgeScrollView.fromSingleChildScrollView(
-                          gradientFractionOnEnd: 0.2,
-                          child: SingleChildScrollView(
-                            controller: ScrollController(),
-                            scrollDirection: Axis.horizontal,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
-                                child: TheaterShowTimesWidget(
-                                  theaterShowTimes: theaterShowTimes,
+                                // Title
+                                Text(
+                                  'Séances',
+                                  style: Theme.of(context).textTheme.headline6,
                                 ),
-                              ),
+
+                                // Filters
+                                AppResources.spacerSmall,
+                                _TagFilterSelector(
+                                  options: widget.movieShowTimes.showTimesSpecOptions,
+                                  selected: filter,
+                                  onChanged: bloc.selectedSpec.add,
+                                ),
+
+                                // Share Button
+                                AppResources.spacerSmall,
+                                Tooltip(
+                                  child: IconButton(
+                                    icon: FaIcon(FontAwesomeIcons.shareAlt),
+                                    onPressed: () => Share.share(widget.movieShowTimes.toFullString()),
+                                  ),
+                                  message: 'Partager les séances',
+                                ),
+
+                              ],
                             ),
                           ),
-                        );
-                      }).toList(growable: false),
-                      AppResources.spacerMedium,
 
-                    ],
-                  ),
+
+                          // Content
+                          ...widget.movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
+                            return FadingEdgeScrollView.fromSingleChildScrollView(
+                              gradientFractionOnEnd: 0.2,
+                              child: SingleChildScrollView(
+                                controller: ScrollController(),
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
+                                    child: TheaterShowTimesWidget(
+                                      theaterName: theaterShowTimes.theater.name,
+                                      formattedShowTimes: theaterShowTimes.getFormattedShowTimes(filter),
+                                      filterName: filter.toString(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(growable: false),
+                          AppResources.spacerMedium,
+
+                        ],
+                      ),
+                    );
+                  }
                 ),
               ],
             ),
@@ -383,9 +386,16 @@ class _TagFilterSelector extends StatelessWidget {
 }
 
 class TheaterShowTimesWidget extends StatelessWidget {
-  const TheaterShowTimesWidget({Key? key, required this.theaterShowTimes}) : super(key: key);
+  const TheaterShowTimesWidget({
+    Key? key,
+    required this.theaterName,
+    required this.formattedShowTimes,
+    required this.filterName,
+  }) : super(key: key);
 
-  final TheaterShowTimes theaterShowTimes;
+  final String theaterName;
+  final FormattedShowTimes formattedShowTimes;
+  final String filterName;
 
   @override
   Widget build(BuildContext context) {
@@ -398,16 +408,19 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
             // Theater name
             Text(
-              theaterShowTimes.theater.name,
+              theaterName,
               style: Theme.of(context).textTheme.headline6,
             ),
 
             // Showtimes
-            Row(
-              children: theaterShowTimes.formattedShowTimes!.keys.map<Widget>((day) => _buildDaySection(
-                context, day, theaterShowTimes.formattedShowTimes![day]!,
-              )).toList()..insertBetween(AppResources.spacerSmall),
-            ),
+            if (formattedShowTimes.isNotEmpty)
+              Row(
+                children: formattedShowTimes.keys.map<Widget>((day) => _buildDaySection(
+                  context, day, formattedShowTimes[day]!,
+                )).toList()..insertBetween(AppResources.spacerSmall),
+              )
+            else
+              Text('Aucune séance en $filterName'),
           ]..insertBetween(AppResources.spacerSmall),
         ),
       ),
