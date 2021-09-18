@@ -3,7 +3,7 @@ description: CinéTime
 version: 2.0.2+42
 
 environment:
-  sdk: '>=2.14.0 <3.0.0'
+  sdk: '>=2.13.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -14,7 +14,7 @@ dependencies:
   provider: ^5.0.0
 
   # Data management
-  shared_preferences: ^2.0.7
+  shared_preferences: ^2.0.8
 
   # Widgets / UI
   flash: ^2.0.1
@@ -26,7 +26,7 @@ dependencies:
   fading_edge_scrollview: ^2.0.0
   flutter_easyrefresh: ^2.2.1
   photo_view: ^0.12.0
-  video_player: ^2.2.0
+  video_player: ^2.2.4
   chewie: ^1.2.2
 
   # Web
@@ -37,9 +37,9 @@ dependencies:
   crypto: ^3.0.1
 
   # Device
-  url_launcher: ^6.0.10
+  url_launcher: ^6.0.11
   share_plus: ^2.1.4
-  geolocator: ^7.6.1
+  geolocator: ^7.6.2
 
   # Internationalization
   intl: ^0.17.0

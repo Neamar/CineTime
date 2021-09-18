@@ -20,7 +20,7 @@ const _httpMethodPost = 'POST';
 
 class ApiClient {
   //#region Vars
-  static const useMocks = false;//!kReleaseMode;
+  static const useMocks = !kReleaseMode;
   static DateTime get mockedNow => useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
 
   static const _graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
