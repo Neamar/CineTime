@@ -234,7 +234,7 @@ class ApiClient {
   }
 
   /// Get the synopsis of the movie corresponding to [movieCode]
-  Future<String?> getSynopsis(ApiId movieId) async {
+  Future<String> getSynopsis(ApiId movieId) async {
     // Send request
     JsonObject? responseJson;
     if (useMocks) {

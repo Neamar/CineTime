@@ -31,7 +31,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BehaviorStreamBuilder<Iterable<MovieShowTimes>?>(
+      body: BehaviorSubjectBuilder<Iterable<MovieShowTimes>?>(
         subject: bloc.moviesShowTimes,
         builder: (context, snapshot) {
           return Column(
@@ -45,7 +45,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: BehaviorStreamBuilder<SplayTreeSet<Theater>>(
+                      child: BehaviorSubjectBuilder<SplayTreeSet<Theater>>(
                         subject: bloc.theaters,
                         builder: (context, snapshot) {
                           final theaters = snapshot.data;

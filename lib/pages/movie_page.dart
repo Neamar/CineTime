@@ -281,95 +281,55 @@ class MoviePage extends StatelessWidget {
   void _openPoster(BuildContext context) => navigateTo(context, (_) => PosterPage(movieShowTimes.movie.poster));
 }
 
-class SynopsisWidget extends StatefulWidget {
-  final ApiId movieId;
+class SynopsisWidget extends StatelessWidget {
+  static const collapsedMaxLines = 3;
 
   const SynopsisWidget({Key? key, required this.movieId}) : super(key: key);
 
-  @override
-  _SynopsisWidgetState createState() => _SynopsisWidgetState();
-}
-
-class _SynopsisWidgetState extends State<SynopsisWidget> {
-  static const collapsedMaxLines = 3;
-  Future<String?>? fetchFuture;
-
-  @override
-  void initState() {
-    fetchFuture = () async {
-      debugPrint('fetch');
-      await Future.delayed(Duration(seconds: 2));     //TODO remove
-      //throw ExceptionWithMessage(message: 'Test');
-      return (await AppService.api.getSynopsis(widget.movieId));
-    } ();
-
-    super.initState();
-  }
+  final ApiId movieId;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
-      future: fetchFuture,
-      builder: (context, snapshot) {
-        return AnimatedSwitcher(
-          duration: AppResources.durationAnimationMedium,
-          child: () {
+    return FetchBuilder<String>(
+      task: () => AppService.api.getSynopsis(movieId),
+      isDense: true,
+      fetchingBuilder: (context) {
+        return Stack(
+          children: [
+            // Fake empty text to set the Widget's height (equals to [collapsedMaxLines] time a text line height)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: List.generate(collapsedMaxLines, (index) => Text(' ')),
+            ),
 
-            // Valid
-            if (snapshot.hasData)
-              return ShowMoreText(
-                text: snapshot.data!,
-                collapsedMaxLines: collapsedMaxLines,
-              );
-
-            // Loading
-            return Stack(
-              key: ValueKey(snapshot.hasError),   //For the AnimatedSwitcher to work
-              children: <Widget>[
-
-                // Fake empty text to set the Widget's height (equals to [collapsedMaxLines] time a text line height)
-                Column(
+            // Content that take the previous Column's height
+            Positioned.fill(
+              child: Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: List.generate(collapsedMaxLines, (index) => Text(' ')),
-                ),
-
-                // Content that take the previous Column's height
-                Positioned.fill(
-                  child: () {
-
-                    // If error
-                    if (snapshot.hasError)
-                      return IconMessage(
-                        icon: IconMessage.iconError,
-                        message: 'Impossible de récuperer le synopsis',
-                        tooltip: snapshot.error.toString(),
-                        inline: true,
-                        redIcon: true,
-                      );
-
-                    // If loading, Draw fake animated lines
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: List.generate(collapsedMaxLines, (index) => Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 3),
-                            child: Container(
-                              color: Colors.white,
-                            ),
-                          ),
-                        )),
+                  children: List.generate(collapsedMaxLines, (index) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 3),
+                      child: Container(
+                        color: Colors.white,
                       ),
-                    );
-                  } (),
+                    ),
+                  )),
                 ),
-              ],
-            );
-          } (),
+              ),
+            ),
+          ],
         );
-      }
+      },
+      builder: (context, synopsis) {
+        return ShowMoreText(
+          text: synopsis,
+          collapsedMaxLines: collapsedMaxLines,
+        );
+      },
     );
   }
 }

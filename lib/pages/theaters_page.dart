@@ -44,7 +44,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
         ],
       ),
       body: SafeArea(
-        child: BehaviorStreamBuilder<bool>(
+        child: BehaviorSubjectBuilder<bool>(
           subject: bloc.isBusySearching,
           builder: (context, isBusySnapshot) {
 
@@ -53,7 +53,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
               return CtProgressIndicator();
 
             // Is NOT loading
-            return BehaviorStreamBuilder<List<Theater>>(
+            return BehaviorSubjectBuilder<List<Theater>>(
               subject: bloc.theaters,
               builder: (context, snapshot) {
 
@@ -319,6 +319,7 @@ class TheatersPageBloc with Disposable {
       () async {
         // Get geo-position
         final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: const Duration(seconds: 10));
+        // TODO throw PermissionDeniedException on PermissionDeniedException
 
         // Get local theaters
         final theaters = await AppService.api.searchTheatersGeo(position.latitude, position.longitude);

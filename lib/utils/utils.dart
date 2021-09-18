@@ -1,5 +1,15 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:cinetime/services/api_client.dart';
 import 'package:flutter/material.dart';
+
+import '_utils.dart';
+import 'exceptions/connectivity_exception.dart';
+import 'exceptions/detailed_exception.dart';
+import 'exceptions/displayable_exception.dart';
+import 'exceptions/operation_canceled_exception.dart';
+import 'exceptions/permission_exception.dart';
+import 'exceptions/unreported_exception.dart';
 
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
@@ -64,6 +74,60 @@ Future<T?> navigateTo<T>(BuildContext context, WidgetBuilder builder, {
 
 void popToRoot(BuildContext context) => Navigator.of(context).popUntil((route) => route.isFirst);
 
+
+/// Display an error to the user
+Future<void> showError(BuildContext context, Object error) async {
+  // Cancellation
+  if (error is OperationCanceledException) {
+    if (!error.silent) {
+      showMessage(context, 'Opération annulée', isError: true);
+    }
+  }
+
+  // Permission
+  else if (error is PermissionDeniedException) {
+    showMessage(context, 'Permission requise', isError: true);
+  }
+
+  // Bad connectivity
+  else if (error is ConnectivityException) {
+    showMessage(context, 'Vérifiez votre connexion internet', isError: true);
+  }
+
+  // Server error
+  else if (error is HttpResponseException) {
+    showMessage(context, 'Erreur serveur', exception: error);
+  }
+
+  // Displayable exception
+  else if (error is DisplayableException) {
+    showMessage(context, error.toString(), isError: true);
+  }
+
+  // Other
+  else {
+    showMessage(context, 'Une erreur est survenue', isError: true);
+  }
+}
+
+/// Report error to Crashlytics
+Future<void> reportError(Object exception, StackTrace stack, {dynamic reason}) async {
+  if (!shouldReportException(exception)) return;
+
+  if (exception is DetailedException)
+    exception = exception.toStringVerbose();
+
+  // TODO report to Sentry;
+}
+
+/// Indicate whether this exception should be reported
+bool shouldReportException(Object? exception) =>
+    exception != null &&
+    exception is! UnreportedException &&
+    exception is! SocketException &&
+    exception is! TimeoutException &&
+    (exception is! HttpResponseException || exception.shouldBeReported);
+
 bool isIterableNullOrEmpty<T>(Iterable<T>? iterable) => iterable == null || iterable.isEmpty;
 bool isMapNullOrEmpty<K, V>(Map<K, V>? map) => map == null || map.isEmpty;
 bool isStringNullOrEmpty(String? s) => s == null || s.isEmpty;
@@ -86,10 +150,7 @@ String? dateToString(DateTime? date) => date?.toIso8601String();
 /// @JsonKey(toJson: toEmptyJsonValue)
 String? toEmptyJsonValue<T>(T? value) => null;
 
-String? convertBasicHtmlTags(String? htmlText) {
-  if (htmlText == null)
-    return null;
-
+String convertBasicHtmlTags(String htmlText) {
   // Replace all double line break with single line break
   htmlText = htmlText.replaceAll('<br><br>', '\n');
 
