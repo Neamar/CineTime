@@ -207,8 +207,10 @@ class ApiClient {
         final showTimes = showTimesJson!.map((showTimeJson) {
           return ShowTime(
             DateTime.tryParse(showTimeJson['startsAt']),
-            version: versionMap[showTimeJson['diffusionVersion']] ?? ShowVersion.original,
-            format: parseFormat(showTimeJson['projection']),
+            spec: ShowTimeSpec(
+              version: versionMap[showTimeJson['diffusionVersion']] ?? ShowVersion.original,
+              format: parseFormat(showTimeJson['projection']),
+            ),
           );
         }).toList();
 

@@ -214,11 +214,11 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                               subject: bloc.selectedSpec,
                               builder: (context, snapshot) {
                                 return _TagFilterSelector(
-                                  options: bloc.showTimeSpecOptions,
+                                  options: widget.movieShowTimes.showTimesSpecOptions,
                                   selected: snapshot.data!,
                                   onChanged: bloc.selectedSpec.add,
                                 );
-                              }
+                              },
                             ),
 
                             // Share Button
@@ -437,35 +437,14 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
 
 class MoviePageBloc with Disposable {
-  MoviePageBloc(this.movieShowTimes) {
-    // Build filter options
-    showTimeSpecOptions = [
-      ShowTimeSpec(ShowVersion.dubbed, ShowFormat.f2D),
-      ShowTimeSpec(ShowVersion.original, ShowFormat.f2D),
-      ShowTimeSpec(ShowVersion.dubbed, ShowFormat.f3D),
-    ];
+  MoviePageBloc(MovieShowTimes movieShowTimes) :
+    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first);
 
-    selectedSpec.add(showTimeSpecOptions.first);
-  }
-
-  final MovieShowTimes movieShowTimes;
-
-  late List<ShowTimeSpec> showTimeSpecOptions;
-  final selectedSpec = BehaviorSubject<ShowTimeSpec>();
+  final BehaviorSubject<ShowTimeSpec> selectedSpec;
 
   @override
   void dispose() {
     selectedSpec.close();
     super.dispose();
   }
-}
-
-class ShowTimeSpec {
-  const ShowTimeSpec(this.version, this.format);
-
-  final ShowVersion version;
-  final ShowFormat format;
-
-  @override
-  String toString() => version.toDisplayString() + (format != ShowFormat.f2D ? ' ${format.toDisplayString()}' : '');
 }

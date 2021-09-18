@@ -19,6 +19,21 @@ class MovieShowTimes {
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
 
+  List<ShowTimeSpec>? _showTimesSpecOptions;
+  List<ShowTimeSpec> get showTimesSpecOptions {
+    if (_showTimesSpecOptions == null) {
+      final options = <ShowTimeSpec>{};
+      for (final theaterShowTimes in theatersShowTimes) {
+        for (final showTime in theaterShowTimes.showTimes) {
+          options.add(showTime.spec);
+        }
+      }
+      _showTimesSpecOptions = options.toList(growable: false);
+    }
+    return _showTimesSpecOptions!;
+  }
+
+  // OPTI use basic cache system ?
   String toFullString() {
     final lines = <String?>[];
 
@@ -171,15 +186,35 @@ extension ExtendedShowFormat on ShowFormat {
 }
 
 class ShowTime {
-  const ShowTime(this.dateTime, {
-    this.version = ShowVersion.original,
-    this.format = ShowFormat.f2D,
-  });
+  const ShowTime(this.dateTime, {required this.spec});
 
   /// Date and Time
   final DateTime? dateTime;
 
-  /// Specs
+  /// Spec
+  final ShowTimeSpec spec;
+}
+
+class ShowTimeSpec {
+  const ShowTimeSpec({
+    this.version = ShowVersion.original,
+    this.format = ShowFormat.f2D,
+  });
+
   final ShowVersion version;
   final ShowFormat format;
+
+  @override
+  String toString() => version.toDisplayString() + (format != ShowFormat.f2D ? ' ${format.toDisplayString()}' : '');
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is ShowTimeSpec &&
+          runtimeType == other.runtimeType &&
+          version == other.version &&
+          format == other.format;
+
+  @override
+  int get hashCode => version.hashCode ^ format.hashCode;
 }
