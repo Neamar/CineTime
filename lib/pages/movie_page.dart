@@ -214,19 +214,20 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                 // Filters
                                 AppResources.spacerSmall,
                                 Expanded(
-                                  child: FillRemainsScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
-                                    builder: (context, child) => FadingEdgeScrollView.fromSingleChildScrollView(
-                                      // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
-                                      gradientFractionOnEnd: 0.5,
-                                      child: child,
-                                    ),
-                                    child: Center(
-                                      child: _TagFilterSelector(
-                                        options: [...widget.movieShowTimes.showTimesSpecOptions, ...widget.movieShowTimes.showTimesSpecOptions],
-                                        selected: filter,
-                                        onChanged: bloc.selectedSpec.add,
+                                  child: Center(
+                                    child: IntrinsicWidth(
+                                      child: FadingEdgeScrollView.fromSingleChildScrollView(
+                                        // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
+                                        gradientFractionOnEnd: 0.5,
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+                                          child: _TagFilterSelector(
+                                            options: widget.movieShowTimes.showTimesSpecOptions,
+                                            selected: filter,
+                                            onChanged: bloc.selectedSpec.add,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
