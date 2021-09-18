@@ -177,8 +177,7 @@ class MoviesPageBloc with Disposable {
   final refresherController = EasyRefreshController();
   bool _useCacheOnNextFetch = false;
   late MoviesShowTimes _theatersShowTimes;     // Fetched data
-  final moviesShowTimes = BehaviorSubject<Iterable<MovieShowTimes>?>();    // Filtered & sorted list
-  Object? _moviesShowTimesError;     //Workaround while BehaviorSubject.hasError isn't exposed : https://github.com/ReactiveX/rxdart/pull/397
+  final moviesShowTimes = BehaviorSubject<Iterable<MovieShowTimes>?>();    // Sorted list
 
   MoviesPageBloc(Iterable<Theater>? selectedTheaters)  {
     // Init list with the favorites
@@ -189,9 +188,6 @@ class MoviesPageBloc with Disposable {
       _useCacheOnNextFetch = true;
       refresherController.callRefresh();
     });
-
-    // TODO remove when https://github.com/ReactiveX/rxdart/pull/397 is closed
-    moviesShowTimes.stream.listen(null, onError: (error) => _moviesShowTimesError = error);
   }
 
   void goToTheatersPage(BuildContext context) async {
@@ -206,8 +202,8 @@ class MoviesPageBloc with Disposable {
 
   Future<void> fetch() async {
     // Reset displayed list if needed
-    if (_moviesShowTimesError != null)
-      moviesShowTimes.add(_moviesShowTimesError = null);
+    if (moviesShowTimes.hasError)
+      moviesShowTimes.add(null);
 
     // If theaters list is empty
     if (theaters.valueOrNull?.isNotEmpty != true) {
