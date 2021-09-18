@@ -36,7 +36,7 @@ class _TheatersPageState extends State<TheatersPage> {
       appBar: AppBar(
         title: TextField(
           decoration: InputDecoration(
-            hintText: 'Nom ou adresse',
+            hintText: 'Nom ou adresse de cinéma',
           ),
           textInputAction: TextInputAction.search,
           onSubmitted: _bloc.onSearch,
@@ -75,7 +75,7 @@ class _TheatersPageState extends State<TheatersPage> {
                 if (snapshot.data == null)
                   return IconMessage(
                     icon: FontAwesomeIcons.search,
-                    message: 'Cherchez par nom ou par localisation',
+                    message: 'Cherchez un cinéma par nom ou localisation',
                   );
 
                 // Empty list
