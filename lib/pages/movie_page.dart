@@ -42,7 +42,7 @@ class _MoviePageState extends State<MoviePage> {
             title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
               path: widget.movieShowTimes.movie.poster,
-              onPressed: () => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster)),
+              onPressed: _openPoster,
               isThumbnail: false,
               applyDarken: true,
             ),
@@ -114,9 +114,12 @@ class _MoviePageState extends State<MoviePage> {
                             height: 100,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: CtCachedImage(
-                                path: widget.movieShowTimes.movie.poster,
-                                isThumbnail: true,
+                              child: GestureDetector(
+                                onTap: _openPoster,
+                                child: CtCachedImage(
+                                  path: widget.movieShowTimes.movie.poster,
+                                  isThumbnail: true,
+                                ),
                               ),
                             ),
                           ),
@@ -305,6 +308,8 @@ class _MoviePageState extends State<MoviePage> {
       ),
     );
   }
+
+  void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
 
   @override
   void dispose() {
