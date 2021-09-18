@@ -14,34 +14,25 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class MoviePage extends StatefulWidget {
-  final MovieShowTimes movieShowTimes;
-
+class MoviePage extends StatelessWidget {
   const MoviePage({Key? key, required this.movieShowTimes}) : super(key: key);
-
-  @override
-  _MoviePageState createState() => _MoviePageState();
-}
-
-class _MoviePageState extends State<MoviePage> {
-  final areShowtimesFiltered = BehaviorSubject.seeded(true);
+  
+  final MovieShowTimes movieShowTimes;
 
   @override
   Widget build(BuildContext context) {
     const double contentPadding = 16;
     const double overlapContentHeight = 50;
-    final bloc = Provider.of<MoviesPageBloc>(context);    //TODO remove ?
 
     return Scaffold(
-      //backgroundColor: Colors.blueGrey,
       body: CustomScrollView(
         slivers: <Widget>[
           ScalingHeader(
             backgroundColor: Colors.red,
-            title: Text(widget.movieShowTimes.movie.title),
+            title: Text(movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
-              path: widget.movieShowTimes.movie.poster,
-              onPressed: _openPoster,
+              path: movieShowTimes.movie.poster,
+              onPressed: () => _openPoster(context),
               isThumbnail: false,
               applyDarken: true,
             ),
@@ -68,8 +59,8 @@ class _MoviePageState extends State<MoviePage> {
                         )
                       ],
                     ),
-                    onPressed: widget.movieShowTimes.movie.trailerId != null
-                        ? () => navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!))
+                    onPressed: movieShowTimes.movie.trailerId != null
+                        ? () => navigateTo(context, (_) => TrailerPage(movieShowTimes.movie.trailerId!))
                         : null,
                   ),
                   TextButton(
@@ -83,11 +74,11 @@ class _MoviePageState extends State<MoviePage> {
                         SizedBox(width: 8.0),
                         Text(
                           'Fiche',
-                          style: TextStyle(color: Colors.white)
+                          style: TextStyle(color: Colors.white),
                         )
                       ],
                     ),
-                    onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
+                    onPressed: () => launch(ApiClient.getMovieUrl(movieShowTimes.movie.id)),
                   )
                 ],
               ),
@@ -114,9 +105,9 @@ class _MoviePageState extends State<MoviePage> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: GestureDetector(
-                                onTap: _openPoster,
+                                onTap: () => _openPoster(context),
                                 child: CtCachedImage(
-                                  path: widget.movieShowTimes.movie.poster,
+                                  path: movieShowTimes.movie.poster,
                                   isThumbnail: true,
                                 ),
                               ),
@@ -128,36 +119,36 @@ class _MoviePageState extends State<MoviePage> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: <Widget>[
                                 Text(
-                                  widget.movieShowTimes.movie.title,
+                                  movieShowTimes.movie.title,
                                   style: Theme.of(context).textTheme.headline6,
                                 ),
-                                if (widget.movieShowTimes.movie.directors != null)
+                                if (movieShowTimes.movie.directors != null)
                                   TextWithLabel(
                                     label: 'De',
-                                    text: widget.movieShowTimes.movie.directors!,
+                                    text: movieShowTimes.movie.directors!,
                                   ),
-                                if (widget.movieShowTimes.movie.actors != null)
+                                if (movieShowTimes.movie.actors != null)
                                   TextWithLabel(
                                     label: 'Avec',
-                                    text: widget.movieShowTimes.movie.actors!,
+                                    text: movieShowTimes.movie.actors!,
                                   ),
-                                if (widget.movieShowTimes.movie.genres != null)
+                                if (movieShowTimes.movie.genres != null)
                                   TextWithLabel(
                                     label: 'Genre',
-                                    text: widget.movieShowTimes.movie.genres!,
+                                    text: movieShowTimes.movie.genres!,
                                   ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
-                                    if (widget.movieShowTimes.movie.releaseDate != null)
+                                    if (movieShowTimes.movie.releaseDate != null)
                                       TextWithLabel(
                                         label: 'Sortie',
-                                        text: widget.movieShowTimes.movie.releaseDateDisplay!,
+                                        text: movieShowTimes.movie.releaseDateDisplay!,
                                       ),
-                                    if (widget.movieShowTimes.movie.duration != null)
+                                    if (movieShowTimes.movie.duration != null)
                                       TextWithLabel(
                                         label: 'Durée',
-                                        text: widget.movieShowTimes.movie.duration!,
+                                        text: movieShowTimes.movie.duration!,
                                       ),
                                   ],
                                 ),
@@ -172,17 +163,17 @@ class _MoviePageState extends State<MoviePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
-                          if (widget.movieShowTimes.movie.pressRating != null)
-                            _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
-                          if (widget.movieShowTimes.movie.userRating != null)
-                            _buildRatingWidget('Spectateur', widget.movieShowTimes.movie.userRating!),
+                          if (movieShowTimes.movie.pressRating != null)
+                            _buildRatingWidget('Presse', movieShowTimes.movie.pressRating!),
+                          if (movieShowTimes.movie.userRating != null)
+                            _buildRatingWidget('Spectateur', movieShowTimes.movie.userRating!),
                         ],
                       ),
 
                       // Synopsis
                       AppResources.spacerMedium,
                       SynopsisWidget(
-                        movieId: widget.movieShowTimes.movie.id,
+                        movieId: movieShowTimes.movie.id,
                       ),
 
                     ],
@@ -191,83 +182,64 @@ class _MoviePageState extends State<MoviePage> {
 
                 // Show times
                 AppResources.spacerMedium,
-                BehaviorStreamBuilder<bool>(
-                  subject: areShowtimesFiltered,
-                  builder: (context, snapshot) {
-                    var applyFilter = snapshot.data == true;
-                    var theatersShowTimesDisplay = widget.movieShowTimes.getTheatersShowTimesDisplay(applyFilter);
+                Material(
+                  color: Color(0xFFEFEFEF),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
 
-                    return Material(
-                      color: Color(0xFFEFEFEF),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
+                        child: Row(
+                          children: <Widget>[
 
-                          // Header
-                          Padding(
-                            padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
-                            child: Row(
-                              children: <Widget>[
-
-                                // Title
-                                Text(
-                                  'Séances',
-                                  style: Theme.of(context).textTheme.headline6,
-                                ),
-                                Spacer(),
-
-                                // Filter Button
-                                /*Tooltip(    // TODO remove ?
-                                  child: IconButton(
-                                    icon: FaIcon(
-                                      FontAwesomeIcons.filter,
-                                      color: applyFilter ? Colors.red : Colors.grey,
-                                    ),
-                                    onPressed: () => areShowtimesFiltered.add(!applyFilter),
-                                  ),
-                                  message: 'Filtres ${applyFilter ? 'appliqués' : 'ignorés'}',
-                                ),*/
-
-                                // Share Button
-                                Tooltip(
-                                  child: IconButton(
-                                    icon: FaIcon(FontAwesomeIcons.shareAlt),
-                                    onPressed: () => Share.share(widget.movieShowTimes.toFullString(applyFilter)),
-                                  ),
-                                  message: 'Partager les séances',
-                                ),
-
-                                // TODO add to calendar
-
-                              ],
+                            // Title
+                            Text(
+                              'Séances',
+                              style: Theme.of(context).textTheme.headline6,
                             ),
-                          ),
+                            Spacer(),
+
+                            // Share Button
+                            Tooltip(
+                              child: IconButton(
+                                icon: FaIcon(FontAwesomeIcons.shareAlt),
+                                onPressed: () => Share.share(movieShowTimes.toFullString()),
+                              ),
+                              message: 'Partager les séances',
+                            ),
+
+                            // TODO add to calendar
+
+                          ],
+                        ),
+                      ),
 
 
-                          // Content
-                          ...theatersShowTimesDisplay.map((theaterShowTimes) {
-                            return FadingEdgeScrollView.fromSingleChildScrollView(
-                              gradientFractionOnEnd: 0.2,
-                              child: SingleChildScrollView(
-                                controller: ScrollController(),
-                                scrollDirection: Axis.horizontal,
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
-                                    child: TheaterShowTimesWidget(
-                                      theaterShowTimes: theaterShowTimes,
-                                    ),
-                                  ),
+                      // Content
+                      ...movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
+                        return FadingEdgeScrollView.fromSingleChildScrollView(
+                          gradientFractionOnEnd: 0.2,
+                          child: SingleChildScrollView(
+                            controller: ScrollController(),
+                            scrollDirection: Axis.horizontal,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
+                                child: TheaterShowTimesWidget(
+                                  theaterShowTimes: theaterShowTimes,
                                 ),
                               ),
-                            );
-                          }).toList(growable: false),
-                          AppResources.spacerMedium,
-                        ],
-                      ),
-                    );
-                  },
+                            ),
+                          ),
+                        );
+                      }).toList(growable: false),
+                      AppResources.spacerMedium,
+
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -288,7 +260,7 @@ class _MoviePageState extends State<MoviePage> {
         child: Column(
           children: <Widget>[
             Text(
-              title
+              title,
             ),
             AppResources.spacerSmall,
             Row(
@@ -298,7 +270,7 @@ class _MoviePageState extends State<MoviePage> {
                 ),
                 AppResources.spacerSmall,
                 Text(
-                  rating.toStringAsFixed(1)
+                  rating.toStringAsFixed(1),
                 ),
               ],
             )
@@ -308,13 +280,7 @@ class _MoviePageState extends State<MoviePage> {
     );
   }
 
-  void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
-
-  @override
-  void dispose() {
-    areShowtimesFiltered.close();
-    super.dispose();
-  }
+  void _openPoster(BuildContext context) => navigateTo(context, (_) => PosterPage(movieShowTimes.movie.poster));
 }
 
 class SynopsisWidget extends StatefulWidget {
@@ -411,9 +377,9 @@ class _SynopsisWidgetState extends State<SynopsisWidget> {
 }
 
 class TheaterShowTimesWidget extends StatelessWidget {
-  final TheaterShowTimes theaterShowTimes;
-
   const TheaterShowTimesWidget({Key? key, required this.theaterShowTimes}) : super(key: key);
+
+  final TheaterShowTimes theaterShowTimes;
 
   @override
   Widget build(BuildContext context) {

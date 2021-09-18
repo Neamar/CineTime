@@ -51,18 +51,18 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       child: Column(
                         children: [
                           BehaviorStreamBuilder<SplayTreeSet<Theater>>(
-                              subject: bloc.theaters,
-                              builder: (context, snapshot) {
-                                final theaters = snapshot.data;
-                                final theatersCount = theaters?.length ?? 0;
-                                return Text(
-                                      () {
-                                    if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                                    if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
-                                    return 'Films dans $theatersCount cinémas';
-                                  } (),
-                                );
-                              }
+                            subject: bloc.theaters,
+                            builder: (context, snapshot) {
+                              final theaters = snapshot.data;
+                              final theatersCount = theaters?.length ?? 0;
+                              return Text(
+                                    () {
+                                  if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                                  if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
+                                  return 'Films dans $theatersCount cinémas';
+                                } (),
+                              );
+                            },
                           ),
                           if (bloc.filterHourEnabled)
                             Text('Entre ${bloc.filterHourMin}h et ${bloc.filterHourMax}h'),
@@ -121,7 +121,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                     ),
                   ),
                   slivers: <Widget>[
-                        () {
+                    () {
                       if (snapshot.hasError)
                         return SliverFillRemaining(
                           child: IconMessage(

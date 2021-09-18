@@ -20,7 +20,6 @@ dependencies:
   flash: ^2.0.1
   font_awesome_flutter: ^9.1.0
   flutter_spinkit: ^5.1.0
-  marquee_widget: ^1.2.0
   shimmer: ^2.0.0
   fading_edge_scrollview: ^2.0.0
   flutter_easyrefresh: ^2.2.1
