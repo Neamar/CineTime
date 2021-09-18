@@ -118,6 +118,7 @@ Future<void> reportError(Object exception, StackTrace stack, {dynamic reason}) a
     exception = exception.toStringVerbose();
 
   // TODO report to Sentry;
+  debugPrint(exception.toString());
 }
 
 /// Indicate whether this exception should be reported

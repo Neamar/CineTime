@@ -3,11 +3,12 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
+import 'package:cinetime/utils/exceptions/permission_exception.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:rxdart/rxdart.dart';
 
 import '_pages.dart';
@@ -318,17 +319,22 @@ class TheatersPageBloc with Disposable {
     await _searchTheaters(
       () async {
         // Get geo-position
-        final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low, timeLimit: const Duration(seconds: 10));
-        // TODO throw PermissionDeniedException on PermissionDeniedException
+        geo.Position? position;
+        try {
+          position = await geo.Geolocator.getCurrentPosition(desiredAccuracy: geo.LocationAccuracy.low, timeLimit: const Duration(seconds: 10));
+        } catch(e) {
+          if (e is geo.PermissionDeniedException || e is geo.LocationServiceDisabledException)
+            throw PermissionDeniedException();
+          rethrow;
+        }
 
         // Get local theaters
-        final theaters = await AppService.api.searchTheatersGeo(position.latitude, position.longitude);
-
-        return theaters;
+        return await AppService.api.searchTheatersGeo(position!.latitude, position.longitude);
       }
     );
   }
 
+  // TODO migrate to FetchBuilder or AsyncTaskBuilder
   Future<void> _searchTheaters(Future<List<Theater>> Function() task) async {
     if (isBusySearching.value == true)
       return;
@@ -342,8 +348,9 @@ class TheatersPageBloc with Disposable {
       // Build Theater list
       theaters.add(result);
     }
-    catch (e) {
-      debugPrint('SearchPage.searchTheaters.Error : $e');
+    catch (e, s) {
+      // Report error first
+      reportError(e, s); // Do not await
 
       if (!theaters.isClosed)
         theaters.addError(e);
