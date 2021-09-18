@@ -14,7 +14,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// TODO Make each show day & time selectable to allow selective share, and a button "ajouter la séance à mon calendrier"
 class MoviePage extends StatefulWidget {
   final MovieShowTimes movieShowTimes;
 
