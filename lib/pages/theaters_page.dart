@@ -316,6 +316,8 @@ class TheatersPageBloc with Disposable {
   Future<void> onSearch(String query) async {
     await _searchTheaters(
       () async {
+        if (isStringNullOrEmpty(query)) return [];
+
         // Get Theater list from server
         return await AppService.api.searchTheaters(query);
       }
