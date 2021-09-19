@@ -2,11 +2,12 @@ import 'package:cinetime/pages/_pages.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 import 'services/storage_service.dart';
 
-void main() async {
+Future<void> main() async {
   // Init Flutter
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -25,8 +26,13 @@ void main() async {
   await StorageService.init();
   FavoriteTheatersHandler.init();
 
-  // Start App
-  runApp(App());
+  // Start App inside Sentry's scope
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = 'https://bdfc16e5af644dcdb5dd9c684e584334@o1004143.ingest.sentry.io/5965118';
+    },
+    appRunner: () => runApp(App()),
+  );
 }
 
 class App extends StatelessWidget {
@@ -49,6 +55,9 @@ class App extends StatelessWidget {
         primarySwatch: Colors.red,
       ),
       navigatorKey: _navigatorKey,
+      navigatorObservers: [
+        SentryNavigatorObserver(),    // Track navigation events
+      ],
       home: FavoriteTheatersHandler.instance!.theaters.isEmpty
         ? TheatersPage()
         : MoviesPage(),

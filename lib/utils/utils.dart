@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cinetime/services/api_client.dart';
 import 'package:flutter/material.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '_utils.dart';
 import 'exceptions/connectivity_exception.dart';
@@ -117,8 +118,8 @@ Future<void> reportError(Object exception, StackTrace stack, {dynamic reason}) a
   if (exception is DetailedException)
     exception = exception.toStringVerbose();
 
-  // TODO report to Sentry;
-  debugPrint(exception.toString());
+  // Report to Sentry;
+  Sentry.captureException(exception, stackTrace: stack, hint: reason);
 }
 
 /// Indicate whether this exception should be reported
