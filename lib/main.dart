@@ -30,6 +30,8 @@ Future<void> main() async {
   await SentryFlutter.init(
     (options) {
       options.dsn = 'https://bdfc16e5af644dcdb5dd9c684e584334@o1004143.ingest.sentry.io/5965118';
+      options.debug = !kReleaseMode;
+      options.environment = kReleaseMode ? 'release' : 'debug';
     },
     appRunner: () => runApp(App()),
   );
