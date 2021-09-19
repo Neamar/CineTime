@@ -45,7 +45,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: BehaviorSubjectBuilder<SplayTreeSet<Theater>>(
+                      child: BehaviorSubjectBuilder<SplayTreeSet<Theater>>(   //OPTI because BehaviorSubjectBuilder of moviesShowTimes is above, and theses two streams are linked, this BehaviorSubjectBuilder is useless. Maybe rework bloc archi ?
                         subject: bloc.theaters,
                         builder: (context, snapshot) {
                           final theaters = snapshot.data;
@@ -138,6 +138,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                             return MovieTile(
                               key: ValueKey(index),
                               movieShowTimes: snapshot.data!.elementAt(index),
+                              showTheaterName: bloc.theaters.value.length > 1,
                             );
                           },
                           childCount: snapshot.data!.length,
