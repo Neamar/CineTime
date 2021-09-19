@@ -62,8 +62,8 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release       // Uncomment to test a release locally
-            // signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
+            // signingConfig signingConfigs.debug       // Use this line instead to test a release locally
         }
     }
 }
