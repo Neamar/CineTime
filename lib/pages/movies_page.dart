@@ -118,7 +118,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                         return SliverFillRemaining(
                           child: IconMessage(
                             icon: IconMessage.iconError,
-                            message: 'Impossible de récuperer les données\n↓ Tirez pour re-essayer ↓',
+                            message: 'Impossible de récupérer les données\n↓ Tirez pour re-essayer ↓',
                             tooltip: snapshot.error.toString(),
                             redIcon: true,
                           ),

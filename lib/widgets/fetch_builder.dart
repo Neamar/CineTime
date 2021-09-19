@@ -149,7 +149,7 @@ class _ErrorWidget extends StatelessWidget {
 
           // Caption
           AppResources.spacerTiny,
-          Text('Impossible de récuperer les données'),
+          Text('Impossible de récupérer les données'),
 
           // Retry
           if (isDense)...[

@@ -65,7 +65,7 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
   Widget _buildError(String errorMessage) {
     return IconMessage(
       icon: IconMessage.iconError,
-      message: 'Impossible de récuperer la bande annonce',
+      message: 'Impossible de récupérer la bande annonce',
       tooltip: errorMessage,
       redIcon: true,
       textColor: Colors.white,
