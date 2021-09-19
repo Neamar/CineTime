@@ -1,4 +1,5 @@
-export 'behavior_stream_builder.dart';
+export 'behavior_subject_builder.dart';
+export 'fetch_builder.dart';
 export 'themed_widgets.dart';
 export 'icon_message.dart';
 export 'movie_tile.dart';

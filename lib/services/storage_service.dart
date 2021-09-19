@@ -9,11 +9,10 @@ class StorageService {
 
   static late SharedPreferences _storage;
 
-  static Future<void> init() async
-    => _storage = await SharedPreferences.getInstance();
+  static Future<void> init() async => _storage = await SharedPreferences.getInstance();
 
-  static Future<void> saveFavoriteTheaters(Iterable<Theater> theaters) async
-    => await _storage.setString(_FavoriteTheatersKey, json.encode(theaters.map((theater) => theater.toJson()).toList(growable: false)));
+  static Future<void> saveFavoriteTheaters(Iterable<Theater> theaters) =>
+    _storage.setString(_FavoriteTheatersKey, json.encode(theaters.map((theater) => theater.toJson()).toList(growable: false)));
 
   static Iterable<Theater> readFavoriteTheaters() {
     //Read json
@@ -28,11 +27,9 @@ class StorageService {
     return usersJson.map((json) => Theater.fromJson(json));
   }
 
-  static DateTime? dateFromString(String? dateString)
-    => DateTime.tryParse(dateString ?? '')?.toLocal();
+  static DateTime? dateFromString(String? dateString) => DateTime.tryParse(dateString ?? '')?.toLocal();
 
-  static String? dateToString(DateTime? date)
-    => date?.toUtc().toIso8601String();
+  static String? dateToString(DateTime? date) => date?.toUtc().toIso8601String();
 }
 
 class FavoriteTheatersHandler {

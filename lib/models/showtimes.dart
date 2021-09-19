@@ -13,26 +13,20 @@ class MoviesShowTimes {
 }
 
 class MovieShowTimes {
+  MovieShowTimes(this.movie, {List<TheaterShowTimes>? theatersShowTimes}) :
+    this.theatersShowTimes = theatersShowTimes ?? [];
+
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
-  final List<TheaterShowTimes> filteredTheatersShowTimes;   // TODO remove ?
-  List<TheaterShowTimes> getTheatersShowTimesDisplay(bool applyFilter) =>
-    applyFilter == true && filteredTheatersShowTimes.isNotEmpty
-      ? filteredTheatersShowTimes
-      : theatersShowTimes;
 
-  MovieShowTimes(this.movie, {Iterable<TheaterShowTimes>? theatersShowTimes, Iterable<TheaterShowTimes>? filteredTheatersShowTimes}) :
-    this.theatersShowTimes = theatersShowTimes as List<TheaterShowTimes>? ?? <TheaterShowTimes>[],
-    this.filteredTheatersShowTimes = filteredTheatersShowTimes as List<TheaterShowTimes>? ?? <TheaterShowTimes>[];
-
-  String toFullString(bool applyFilters) {
+  String toFullString() {
     final lines = <String?>[];
 
     // Movie name
     lines.add("Séances pour '${movie.title}'");
 
     // For each theater
-    for (final theaterShowTimes in getTheatersShowTimesDisplay(applyFilters == true)) {
+    for (final theaterShowTimes in theatersShowTimes) {
       // Separator
       lines.add('');
 

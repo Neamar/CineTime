@@ -234,7 +234,7 @@ class ApiClient {
   }
 
   /// Get the synopsis of the movie corresponding to [movieCode]
-  Future<String?> getSynopsis(ApiId movieId) async {
+  Future<String> getSynopsis(ApiId movieId) async {
     // Send request
     JsonObject? responseJson;
     if (useMocks) {
@@ -254,7 +254,7 @@ class ApiClient {
     return convertBasicHtmlTags(synopsis);
   }
 
-  Future<String?> getVideoUrl(ApiId videoId) async {
+  Future<String> getVideoUrl(ApiId videoId) async {
     // Send request
     JsonObject? responseJson;
     if (useMocks) {
@@ -272,7 +272,6 @@ class ApiClient {
     // Process result
     responseJson = responseJson!['data']!['video'];
     final JsonList? videosJson = responseJson!['files'];
-    if (isIterableNullOrEmpty(videosJson)) return null;
     if (videosJson!.length == 1) return MovieVideo.fromJson(videosJson.first).url;
 
     // Find highest quality video, but not greater than 720p
