@@ -28,6 +28,7 @@ class MovieTile extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, box) {
             return Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
 
                 // Poster
@@ -96,6 +97,7 @@ class MovieTile extends StatelessWidget {
 
                         // Show time summary
                         Spacer(),
+                        AppResources.spacerTiny,
                         for (var i = 0; i < math.min(movieShowTimes.theatersShowTimes.length, 2); i++)
                           Builder(
                             builder: (context) {

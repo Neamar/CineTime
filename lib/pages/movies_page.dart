@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
@@ -117,7 +118,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                         return SliverFillRemaining(
                           child: IconMessage(
                             icon: IconMessage.iconError,
-                            message: 'Impossible de récuperer les données\n↓ Tirez pour re-essayer ↓',
+                            message: 'Impossible de récupérer les données\n↓ Tirez pour re-essayer ↓',
                             tooltip: snapshot.error.toString(),
                             redIcon: true,
                           ),
@@ -132,7 +133,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                         );
 
                       return SliverFixedExtentList(
-                        itemExtent: 100,
+                        itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             return MovieTile(
