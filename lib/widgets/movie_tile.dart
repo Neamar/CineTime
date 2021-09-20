@@ -9,9 +9,10 @@ import 'package:flutter/material.dart';
 import '_widgets.dart';
 
 class MovieTile extends StatelessWidget {
-  const MovieTile({Key? key, required this.movieShowTimes}) : super(key: key);
+  const MovieTile({Key? key, required this.movieShowTimes, this.showTheaterName = true}) : super(key: key);
 
   final MovieShowTimes movieShowTimes;
+  final bool showTheaterName;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +28,7 @@ class MovieTile extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, box) {
             return Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
 
                 // Poster
@@ -45,6 +47,8 @@ class MovieTile extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
+
+                        // Info line 1
                         Row(
                           children: <Widget>[
                             Expanded(
@@ -52,6 +56,8 @@ class MovieTile extends StatelessWidget {
                                 textBaseline: TextBaseline.alphabetic,
                                 crossAxisAlignment: CrossAxisAlignment.baseline,
                                 children: <Widget>[
+
+                                  // Movie name
                                   Flexible(
                                     child: Text(
                                       movieShowTimes.movie.title,
@@ -60,19 +66,25 @@ class MovieTile extends StatelessWidget {
                                       softWrap: false,
                                     ),
                                   ),
+
+                                  // Release date
                                   if (releaseYear != null)
                                     Text('  ($releaseYear)'),
                                 ],
                               ),
                             ),
+
+                            // Rating
                             if (movieShowTimes.movie.rating != null && movieShowTimes.movie.rating! > 0)...[
                               AppResources.spacerLarge,
                               StarRating(
                                 rating: movieShowTimes.movie.rating!,
-                              )
+                              ),
                             ],
                           ],
                         ),
+
+                        // Info line 2
                         AppResources.spacerTiny,
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -82,28 +94,36 @@ class MovieTile extends StatelessWidget {
                               Text(movieShowTimes.movie.duration!),
                           ],
                         ),
+
+                        // Show time summary
                         Spacer(),
+                        AppResources.spacerTiny,
                         for (var i = 0; i < math.min(movieShowTimes.theatersShowTimes.length, 2); i++)
                           Builder(
                             builder: (context) {
-                              var theaterShowTimes = movieShowTimes.theatersShowTimes[i];
+                              final theaterShowTimes = movieShowTimes.theatersShowTimes[i];
 
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
+
+                                  // Theater name
                                   Flexible(
                                     child: Text(
-                                      theaterShowTimes.theater.name,
+                                      showTheaterName ? theaterShowTimes.theater.name : '',
                                       style: Theme.of(context).textTheme.caption,
                                       softWrap: false,
                                       overflow: TextOverflow.fade,
                                     ),
                                   ),
+
+                                  // Show time summary
                                   AppResources.spacerMedium,
                                   Text(
                                     theaterShowTimes.showTimesSummary!,
                                     style: Theme.of(context).textTheme.caption,
                                   ),
+
                                 ],
                               );
                             }

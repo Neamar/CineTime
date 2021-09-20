@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
@@ -45,7 +46,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: BehaviorSubjectBuilder<SplayTreeSet<Theater>>(
+                      child: BehaviorSubjectBuilder<SplayTreeSet<Theater>>(   //OPTI because BehaviorSubjectBuilder of moviesShowTimes is above, and theses two streams are linked, this BehaviorSubjectBuilder is useless. Maybe rework bloc archi ?
                         subject: bloc.theaters,
                         builder: (context, snapshot) {
                           final theaters = snapshot.data;
@@ -117,7 +118,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                         return SliverFillRemaining(
                           child: IconMessage(
                             icon: IconMessage.iconError,
-                            message: 'Impossible de récuperer les données\n↓ Tirez pour re-essayer ↓',
+                            message: 'Impossible de récupérer les données\n↓ Tirez pour re-essayer ↓',
                             tooltip: snapshot.error.toString(),
                             redIcon: true,
                           ),
@@ -132,12 +133,13 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                         );
 
                       return SliverFixedExtentList(
-                        itemExtent: 100,
+                        itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             return MovieTile(
                               key: ValueKey(index),
                               movieShowTimes: snapshot.data!.elementAt(index),
+                              showTheaterName: bloc.theaters.value.length > 1,
                             );
                           },
                           childCount: snapshot.data!.length,
@@ -202,6 +204,7 @@ class MoviesPageBloc with Disposable {
       //TODO handle cache
       _theatersShowTimes = await AppService.api.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
     } catch (e, s) {
+      reportError(e, s); // Do not await
       moviesShowTimes.addError(e);
       return;
     } finally {

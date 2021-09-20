@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
@@ -30,7 +31,9 @@ class ApiClient {
 
   static const _logHeaders = false;
 
-  ApiClient() : _client = http.Client();
+  ApiClient() : _client = SentryHttpClient(
+    captureFailedRequests: true,
+  );
 
   final http.Client _client;
   //#endregion

@@ -62,7 +62,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
                 if (snapshot.hasError)
                   return IconMessage(
                     icon: IconMessage.iconError,
-                    message: 'Impossible de récuperer les données',
+                    message: 'Impossible de récupérer les données',
                     tooltip: snapshot.error.toString(),
                     redIcon: true,
                   );
