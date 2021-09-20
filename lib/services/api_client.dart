@@ -125,6 +125,7 @@ class ApiClient {
         responseJson = await _send<JsonObject>(
           _httpMethodGet,
           urls.elementAt(theaters.toList(growable: false).indexOf(theater) % urls.length),
+          useCache: useCache,
         );
       } else {
         responseJson = await _sendGraphQL<JsonObject>(
@@ -141,6 +142,7 @@ class ApiClient {
             ],
             "country": "FRANCE"
           },
+          useCache: useCache,
         );
       }
 
@@ -365,35 +367,38 @@ class ApiClient {
 
   /// Send a generic request
   Future<T?> _sendRequest<T>(http.Request request, {bool useCache = true}) async {
-    http.Response? response;
-
     // Log
     _log(request: request);
 
-    // Check cache
-    final cacheKey = _getCacheKeyFromRequest(request);
-    final cachedResponseFile = await _cacheManager.getFileFromCache(cacheKey);
+    // Get response
+    final response = await () async {
+      final cacheKey = _getCacheKeyFromRequest(request);
 
-    // If cache is available
-    if (cachedResponseFile != null) {
-      // Read response from cached file
-      final cachedResponse = await cachedResponseFile.file.readAsString();
+      // If we can use cache
+      if (useCache) {
+        // Check cache
+        final cachedResponseFile = await _cacheManager.getFileFromCache(cacheKey);
 
-      // Process response
-      response = http.Response(cachedResponse, 200,
-        headers: {HttpHeaders.contentTypeHeader: contentTypeJson},    // Needed so content is decoded using utf-8
-        request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
-      );
-    }
+        // If cache is available
+        if (cachedResponseFile != null) {
+          // Read response from cached file
+          final cachedResponse = await cachedResponseFile.file.readAsString();
 
-    // If cache is unavailable
-    else {
+          // Process response
+          return http.Response(cachedResponse, 200,
+            headers: {HttpHeaders.contentTypeHeader: contentTypeJson}, // Needed so content is decoded using utf-8
+            request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
+          );
+        }
+      }
+
       // Check internet
       await throwIfNoInternet();
 
       // All in one Future to handle timeout
+      http.Response? response;
       try {
-        await (() async {
+        await(() async {
           //Send request
           final streamedResponse = await _client.send(request);
 
@@ -408,10 +413,11 @@ class ApiClient {
       try {
         _cacheManager.putFile(cacheKey, response!.bodyBytes);
         debugPrint('WS (˅) [CACHED $cacheKey]');
-      } catch(e, s) {
+      } catch (e, s) {
         reportError(e, s);
       }
-    }
+      return response;
+    } ();
 
     // Process response
     return _processResponse<T>(response!);
