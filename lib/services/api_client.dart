@@ -128,6 +128,7 @@ class ApiClient {
             "id": theater.id.encodedId,
             "from": _dateToString(mockedNow),
             "to": _dateToString(mockedNow.add(Duration(days: 8))),
+            "count": 50,
             "hasPreview": false,
             "order": [
               "PREVIEW",
