@@ -131,6 +131,7 @@ class ApiClient {
             "id": theater.id.encodedId,
             "from": _dateToString(mockedNow),
             "to": _dateToString(mockedNow.add(Duration(days: 8))),
+            "count": 50,
             "hasPreview": false,
             "order": [
               "PREVIEW",
@@ -145,8 +146,14 @@ class ApiClient {
       // Process response
       responseJson = responseJson!['data']!;
 
+      // Check data
+      final JsonObject moviesShowTimesDataJson = responseJson!['movieShowtimeList']!;
+      if (moviesShowTimesDataJson['pageInfo']['hasNextPage'] == true) {
+        reportError(UnimplementedError('MovieShowtimes has more results to be fetched'), StackTrace.current);
+      }
+
       // Get movie info
-      final JsonList moviesShowTimesJson = responseJson!['movieShowtimeList']['edges']!;
+      final JsonList moviesShowTimesJson = moviesShowTimesDataJson['edges']!;
       for (JsonObject movieShowTimesJson in moviesShowTimesJson) {
         movieShowTimesJson = movieShowTimesJson['node']!;
 
