@@ -9,6 +9,7 @@ import 'package:cinetime/utils/exceptions/detailed_exception.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -27,7 +28,7 @@ class ApiClient {
   static const _graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
 
   static const _timeOutDuration = Duration(seconds: 30);
-  static const contentTypeJson = 'application/json';
+  static const contentTypeJson = 'application/json; charset=utf-8';
 
   static const _logHeaders = false;
 
@@ -36,6 +37,10 @@ class ApiClient {
   );
 
   final http.Client _client;
+  final _cacheManager = CacheManager(Config(
+    'CtCache',
+    stalePeriod: const Duration(days: 1),
+  ));
   //#endregion
 
   //#region Requests
@@ -124,6 +129,7 @@ class ApiClient {
         responseJson = await _send<JsonObject>(
           _httpMethodGet,
           urls.elementAt(theaters.toList(growable: false).indexOf(theater) % urls.length),
+          useCache: useCache,
         );
       } else {
         responseJson = await _sendGraphQL<JsonObject>(
@@ -141,6 +147,7 @@ class ApiClient {
             ],
             "country": "FRANCE"
           },
+          useCache: useCache,
         );
       }
 
@@ -315,8 +322,21 @@ class ApiClient {
   /// Return the path part of an url
   static String? _getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
 
+  /// Build a unique key based on the request, used for cache.
+  static String _getCacheKeyFromRequest(http.Request request) {
+    // If it's a GraphQL request
+    if (request.url.toString() == _graphUrl) {
+      return request.body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
+    }
+
+    // If it's a classic request
+    else {
+      return request.url.toString();
+    }
+  }
+
   /// Send a graphQL request
-  Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
+  Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true}) async {
     // Headers
     const headers = const {
       'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1' + 'MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x' + '6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
@@ -331,11 +351,11 @@ class ApiClient {
     };
 
     // Send request
-    return await _send(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body);
+    return await _send(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
   }
 
   /// Send a classic request
-  Future<T?> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody}) async {
+  Future<T?> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = true}) async {
     // Create request
     final request = http.Request(method, Uri.parse(url));
 
@@ -355,30 +375,62 @@ class ApiClient {
       request.body = stringBody;
 
     // Send request
-    return await _sendRequest<T>(request);
+    return await _sendRequest<T>(request, useCache: useCache);
   }
 
   /// Send a generic request
-  Future<T?> _sendRequest<T>(http.BaseRequest request) async {
-    // Check internet
-    await throwIfNoInternet();
-
+  Future<T?> _sendRequest<T>(http.Request request, {bool useCache = true}) async {
     // Log
     _log(request: request);
 
-    // All in one Future to handle timeout
-    http.Response? response;
-    try {
-      await (() async {
-        //Send request
-        final streamedResponse = await _client.send(request);
+    // Get response
+    final response = await () async {
+      final cacheKey = _getCacheKeyFromRequest(request);
 
-        //Wait for the full response
-        response = await http.Response.fromStream(streamedResponse);
-      }()).timeout(_timeOutDuration);
-    } on TimeoutException {
-      throw ConnectivityException(ConnectivityExceptionType.timeout);
-    }
+      // If we can use cache
+      if (useCache) {
+        // Check cache
+        final cachedResponseFile = await _cacheManager.getFileFromCache(cacheKey);
+
+        // If cache is available
+        if (cachedResponseFile != null) {
+          // Read response from cached file
+          final cachedResponse = await cachedResponseFile.file.readAsString();
+
+          // Process response
+          return http.Response(cachedResponse, 200,
+            headers: {HttpHeaders.contentTypeHeader: contentTypeJson}, // Needed so content is decoded using utf-8
+            request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
+          );
+        }
+      }
+
+      // Check internet
+      await throwIfNoInternet();
+
+      // All in one Future to handle timeout
+      http.Response? response;
+      try {
+        await(() async {
+          //Send request
+          final streamedResponse = await _client.send(request);
+
+          //Wait for the full response
+          response = await http.Response.fromStream(streamedResponse);
+        }()).timeout(_timeOutDuration);
+      } on TimeoutException {
+        throw ConnectivityException(ConnectivityExceptionType.timeout);
+      }
+
+      // Store in cache
+      try {
+        _cacheManager.putFile(cacheKey, response!.bodyBytes);
+        debugPrint('WS (˅) [CACHED $cacheKey]');
+      } catch (e, s) {
+        reportError(e, s);
+      }
+      return response;
+    } ();
 
     // Process response
     return _processResponse<T>(response!);
@@ -476,7 +528,10 @@ class ApiClient {
   }
 
   static Future<void> throwIfNoInternet() async {
-    if (!(await isConnectedToInternet())) throw ConnectivityException(ConnectivityExceptionType.noInternet);
+    if (!(await isConnectedToInternet())) {
+      debugPrint('WS (✕) NO INTERNET');
+      throw ConnectivityException(ConnectivityExceptionType.noInternet);
+    }
   }
 
   static Future<bool> isConnectedToInternet() async {
