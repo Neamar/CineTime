@@ -118,6 +118,7 @@ class ApiClient {
           'https://gist.githubusercontent.com/Nico04/68c748a39f00e0180558673789cd5c40/raw/a7a548dd4e96060eaecefea892304b53ff0bacc0/showTimes1.json',
           'https://gist.githubusercontent.com/Nico04/81aa12b3c7078df19cbd32bb9b5b47cf/raw/7f08ed7153f685dd76c41fa0868f28ad28a0d522/showTimes2.json',
           'https://gist.githubusercontent.com/Nico04/d6886737ebe58291cd849bcf8119b73f/raw/60d0a79060c4a5f7f90a1ddc573e7440b43394e6/showTimes3.json',
+          'https://gist.githubusercontent.com/Nico04/d25fed26e00ba90704c5cd97b8d0fd2a/raw/ebd2633c46d70b3be37acec1fdc3f16ccaf91edb/showTimes4.json',
         ];
 
         responseJson = await _send<JsonObject>(
@@ -217,8 +218,10 @@ class ApiClient {
         final showTimes = showTimesJson!.map((showTimeJson) {
           return ShowTime(
             DateTime.tryParse(showTimeJson['startsAt']),
-            version: versionMap[showTimeJson['diffusionVersion']],
-            format: parseFormat(showTimeJson['projection']),
+            spec: ShowTimeSpec(
+              version: versionMap[showTimeJson['diffusionVersion']] ?? ShowVersion.original,
+              format: parseFormat(showTimeJson['projection']),
+            ),
           );
         }).toList();
 

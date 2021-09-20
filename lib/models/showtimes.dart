@@ -19,6 +19,36 @@ class MovieShowTimes {
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
 
+  List<ShowTimeSpec>? _showTimesSpecOptions;
+  List<ShowTimeSpec> get showTimesSpecOptions {
+    if (_showTimesSpecOptions == null) {
+      // Build options set
+      final options = <ShowTimeSpec>{};
+      for (final theaterShowTimes in theatersShowTimes) {
+        for (final showTime in theaterShowTimes.showTimes) {
+          options.add(showTime.spec);
+        }
+      }
+
+      // Sort list
+      final optionList = options.toList(growable: false);
+      optionList.sort((o1, o2) {
+        final s1 = o1.toString();
+        final s2 = o2.toString();
+
+        // Compare length first
+        final lengthComparison = s1.length.compareTo(s2.length);
+        if (lengthComparison != 0) return lengthComparison;
+
+        // Compare alpha
+        return s2.compareTo(s1);
+      });
+      _showTimesSpecOptions = optionList;
+    }
+    return _showTimesSpecOptions!;
+  }
+
+  // OPTI use basic cache system ?
   String toFullString() {
     final lines = <String?>[];
 
@@ -51,15 +81,17 @@ class MovieShowTimes {
   }
 }
 
+typedef FormattedShowTimes = SplayTreeMap<Date, List<ShowTime?>>;
+
 class TheaterShowTimes {
+  TheaterShowTimes(this.theater, { List<ShowTime>? showTimes }) :
+    this.showTimes = showTimes ?? <ShowTime>[];
+
   /// Theater data
   final Theater theater;
 
-  /// List of showtimes, sorted by date
+  /// Unfiltered list of showtimes, sorted by date
   final List<ShowTime> showTimes;
-
-  TheaterShowTimes(this.theater, { List<ShowTime>? showTimes }) :
-    this.showTimes = showTimes ?? <ShowTime>[];
 
   /// Simple cache for [showTimesSummary]
   String? _showTimesSummary;
@@ -95,50 +127,47 @@ class TheaterShowTimes {
     return _showTimesSummary;
   }
 
-  /// Simple cache for [formattedShowTimes]
-  SplayTreeMap<Date, List<ShowTime?>>? _showTimesMap;
-
   /// Formatted & sorted map of showtimes, where keys are the day.
   /// All showtimes elements in lists are aligned per time.
-  SplayTreeMap<Date, List<ShowTime?>>? get formattedShowTimes {
-    if (_showTimesMap == null) {
-      const aligned = true;
-      _showTimesMap = SplayTreeMap();
+  /// OPTI: Compute & store all FormattedShowTimes per filter value (low quantity) at object creation.
+  FormattedShowTimes getFormattedShowTimes(ShowTimeSpec filter) {
+    const aligned = true;
+    final filteredShowTimes = showTimes.where((showTime) => showTime.spec == filter).toList(growable: false);
+    final showTimesMap = FormattedShowTimes();
 
-      // Unaligned, simple version
-      if (!aligned) {
-        for (final showTime in showTimes) {
-          final date = showTime.dateTime!.toDate;
-          final st = _showTimesMap!.putIfAbsent(date, () => []);
-          st.add(showTime);
-        }
-      }
-
-      // Aligned version
-      else {
-        // List all unique times
-        final timesRef = showTimes
-            .map((st) => st.dateTime!.toTime)
-            .toSet()
-            .toList(growable: false)
-          ..sort();
-        final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
-
-        // Build map
-        for (final showTime in showTimes) {
-          final date = showTime.dateTime!.toDate;
-          final time = showTime.dateTime!.toTime;
-
-          // Get day list or create it
-          final showTimes = _showTimesMap!.putIfAbsent(date, () => List.filled(timesRef.length, null, growable: false));
-
-          // Insert showTime at right index
-          showTimes[timesRefMap[time]!] = showTime;
-        }
+    // Unaligned, simple version
+    if (!aligned) {
+      for (final showTime in filteredShowTimes) {
+        final date = showTime.dateTime!.toDate;
+        final st = showTimesMap.putIfAbsent(date, () => []);
+        st.add(showTime);
       }
     }
 
-    return _showTimesMap;
+    // Aligned version
+    else {
+      // List all unique times
+      final timesRef = filteredShowTimes
+          .map((st) => st.dateTime!.toTime)
+          .toSet()
+          .toList(growable: false)
+        ..sort();
+      final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
+
+      // Build map
+      for (final showTime in filteredShowTimes) {
+        final date = showTime.dateTime!.toDate;
+        final time = showTime.dateTime!.toTime;
+
+        // Get day list or create it
+        final showTimes = showTimesMap.putIfAbsent(date, () => List.filled(timesRef.length, null, growable: false));
+
+        // Insert showTime at right index
+        showTimes[timesRefMap[time]!] = showTime;
+      }
+    }
+
+    return showTimesMap;
   }
 
   TheaterShowTimes copyWith({List<ShowTime>? showTimes}) => TheaterShowTimes(
@@ -148,33 +177,58 @@ class TheaterShowTimes {
 }
 
 enum ShowVersion { original, dubbed, local }
-const _versionMap = {
-  ShowVersion.original: 'VO',
-  ShowVersion.dubbed: 'VF',
-  ShowVersion.local: 'VF',
-};
+extension ExtendedShowVersion on ShowVersion {
+  static const _versionMap = {
+    ShowVersion.original: 'VO',
+    ShowVersion.dubbed: 'VF',
+    ShowVersion.local: 'VF',
+  };
+
+  String toDisplayString() => _versionMap[this]!;
+}
 
 enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
-const _formatMap = {
-  ShowFormat.f2D: '2D',
-  ShowFormat.f3D: '3D',
-  ShowFormat.IMAX: 'IMAX',
-  ShowFormat.IMAX_3D: 'IMAX 3D',
-};
+extension ExtendedShowFormat on ShowFormat {
+  static const _formatMap = {
+    ShowFormat.f2D: '',
+    ShowFormat.f3D: '3D',
+    ShowFormat.IMAX: 'IMAX',
+    ShowFormat.IMAX_3D: 'IMAX 3D',
+  };
+
+  String toDisplayString() => _formatMap[this]!;
+}
 
 class ShowTime {
-  const ShowTime(this.dateTime, {
-    required this.version,
-    this.format = ShowFormat.f2D,
-  });
+  const ShowTime(this.dateTime, {required this.spec});
 
   /// Date and Time
   final DateTime? dateTime;
 
-  /// Specs
-  final ShowVersion? version;
+  /// Spec
+  final ShowTimeSpec spec;
+}
+
+class ShowTimeSpec {
+  const ShowTimeSpec({
+    this.version = ShowVersion.original,
+    this.format = ShowFormat.f2D,
+  });
+
+  final ShowVersion version;
   final ShowFormat format;
 
-  String? get versionDisplay => _versionMap[version];
-  String get formatDisplay => _formatMap[format] ?? '';
+  @override
+  String toString() => version.toDisplayString() + (format != ShowFormat.f2D ? ' ${format.toDisplayString()}' : '');
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is ShowTimeSpec &&
+          runtimeType == other.runtimeType &&
+          version == other.version &&
+          format == other.format;
+
+  @override
+  int get hashCode => version.hashCode ^ format.hashCode;
 }

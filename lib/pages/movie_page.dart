@@ -8,14 +8,23 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class MoviePage extends StatelessWidget {
+class MoviePage extends StatefulWidget {
   const MoviePage(this.movieShowTimes);
-  
+
   final MovieShowTimes movieShowTimes;
+
+  @override
+  State<MoviePage> createState() => _MoviePageState();
+}
+
+class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, MoviePageBloc> {
+  @override
+  initBloc() => MoviePageBloc(widget.movieShowTimes);
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +36,9 @@ class MoviePage extends StatelessWidget {
         slivers: <Widget>[
           ScalingHeader(
             backgroundColor: Colors.red,
-            title: Text(movieShowTimes.movie.title),
+            title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
-              path: movieShowTimes.movie.poster,
+              path: widget.movieShowTimes.movie.poster,
               onPressed: () => _openPoster(context),
               isThumbnail: false,
               applyDarken: true,
@@ -57,8 +66,8 @@ class MoviePage extends StatelessWidget {
                         )
                       ],
                     ),
-                    onPressed: movieShowTimes.movie.trailerId != null
-                        ? () => navigateTo(context, (_) => TrailerPage(movieShowTimes.movie.trailerId!))
+                    onPressed: widget.movieShowTimes.movie.trailerId != null
+                        ? () => navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!))
                         : null,
                   ),
                   TextButton(
@@ -76,7 +85,7 @@ class MoviePage extends StatelessWidget {
                         )
                       ],
                     ),
-                    onPressed: () => launch(ApiClient.getMovieUrl(movieShowTimes.movie.id)),
+                    onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
                   )
                 ],
               ),
@@ -105,7 +114,7 @@ class MoviePage extends StatelessWidget {
                               child: GestureDetector(
                                 onTap: () => _openPoster(context),
                                 child: CtCachedImage(
-                                  path: movieShowTimes.movie.poster,
+                                  path: widget.movieShowTimes.movie.poster,
                                   isThumbnail: true,
                                 ),
                               ),
@@ -117,36 +126,36 @@ class MoviePage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: <Widget>[
                                 Text(
-                                  movieShowTimes.movie.title,
+                                  widget.movieShowTimes.movie.title,
                                   style: Theme.of(context).textTheme.headline6,
                                 ),
-                                if (movieShowTimes.movie.directors != null)
+                                if (widget.movieShowTimes.movie.directors != null)
                                   TextWithLabel(
                                     label: 'De',
-                                    text: movieShowTimes.movie.directors!,
+                                    text: widget.movieShowTimes.movie.directors!,
                                   ),
-                                if (movieShowTimes.movie.actors != null)
+                                if (widget.movieShowTimes.movie.actors != null)
                                   TextWithLabel(
                                     label: 'Avec',
-                                    text: movieShowTimes.movie.actors!,
+                                    text: widget.movieShowTimes.movie.actors!,
                                   ),
-                                if (movieShowTimes.movie.genres != null)
+                                if (widget.movieShowTimes.movie.genres != null)
                                   TextWithLabel(
                                     label: 'Genre',
-                                    text: movieShowTimes.movie.genres!,
+                                    text: widget.movieShowTimes.movie.genres!,
                                   ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
-                                    if (movieShowTimes.movie.releaseDate != null)
+                                    if (widget.movieShowTimes.movie.releaseDate != null)
                                       TextWithLabel(
                                         label: 'Sortie',
-                                        text: movieShowTimes.movie.releaseDateDisplay!,
+                                        text: widget.movieShowTimes.movie.releaseDateDisplay!,
                                       ),
-                                    if (movieShowTimes.movie.duration != null)
+                                    if (widget.movieShowTimes.movie.duration != null)
                                       TextWithLabel(
                                         label: 'Durée',
-                                        text: movieShowTimes.movie.duration!,
+                                        text: widget.movieShowTimes.movie.duration!,
                                       ),
                                   ],
                                 ),
@@ -161,17 +170,17 @@ class MoviePage extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
-                          if (movieShowTimes.movie.pressRating != null)
-                            _buildRatingWidget('Presse', movieShowTimes.movie.pressRating!),
-                          if (movieShowTimes.movie.userRating != null)
-                            _buildRatingWidget('Spectateur', movieShowTimes.movie.userRating!),
+                          if (widget.movieShowTimes.movie.pressRating != null)
+                            _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
+                          if (widget.movieShowTimes.movie.userRating != null)
+                            _buildRatingWidget('Spectateur', widget.movieShowTimes.movie.userRating!),
                         ],
                       ),
 
                       // Synopsis
                       AppResources.spacerMedium,
                       SynopsisWidget(
-                        movieId: movieShowTimes.movie.id,
+                        movieId: widget.movieShowTimes.movie.id,
                       ),
 
                     ],
@@ -180,64 +189,92 @@ class MoviePage extends StatelessWidget {
 
                 // Show times
                 AppResources.spacerMedium,
-                Material(
-                  color: Color(0xFFEFEFEF),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
+                BehaviorSubjectBuilder<ShowTimeSpec>(
+                  subject: bloc.selectedSpec,
+                  builder: (context, snapshot) {
+                    final filter = snapshot.data!;
+                    return Material(
+                      color: const Color(0xFFEFEFEF),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
 
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
-                        child: Row(
-                          children: <Widget>[
+                          // Header
+                          Padding(
+                            padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
+                            child: Row(
+                              children: <Widget>[
 
-                            // Title
-                            Text(
-                              'Séances',
-                              style: Theme.of(context).textTheme.headline6,
-                            ),
-                            Spacer(),
-
-                            // Share Button
-                            Tooltip(
-                              child: IconButton(
-                                icon: FaIcon(FontAwesomeIcons.shareAlt),
-                                onPressed: () => Share.share(movieShowTimes.toFullString()),
-                              ),
-                              message: 'Partager les séances',
-                            ),
-
-                            // TODO add to calendar
-
-                          ],
-                        ),
-                      ),
-
-
-                      // Content
-                      ...movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
-                        return FadingEdgeScrollView.fromSingleChildScrollView(
-                          gradientFractionOnEnd: 0.2,
-                          child: SingleChildScrollView(
-                            controller: ScrollController(),
-                            scrollDirection: Axis.horizontal,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
-                                child: TheaterShowTimesWidget(
-                                  theaterShowTimes: theaterShowTimes,
+                                // Title
+                                Text(
+                                  'Séances',
+                                  style: Theme.of(context).textTheme.headline6,
                                 ),
-                              ),
+
+                                // Filters
+                                AppResources.spacerSmall,
+                                Expanded(
+                                  child: Center(
+                                    child: IntrinsicWidth(
+                                      child: FadingEdgeScrollView.fromSingleChildScrollView(
+                                        // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
+                                        gradientFractionOnEnd: 0.5,
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+                                          child: _TagFilterSelector(
+                                            options: widget.movieShowTimes.showTimesSpecOptions,
+                                            selected: filter,
+                                            onChanged: bloc.selectedSpec.add,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Share Button
+                                AppResources.spacerSmall,
+                                Tooltip(
+                                  child: IconButton(
+                                    icon: FaIcon(FontAwesomeIcons.shareAlt),
+                                    onPressed: () => Share.share(widget.movieShowTimes.toFullString()),
+                                  ),
+                                  message: 'Partager les séances',
+                                ),
+
+                              ],
                             ),
                           ),
-                        );
-                      }).toList(growable: false),
-                      AppResources.spacerMedium,
 
-                    ],
-                  ),
+
+                          // Content
+                          ...widget.movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
+                            return FadingEdgeScrollView.fromSingleChildScrollView(
+                              gradientFractionOnEnd: 0.2,
+                              child: SingleChildScrollView(
+                                controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
+                                    child: TheaterShowTimesWidget(
+                                      theaterName: theaterShowTimes.theater.name,
+                                      formattedShowTimes: theaterShowTimes.getFormattedShowTimes(filter),
+                                      filterName: filter.toString(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(growable: false),
+                          AppResources.spacerMedium,
+
+                        ],
+                      ),
+                    );
+                  }
                 ),
               ],
             ),
@@ -278,7 +315,7 @@ class MoviePage extends StatelessWidget {
     );
   }
 
-  void _openPoster(BuildContext context) => navigateTo(context, (_) => PosterPage(movieShowTimes.movie.poster));
+  void _openPoster(BuildContext context) => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
 }
 
 class SynopsisWidget extends StatelessWidget {
@@ -334,10 +371,44 @@ class SynopsisWidget extends StatelessWidget {
   }
 }
 
-class TheaterShowTimesWidget extends StatelessWidget {
-  const TheaterShowTimesWidget({Key? key, required this.theaterShowTimes}) : super(key: key);
+class _TagFilterSelector extends StatelessWidget {
+  const _TagFilterSelector({Key? key, required this.options, required this.selected, this.onChanged}) : super(key: key);
 
-  final TheaterShowTimes theaterShowTimes;
+  final List<ShowTimeSpec> options;
+  final ShowTimeSpec selected;
+  final ValueChanged<ShowTimeSpec>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return ToggleButtons(
+      isSelected: options.map((option) => option == selected).toList(growable: false),
+      constraints: BoxConstraints(minHeight: 0, minWidth: 0),
+      borderRadius: BorderRadius.circular(5),
+      onPressed: (int index) {
+        final tapped = options[index];
+        if (tapped != selected) onChanged?.call(tapped);
+      },
+      children: options.map((option) {
+        return Padding(
+          padding: const EdgeInsets.all(5),
+          child: Text(option.toString()),
+        );
+      }).toList(growable: false),
+    );
+  }
+}
+
+class TheaterShowTimesWidget extends StatelessWidget {
+  const TheaterShowTimesWidget({
+    Key? key,
+    required this.theaterName,
+    required this.formattedShowTimes,
+    required this.filterName,
+  }) : super(key: key);
+
+  final String theaterName;
+  final FormattedShowTimes formattedShowTimes;
+  final String filterName;
 
   @override
   Widget build(BuildContext context) {
@@ -350,16 +421,19 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
             // Theater name
             Text(
-              theaterShowTimes.theater.name,
+              theaterName,
               style: Theme.of(context).textTheme.headline6,
             ),
 
             // Showtimes
-            Row(
-              children: theaterShowTimes.formattedShowTimes!.keys.map<Widget>((day) => _buildDaySection(
-                context, day, theaterShowTimes.formattedShowTimes![day]!,
-              )).toList()..insertBetween(AppResources.spacerSmall),
-            ),
+            if (formattedShowTimes.isNotEmpty)
+              Row(
+                children: formattedShowTimes.keys.map<Widget>((day) => _buildDaySection(
+                  context, day, formattedShowTimes[day]!,
+                )).toList()..insertBetween(AppResources.spacerSmall),
+              )
+            else
+              Text('Aucune séance en $filterName'),
           ]..insertBetween(AppResources.spacerSmall),
         ),
       ),
@@ -377,29 +451,26 @@ class TheaterShowTimesWidget extends StatelessWidget {
         // Times
         AppResources.spacerSmall,
         ...showtimes.map<Widget>((showtime) {
-          return Row(
-            children: [
-              // Time
-              Text(
-                showtime?.dateTime?.toTime.toString() ?? '-',
-              ),
-
-              // Tag
-              if (showtime != null && showtime.version != null)
-                TinyChip(
-                  label: showtime.versionDisplay!,
-                ),
-
-              if (showtime != null && showtime.format != ShowFormat.f2D)
-                TinyChip(
-                  label: showtime.formatDisplay,
-                ),
-
-            ],
+          return Text(
+            showtime?.dateTime?.toTime.toString() ?? '-',
           );
         }).toList()..insertBetween(AppResources.spacerExtraTiny),
 
       ],
     );
+  }
+}
+
+
+class MoviePageBloc with Disposable {
+  MoviePageBloc(MovieShowTimes movieShowTimes) :
+    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first);
+
+  final BehaviorSubject<ShowTimeSpec> selectedSpec;
+
+  @override
+  void dispose() {
+    selectedSpec.close();
+    super.dispose();
   }
 }
