@@ -143,8 +143,14 @@ class ApiClient {
       // Process response
       responseJson = responseJson!['data']!;
 
+      // Check data
+      final JsonObject moviesShowTimesDataJson = responseJson!['movieShowtimeList']!;
+      if (moviesShowTimesDataJson['pageInfo']['hasNextPage'] == true) {
+        reportError(UnimplementedError('MovieShowtimes has more results to be fetched'), StackTrace.current);
+      }
+
       // Get movie info
-      final JsonList moviesShowTimesJson = responseJson!['movieShowtimeList']['edges']!;
+      final JsonList moviesShowTimesJson = moviesShowTimesDataJson['edges']!;
       for (JsonObject movieShowTimesJson in moviesShowTimesJson) {
         movieShowTimesJson = movieShowTimesJson['node']!;
 
