@@ -321,7 +321,7 @@ class ApiClient {
   }
 
   /// Send a graphQL request
-  Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
+  Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true}) async {
     // Headers
     const headers = const {
       'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1' + 'MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x' + '6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
@@ -336,11 +336,11 @@ class ApiClient {
     };
 
     // Send request
-    return await _send(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body);
+    return await _send(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
   }
 
   /// Send a classic request
-  Future<T?> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody}) async {
+  Future<T?> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = true}) async {
     // Create request
     final request = http.Request(method, Uri.parse(url));
 
@@ -360,11 +360,11 @@ class ApiClient {
       request.body = stringBody;
 
     // Send request
-    return await _sendRequest<T>(request);
+    return await _sendRequest<T>(request, useCache: useCache);
   }
 
   /// Send a generic request
-  Future<T?> _sendRequest<T>(http.Request request) async {
+  Future<T?> _sendRequest<T>(http.Request request, {bool useCache = true}) async {
     http.Response? response;
 
     // Log
@@ -381,7 +381,7 @@ class ApiClient {
 
       // Process response
       response = http.Response(cachedResponse, 200,
-        //headers: {HttpHeaders.contentTypeHeader: contentTypeJson},
+        headers: {HttpHeaders.contentTypeHeader: contentTypeJson},    // Needed so content is decoded using utf-8
         request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
       );
     }
@@ -581,37 +581,5 @@ class HttpResponseException extends DetailedException {
   static String _buildMessage(http.Response response, JsonObject? responseJson) {
     final errorMessage = responseJson?.elementAt('error');    // May be a String, or a more complex json
     return 'Erreur ${response.statusCode}' + (errorMessage != null && errorMessage is String ? ' : $errorMessage' : '');
-  }
-}
-
-class CtCacheManager extends CacheManager {
-  static const _key = "CtCache";
-
-  static CtCacheManager? _instance;
-
-  factory CtCacheManager() {
-    _instance ??= CtCacheManager._();
-    return _instance!;
-  }
-
-  CtCacheManager._() : super(Config(
-    _key,
-    stalePeriod: const Duration(days: 1),
-  ));
-
-  @override
-  Future<FileInfo?> getFileFromCache(String url, {bool ignoreMemCache = false}) async {
-    debugPrint('WS.cache (?) [$url]');
-    final fileInfo = await super.getFileFromCache(url, ignoreMemCache: ignoreMemCache);
-    debugPrint('WS.cache (${fileInfo != null ? '✓' : '☓'}) [$url]');
-    return fileInfo;
-  }
-
-  @override
-  Future<FileInfo> downloadFile(String url, {String? key, Map<String, String>? authHeaders, bool force = false}) async {
-    debugPrint('WS.server (?) [$url]');
-    final fileInfo = await super.downloadFile(url, key: key, authHeaders: authHeaders, force: force);
-    debugPrint('WS.server (✓) [$url]');
-    return fileInfo;
   }
 }
