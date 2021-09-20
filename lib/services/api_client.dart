@@ -9,6 +9,7 @@ import 'package:cinetime/utils/exceptions/detailed_exception.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -26,13 +27,17 @@ class ApiClient {
   static const _graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
 
   static const _timeOutDuration = Duration(seconds: 30);
-  static const contentTypeJson = 'application/json';
+  static const contentTypeJson = 'application/json; charset=utf-8';
 
   static const _logHeaders = false;
 
   ApiClient() : _client = http.Client();
 
   final http.Client _client;
+  final _cacheManager = CacheManager(Config(
+    'CtCache',
+    stalePeriod: const Duration(days: 1),
+  ));
   //#endregion
 
   //#region Requests
@@ -302,6 +307,19 @@ class ApiClient {
   /// Return the path part of an url
   static String? _getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
 
+  /// Build a unique key based on the request, used for cache.
+  static String _getCacheKeyFromRequest(http.Request request) {
+    // If it's a GraphQL request
+    if (request.url.toString() == _graphUrl) {
+      return request.body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
+    }
+
+    // If it's a classic request
+    else {
+      return request.url.toString();
+    }
+  }
+
   /// Send a graphQL request
   Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
     // Headers
@@ -346,25 +364,53 @@ class ApiClient {
   }
 
   /// Send a generic request
-  Future<T?> _sendRequest<T>(http.BaseRequest request) async {
-    // Check internet
-    await throwIfNoInternet();
+  Future<T?> _sendRequest<T>(http.Request request) async {
+    http.Response? response;
 
     // Log
     _log(request: request);
 
-    // All in one Future to handle timeout
-    http.Response? response;
-    try {
-      await (() async {
-        //Send request
-        final streamedResponse = await _client.send(request);
+    // Check cache
+    final cacheKey = _getCacheKeyFromRequest(request);
+    final cachedResponseFile = await _cacheManager.getFileFromCache(cacheKey);
 
-        //Wait for the full response
-        response = await http.Response.fromStream(streamedResponse);
-      }()).timeout(_timeOutDuration);
-    } on TimeoutException {
-      throw ConnectivityException(ConnectivityExceptionType.timeout);
+    // If cache is available
+    if (cachedResponseFile != null) {
+      // Read response from cached file
+      final cachedResponse = await cachedResponseFile.file.readAsString();
+
+      // Process response
+      response = http.Response(cachedResponse, 200,
+        //headers: {HttpHeaders.contentTypeHeader: contentTypeJson},
+        request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
+      );
+    }
+
+    // If cache is unavailable
+    else {
+      // Check internet
+      await throwIfNoInternet();
+
+      // All in one Future to handle timeout
+      try {
+        await (() async {
+          //Send request
+          final streamedResponse = await _client.send(request);
+
+          //Wait for the full response
+          response = await http.Response.fromStream(streamedResponse);
+        }()).timeout(_timeOutDuration);
+      } on TimeoutException {
+        throw ConnectivityException(ConnectivityExceptionType.timeout);
+      }
+
+      // Store in cache
+      try {
+        _cacheManager.putFile(cacheKey, response!.bodyBytes);
+        debugPrint('WS (˅) [CACHED $cacheKey]');
+      } catch(e, s) {
+        reportError(e, s);
+      }
     }
 
     // Process response
@@ -463,7 +509,10 @@ class ApiClient {
   }
 
   static Future<void> throwIfNoInternet() async {
-    if (!(await isConnectedToInternet())) throw ConnectivityException(ConnectivityExceptionType.noInternet);
+    if (!(await isConnectedToInternet())) {
+      debugPrint('WS (✕) NO INTERNET');
+      throw ConnectivityException(ConnectivityExceptionType.noInternet);
+    }
   }
 
   static Future<bool> isConnectedToInternet() async {
@@ -532,5 +581,37 @@ class HttpResponseException extends DetailedException {
   static String _buildMessage(http.Response response, JsonObject? responseJson) {
     final errorMessage = responseJson?.elementAt('error');    // May be a String, or a more complex json
     return 'Erreur ${response.statusCode}' + (errorMessage != null && errorMessage is String ? ' : $errorMessage' : '');
+  }
+}
+
+class CtCacheManager extends CacheManager {
+  static const _key = "CtCache";
+
+  static CtCacheManager? _instance;
+
+  factory CtCacheManager() {
+    _instance ??= CtCacheManager._();
+    return _instance!;
+  }
+
+  CtCacheManager._() : super(Config(
+    _key,
+    stalePeriod: const Duration(days: 1),
+  ));
+
+  @override
+  Future<FileInfo?> getFileFromCache(String url, {bool ignoreMemCache = false}) async {
+    debugPrint('WS.cache (?) [$url]');
+    final fileInfo = await super.getFileFromCache(url, ignoreMemCache: ignoreMemCache);
+    debugPrint('WS.cache (${fileInfo != null ? '✓' : '☓'}) [$url]');
+    return fileInfo;
+  }
+
+  @override
+  Future<FileInfo> downloadFile(String url, {String? key, Map<String, String>? authHeaders, bool force = false}) async {
+    debugPrint('WS.server (?) [$url]');
+    final fileInfo = await super.downloadFile(url, key: key, authHeaders: authHeaders, force: force);
+    debugPrint('WS.server (✓) [$url]');
+    return fileInfo;
   }
 }
