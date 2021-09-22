@@ -31,6 +31,8 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
     const double contentPadding = 16;
     const double overlapContentHeight = 50;
 
+    final hasTrailer = widget.movieShowTimes.movie.trailerId != null;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
@@ -57,16 +59,16 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                       children: <Widget>[
                         FaIcon(
                           FontAwesomeIcons.video,
-                          color: Colors.white,
+                          color: hasTrailer ? Colors.white : Colors.black26,
                         ),
                         SizedBox(width: 8.0),
                         Text(
                           'Bande annonce',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: hasTrailer ? Colors.white : Colors.black26),
                         )
                       ],
                     ),
-                    onPressed: widget.movieShowTimes.movie.trailerId != null
+                    onPressed: hasTrailer
                         ? () => navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!))
                         : null,
                   ),

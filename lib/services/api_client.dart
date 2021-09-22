@@ -175,7 +175,7 @@ class ApiClient {
           JsonList genresJson = movieJson['genres'] ?? [];
           String? posterUrl = movieJson['poster']?['url'];
           JsonList videosJson = movieJson['videos'] ?? [];
-          String trailerId = videosJson.firstOrNull?['id'];
+          String? trailerId = videosJson.firstOrNull?['id'];
           JsonObject statisticsJson = movieJson['stats'] ?? {};
 
           String? personsFromJson(JsonList? personsJson) {
@@ -196,7 +196,7 @@ class ApiClient {
             durationApi: movieJson['runTime'],
             genresApi: genresJson,
             poster: _getPathFromUrl(posterUrl),
-            trailerId: isStringNullOrEmpty(trailerId) ? null : ApiId.fromEncoded(trailerId),
+            trailerId: isStringNullOrEmpty(trailerId) ? null : ApiId.fromEncoded(trailerId!),
             pressRating: (statisticsJson['pressReview']?['score'] as num?)?.toDouble(),
             userRating: (statisticsJson['userRating']?['score'] as num?)?.toDouble(),
           );
