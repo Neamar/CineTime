@@ -272,7 +272,10 @@ class ApiClient {
     }
 
     // Return result
-    final String synopsis = responseJson!['data']!['movie']!['synopsis'];
+    final String? synopsis = responseJson?['data']?['movie']?['synopsis'];
+    if (synopsis == null) return '\nAucun synopsis\n';
+
+    // Return cleaned data
     return convertBasicHtmlTags(synopsis);
   }
 
