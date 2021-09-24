@@ -201,7 +201,6 @@ class MoviesPageBloc with Disposable {
 
     // Fetch data
     try {
-      //TODO handle cache
       _theatersShowTimes = await AppService.api.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
     } catch (e, s) {
       reportError(e, s); // Do not await
