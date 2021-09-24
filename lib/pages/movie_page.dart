@@ -454,7 +454,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
         AppResources.spacerSmall,
         ...showtimes.map<Widget>((showtime) {
           return Text(
-            showtime?.dateTime?.toTime.toString() ?? '-',
+            showtime?.dateTime.toTime.toString() ?? '-',
           );
         }).toList()..insertBetween(AppResources.spacerExtraTiny),
 
