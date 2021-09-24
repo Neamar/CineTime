@@ -57,9 +57,6 @@ class App extends StatelessWidget {
         primarySwatch: Colors.red,
       ),
       navigatorKey: _navigatorKey,
-      navigatorObservers: [
-        SentryNavigatorObserver(),    // Track navigation events
-      ],
       home: FavoriteTheatersHandler.instance!.theaters.isEmpty
         ? TheatersPage()
         : MoviesPage(),
