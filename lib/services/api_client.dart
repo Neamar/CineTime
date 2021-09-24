@@ -105,7 +105,7 @@ class ApiClient {
         zipCode: address?['zip'],
         city: address?['city'],
         poster: _getPathFromUrl(posterUrl),
-        distance: theaterJson['coordinates']?['distance'],
+        distance: theaterJson['coordinates']?['distance']?.toDouble(),
       );
     }).toList(growable: false);
   }
