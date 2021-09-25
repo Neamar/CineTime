@@ -5,7 +5,6 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
-import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:cinetime/widgets/_widgets.dart';
@@ -201,11 +200,11 @@ class MoviesPageBloc with Disposable {
 
     // Fetch data
     try {
-      //TODO handle cache
       _theatersShowTimes = await AppService.api.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
     } catch (e, s) {
       reportError(e, s); // Do not await
-      moviesShowTimes.addError(e);
+      if (!moviesShowTimes.isClosed)
+        moviesShowTimes.addError(e);
       return;
     } finally {
       _useCacheOnNextFetch = false;
@@ -222,7 +221,7 @@ class MoviesPageBloc with Disposable {
     displayList.sort((mst1, mst2) => (mst2.movie.userRating ?? 0).compareTo(mst1.movie.userRating ?? 0));
 
     // ---- Update UI ----
-    moviesShowTimes.add(displayList);
+    moviesShowTimes.tryAdd(displayList);
   }
 
   @override
