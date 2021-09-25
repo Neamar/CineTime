@@ -430,9 +430,16 @@ class TheaterShowTimesWidget extends StatelessWidget {
             // Showtimes
             if (formattedShowTimes.isNotEmpty)
               Row(
-                children: formattedShowTimes.keys.map<Widget>((day) => _buildDaySection(
-                  context, day, formattedShowTimes[day]!,
-                )).toList()..insertBetween(AppResources.spacerSmall),
+                children: formattedShowTimes.keys.mapIndexed<Widget>((index, day) {
+                  return _DayShowTimes(
+                    day: day,
+                    showtimes: formattedShowTimes[day]!,
+                    backgroundColor: () {
+                      if (day == ApiClient.mockedNow.toDate) return Colors.redAccent;
+                      if (index.isEven) return Colors.black12;
+                    } (),
+                  );
+                }).toList()..insertBetween(AppResources.spacerTiny),
               )
             else
               Text('Aucune séance en $filterName'),
@@ -441,24 +448,48 @@ class TheaterShowTimesWidget extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildDaySection(BuildContext context, Date day, List<ShowTime?> showtimes) {
-    return Column(
-      children: [
-        // Day
-        Text(
-          day.toWeekdayString(withDay: true)!,
-        ),
+class _DayShowTimes extends StatelessWidget {
+  const _DayShowTimes({Key? key, required this.day, required this.showtimes, this.backgroundColor}) : super(key: key);
 
-        // Times
-        AppResources.spacerSmall,
-        ...showtimes.map<Widget>((showtime) {
-          return Text(
-            showtime?.dateTime?.toTime.toString() ?? '-',
-          );
-        }).toList()..insertBetween(AppResources.spacerExtraTiny),
+  final Date day;
+  final List<ShowTime?> showtimes;
+  final Color? backgroundColor;
 
-      ],
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.all(6),
+      child: Column(
+        children: [
+          // Week day
+          Text(
+            day.toWeekdayString(),
+            style: Theme.of(context).textTheme.subtitle1,
+          ),
+
+          // Day
+          AppResources.spacerTiny,
+          Text(
+            day.day.toString(),
+            style: Theme.of(context).textTheme.headline6,
+          ),
+
+          // Times
+          AppResources.spacerSmall,
+          ...showtimes.map<Widget>((showtime) {
+            return Text(
+              showtime?.dateTime?.toTime.toString() ?? '-',
+            );
+          }).toList()..insertBetween(AppResources.spacerExtraTiny),
+
+        ],
+      ),
     );
   }
 }
