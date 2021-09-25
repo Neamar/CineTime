@@ -22,14 +22,25 @@ const _httpMethodPost = 'POST';
 
 class ApiClient {
   //#region Vars
+  /// Whether to use mocks or not
   static const useMocks = !kReleaseMode;
+
+  /// Mocked [DateTime.now()], to be consistent with mocked data
   static DateTime get mockedNow => useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
 
+  /// API url
   static const _graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
 
+  /// Shows started for more than this duration are filtered out.
+  static const _maxStartedShowtimeDuration = Duration(hours: 1);
+
+  /// Request timeout duration
   static const _timeOutDuration = Duration(seconds: 30);
+
+  /// Json mime type
   static const contentTypeJson = 'application/json; charset=utf-8';
 
+  /// Whether to log headers also or not.
   static const _logHeaders = false;
 
   ApiClient() : _client = SentryHttpClient(
@@ -167,6 +178,42 @@ class ApiClient {
       for (JsonObject movieShowTimesJson in moviesShowTimesJson) {
         movieShowTimesJson = movieShowTimesJson['node']!;
 
+        // Build ShowTimes
+        final JsonList? showTimesJson = movieShowTimesJson['showtimes'];
+        if (isIterableNullOrEmpty(showTimesJson))
+          continue;
+
+        const versionMap = {
+          'ORIGINAL': ShowVersion.original,
+          'DUBBED': ShowVersion.dubbed,
+          'LOCAL': ShowVersion.local,
+        };
+        ShowFormat parseFormat(JsonList? json) {
+          if (isIterableNullOrEmpty(json)) return ShowFormat.f2D;
+          final flat = json!.join('|');
+          if (flat.contains('IMAX'))
+            return flat.contains('3D') ? ShowFormat.IMAX_3D : ShowFormat.IMAX;
+          if (flat.contains('3D'))
+            return ShowFormat.f3D;
+          return ShowFormat.f2D;
+        }
+
+        final showTimes = showTimesJson!.map((showTimeJson) {
+          return ShowTime(
+            DateTime.parse(showTimeJson['startsAt']),
+            spec: ShowTimeSpec(
+              version: versionMap[showTimeJson['diffusionVersion']] ?? ShowVersion.original,
+              format: parseFormat(showTimeJson['projection']),
+            ),
+          );
+        }).toList();
+
+        // Filter passed shows
+        showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(mockedNow));
+
+        // Skip this movie if there are no valid show time
+        if (showTimes.isEmpty) continue;
+
         // Build Movie info
         JsonObject movieJson = movieShowTimesJson['movie']!;
         final String movieId = movieJson['id'];
@@ -204,36 +251,6 @@ class ApiClient {
           );
         }
 
-        // Build ShowTimes
-        final JsonList? showTimesJson = movieShowTimesJson['showtimes'];
-        if (isIterableNullOrEmpty(showTimesJson))
-          continue;
-
-        const versionMap = {
-          'ORIGINAL': ShowVersion.original,
-          'DUBBED': ShowVersion.dubbed,
-          'LOCAL': ShowVersion.local,
-        };
-        ShowFormat parseFormat(JsonList? json) {
-          if (isIterableNullOrEmpty(json)) return ShowFormat.f2D;
-          final flat = json!.join('|');
-          if (flat.contains('IMAX'))
-            return flat.contains('3D') ? ShowFormat.IMAX_3D : ShowFormat.IMAX;
-          if (flat.contains('3D'))
-            return ShowFormat.f3D;
-          return ShowFormat.f2D;
-        }
-
-        final showTimes = showTimesJson!.map((showTimeJson) {
-          return ShowTime(
-            DateTime.tryParse(showTimeJson['startsAt']),
-            spec: ShowTimeSpec(
-              version: versionMap[showTimeJson['diffusionVersion']] ?? ShowVersion.original,
-              format: parseFormat(showTimeJson['projection']),
-            ),
-          );
-        }).toList();
-
         // Get or create MovieShowTimes
         final movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie!));
 
@@ -249,7 +266,7 @@ class ApiClient {
 
     // Return data
     return MoviesShowTimes(
-      fetchedAt: DateTime.now(),  // TODO save this value to shared pref and restore it ?
+      fetchedAt: mockedNow,  // TODO save this value to shared pref and restore it ?
       fromCache: false,   // TODO remove that field
       moviesShowTimes: moviesShowTimesMap.values.toList(growable: false),
     );

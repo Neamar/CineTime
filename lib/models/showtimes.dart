@@ -107,8 +107,7 @@ class TheaterShowTimes {
 
       // Get all date with a show, from [now], without duplicates, sorted.
       final daysWithShow = showTimes
-        .where((s) => s.dateTime!.isAfter(now))     //TODO use https://github.com/jogboms/time.dart (for all project)
-        .map((s) => s.dateTime!.toDate)
+        .map((s) => s.dateTime.toDate)
         .toSet()
         .toList(growable: false)
       ..sort();
@@ -138,7 +137,7 @@ class TheaterShowTimes {
     // Unaligned, simple version
     if (!aligned) {
       for (final showTime in filteredShowTimes) {
-        final date = showTime.dateTime!.toDate;
+        final date = showTime.dateTime.toDate;
         final st = showTimesMap.putIfAbsent(date, () => []);
         st.add(showTime);
       }
@@ -148,7 +147,7 @@ class TheaterShowTimes {
     else {
       // List all unique times
       final timesRef = filteredShowTimes
-          .map((st) => st.dateTime!.toTime)
+          .map((st) => st.dateTime.toTime)
           .toSet()
           .toList(growable: false)
         ..sort();
@@ -156,8 +155,8 @@ class TheaterShowTimes {
 
       // Build map
       for (final showTime in filteredShowTimes) {
-        final date = showTime.dateTime!.toDate;
-        final time = showTime.dateTime!.toTime;
+        final date = showTime.dateTime.toDate;
+        final time = showTime.dateTime.toTime;
 
         // Get day list or create it
         final showTimes = showTimesMap.putIfAbsent(date, () => List.filled(timesRef.length, null, growable: false));
@@ -203,7 +202,7 @@ class ShowTime {
   const ShowTime(this.dateTime, {required this.spec});
 
   /// Date and Time
-  final DateTime? dateTime;
+  final DateTime dateTime;
 
   /// Spec
   final ShowTimeSpec spec;
