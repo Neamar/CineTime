@@ -505,7 +505,7 @@ class _DayShowTimes extends StatelessWidget {
           // Times
           AppResources.spacerSmall,
           ...showtimes.map<Widget>((showtime) {
-            final formattedShowtime = showtime?.dateTime?.toTime.toString();
+            final formattedShowtime = showtime?.dateTime.toTime.toString();
             final text = Text(
               formattedShowtime ?? '-',
             );
@@ -528,7 +528,7 @@ class _ShowtimeDialog extends StatelessWidget {
     required this.movie,
     required this.theater,
     required this.showtime,
-  }) : dateDisplay = AppResources.formatterFullDate.format(showtime.dateTime!), super(key: key);
+  }) : dateDisplay = AppResources.formatterFullDate.format(showtime.dateTime), super(key: key);
 
   final Movie movie;
   final Theater theater;
@@ -603,8 +603,8 @@ $dateDisplay""";
       title: movie.title,
       description: 'Séance de cinéma pour ${movie.title} en ${showtime.spec}',
       location: theater.fullAddress,
-      startDate: showtime.dateTime!,
-      endDate: showtime.dateTime!.add(movie.duration),
+      startDate: showtime.dateTime,
+      endDate: showtime.dateTime.add(movie.duration),
     ));
     print(success);
   }
