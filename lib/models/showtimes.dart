@@ -47,38 +47,6 @@ class MovieShowTimes {
     }
     return _showTimesSpecOptions!;
   }
-
-  // OPTI use basic cache system ?
-  String toFullString() {
-    final lines = <String?>[];
-
-    // Movie name
-    lines.add("Séances pour '${movie.title}'");
-
-    // For each theater
-    for (final theaterShowTimes in theatersShowTimes) {
-      // Separator
-      lines.add('');
-
-      // Theater's name
-      lines.add(theaterShowTimes.theater.name);
-
-      lines.add('TODO');    // TODO
-      /*
-      // For each room
-      for (final roomsShowTimes in theaterShowTimes.roomsShowTimes) {
-        final roomShowTimes = roomsShowTimes.showTimesDisplay;
-        final header = "[${roomsShowTimes.tags.join(' ')}] ";
-
-        // for each ShowTimes
-        for (final showTimes in roomShowTimes)
-          lines.add(header + showTimes.where((s) => s != null).join(' '));
-      }*/
-    }
-
-    // Return formatted string
-    return lines.join('\n');
-  }
 }
 
 typedef FormattedShowTimes = SplayTreeMap<Date, List<ShowTime?>>;

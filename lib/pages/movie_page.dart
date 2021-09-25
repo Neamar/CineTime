@@ -12,6 +12,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:add_2_calendar/add_2_calendar.dart';
 
 class MoviePage extends StatefulWidget {
   const MoviePage(this.movieShowTimes);
@@ -154,10 +155,10 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                         label: 'Sortie',
                                         text: widget.movieShowTimes.movie.releaseDateDisplay!,
                                       ),
-                                    if (widget.movieShowTimes.movie.duration != null)
+                                    if (widget.movieShowTimes.movie.durationDisplay != null)
                                       TextWithLabel(
                                         label: 'Durée',
-                                        text: widget.movieShowTimes.movie.duration!,
+                                        text: widget.movieShowTimes.movie.durationDisplay!,
                                       ),
                                   ],
                                 ),
@@ -216,7 +217,8 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                 // Filters
                                 AppResources.spacerSmall,
                                 Expanded(
-                                  child: Center(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
                                     child: IntrinsicWidth(
                                       child: FadingEdgeScrollView.fromSingleChildScrollView(
                                         // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
@@ -235,22 +237,13 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                   ),
                                 ),
 
-                                // Share Button
-                                AppResources.spacerSmall,
-                                Tooltip(
-                                  child: IconButton(
-                                    icon: FaIcon(FontAwesomeIcons.shareAlt),
-                                    onPressed: () => Share.share(widget.movieShowTimes.toFullString()),
-                                  ),
-                                  message: 'Partager les séances',
-                                ),
-
                               ],
                             ),
                           ),
 
 
                           // Content
+                          AppResources.spacerLarge,
                           ...widget.movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
                             return FadingEdgeScrollView.fromSingleChildScrollView(
                               gradientFractionOnEnd: 0.2,
@@ -266,8 +259,8 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                       formattedShowTimes: theaterShowTimes.getFormattedShowTimes(filter),
                                       filterName: filter.toString(),
                                       onShowtimePressed: (showtime) => _openShowtimeDialog(
-                                        movieTitle: widget.movieShowTimes.movie.title,
-                                        theaterName: theaterShowTimes.theater.name,
+                                        movie: widget.movieShowTimes.movie,
+                                        theater: theaterShowTimes.theater,
                                         showtime: showtime,
                                       ),
                                     ),
@@ -324,15 +317,15 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
   void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
 
-  void _openShowtimeDialog({required String movieTitle, required String theaterName, required ShowTime showtime}) {
+  void _openShowtimeDialog({required Movie movie, required Theater theater, required ShowTime showtime}) {
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
           clipBehavior: Clip.antiAlias,
           child: _ShowtimeDialog(
-            movieTitle: movieTitle,
-            theaterName: theaterName,
+            movie: movie,
+            theater: theater,
             showtime: showtime,
           ),
         );
@@ -529,16 +522,17 @@ class _DayShowTimes extends StatelessWidget {
 }
 
 class _ShowtimeDialog extends StatelessWidget {
-  const _ShowtimeDialog({
+  _ShowtimeDialog({
     Key? key,
-    required this.movieTitle,
-    required this.theaterName,
+    required this.movie,
+    required this.theater,
     required this.showtime,
-  }) : super(key: key);
+  }) : dateDisplay = AppResources.formatterFullDate.format(showtime.dateTime!), super(key: key);
 
-  final String movieTitle;
-  final String theaterName;
+  final Movie movie;
+  final Theater theater;
   final ShowTime showtime;
+  final String dateDisplay;
 
   @override
   Widget build(BuildContext context) {
@@ -548,17 +542,17 @@ class _ShowtimeDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            movieTitle,
+            movie.title,
             style: Theme.of(context).textTheme.headline4,
           ),
           AppResources.spacerLarge,
           Text(
-            theaterName,
+            theater.name,
             style: Theme.of(context).textTheme.headline6,
           ),
           AppResources.spacerSmall,
           Text(
-            AppResources.formatterFullDate.format(showtime.dateTime!),
+            dateDisplay,
             style: Theme.of(context).textTheme.subtitle1,
           ),
           AppResources.spacerSmall,
@@ -570,20 +564,46 @@ class _ShowtimeDialog extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: FaIcon(FontAwesomeIcons.shareAlt),
-                onPressed: () {},
+              Tooltip(
+                message: 'Partager la séance',
+                child: IconButton(
+                  icon: FaIcon(FontAwesomeIcons.shareAlt),
+                  onPressed: _share,
+                ),
               ),
               AppResources.spacerLarge,
-              IconButton(
-                icon: FaIcon(FontAwesomeIcons.calendarAlt),
-                onPressed: () {},
+              Tooltip(
+                message: 'Ajouter au calendrier',
+                child: IconButton(
+                  icon: FaIcon(FontAwesomeIcons.calendarAlt),
+                  onPressed: _addToCalendar,
+                ),
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _share() async {
+    final text =
+"""${movie.title} [${showtime.spec}]
+${theater.name}
+$dateDisplay""";
+
+    await Share.share(text);
+  }
+
+  Future<void> _addToCalendar() async {
+    final success = await Add2Calendar.addEvent2Cal(Event(
+      title: movie.title,
+      description: 'Séance de cinéma pour ${movie.title} en ${showtime.spec}',
+      location: theater.fullAddress,
+      startDate: showtime.dateTime!,
+      endDate: showtime.dateTime!.add(movie.duration),
+    ));
+    print(success);
   }
 }
 

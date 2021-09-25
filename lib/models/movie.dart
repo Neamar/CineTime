@@ -18,7 +18,7 @@ class Movie extends Identifiable {
     this.userRating,
   }) :
     genres = _buildGenresFromApi(genresApi),
-    duration = _buildDurationFromApi(durationApi),
+    durationDisplay = _buildDurationFromApi(durationApi),
     super(id);
 
   final String title;
@@ -33,7 +33,18 @@ class Movie extends Identifiable {
   final String? genres;
   final String? synopsis;
 
-  final String? duration;
+  final String? durationDisplay;
+  Duration get duration {
+    if (durationDisplay == null) return Duration.zero;
+
+    final parts = durationDisplay!.split('h');
+    if (parts.length != 2) return Duration.zero;
+
+    return Duration(
+      hours: int.parse(parts[0]),
+      minutes: int.parse(parts[1]),
+    );
+  }
 
   final double? pressRating;
   final double? userRating;
