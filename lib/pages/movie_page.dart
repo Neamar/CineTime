@@ -35,6 +35,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
     return Scaffold(
       body: CustomScrollView(
+        controller: bloc.scrollController,
         slivers: <Widget>[
           ScalingHeader(
             backgroundColor: Colors.red,
@@ -497,7 +498,22 @@ class _DayShowTimes extends StatelessWidget {
 
 class MoviePageBloc with Disposable {
   MoviePageBloc(MovieShowTimes movieShowTimes) :
-    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first);
+    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first) {
+    selectedSpec.listen((value) {
+      // If page is fully scrolled
+      if (scrollController.offset == scrollController.position.maxScrollExtent) {
+        WidgetsBinding.instance?.addPostFrameCallback((_) {
+          scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: AppResources.durationAnimationMedium,
+            curve: Curves.easeInOut,
+          );
+        });
+      }
+    });
+  }
+
+  final scrollController = ScrollController();
 
   final BehaviorSubject<ShowTimeSpec> selectedSpec;
 
