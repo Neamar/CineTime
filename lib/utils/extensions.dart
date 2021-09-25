@@ -116,6 +116,14 @@ extension ExtendedIterable<T> on Iterable<T> {
     if (this.isEmpty) return null;
     return this.first;
   }
+
+  Iterable<E> mapIndexed<E>(E f(int index, T item)) sync* {
+    var index = 0;
+    for (final item in this) {
+      yield f(index, item);
+      index++;
+    }
+  }
 }
 
 extension ExtendedList<T> on List<T> {
@@ -166,15 +174,15 @@ extension ExtendedDateTime on DateTime {
   /// Return a Time (without the date part)
   Time get toTime => Time(this.hour, this.minute);
 
-  String? toWeekdayString({bool? withDay, bool? withMonth}) {
-    var formattedDate = AppResources.weekdayNames[this.weekday]!;
+  String toWeekdayString({bool withDay = false, bool withMonth = false}) {
+    var formattedDate = AppResources.weekdayNamesShort[this.weekday]!;
 
-    if (withDay != true && withMonth != true)
+    if (!withDay && !withMonth)
       return formattedDate;
 
     formattedDate += ' ' + this.day.toTwoDigitsString();
 
-    if (withMonth != true)
+    if (!withMonth)
       return formattedDate;
 
     return formattedDate + ' ' + AppResources.formatterMonth.format(this);
