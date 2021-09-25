@@ -201,11 +201,11 @@ class MoviesPageBloc with Disposable {
 
     // Fetch data
     try {
-      //TODO handle cache
       _theatersShowTimes = await AppService.api.getMoviesList(theaters.value, useCache: _useCacheOnNextFetch);
     } catch (e, s) {
       reportError(e, s); // Do not await
-      moviesShowTimes.addError(e);
+      if (!moviesShowTimes.isClosed)
+        moviesShowTimes.addError(e);
       return;
     } finally {
       _useCacheOnNextFetch = false;
@@ -222,7 +222,7 @@ class MoviesPageBloc with Disposable {
     displayList.sort((mst1, mst2) => (mst2.movie.userRating ?? 0).compareTo(mst1.movie.userRating ?? 0));
 
     // ---- Update UI ----
-    moviesShowTimes.add(displayList);
+    moviesShowTimes.tryAdd(displayList);
   }
 
   @override

@@ -44,7 +44,7 @@ class ApiClient {
   static const _logHeaders = false;
 
   ApiClient() : _client = SentryHttpClient(
-    captureFailedRequests: true,
+    captureFailedRequests: false,   // Ignore, happens mostly because the connection was interrupted.
   );
 
   final http.Client _client;
@@ -116,7 +116,7 @@ class ApiClient {
         zipCode: address?['zip'],
         city: address?['city'],
         poster: _getPathFromUrl(posterUrl),
-        distance: theaterJson['coordinates']?['distance'],
+        distance: theaterJson['coordinates']?['distance']?.toDouble(),
       );
     }).toList(growable: false);
   }
@@ -289,7 +289,10 @@ class ApiClient {
     }
 
     // Return result
-    final String synopsis = responseJson!['data']!['movie']!['synopsis'];
+    final String? synopsis = responseJson?['data']?['movie']?['synopsis'];
+    if (synopsis == null) return '\nAucun synopsis\n';
+
+    // Return cleaned data
     return convertBasicHtmlTags(synopsis);
   }
 
