@@ -477,13 +477,13 @@ class _DayShowTimes extends StatelessWidget {
             style: Theme.of(context).textTheme.headline6,
           ),
 
-          // Times
-          AppResources.spacerSmall,
-          ...showtimes.map<Widget>((showtime) {
-            return Text(
-              showtime?.dateTime?.toTime.toString() ?? '-',
-            );
-          }).toList()..insertBetween(AppResources.spacerExtraTiny),
+        // Times
+        AppResources.spacerSmall,
+        ...showtimes.map<Widget>((showtime) {
+          return Text(
+            showtime?.dateTime.toTime.toString() ?? '-',
+          );
+        }).toList()..insertBetween(AppResources.spacerExtraTiny),
 
         ],
       ),
