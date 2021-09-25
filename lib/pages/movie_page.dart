@@ -599,14 +599,13 @@ $dateDisplay""";
   }
 
   Future<void> _addToCalendar() async {
-    final success = await Add2Calendar.addEvent2Cal(Event(
+    await Add2Calendar.addEvent2Cal(Event(
       title: movie.title,
       description: 'Séance de cinéma pour ${movie.title} en ${showtime.spec}',
       location: theater.fullAddress,
       startDate: showtime.dateTime,
       endDate: showtime.dateTime.add(movie.duration),
     ));
-    print(success);
   }
 }
 
