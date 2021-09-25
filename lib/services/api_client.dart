@@ -232,7 +232,10 @@ class ApiClient {
             return personsJson.map((json) {
               json = json['node'];
               final JsonObject? personJson = json['person'] ?? json['actor'];
-              return '${personJson?['firstName']} ${personJson?['lastName']}';
+              return [
+                personJson?['firstName'],
+                personJson?['lastName'],
+              ].joinNotNull(' ');
             }).join(', ');
           }
 
