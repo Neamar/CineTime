@@ -41,7 +41,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
             title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
               path: widget.movieShowTimes.movie.poster,
-              onPressed: () => _openPoster(context),
+              onPressed: _openPoster,
               isThumbnail: false,
               applyDarken: true,
             ),
@@ -114,7 +114,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: GestureDetector(
-                                onTap: () => _openPoster(context),
+                                onTap: _openPoster,
                                 child: CtCachedImage(
                                   path: widget.movieShowTimes.movie.poster,
                                   isThumbnail: true,
@@ -195,7 +195,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                   subject: bloc.selectedSpec,
                   builder: (context, snapshot) {
                     final filter = snapshot.data!;
-                    return Container(
+                    return Material(
                       color: Colors.white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -265,6 +265,11 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                       theaterName: theaterShowTimes.theater.name,
                                       formattedShowTimes: theaterShowTimes.getFormattedShowTimes(filter),
                                       filterName: filter.toString(),
+                                      onShowtimePressed: (showtime) => _openShowtimeDialog(
+                                        movieTitle: widget.movieShowTimes.movie.title,
+                                        theaterName: theaterShowTimes.theater.name,
+                                        showtime: showtime,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -276,7 +281,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         ],
                       ),
                     );
-                  }
+                  },
                 ),
               ],
             ),
@@ -317,7 +322,23 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
     );
   }
 
-  void _openPoster(BuildContext context) => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
+  void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
+
+  void _openShowtimeDialog({required String movieTitle, required String theaterName, required ShowTime showtime}) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          clipBehavior: Clip.antiAlias,
+          child: _ShowtimeDialog(
+            movieTitle: movieTitle,
+            theaterName: theaterName,
+            showtime: showtime,
+          ),
+        );
+      },
+    );
+  }
 }
 
 class SynopsisWidget extends StatelessWidget {
@@ -406,11 +427,13 @@ class TheaterShowTimesWidget extends StatelessWidget {
     required this.theaterName,
     required this.formattedShowTimes,
     required this.filterName,
+    this.onShowtimePressed,
   }) : super(key: key);
 
   final String theaterName;
   final FormattedShowTimes formattedShowTimes;
   final String filterName;
+  final ValueChanged<ShowTime>? onShowtimePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -436,6 +459,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
                   if (day == ApiClient.mockedNow.toDate) return Colors.redAccent;
                   if (index.isEven) return Colors.black12;
                 } (),
+                onPressed: onShowtimePressed,
               );
             }).toList()..insertBetween(AppResources.spacerTiny),
           )
@@ -448,11 +472,18 @@ class TheaterShowTimesWidget extends StatelessWidget {
 }
 
 class _DayShowTimes extends StatelessWidget {
-  const _DayShowTimes({Key? key, required this.day, required this.showtimes, this.backgroundColor}) : super(key: key);
+  const _DayShowTimes({
+    Key? key,
+    required this.day,
+    required this.showtimes,
+    this.backgroundColor,
+    this.onPressed,
+  }) : super(key: key);
 
   final Date day;
   final List<ShowTime?> showtimes;
   final Color? backgroundColor;
+  final ValueChanged<ShowTime>? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -480,13 +511,52 @@ class _DayShowTimes extends StatelessWidget {
           // Times
           AppResources.spacerSmall,
           ...showtimes.map<Widget>((showtime) {
-            return Text(
-              showtime?.dateTime?.toTime.toString() ?? '-',
+            final formattedShowtime = showtime?.dateTime?.toTime.toString();
+            final text = Text(
+              formattedShowtime ?? '-',
+            );
+            if (formattedShowtime == null) return text;
+            return InkWell(
+              onTap: onPressed != null ? () => onPressed!(showtime!) : null,
+              child: text,
             );
           }).toList()..insertBetween(AppResources.spacerExtraTiny),
 
         ],
       ),
+    );
+  }
+}
+
+class _ShowtimeDialog extends StatelessWidget {
+  const _ShowtimeDialog({
+    Key? key,
+    required this.movieTitle,
+    required this.theaterName,
+    required this.showtime,
+  }) : super(key: key);
+
+  final String movieTitle;
+  final String theaterName;
+  final ShowTime showtime;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          movieTitle,
+        ),
+        Text(
+          theaterName,
+        ),
+        Text(
+          showtime.dateTime.toString(),
+        ),
+        Text(
+          showtime.spec.toString(),
+        ),
+      ],
     );
   }
 }
