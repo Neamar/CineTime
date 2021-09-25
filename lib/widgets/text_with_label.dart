@@ -9,22 +9,22 @@ class TextWithLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicWidth(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            label,
-            style: Theme.of(context).textTheme.caption,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      textBaseline: TextBaseline.ideographic,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      children: <Widget>[
+        Text(
+          label,
+          style: Theme.of(context).textTheme.caption,
+        ),
+        AppResources.spacerTiny,
+        Flexible(
+          child: Text(
+            text,
           ),
-          AppResources.spacerTiny,
-          Flexible(
-            child: Text(
-              text,
-            ),
-          )
-        ],
-      ),
+        )
+      ],
     );
   }
 }
