@@ -3,6 +3,7 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FetchBuilder<T> extends StatefulWidget {
@@ -68,7 +69,10 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
             isDense: widget.isDense,
           );
         } else if (!snapshot.hasData) {
-          return widget.fetchingBuilder?.call(context) ?? Center(child: CircularProgressIndicator());
+          return widget.fetchingBuilder?.call(context) ?? SpinKitFadingCube(
+            color: Theme.of(context).primaryColor,
+            size: 25.0,
+          );
         } else {
           return widget.builder?.call(context, snapshot.data!) ?? const SizedBox();
         }
