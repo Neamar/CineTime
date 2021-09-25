@@ -195,85 +195,88 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                   subject: bloc.selectedSpec,
                   builder: (context, snapshot) {
                     final filter = snapshot.data!;
-                    return Container(
-                      color: Colors.white,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
+                    return CtAnimatedSwitcher(
+                      child: Container(
+                        key: ObjectKey(filter),
+                        color: Colors.white,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
 
-                          // Header
-                          Padding(
-                            padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
-                            child: Row(
-                              children: <Widget>[
+                            // Header
+                            Padding(
+                              padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
+                              child: Row(
+                                children: <Widget>[
 
-                                // Title
-                                Text(
-                                  'Séances',
-                                  style: Theme.of(context).textTheme.headline6,
-                                ),
+                                  // Title
+                                  Text(
+                                    'Séances',
+                                    style: Theme.of(context).textTheme.headline6,
+                                  ),
 
-                                // Filters
-                                AppResources.spacerSmall,
-                                Expanded(
-                                  child: Center(
-                                    child: IntrinsicWidth(
-                                      child: FadingEdgeScrollView.fromSingleChildScrollView(
-                                        // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
-                                        gradientFractionOnEnd: 0.5,
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
-                                          child: _TagFilterSelector(
-                                            options: widget.movieShowTimes.showTimesSpecOptions,
-                                            selected: filter,
-                                            onChanged: bloc.selectedSpec.add,
+                                  // Filters
+                                  AppResources.spacerSmall,
+                                  Expanded(
+                                    child: Center(
+                                      child: IntrinsicWidth(
+                                        child: FadingEdgeScrollView.fromSingleChildScrollView(
+                                          // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
+                                          gradientFractionOnEnd: 0.5,
+                                          child: SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+                                            child: _TagFilterSelector(
+                                              options: widget.movieShowTimes.showTimesSpecOptions,
+                                              selected: filter,
+                                              onChanged: bloc.selectedSpec.add,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
 
-                                // Share Button
-                                AppResources.spacerSmall,
-                                Tooltip(
-                                  child: IconButton(
-                                    icon: FaIcon(FontAwesomeIcons.shareAlt),
-                                    onPressed: () => Share.share(widget.movieShowTimes.toFullString()),
+                                  // Share Button
+                                  AppResources.spacerSmall,
+                                  Tooltip(
+                                    child: IconButton(
+                                      icon: FaIcon(FontAwesomeIcons.shareAlt),
+                                      onPressed: () => Share.share(widget.movieShowTimes.toFullString()),
+                                    ),
+                                    message: 'Partager les séances',
                                   ),
-                                  message: 'Partager les séances',
-                                ),
 
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
 
 
-                          // Content
-                          ...widget.movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
-                            return FadingEdgeScrollView.fromSingleChildScrollView(
-                              gradientFractionOnEnd: 0.2,
-                              child: SingleChildScrollView(
-                                controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
-                                scrollDirection: Axis.horizontal,
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
-                                    child: TheaterShowTimesWidget(
-                                      theaterName: theaterShowTimes.theater.name,
-                                      formattedShowTimes: theaterShowTimes.getFormattedShowTimes(filter),
-                                      filterName: filter.toString(),
+                            // Content
+                            ...widget.movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
+                              return FadingEdgeScrollView.fromSingleChildScrollView(
+                                gradientFractionOnEnd: 0.2,
+                                child: SingleChildScrollView(
+                                  controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+                                  scrollDirection: Axis.horizontal,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
+                                      child: TheaterShowTimesWidget(
+                                        theaterName: theaterShowTimes.theater.name,
+                                        formattedShowTimes: theaterShowTimes.getFormattedShowTimes(filter),
+                                        filterName: filter.toString(),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }).toList(growable: false),
-                          AppResources.spacerMedium,
+                              );
+                            }).toList(growable: false),
+                            AppResources.spacerMedium,
 
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }
