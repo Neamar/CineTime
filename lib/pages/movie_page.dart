@@ -195,8 +195,8 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                   subject: bloc.selectedSpec,
                   builder: (context, snapshot) {
                     final filter = snapshot.data!;
-                    return Material(
-                      color: const Color(0xFFEFEFEF),
+                    return Container(
+                      color: Colors.white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
@@ -414,38 +414,35 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
 
-            // Theater name
-            Text(
-              theaterName,
-              style: Theme.of(context).textTheme.headline6,
-            ),
-
-            // Showtimes
-            if (formattedShowTimes.isNotEmpty)
-              Row(
-                children: formattedShowTimes.keys.mapIndexed<Widget>((index, day) {
-                  return _DayShowTimes(
-                    day: day,
-                    showtimes: formattedShowTimes[day]!,
-                    backgroundColor: () {
-                      if (day == ApiClient.mockedNow.toDate) return Colors.redAccent;
-                      if (index.isEven) return Colors.black12;
-                    } (),
-                  );
-                }).toList()..insertBetween(AppResources.spacerTiny),
-              )
-            else
-              Text('Aucune séance en $filterName'),
-          ]..insertBetween(AppResources.spacerSmall),
+        // Theater name
+        Text(
+          theaterName,
+          style: Theme.of(context).textTheme.headline6,
         ),
-      ),
+
+        // Showtimes
+        AppResources.spacerSmall,
+        if (formattedShowTimes.isNotEmpty)
+          Row(
+            children: formattedShowTimes.keys.mapIndexed<Widget>((index, day) {
+              return _DayShowTimes(
+                day: day,
+                showtimes: formattedShowTimes[day]!,
+                backgroundColor: () {
+                  if (day == ApiClient.mockedNow.toDate) return Colors.redAccent;
+                  if (index.isEven) return Colors.black12;
+                } (),
+              );
+            }).toList()..insertBetween(AppResources.spacerTiny),
+          )
+        else
+          Text('Aucune séance en $filterName'),
+        AppResources.spacerLarge,
+      ],
     );
   }
 }
@@ -469,7 +466,7 @@ class _DayShowTimes extends StatelessWidget {
         children: [
           // Week day
           Text(
-            day.toWeekdayString(),
+            AppResources.weekdayNames[day.weekday]!,
             style: Theme.of(context).textTheme.subtitle1,
           ),
 

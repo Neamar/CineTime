@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AppResources {
-  static const locale = 'fr';
-
   // Widgets
   static const spacerLarge = SizedBox(width: 20, height: 20);
   static const spacerMedium = SizedBox(width: 15, height: 15);
@@ -17,11 +15,11 @@ class AppResources {
   static const durationAnimationLong = Duration(milliseconds: 500);
 
   // Formatter
-  static final formatterDate = DateFormat("dd MMMM yyyy", locale);
-  static final formatterMonth = DateFormat("MMM", locale);
+  static final formatterDate = DateFormat("dd MMMM yyyy");
+  static final formatterMonth = DateFormat("MMM");
 
   // Translations
-  static const weekdayNames = {
+  static const weekdayNamesShort = {
     DateTime.monday: 'Lu',
     DateTime.tuesday: 'Ma',
     DateTime.wednesday: 'Me',
@@ -29,5 +27,14 @@ class AppResources {
     DateTime.friday: 'Ve',
     DateTime.saturday: 'Sa',
     DateTime.sunday: 'Di',
+  };
+  static const weekdayNames = {
+    DateTime.monday: 'Lun',
+    DateTime.tuesday: 'Mar',
+    DateTime.wednesday: 'Mer',
+    DateTime.thursday: 'Jeu',
+    DateTime.friday: 'Ven',
+    DateTime.saturday: 'Sam',
+    DateTime.sunday: 'Dim',
   };
 }

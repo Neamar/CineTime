@@ -2,6 +2,7 @@ import 'package:cinetime/pages/_pages.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -16,7 +17,8 @@ Future<void> main() async {
     debugPrint = (message, {wrapWidth}) {};
   }
 
-  // Init date formatting
+  // Init intl package
+  Intl.defaultLocale = App.defaultLocale.toString();
   initializeDateFormatting(App.defaultLocale.toString());
 
   // Set default TimeAgo package locale

@@ -175,7 +175,7 @@ extension ExtendedDateTime on DateTime {
   Time get toTime => Time(this.hour, this.minute);
 
   String toWeekdayString({bool withDay = false, bool withMonth = false}) {
-    var formattedDate = AppResources.weekdayNames[this.weekday]!;
+    var formattedDate = AppResources.weekdayNamesShort[this.weekday]!;
 
     if (!withDay && !withMonth)
       return formattedDate;
