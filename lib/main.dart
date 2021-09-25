@@ -1,4 +1,5 @@
 import 'package:cinetime/pages/_pages.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -28,6 +29,9 @@ Future<void> main() async {
   await StorageService.init();
   FavoriteTheatersHandler.init();
 
+  // TEMP to be removed once https://github.com/ja2375/add_2_calendar/issues/83 is closed
+  DeviceInfoPlugin().androidInfo.then((info) => App.androidSdkVersion = info.version.sdkInt);
+
   // Start App inside Sentry's scope
   await SentryFlutter.init(
     (options) {
@@ -49,6 +53,9 @@ class App extends StatelessWidget {
   /// The [BuildContext] of the main navigator.
   /// We may use this on showMessage, showError, openDialog, etc.
   static BuildContext get navigatorContext => _navigatorKey.currentContext!;
+
+  /// TEMP to be removed once https://github.com/ja2375/add_2_calendar/issues/83 is closed
+  static int? androidSdkVersion;
 
   // This widget is the root of your application.
   @override
