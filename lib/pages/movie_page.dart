@@ -542,21 +542,47 @@ class _ShowtimeDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          movieTitle,
-        ),
-        Text(
-          theaterName,
-        ),
-        Text(
-          showtime.dateTime.toString(),
-        ),
-        Text(
-          showtime.spec.toString(),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            movieTitle,
+            style: Theme.of(context).textTheme.headline4,
+          ),
+          AppResources.spacerLarge,
+          Text(
+            theaterName,
+            style: Theme.of(context).textTheme.headline6,
+          ),
+          AppResources.spacerSmall,
+          Text(
+            AppResources.formatterFullDate.format(showtime.dateTime!),
+            style: Theme.of(context).textTheme.subtitle1,
+          ),
+          AppResources.spacerSmall,
+          Text(
+            showtime.spec.toString(),
+            style: Theme.of(context).textTheme.headline6,
+          ),
+          AppResources.spacerLarge,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: FaIcon(FontAwesomeIcons.shareAlt),
+                onPressed: () {},
+              ),
+              AppResources.spacerLarge,
+              IconButton(
+                icon: FaIcon(FontAwesomeIcons.calendarAlt),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
