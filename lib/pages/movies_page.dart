@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
@@ -27,86 +28,100 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
+      body: FetchBuilder<MoviesShowTimes>(
+        controller: bloc.fetchController,
+        task: bloc.fetch,
+        builder: (context, moviesShowtimesData) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
 
-          // Header
-          Material(
-            color: Theme.of(context).primaryColor,
-            child: InkWell(
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      // Spacer for alignment
-                      Spacer(),
+              // Header
+              Material(
+                color: Theme.of(context).primaryColor,
+                child: InkWell(
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          // Spacer for alignment
+                          Spacer(),
 
-                      // Label
-                      BehaviorSubjectBuilder<SplayTreeSet<Theater>>(
-                        subject: bloc.theaters,
-                        builder: (context, snapshot) {
-                          final theaters = snapshot.data;
-                          final theatersCount = theaters?.length ?? 0;
-                          return Text(
-                            () {
-                              if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                              if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
-                              return 'Films dans $theatersCount cinémas';
-                            } (),
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
-                          );
-                        },
-                      ),
+                          // Info
+                          Column(
+                            children: [
+                              // Theater info
+                              BehaviorSubjectBuilder<SplayTreeSet<Theater>>(   //OPTI because BehaviorSubjectBuilder of moviesShowTimes is above, and theses two streams are linked, this BehaviorSubjectBuilder is useless.
+                                subject: bloc.theaters,
+                                builder: (context, snapshot) {
+                                  final theaters = snapshot.data;
+                                  final theatersCount = theaters?.length ?? 0;
+                                  return Text(
+                                    () {
+                                      if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                                      if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
+                                      return 'Films dans $theatersCount cinémas';
+                                    } (),
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                                  );
+                                },
+                              ),
 
-                      // Actions
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Icon(
-                            Icons.edit,
-                            color: Colors.white,
+                              // Period
+                              AppResources.spacerTiny,
+                              Text(
+                                'Entre le ${moviesShowtimesData.fetchedFrom.day} et le ${moviesShowtimesData.fetchedTo.day}',
+                                style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
+                              ),
+                            ],
                           ),
-                        ),
+
+                          // Actions
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
+                  onTap: () => bloc.goToTheatersPage(context),
                 ),
               ),
-              onTap: () => bloc.goToTheatersPage(context),
-            ),
-          ),
 
-          // Content
-          Expanded(
-            child: FetchBuilder<List<MovieShowTimes>>(
-              controller: bloc.fetchController,
-              task: bloc.fetch,
-              builder: (context, moviesShowtimes) {
-                if (moviesShowtimes.isEmpty)
-                  return IconMessage(
-                    icon: Icons.theaters,
-                    message: 'Aucune séance',
-                  );
-
-                return ListView.builder(
-                  itemCount: moviesShowtimes.length,
-                  itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
-                  padding: EdgeInsets.zero,
-                  itemBuilder: (context, index) {
-                    return MovieTile(
-                      key: ValueKey(index),
-                      movieShowTimes: moviesShowtimes[index],
-                      showTheaterName: bloc.theaters.value.length > 1,
+              // Content
+              Expanded(
+                child: () {
+                  if (moviesShowtimesData.moviesShowTimes.isEmpty)
+                    return IconMessage(
+                      icon: Icons.theaters,
+                      message: 'Aucune séance',
                     );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+
+                  return ListView.builder(
+                    itemCount: moviesShowtimesData.moviesShowTimes.length,
+                    itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
+                    padding: EdgeInsets.zero,
+                    itemBuilder: (context, index) {
+                      return MovieTile(
+                        key: ValueKey(index),
+                        movieShowTimes: moviesShowtimesData.moviesShowTimes[index],
+                        showTheaterName: bloc.theaters.value.length > 1,
+                      );
+                    },
+                  );
+                } (),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -127,16 +142,15 @@ class MoviesPageBloc with Disposable {
     theaters.listen((value) => fetchController.refresh());
   }
 
-  Future<List<MovieShowTimes>> fetch() async {
+  Future<MoviesShowTimes> fetch() async {
     // Fetch data
-    final moviesShowTimesData = await AppService.api.getMoviesList(theaters.value);
+    final moviesShowTimes = await AppService.api.getMoviesList(theaters.value);
 
     // Sort
-    final displayList = moviesShowTimesData.moviesShowTimes;
-    displayList.sort((mst1, mst2) => (mst2.movie.userRating ?? 0).compareTo(mst1.movie.userRating ?? 0));
+    moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => (mst2.movie.userRating ?? 0).compareTo(mst1.movie.userRating ?? 0));
 
     // Return data
-    return displayList;
+    return moviesShowTimes;
   }
 
   void goToTheatersPage(BuildContext context) async {
