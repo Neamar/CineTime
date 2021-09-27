@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AppResources {
+  // Colors
+  static const colorRed = Color(0xFFD32F2F);
+  static const colorLightRed = Color(0xFFFF6659);
+  static const colorDarkRed = Color(0xFF9A0007);
+
+  static const colorGrey = Color(0xFFFAFAFA);
+  static const colorDarkGrey = Color(0xFFC7C7C7);
+
   // Widgets
   static const spacerLarge = SizedBox(width: 20, height: 20);
   static const spacerMedium = SizedBox(width: 15, height: 15);

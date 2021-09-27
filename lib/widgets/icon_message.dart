@@ -35,7 +35,7 @@ class IconMessage extends StatelessWidget {
       children: <Widget>[
         Icon(
           icon,
-          color: redIcon ? Colors.red : null,
+          color: redIcon ? Theme.of(context).primaryColor : null,
           size: inline ? 25 : 50,
         ),
         AppResources.spacerLarge,
