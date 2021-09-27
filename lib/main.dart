@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
+import 'resources/app_theme.dart';
 import 'services/storage_service.dart';
 
 Future<void> main() async {
@@ -62,9 +63,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CinéTime',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-      ),
+      theme: appTheme(),
       navigatorKey: _navigatorKey,
       home: FavoriteTheatersHandler.instance!.theaters.isEmpty
         ? TheatersPage()

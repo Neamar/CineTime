@@ -39,7 +39,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
       body: CustomScrollView(
         slivers: <Widget>[
           ScalingHeader(
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).primaryColor,
             title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
               path: widget.movieShowTimes.movie.poster,
@@ -49,7 +49,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
             ),
             overlapContentHeight: overlapContentHeight,
             overlapContentRadius: overlapContentHeight / 2,
-            overlapContentBackgroundColor: Colors.redAccent,
+            overlapContentBackgroundColor: AppResources.colorDarkRed,
             overlapContent: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
@@ -61,12 +61,12 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                       children: <Widget>[
                         FaIcon(
                           FontAwesomeIcons.video,
-                          color: hasTrailer ? Colors.white : Colors.black26,
+                          color: hasTrailer ? Colors.white : AppResources.colorDarkGrey,
                         ),
                         SizedBox(width: 8.0),
                         Text(
                           'Bande annonce',
-                          style: TextStyle(color: hasTrailer ? Colors.white : Colors.black26),
+                          style: TextStyle(color: hasTrailer ? Colors.white : AppResources.colorDarkGrey),
                         )
                       ],
                     ),
@@ -450,7 +450,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
                 day: day,
                 showtimes: formattedShowTimes[day]!,
                 backgroundColor: () {
-                  if (day == ApiClient.mockedNow.toDate) return Colors.redAccent;
+                  if (day == ApiClient.mockedNow.toDate) return AppResources.colorLightRed;
                   if (index.isEven) return Colors.black12;
                 } (),
                 onPressed: onShowtimePressed,

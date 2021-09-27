@@ -1,5 +1,6 @@
 import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
@@ -173,7 +174,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
                                   top: 0,
                                   right: 0,
                                   child: Material(
-                                    color: isFavorite ? Colors.redAccent : Colors.white,
+                                    color: isFavorite ? Theme.of(context).primaryColor : Colors.white,
                                     shape: CornerBorder(CornerBorderPosition.topRight),
                                     clipBehavior: Clip.antiAlias,
                                     elevation: 2,
@@ -236,7 +237,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
 
                     // Validate button
                     Material(
-                      color: selectedCount > 0 ? Colors.redAccent : Colors.grey,
+                      color: selectedCount > 0 ? AppResources.colorLightRed : AppResources.colorDarkGrey,
                       child: InkWell(
                         child: Center(
                           child: Padding(
