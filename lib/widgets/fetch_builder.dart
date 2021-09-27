@@ -147,7 +147,7 @@ class _ErrorWidget extends StatelessWidget {
           // Icon
           Icon(
             Icons.error_outline,
-            color: Colors.red,
+            color: AppResources.colorRed,
             size: isDense ? null : 40,
           ),
 

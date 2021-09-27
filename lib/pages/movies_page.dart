@@ -35,7 +35,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 
           // Header
           Material(
-            color: Colors.red,
+            color: Theme.of(context).primaryColor,
             child: InkWell(
               child: SafeArea(
                 child: Padding(
@@ -52,6 +52,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                           return 'Films dans $theatersCount cinémas';
                         } (),
                         textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
                       );
                     },
                   ),

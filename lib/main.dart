@@ -1,4 +1,5 @@
 import 'package:cinetime/pages/_pages.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -6,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
+import 'resources/app_theme.dart';
 import 'services/storage_service.dart';
 
 Future<void> main() async {
@@ -27,6 +29,9 @@ Future<void> main() async {
   // Init shared pref
   await StorageService.init();
   FavoriteTheatersHandler.init();
+
+  // TEMP to be removed once https://github.com/ja2375/add_2_calendar/issues/83 is closed
+  DeviceInfoPlugin().androidInfo.then((info) => App.androidSdkVersion = info.version.sdkInt);
 
   // Start App inside Sentry's scope
   await SentryFlutter.init(
@@ -50,14 +55,15 @@ class App extends StatelessWidget {
   /// We may use this on showMessage, showError, openDialog, etc.
   static BuildContext get navigatorContext => _navigatorKey.currentContext!;
 
+  /// TEMP to be removed once https://github.com/ja2375/add_2_calendar/issues/83 is closed
+  static int? androidSdkVersion;
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CinéTime',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-      ),
+      theme: appTheme(),
       navigatorKey: _navigatorKey,
       home: FavoriteTheatersHandler.instance!.theaters.isEmpty
         ? TheatersPage()

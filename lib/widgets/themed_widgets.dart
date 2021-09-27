@@ -8,7 +8,7 @@ class CtProgressIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SpinKitCubeGrid(
-        color: Colors.red,
+        color: Theme.of(context).primaryColor,
       )
     );
   }
