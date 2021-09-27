@@ -21,8 +21,6 @@ class MoviesPage extends StatefulWidget {
 }
 
 class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, MoviesPageBloc> {
-  final _scrollController = ScrollController();
-
   @override
   initBloc() => MoviesPageBloc(widget.selectedTheaters);
 
@@ -40,21 +38,40 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: BehaviorSubjectBuilder<SplayTreeSet<Theater>>(
-                    subject: bloc.theaters,
-                    builder: (context, snapshot) {
-                      final theaters = snapshot.data;
-                      final theatersCount = theaters?.length ?? 0;
-                      return Text(
-                        () {
-                          if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                          if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
-                          return 'Films dans $theatersCount cinémas';
-                        } (),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
-                      );
-                    },
+                  child: Row(
+                    children: [
+                      // Spacer for alignment
+                      Spacer(),
+
+                      // Label
+                      BehaviorSubjectBuilder<SplayTreeSet<Theater>>(
+                        subject: bloc.theaters,
+                        builder: (context, snapshot) {
+                          final theaters = snapshot.data;
+                          final theatersCount = theaters?.length ?? 0;
+                          return Text(
+                            () {
+                              if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                              if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
+                              return 'Films dans $theatersCount cinémas';
+                            } (),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                          );
+                        },
+                      ),
+
+                      // Actions
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
