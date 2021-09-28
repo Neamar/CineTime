@@ -58,8 +58,12 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
   }
 
   Future<void> _goToSearchPage() async {
-    await navigateTo(context, (_) => TheaterSearchPage(), returnAfterPageTransition: false);
-    bloc.refresh();
+    final singleSelectionMode = await navigateTo<bool>(context, (_) => TheaterSearchPage());
+    if (singleSelectionMode == true) {
+      Navigator.pop(context);
+    } else {
+      bloc.refresh();
+    }
   }
 }
 

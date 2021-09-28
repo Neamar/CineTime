@@ -26,8 +26,8 @@ class AppService {
 
   bool isSelected(Theater theater) => _selectedTheaters.contains(theater);
 
-  Future<bool> selectTheater(Theater theater, {bool singleSelectionMode = false}) async {
-    if (singleSelectionMode) {
+  Future<bool> selectTheater(Theater theater, {bool clearFirst = false}) async {
+    if (clearFirst) {
       await StorageService.saveSelectedTheaters(_selectedTheaters..clear()..add(theater));
       return true;
     } else {

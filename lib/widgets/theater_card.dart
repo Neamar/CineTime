@@ -126,11 +126,11 @@ class _TheaterCardState extends State<TheaterCard> {
       });
     } else {
       // Save value
-      await AppService.instance.selectTheater(widget.theater, singleSelectionMode: true);
+      await AppService.instance.selectTheater(widget.theater, clearFirst: true);
 
       // Update UI
       if (context.canPop)
-        Navigator.pop(context);
+        Navigator.of(context).pop(!widget.multiSelectionMode);
       else
         navigateTo(context, (_) => MoviesPage(), clearHistory: true);
     }
