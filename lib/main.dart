@@ -1,4 +1,5 @@
 import 'package:cinetime/pages/_pages.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,6 @@ Future<void> main() async {
 
   // Init shared pref
   await StorageService.init();
-  FavoriteTheatersHandler.init();
 
   // TEMP to be removed once https://github.com/ja2375/add_2_calendar/issues/83 is closed
   DeviceInfoPlugin().androidInfo.then((info) => App.androidSdkVersion = info.version.sdkInt);
@@ -65,7 +65,7 @@ class App extends StatelessWidget {
       title: 'CinéTime',
       theme: appTheme(),
       navigatorKey: _navigatorKey,
-      home: FavoriteTheatersHandler.instance!.theaters.isEmpty
+      home: AppService.instance.selectedTheaters.isEmpty
         ? TheatersPage()
         : MoviesPage(),
     );

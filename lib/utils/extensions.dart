@@ -88,6 +88,9 @@ extension ExtendedBehaviorSubject<T> on BehaviorSubject<T> {
     }
     return false;
   }
+
+  /// Add current [value] to subject;
+  void reAdd() => add(value);
 }
 
 extension ExtendedIterable<T> on Iterable<T> {
@@ -127,10 +130,10 @@ extension ExtendedIterable<T> on Iterable<T> {
 }
 
 extension ExtendedList<T> on List<T> {
-  T? elementAtOrNull(int index) {
-    if (index < 0 || index >= this.length)
-      return null;
-    return this.elementAt(index);
+  void addNotNull(T? value) {
+    if (value != null) {
+      this.add(value);
+    }
   }
 
   /// Insert [widget] between each member of this list
@@ -138,6 +141,12 @@ extension ExtendedList<T> on List<T> {
     if (this.length > 1) {
       for (var i = this.length - 1; i > 0; i--) this.insert(i, item);
     }
+  }
+
+  T? elementAtOrNull(int index) {
+    if (index < 0 || index >= this.length)
+      return null;
+    return this.elementAt(index);
   }
 
   /// Return true if this list's content is equals to [other]'s.

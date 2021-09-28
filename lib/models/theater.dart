@@ -4,7 +4,6 @@ class Theater extends Identifiable {
   const Theater({
     required ApiId id,
     required this.name,
-    this.poster,
     this.street,
     this.zipCode,
     this.city,
@@ -12,7 +11,6 @@ class Theater extends Identifiable {
   }) : super(id);
 
   final String name;
-  final String? poster;    // Path to the image (not full url)
   final String? street;
   final String? zipCode;
   final String? city;
@@ -46,10 +44,11 @@ class Theater extends Identifiable {
     return lines.join('\n');
   }
 
+
+
   factory Theater.fromJson(Map<String, dynamic> json) => Theater(
     id: ApiId.fromEncoded(json['id']),
     name: json['name'],
-    poster: json['poster'],
     street: json['street'],
     zipCode: json['zipCode'],
     city: json['city'],
@@ -57,7 +56,6 @@ class Theater extends Identifiable {
   Map<String, dynamic> toJson() => {
     'id': id.encodedId,
     'name': name,
-    'poster': poster,
     'street': street,
     'zipCode': zipCode,
     'city': city,

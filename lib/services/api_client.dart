@@ -76,7 +76,6 @@ class ApiClient {
         street: theaterInfo['address'],
         zipCode: theaterInfo['zip'],
         city: theaterInfo['city'],
-        poster: theaterInfo['poster_path'],
       );
     }).toList(growable: false);
   }
@@ -115,7 +114,6 @@ class ApiClient {
         street: address?['address'],
         zipCode: address?['zip'],
         city: address?['city'],
-        poster: _getPathFromUrl(posterUrl),
         distance: theaterJson['coordinates']?['distance']?.toDouble(),
       );
     }).toList(growable: false);

@@ -13,9 +13,7 @@ import 'package:rxdart/rxdart.dart';
 import '_pages.dart';
 
 class MoviesPage extends StatefulWidget {
-  const MoviesPage([this.selectedTheaters]);
-
-  final Iterable<Theater>? selectedTheaters;
+  const MoviesPage();
 
   @override
   State<MoviesPage> createState() => _MoviesPageState();
@@ -23,7 +21,7 @@ class MoviesPage extends StatefulWidget {
 
 class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, MoviesPageBloc> {
   @override
-  initBloc() => MoviesPageBloc(widget.selectedTheaters);
+  initBloc() => MoviesPageBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -130,13 +128,12 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 
 class MoviesPageBloc with Disposable {
   final theaters = BehaviorSubject<SplayTreeSet<Theater>>();
-  final favoriteTheaters = FavoriteTheatersHandler.instance;
 
   final fetchController = FetchBuilderController();
 
-  MoviesPageBloc(Iterable<Theater>? selectedTheaters)  {
-    // Init list with the favorites
-    theaters.add(SplayTreeSet.from(selectedTheaters ?? favoriteTheaters!.theaters, (t1, t2) => t1.name.compareTo(t2.name)));
+  MoviesPageBloc()  {
+    // Init list
+    theaters.add(SplayTreeSet.from(AppService.instance.selectedTheaters, (t1, t2) => t1.name.compareTo(t2.name)));
 
     // Update data when theaters list change
     theaters.listen((value) => fetchController.refresh());
@@ -153,9 +150,9 @@ class MoviesPageBloc with Disposable {
     return moviesShowTimes;
   }
 
-  void goToTheatersPage(BuildContext context) async {
+  void goToTheatersPage(BuildContext context) async {   // TODO move to widget
     // Go to TheatersPage
-    var selectedTheaters = await navigateTo<Iterable<Theater>>(context, (_) => TheatersPage(selectedTheaters: theaters.value));
+    var selectedTheaters = await navigateTo<Iterable<Theater>>(context, (_) => TheatersPage());
     if (selectedTheaters == null)
       return;
 
