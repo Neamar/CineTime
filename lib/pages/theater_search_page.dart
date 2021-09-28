@@ -34,10 +34,11 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             icon: Icon(Icons.my_location),
             onPressed: bloc.startGeoSearch,
           ),
-          IconButton(
-            icon: Icon(Icons.list),
-            onPressed: () {},   // TODO
-          ),
+          if (context.canPop)   // Hide when page is shown at app start
+            IconButton(
+              icon: Icon(Icons.list),
+              onPressed: () {},   // TODO
+            ),
         ],
       ),
       body: Center(   // Needed for child that are not a ListView

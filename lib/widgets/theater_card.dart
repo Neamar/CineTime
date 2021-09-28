@@ -1,12 +1,19 @@
 import 'package:cinetime/models/theater.dart';
+import 'package:cinetime/pages/movies_page.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
 
 class TheaterCard extends StatefulWidget {
-  const TheaterCard({Key? key, required this.theater}) : super(key: key);
+  const TheaterCard({Key? key, required this.theater, this.multiSelectionMode = false}) : super(key: key);
 
+  /// Theater
   final Theater theater;
+
+  /// If false, it will clear selection, select [theater] and pop when pressed.
+  /// If true, it will display a checkbox, and just select/unselect this [theater] when pressed.
+  final bool multiSelectionMode;
 
   @override
   State<TheaterCard> createState() => _TheaterCardState();
@@ -106,16 +113,27 @@ class _TheaterCardState extends State<TheaterCard> {
   }
 
   Future<void> _onSelected() async {
-    // Save value
-    if (isSelected)
-      await AppService.instance.unselectTheater(widget.theater);
-    else
-      await AppService.instance.selectTheater(widget.theater);
+    if (widget.multiSelectionMode) {
+      // Save value
+      if (isSelected)
+        await AppService.instance.unselectTheater(widget.theater);
+      else
+        await AppService.instance.selectTheater(widget.theater);
 
-    // Update UI
-    setState(() {
-      _refreshStatus();
-    });
+      // Update UI
+      setState(() {
+        _refreshStatus();
+      });
+    } else {
+      // Save value
+      await AppService.instance.selectTheater(widget.theater, singleSelectionMode: true);
+
+      // Update UI
+      if (context.canPop)
+        Navigator.pop(context);
+      else
+        navigateTo(context, (_) => MoviesPage(), clearHistory: true);
+    }
   }
 
   Future<void> _onFavoriteTap() async {

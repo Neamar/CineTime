@@ -26,13 +26,18 @@ class AppService {
 
   bool isSelected(Theater theater) => _selectedTheaters.contains(theater);
 
-  Future<bool> selectTheater(Theater theater) async {
-    if (_selectedTheaters.length >= _maxSelected) {
-      showMessage(App.navigatorContext, 'Maximum $_maxSelected', isError: true);    // Do not await
-      return false;
-    } else {
-      await StorageService.saveSelectedTheaters(_selectedTheaters..add(theater));
+  Future<bool> selectTheater(Theater theater, {bool singleSelectionMode = false}) async {
+    if (singleSelectionMode) {
+      await StorageService.saveSelectedTheaters(_selectedTheaters..clear()..add(theater));
       return true;
+    } else {
+      if (_selectedTheaters.length >= _maxSelected) {
+        showMessage(App.navigatorContext, 'Maximum $_maxSelected', isError: true); // Do not await
+        return false;
+      } else {
+        await StorageService.saveSelectedTheaters(_selectedTheaters..add(theater));
+        return true;
+      }
     }
   }
   Future<bool> unselectTheater(Theater theater) async {
