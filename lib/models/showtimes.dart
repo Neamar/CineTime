@@ -5,11 +5,11 @@ import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
 class MoviesShowTimes {
-  const MoviesShowTimes({this.fetchedAt, this.fromCache, this.moviesShowTimes});
+  const MoviesShowTimes({required this.moviesShowTimes, required this.fetchedFrom, required this.fetchedTo});
 
-  final List<MovieShowTimes>? moviesShowTimes;
-  final bool? fromCache;        // TODO remove not used ?
-  final DateTime? fetchedAt;    // TODO remove not used ?
+  final List<MovieShowTimes> moviesShowTimes;
+  final DateTime fetchedFrom;
+  final DateTime fetchedTo;
 }
 
 class MovieShowTimes {

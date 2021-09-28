@@ -122,6 +122,10 @@ class ApiClient {
   }
 
   Future<MoviesShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
+    // Prepare period
+    final from = mockedNow;
+    final to = mockedNow.add(Duration(days: 8));
+
     // Build movieShowTimes list
     final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
 
@@ -147,8 +151,8 @@ class ApiClient {
           query: r"query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }",
           variables: {
             "id": theater.id.encodedId,
-            "from": _dateToString(mockedNow),
-            "to": _dateToString(mockedNow.add(Duration(days: 8))),
+            "from": _dateToString(from),
+            "to": _dateToString(to),
             "count": 50,
             "hasPreview": false,
             "order": [
@@ -269,9 +273,9 @@ class ApiClient {
 
     // Return data
     return MoviesShowTimes(
-      fetchedAt: mockedNow,  // TODO save this value to shared pref and restore it ?
-      fromCache: false,   // TODO remove that field
       moviesShowTimes: moviesShowTimesMap.values.toList(growable: false),
+      fetchedFrom: from,
+      fetchedTo: to,
     );
   }
 
