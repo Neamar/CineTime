@@ -66,7 +66,7 @@ class App extends StatelessWidget {
       theme: appTheme(),
       navigatorKey: _navigatorKey,
       home: AppService.instance.selectedTheaters.isEmpty
-        ? TheatersPage()
+        ? TheaterSearchPage()
         : MoviesPage(),
     );
   }

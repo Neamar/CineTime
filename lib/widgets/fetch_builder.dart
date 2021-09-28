@@ -141,7 +141,7 @@ class _ErrorWidget extends StatelessWidget {
     return InkWell(
       onTap: isDense ? onRetry : null,
       child: Flex(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         direction: isDense ? Axis.horizontal : Axis.vertical,
         children: [
           // Icon

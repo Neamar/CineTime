@@ -1,23 +1,14 @@
-import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
-import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/services/app_service.dart';
-import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/permission_exception.dart';
 import 'package:cinetime/widgets/_widgets.dart';
-import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
-import 'package:rxdart/rxdart.dart';
-
-import '_pages.dart';
 
 class TheaterSearchPage extends StatefulWidget {
-  final Iterable<Theater>? selectedTheaters;
-
-  const TheaterSearchPage({ this.selectedTheaters });
+  const TheaterSearchPage();
 
   @override
   _TheaterSearchPageState createState() => _TheaterSearchPageState();
@@ -36,222 +27,51 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             hintText: 'Nom ou adresse de cinéma',
           ),
           textInputAction: TextInputAction.search,
-          //onSubmitted: bloc.onSearch,
+          onSubmitted: bloc.startQuerySearch,
         ),
-        /*actions: <Widget>[
+        actions: <Widget>[
           IconButton(
             icon: Icon(Icons.my_location),
-            onPressed: bloc.getGeoLocation,
+            onPressed: bloc.startGeoSearch,
           ),
-        ],*/
-      ),/*
-      body: SafeArea(
-        child: BehaviorSubjectBuilder<bool>(
-          subject: bloc.isBusySearching,
-          builder: (context, isBusySnapshot) {
+          IconButton(
+            icon: Icon(Icons.list),
+            onPressed: () {},   // TODO
+          ),
+        ],
+      ),
+      body: Center(   // Needed for child that are not a ListView
+        child: FetchBuilder<_SearchResult>(
+          controller: bloc.fetchBuilderController,
+          task: bloc.fetchTheaters,
+          builder: (context, searchResult) {
+            // No data
+            if (searchResult.theaters == null)
+              return IconMessage(
+                icon: FontAwesomeIcons.search,
+                message: 'Cherchez un cinéma par nom ou localisation',
+              );
 
-            // Is loading
-            if (isBusySnapshot.data!)
-              return CtProgressIndicator();
+            // Empty list
+            if (searchResult.theaters!.isEmpty)
+              return IconMessage(
+                icon: IconMessage.iconSad,
+                message: 'Aucun résultat',
+              );
 
-            // Is NOT loading
-            return BehaviorSubjectBuilder<List<Theater>>(
-              subject: bloc.theaters,
-              builder: (context, snapshot) {
-
-                // Error
-                if (snapshot.hasError)
-                  return IconMessage(
-                    icon: IconMessage.iconError,
-                    message: 'Impossible de récupérer les données',
-                    tooltip: snapshot.error.toString(),
-                    redIcon: true,
-                  );
-
-                // No data
-                if (snapshot.data == null)
-                  return IconMessage(
-                    icon: FontAwesomeIcons.search,
-                    message: 'Cherchez un cinéma par nom ou localisation',
-                  );
-
-                // Empty list
-                if (snapshot.data!.isEmpty)
-                  return IconMessage(
-                    icon: IconMessage.iconSad,
-                    message: 'Aucun résultat',
-                  );
-
-                // Has data
-                final selectedCount = bloc.selectedTheaters.length;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-
-                    // Stat texts
-                    Material(
-                      color: Colors.deepPurpleAccent,
-                      child: Row(
-                        children: <Widget>[
-                          _buildStatText(
-                            text: 'résultat'.plural(snapshot.data!.length),
-                            alignment: TextAlign.start,
-                          ),
-                          _buildStatText(
-                            text: 'sélectionné'.plural(selectedCount),
-                            alignment: TextAlign.center,
-                            onPressed: bloc.onSelectAll
-                          ),
-                          _buildStatText(
-                            text: 'favori'.plural(bloc.favoriteTheaters!.theaters.length),
-                            alignment: TextAlign.end,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Theater list
-                    Expanded(
-                      child: ListView.builder(
-                        itemBuilder: (context, index) {
-                          var theater = snapshot.data![index];
-                          var isFavorite = bloc.favoriteTheaters!.isFavorite(theater);
-
-                          return Card(
-                            key: ObjectKey(theater),
-                            clipBehavior: Clip.antiAlias,
-                            color: bloc.isSelected(theater) ? Colors.lightBlueAccent : null,
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: <Widget>[
-
-                                // Main content
-                                InkWell(
-                                  child: Row(
-                                    children: <Widget>[
-
-                                      // Image
-                                      AspectRatio(
-                                        aspectRatio: 1,
-                                        child: CtCachedImage(
-                                          path: theater.poster,
-                                          isThumbnail: true,
-                                        ),
-                                      ),
-
-                                      // Info
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                                            children: <Widget>[
-                                              Text(
-                                                theater.name,
-                                                style: Theme.of(context).textTheme.subtitle1,
-                                              ),
-                                              Spacer(),
-                                              if (theater.distanceDisplay != null)
-                                                Text(
-                                                  theater.distanceDisplay!,
-                                                  style: Theme.of(context).textTheme.bodyText2,
-                                                ),
-                                              Text(
-                                                theater.fullAddress,
-                                                style: Theme.of(context).textTheme.caption,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () => bloc.onSelected(theater),
-                                ),
-
-                                // Star button
-                                Positioned(
-                                  top: 0,
-                                  right: 0,
-                                  child: Material(
-                                    color: isFavorite ? Theme.of(context).primaryColor : Colors.white,
-                                    shape: CornerBorder(CornerBorderPosition.topRight),
-                                    clipBehavior: Clip.antiAlias,
-                                    elevation: 2,
-                                    child: SizedBox.fromSize(
-                                      size: Size.square(50),
-                                      child: InkWell(
-                                        child: Align(
-                                          alignment: Alignment.topRight,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(5),
-                                            child: Icon(
-                                              isFavorite ? Icons.star : Icons.star_border,
-                                              color: isFavorite ? Colors.white : Colors.black,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                        onTap: () => bloc.onFavoriteTap(theater),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        itemCount: snapshot.data!.length,
-                        itemExtent: 100,
-                      ),
-                    ),
-
-                    // Validate button
-                    Material(
-                      color: selectedCount > 0 ? AppResources.colorLightRed : AppResources.colorDarkGrey,
-                      child: InkWell(
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Text('Appliquer'),
-                          )
-                        ),
-                        onTap:  selectedCount > 0
-                          ? () {
-                              if (selectedCount > TheaterSearchPageBloc._max) {
-                                showMessage(context, 'Maximum ${TheaterSearchPageBloc._max}', isError: true);
-                                return;
-                              }
-                              if (ModalRoute.of(context)!.isFirst) {
-                                navigateTo(context, (_) => MoviesPage(bloc.selectedTheaters));
-                              } else {
-                                Navigator.of(context).pop(bloc.selectedTheaters);
-                              }
-                            }
-                          : null,
-                      ),
-                    ),
-                  ],
+            return ListView.builder(
+              itemExtent: 100,
+              itemCount: searchResult.theaters!.length,
+              itemBuilder: (context, index) {
+                final theater = searchResult.theaters![index];
+                return TheaterCard(
+                  key: ObjectKey(theater),
+                  theater: theater,
                 );
-              }
+              },
             );
-          }
-        )
-      ),*/
-    );
-  }
-
-  Widget _buildStatText({required String text, TextAlign? alignment, VoidCallback? onPressed}) {
-    return Expanded(
-      child: InkWell(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            text,
-            textAlign: alignment,
-          ),
+          },
         ),
-        onTap: onPressed,
       ),
     );
   }
@@ -259,132 +79,67 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
 
 
 class TheaterSearchPageBloc with Disposable {
-  /*static const _max = 5;
-  final favoriteTheaters = FavoriteTheatersHandler.instance;
-  final selectedTheaters = Set<Theater>();
+  final fetchBuilderController = FetchBuilderController();
 
-  final theaters = BehaviorSubject<List<Theater>>();
+  _SearchParams? _searchParams;
 
-  final isBusySearching = BehaviorSubject.seeded(false);
-
-  TheaterSearchPageBloc(Iterable<Theater>? selectedTheaters) {
-    final initialTheaters = Set.of([
-      if (selectedTheaters != null) ...selectedTheaters,
-      ...favoriteTheaters!.theaters
-    ]);
-    if (initialTheaters.isNotEmpty) theaters.add(initialTheaters.toList());
-    this.selectedTheaters.addAll(selectedTheaters ?? []);
+  void startGeoSearch() {
+    _searchParams = const _SearchParams(isGeo: true);
+    fetchBuilderController.refresh();
   }
 
-  Future<void> onSearch(String query) async {
-    await _searchTheaters(
-      () async {
-        if (isStringNullOrEmpty(query)) return [];
-
-        // Get Theater list from server
-        return await AppService.api.searchTheaters(query);
-      }
-    );
+  void startQuerySearch(String query) {
+    _searchParams = _SearchParams(query: query);
+    fetchBuilderController.refresh();
   }
 
-  Future<void> getGeoLocation() async {
-    await _searchTheaters(
-      () async {
-        // Get geo-position
-        geo.Position? position;
-        try {
-          position = await geo.Geolocator.getCurrentPosition(desiredAccuracy: geo.LocationAccuracy.low, timeLimit: const Duration(seconds: 10));
-        } catch(e) {
-          if (e is geo.PermissionDeniedException || e is geo.LocationServiceDisabledException)
-            throw PermissionDeniedException();
-          rethrow;
-        }
+  Future<_SearchResult> fetchTheaters() async {
+    // If search hasn't started yet
+    if (_searchParams == null) return _SearchResult.none();
 
-        // Get local theaters
-        return await AppService.api.searchTheatersGeo(position.latitude, position.longitude);
-      }
-    );
+    // Search
+    final theaters = await (_searchParams!.isGeo ? _geoSearch() : _querySearch(_searchParams!.query!));
+
+    // Return result
+    return _SearchResult(theaters);
   }
 
-  // TODO migrate to FetchBuilder or AsyncTaskBuilder
-  Future<void> _searchTheaters(Future<List<Theater>> Function() task) async {
-    if (isBusySearching.value == true)
-      return;
-
+  Future<List<Theater>> _geoSearch() async {
+    // Get geo-position
+    geo.Position? position;
     try {
-      isBusySearching.add(true);
-
-      // Get Theater list from server
-      final result = await task();
-
-      // Build Theater list
-      theaters.add(result);
-    }
-    catch (e, s) {
-      // Report error first
-      reportError(e, s); // Do not await
-
-      if (!theaters.isClosed)
-        theaters.addError(e);
-    }
-    finally {
-      if (!isBusySearching.isClosed)
-        isBusySearching.add(false);
-    }
-  }
-
-  bool isSelected(Theater theater) => selectedTheaters.contains(theater);
-
-  void onSelected(Theater theater) {
-    if (isSelected(theater))
-      selectedTheaters.remove(theater);
-    else
-      selectedTheaters.add(theater);
-
-    _refreshList();
-  }
-
-  void onFavoriteTap(Theater theater) {
-    if (favoriteTheaters!.isFavorite(theater)) {
-      favoriteTheaters!.remove(theater);
-    } else {
-      if (favoriteTheaters!.length >= _max) {
-        showMessage(App.navigatorContext, 'Maximum $_max', isError: true);
-      } else {
-        favoriteTheaters!.add(theater);
-      }
+      position = await geo.Geolocator.getCurrentPosition(
+        desiredAccuracy: geo.LocationAccuracy.low,
+        timeLimit: const Duration(seconds: 10),
+      );
+    } catch(e) {
+      if (e is geo.PermissionDeniedException || e is geo.LocationServiceDisabledException)
+        throw PermissionDeniedException();
+      rethrow;
     }
 
-    _refreshList();
+    // Get local theaters
+    return await AppService.api.searchTheatersGeo(position.latitude, position.longitude);
   }
 
-  /*void onDeleteTap(Theater theater) {  // TODO remove ?
-    if (favoriteTheaters!.isFavorite(theater))
-      favoriteTheaters!.remove(theater);
-    if (isSelected(theater))
-      selectedTheaters.remove(theater);
+  Future<List<Theater>> _querySearch(String query) async {
+    if (isStringNullOrEmpty(query)) return [];
 
-    theaters.add(theaters.value..remove(theater));
-  }*/
-
-  void onSelectAll() {
-    //Add all to selection
-    if (selectedTheaters.length != theaters.value.length)
-      selectedTheaters.addAll(theaters.value);
-
-    //clear selection
-    else
-      selectedTheaters.clear();
-
-    _refreshList();
+    // Get Theater list from server
+    return await AppService.api.searchTheaters(query);
   }
+}
 
-  _refreshList() => theaters.add(theaters.value);
+class _SearchParams {
+  const _SearchParams({this.query, this.isGeo = false}) : assert(isGeo && query == null || !isGeo && query != null);
 
-  @override
-  void dispose() {
-    theaters.close();
-    isBusySearching.close();
-    super.dispose();
-  }*/
+  final String? query;
+  final bool isGeo;
+}
+
+class _SearchResult {
+  const _SearchResult(this.theaters);
+  const _SearchResult.none() : theaters = null;
+
+  final List<Theater>? theaters;
 }
