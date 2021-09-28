@@ -119,7 +119,7 @@ class ApiClient {
     }).toList(growable: false);
   }
 
-  Future<MoviesShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = true }) async {
     // Prepare period
     final from = mockedNow;
     final to = mockedNow.add(Duration(days: 8));
@@ -271,6 +271,7 @@ class ApiClient {
 
     // Return data
     return MoviesShowTimes(
+      theaters: theaters,
       moviesShowTimes: moviesShowTimesMap.values.toList(growable: false),
       fetchedFrom: from,
       fetchedTo: to,

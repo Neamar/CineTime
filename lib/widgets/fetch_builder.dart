@@ -11,6 +11,7 @@ class FetchBuilder<T> extends StatefulWidget {
     Key? key,
     this.controller,
     required this.task,
+    this.fetchAtInit = true,
     this.fetchingBuilder,
     this.builder,
     this.onSuccess,
@@ -20,6 +21,9 @@ class FetchBuilder<T> extends StatefulWidget {
   /// Task that fetch and return the data
   /// May throw
   final AsyncTask<T> task;
+
+  /// Whether to automatically start [task] when widget is initialised.
+  final bool fetchAtInit;
 
   /// Optional Widget to display while fetching
   final WidgetBuilder? fetchingBuilder;
@@ -48,7 +52,7 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
   void initState() {
     super.initState();
     _setControllerCallback();
-    _fetch();
+    if (widget.fetchAtInit) _fetch();
   }
 
   @override

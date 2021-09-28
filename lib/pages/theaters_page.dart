@@ -3,9 +3,10 @@ import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
-import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+
+import 'theater_search_page.dart';
 
 class TheatersPage extends StatefulWidget {
   const TheatersPage();
@@ -32,6 +33,10 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _goToSearchPage,
+        child: const Icon(Icons.add),
+      ),
       body: BehaviorSubjectBuilder<List<Theater>>(
         subject: bloc.theaters,
         builder: (context, snapshot) {
@@ -42,7 +47,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
             itemBuilder: (context, index) {
               final theater = theaters[index];
               return TheaterCard(
-                key: ObjectKey(theater),
+                key: ValueKey(theater.id.id + bloc.refreshID.toString()),
                 theater: theater,
               );
             },
@@ -51,21 +56,32 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
       ),
     );
   }
+
+  Future<void> _goToSearchPage() async {
+    await navigateTo(context, (_) => TheaterSearchPage(), returnAfterPageTransition: false);
+    bloc.refresh();
+  }
 }
 
 
 class TheatersPageBloc with Disposable {
-  final theaters = BehaviorSubject<List<Theater>>();
-
   TheatersPageBloc() {
-    final initialTheaters = Set.of([
-      ...AppService.instance.selectedTheaters,
-      ...AppService.instance.favoriteTheaters,
-    ]);
-    theaters.add(initialTheaters.toList());
+    refresh();
   }
 
-  _refreshList() => theaters.reAdd();
+  /// Used to properly refresh widgets
+  int refreshID = 0;
+
+  /// List of theaters
+  final theaters = BehaviorSubject<List<Theater>>();
+
+  refresh() {
+    refreshID++;
+    theaters.add(Set.of([
+      ...AppService.instance.selectedTheaters,
+      ...AppService.instance.favoriteTheaters,
+    ]).toList());
+  }
 
   @override
   void dispose() {

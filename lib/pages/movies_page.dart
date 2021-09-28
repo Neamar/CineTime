@@ -28,6 +28,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
     return Scaffold(
       body: FetchBuilder<MoviesShowTimes>(
         controller: bloc.fetchController,
+        fetchAtInit: false,
         task: bloc.fetch,
         builder: (context, moviesShowtimesData) {
           return Column(
@@ -50,22 +51,19 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                           Column(
                             children: [
                               // Theater info
-                              BehaviorSubjectBuilder<SplayTreeSet<Theater>>(   //OPTI because BehaviorSubjectBuilder of moviesShowTimes is above, and theses two streams are linked, this BehaviorSubjectBuilder is useless.
-                                subject: bloc.theaters,
-                                builder: (context, snapshot) {
-                                  final theaters = snapshot.data;
-                                  final theatersCount = theaters?.length ?? 0;
-                                  return Text(
-                                    () {
-                                      if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                                      if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
-                                      return 'Films dans $theatersCount cinémas';
-                                    } (),
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
-                                  );
-                                },
-                              ),
+                              () {
+                                final theaters = moviesShowtimesData.theaters;
+                                final theatersCount = theaters.length;
+                                return Text(
+                                  () {
+                                    if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                                    if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
+                                    return 'Films dans $theatersCount cinémas';
+                                  } (),
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                                );
+                              } (),
 
                               // Period
                               AppResources.spacerTiny,
@@ -90,7 +88,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       ),
                     ),
                   ),
-                  onTap: () => bloc.goToTheatersPage(context),
+                  onTap: _goToTheatersPage,
                 ),
               ),
 
@@ -111,7 +109,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       return MovieCard(
                         key: ValueKey(index),
                         movieShowTimes: moviesShowtimesData.moviesShowTimes[index],
-                        showTheaterName: bloc.theaters.value.length > 1,
+                        showTheaterName: moviesShowtimesData.theaters.length > 1,
                       );
                     },
                   );
@@ -123,25 +121,29 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
       ),
     );
   }
+
+  Future<void> _goToTheatersPage() async {
+    // Go to TheatersPage
+    await navigateTo(context, (_) => TheatersPage(), returnAfterPageTransition: false);
+
+    // Update UI
+    bloc.refresh();
+  }
 }
 
 
 class MoviesPageBloc with Disposable {
-  final theaters = BehaviorSubject<SplayTreeSet<Theater>>();
-
-  final fetchController = FetchBuilderController();
-
-  MoviesPageBloc()  {
-    // Init list
-    theaters.add(SplayTreeSet.from(AppService.instance.selectedTheaters, (t1, t2) => t1.name.compareTo(t2.name)));
-
-    // Update data when theaters list change
-    theaters.listen((value) => fetchController.refresh());
+  MoviesPageBloc() {
+    // Initial fetch, after widget is initialised
+    WidgetsBinding.instance!.addPostFrameCallback((_) => refresh());
   }
+
+  List<Theater> _theaters = [];
+  final fetchController = FetchBuilderController();
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data
-    final moviesShowTimes = await AppService.api.getMoviesList(theaters.value);
+    final moviesShowTimes = await AppService.api.getMoviesList(_theaters);
 
     // Sort
     moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => (mst2.movie.userRating ?? 0).compareTo(mst1.movie.userRating ?? 0));
@@ -150,19 +152,15 @@ class MoviesPageBloc with Disposable {
     return moviesShowTimes;
   }
 
-  void goToTheatersPage(BuildContext context) async {   // TODO move to widget
-    // Go to TheatersPage
-    var selectedTheaters = await navigateTo<Iterable<Theater>>(context, (_) => TheatersPage());
-    if (selectedTheaters == null)
+  void refresh() {
+    // Compare new list with current one
+    if (AppService.instance.selectedTheaters.toSet().isEqualTo(_theaters.toSet()))
       return;
 
-    // Add result to selection & Update UI
-    theaters.add(theaters.value..clear()..addAll(selectedTheaters));
-  }
+    // Copy selected theater to a local list
+    _theaters = UnmodifiableListView(List.from(AppService.instance.selectedTheaters));
 
-  @override
-  void dispose() {
-    theaters.close();
-    super.dispose();
+    // Refresh data
+    fetchController.refresh();
   }
 }

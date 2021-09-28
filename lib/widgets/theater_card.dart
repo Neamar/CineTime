@@ -105,12 +105,12 @@ class _TheaterCardState extends State<TheaterCard> {
     );
   }
 
-  void _onSelected() {
+  Future<void> _onSelected() async {
     // Save value
     if (isSelected)
-      AppService.instance.unselectTheater(widget.theater);
+      await AppService.instance.unselectTheater(widget.theater);
     else
-      AppService.instance.selectTheater(widget.theater);
+      await AppService.instance.selectTheater(widget.theater);
 
     // Update UI
     setState(() {
@@ -118,12 +118,12 @@ class _TheaterCardState extends State<TheaterCard> {
     });
   }
 
-  void _onFavoriteTap() {
+  Future<void> _onFavoriteTap() async {
     // Save value
     if (isFavorite)
-      AppService.instance.addToFavorites(widget.theater);
+      await AppService.instance.removeFromFavorites(widget.theater);
     else
-      AppService.instance.removeFromFavorites(widget.theater);
+      await AppService.instance.addToFavorites(widget.theater);
 
     // Update UI
     setState(() {

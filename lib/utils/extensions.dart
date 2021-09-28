@@ -156,6 +156,14 @@ extension ExtendedList<T> on List<T> {
   }
 }
 
+extension ExtendedSet<T> on Set<T> {
+  /// Return true if this set's content is equals to [other]'s.
+  bool isEqualTo(Set<T>? other) {
+    const comparator = SetEquality();
+    return comparator.equals(this, other);
+  }
+}
+
 extension ExtendedObjectIterable<Object> on Iterable<Object> {
   /// Converts each element to a String and concatenates the strings, ignoring null values.
   String joinNotNull(String separator) => this
