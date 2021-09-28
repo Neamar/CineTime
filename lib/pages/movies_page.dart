@@ -108,7 +108,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                     itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
                     padding: EdgeInsets.zero,
                     itemBuilder: (context, index) {
-                      return MovieTile(
+                      return MovieCard(
                         key: ValueKey(index),
                         movieShowTimes: moviesShowtimesData.moviesShowTimes[index],
                         showTheaterName: bloc.theaters.value.length > 1,

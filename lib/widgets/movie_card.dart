@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 
 import '_widgets.dart';
 
-class MovieTile extends StatelessWidget {
-  const MovieTile({Key? key, required this.movieShowTimes, this.showTheaterName = true}) : super(key: key);
+class MovieCard extends StatelessWidget {
+  const MovieCard({Key? key, required this.movieShowTimes, this.showTheaterName = true}) : super(key: key);
 
   final MovieShowTimes movieShowTimes;
   final bool showTheaterName;
