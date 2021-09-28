@@ -80,7 +80,7 @@ class TheatersPageBloc with Disposable {
     theaters.add(Set.of([
       ...AppService.instance.selectedTheaters,
       ...AppService.instance.favoriteTheaters,
-    ]).toList());
+    ]).toList()..sort());
   }
 
   @override

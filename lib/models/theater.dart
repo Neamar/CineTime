@@ -1,6 +1,6 @@
 import '_models.dart';
 
-class Theater extends Identifiable {
+class Theater extends Identifiable with Comparable {
   const Theater({
     required ApiId id,
     required this.name,
@@ -44,7 +44,8 @@ class Theater extends Identifiable {
     return lines.join('\n');
   }
 
-
+  @override
+  int compareTo(other) => this.name.compareTo(other.name);
 
   factory Theater.fromJson(Map<String, dynamic> json) => Theater(
     id: ApiId.fromEncoded(json['id']),

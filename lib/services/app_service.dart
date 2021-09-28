@@ -22,7 +22,7 @@ class AppService {
   //#region Selected theaters
   static const _maxSelected = 5;
   final Set<Theater> _selectedTheaters;
-  UnmodifiableListView<Theater> get selectedTheaters => UnmodifiableListView(_selectedTheaters);
+  UnmodifiableSetView<Theater> get selectedTheaters => UnmodifiableSetView(_selectedTheaters);
 
   bool isSelected(Theater theater) => _selectedTheaters.contains(theater);
 
@@ -48,7 +48,7 @@ class AppService {
 
   //#region Favorite theaters
   final Set<Theater> _favoriteTheaters;
-  UnmodifiableListView<Theater> get favoriteTheaters => UnmodifiableListView(_favoriteTheaters);
+  UnmodifiableSetView<Theater> get favoriteTheaters => UnmodifiableSetView(_favoriteTheaters);
 
   bool isFavorite(Theater theater) => _favoriteTheaters.contains(theater);
 

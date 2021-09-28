@@ -106,9 +106,10 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                     itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
                     padding: EdgeInsets.zero,
                     itemBuilder: (context, index) {
+                      final movieShowTimes = moviesShowtimesData.moviesShowTimes[index];
                       return MovieCard(
-                        key: ValueKey(index),
-                        movieShowTimes: moviesShowtimesData.moviesShowTimes[index],
+                        key: ObjectKey(movieShowTimes),
+                        movieShowTimes: movieShowTimes,
                         showTheaterName: moviesShowtimesData.theaters.length > 1,
                       );
                     },
@@ -138,12 +139,12 @@ class MoviesPageBloc with Disposable {
     WidgetsBinding.instance!.addPostFrameCallback((_) => refresh());
   }
 
-  List<Theater> _theaters = [];
+  UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
   final fetchController = FetchBuilderController();
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data
-    final moviesShowTimes = await AppService.api.getMoviesList(_theaters);
+    final moviesShowTimes = await AppService.api.getMoviesList(_theaters.toList(growable: false)..sort());
 
     // Sort
     moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => (mst2.movie.userRating ?? 0).compareTo(mst1.movie.userRating ?? 0));
@@ -154,11 +155,11 @@ class MoviesPageBloc with Disposable {
 
   void refresh() {
     // Compare new list with current one
-    if (AppService.instance.selectedTheaters.toSet().isEqualTo(_theaters.toSet()))
+    if (AppService.instance.selectedTheaters.isEqualTo(_theaters))
       return;
 
     // Copy selected theater to a local list
-    _theaters = UnmodifiableListView(List.from(AppService.instance.selectedTheaters));
+    _theaters = UnmodifiableSetView(Set.from(AppService.instance.selectedTheaters));
 
     // Refresh data
     fetchController.refresh();
