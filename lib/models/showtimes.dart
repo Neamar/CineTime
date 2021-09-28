@@ -13,7 +13,7 @@ class MoviesShowTimes {
   final DateTime fetchedTo;
 }
 
-class MovieShowTimes {
+class MovieShowTimes with Comparable<MovieShowTimes> {
   MovieShowTimes(this.movie, {List<TheaterShowTimes>? theatersShowTimes}) :
     this.theatersShowTimes = theatersShowTimes ?? [];
 
@@ -48,6 +48,9 @@ class MovieShowTimes {
     }
     return _showTimesSpecOptions!;
   }
+
+  @override
+  int compareTo(MovieShowTimes other) => movie.compareTo(other.movie);
 }
 
 typedef FormattedShowTimes = SplayTreeMap<Date, List<ShowTime?>>;

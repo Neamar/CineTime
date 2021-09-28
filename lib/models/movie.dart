@@ -2,7 +2,7 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 
-class Movie extends Identifiable {
+class Movie extends Identifiable with Comparable<Movie> {
   Movie({
     required ApiId id,
     required this.title,
@@ -49,6 +49,13 @@ class Movie extends Identifiable {
   final double? pressRating;
   final double? userRating;
   double? get rating => (pressRating != null && userRating != null ? (pressRating! + userRating!) / 2 : pressRating) ?? userRating;
+
+  @override
+  int compareTo(Movie other) {
+    if (this.userRating != null && other.userRating != null) return other.userRating!.compareTo(this.userRating!);
+    if (this.pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(this.pressRating!);
+    return this.title.compareTo(other.title);
+  }
 
   static String? _buildGenresFromApi(JsonList? genresApi) => genresApi?.map((genreApi) => _genresMap[genreApi]).joinNotNull(', ');
   static String? _buildDurationFromApi(String? durationApi) {
