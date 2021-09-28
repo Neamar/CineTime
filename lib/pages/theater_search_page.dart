@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 
+import 'theaters_page.dart';
+
 class TheaterSearchPage extends StatefulWidget {
   const TheaterSearchPage();
 
@@ -14,7 +16,7 @@ class TheaterSearchPage extends StatefulWidget {
   _TheaterSearchPageState createState() => _TheaterSearchPageState();
 }
 
-class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider<TheaterSearchPage, TheaterSearchPageBloc> {
+class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider<TheaterSearchPage, TheaterSearchPageBloc>, MultiSelectionMode<TheaterSearchPage> {
   @override
   initBloc() => TheaterSearchPageBloc();
 
@@ -35,9 +37,8 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             onPressed: bloc.startGeoSearch,
           ),
           if (context.canPop)   // Hide when page is shown at app start
-            IconButton(
-              icon: Icon(Icons.list),
-              onPressed: () {},   // TODO
+            MultiSelectionModeButton(
+              onPressed: toggleSelectionMode,
             ),
         ],
       ),
@@ -68,6 +69,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
                 return TheaterCard(
                   key: ObjectKey(theater),
                   theater: theater,
+                  multiSelectionMode: multiSelectionMode,
                 );
               },
             );

@@ -15,7 +15,7 @@ class TheatersPage extends StatefulWidget {
   _TheatersPageState createState() => _TheatersPageState();
 }
 
-class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersPage, TheatersPageBloc> {
+class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersPage, TheatersPageBloc>, MultiSelectionMode<TheatersPage> {
   @override
   initBloc() => TheatersPageBloc();
 
@@ -27,9 +27,8 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
           'Mes cinémas',
         ),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.list),
-            onPressed: () {},
+          MultiSelectionModeButton(
+            onPressed: toggleSelectionMode,
           ),
         ],
       ),
@@ -49,6 +48,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
               return TheaterCard(
                 key: ValueKey(theater.id.id + bloc.refreshID.toString()),
                 theater: theater,
+                multiSelectionMode: multiSelectionMode,
               );
             },
           );
@@ -62,8 +62,48 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
     if (singleSelectionMode == true) {
       Navigator.pop(context);
     } else {
+      autoUpdateSelectionMode();
       bloc.refresh();
     }
+  }
+}
+
+class MultiSelectionModeButton extends StatelessWidget {
+  const MultiSelectionModeButton({Key? key, this.onPressed}) : super(key: key);
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Sélection multiple',
+      child: IconButton(
+        icon: Icon(Icons.list),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+mixin MultiSelectionMode<T extends StatefulWidget> on State<T> {
+  bool multiSelectionMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    multiSelectionMode = AppService.instance.selectedTheaters.length >= 2;
+  }
+
+  void autoUpdateSelectionMode() {
+    if (!multiSelectionMode && AppService.instance.selectedTheaters.length >= 2) {
+      toggleSelectionMode();
+    }
+  }
+
+  void toggleSelectionMode() {
+    setState(() {
+      multiSelectionMode = !multiSelectionMode;
+    });
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:cinetime/models/theater.dart';
 import 'package:cinetime/pages/movies_page.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/services/app_service.dart';
+import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
 
@@ -33,7 +34,6 @@ class _TheaterCardState extends State<TheaterCard> {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      color: isSelected ? Colors.lightBlueAccent : null,
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
@@ -43,10 +43,20 @@ class _TheaterCardState extends State<TheaterCard> {
             child: Row(
               children: <Widget>[
 
-                // Image
-                Icon(
-                  Icons.theaters,
-                  size: 50,
+                // Leading
+                SizedBox(
+                  width: 60,
+                  child: widget.multiSelectionMode
+                    ? IgnorePointer(
+                        child: Checkbox(
+                          value: isSelected,
+                          onChanged: (_) {},
+                        ),
+                      )
+                    : Icon(
+                        Icons.theaters,
+                        size: 50,
+                      ),
                 ),
 
                 // Info
