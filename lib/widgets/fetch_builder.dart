@@ -142,36 +142,38 @@ class _ErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: isDense ? onRetry : null,
-      child: Flex(
-        mainAxisSize: MainAxisSize.min,
-        direction: isDense ? Axis.horizontal : Axis.vertical,
-        children: [
-          // Icon
-          Icon(
-            Icons.error_outline,
-            color: AppResources.colorRed,
-            size: isDense ? null : 40,
-          ),
-
-          // Caption
-          AppResources.spacerTiny,
-          Text('Impossible de récupérer les données'),
-
-          // Retry
-          if (isDense)...[
-            AppResources.spacerTiny,
+    return Center(
+      child: InkWell(
+        onTap: isDense ? onRetry : null,
+        child: Flex(
+          mainAxisSize: MainAxisSize.min,
+          direction: isDense ? Axis.horizontal : Axis.vertical,
+          children: [
+            // Icon
             Icon(
-              Icons.refresh,
+              Icons.error_outline,
+              color: AppResources.colorRed,
+              size: isDense ? null : 40,
             ),
-          ]
-          else
-            TextButton(
-              child: Text('Re-essayer'),
-              onPressed: onRetry,
-            ),
-        ],
+
+            // Caption
+            AppResources.spacerTiny,
+            Text('Impossible de récupérer les données'),
+
+            // Retry
+            if (isDense)...[
+              AppResources.spacerTiny,
+              Icon(
+                Icons.refresh,
+              ),
+            ]
+            else
+              TextButton(
+                child: Text('Re-essayer'),
+                onPressed: onRetry,
+              ),
+          ],
+        ),
       ),
     );
   }

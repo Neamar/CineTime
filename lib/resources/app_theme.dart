@@ -5,6 +5,9 @@ ThemeData appTheme() {
   return ThemeData(
     primarySwatch: _createMaterialColor(AppResources.colorRed),
     scaffoldBackgroundColor: AppResources.colorGrey,
+    iconTheme: IconThemeData(
+      color: Colors.white,
+    ),
   );
 }
 

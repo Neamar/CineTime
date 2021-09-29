@@ -1,4 +1,5 @@
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/permission_exception.dart';
@@ -23,6 +24,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: TextField(
           decoration: InputDecoration(
@@ -42,26 +44,27 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             ),
         ],
       ),
-      body: Center(   // Needed for child that are not a ListView
-        child: FetchBuilder<_SearchResult>(
-          controller: bloc.fetchBuilderController,
-          task: bloc.fetchTheaters,
-          builder: (context, searchResult) {
-            // No data
-            if (searchResult.theaters == null)
-              return IconMessage(
-                icon: FontAwesomeIcons.search,
-                message: 'Cherchez un cinéma par nom ou localisation',
-              );
+      body: FetchBuilder<_SearchResult>(
+        controller: bloc.fetchBuilderController,
+        task: bloc.fetchTheaters,
+        builder: (context, searchResult) {
+          // No data
+          if (searchResult.theaters == null)
+            return _NoResultMessage(
+              icon: FontAwesomeIcons.search,
+              message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
+            );
 
-            // Empty list
-            if (searchResult.theaters!.isEmpty)
-              return IconMessage(
-                icon: IconMessage.iconSad,
-                message: 'Aucun résultat',
-              );
+          // Empty list
+          if (searchResult.theaters!.isEmpty)
+            return _NoResultMessage(
+              icon: IconMessage.iconSad,
+              message: 'Aucun résultat',
+            );
 
-            return ListView.builder(
+          return Scaffold(
+            resizeToAvoidBottomInset: true,
+            body: ListView.builder(
               itemExtent: 100,
               itemCount: searchResult.theaters!.length,
               itemBuilder: (context, index) {
@@ -72,9 +75,51 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
                   multiSelectionMode: multiSelectionMode,
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _NoResultMessage extends StatelessWidget {
+  const _NoResultMessage({Key? key, required this.icon, required this.message}) : super(key: key);
+
+  final IconData icon;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final lines = message.split('\n');
+    return Container(
+      color: AppResources.colorDarkRed,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 50,
+                ),
+                AppResources.spacerLarge,
+                for(int i = 0; i < lines.length; i++)
+                  Text(
+                    lines[i],
+                    textAlign: TextAlign.center,
+                    style: (i.isOdd ? textTheme.headline5 : textTheme.headline6)?.copyWith(color: Colors.white),
+                  ),
+              ],
+            ),
+          ),
+
+          // Image
+          Image.asset('assets/illus.png'),
+        ],
       ),
     );
   }

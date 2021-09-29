@@ -78,10 +78,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                           Expanded(
                             child: Align(
                               alignment: Alignment.centerRight,
-                              child: Icon(
-                                Icons.edit,
-                                color: Colors.white,
-                              ),
+                              child: Icon(Icons.edit),
                             ),
                           ),
                         ],
