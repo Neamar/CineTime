@@ -1,5 +1,4 @@
 import 'package:cinetime/models/theater.dart';
-import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
@@ -101,9 +100,13 @@ mixin MultiSelectionMode<T extends StatefulWidget> on State<T> {
   }
 
   void toggleSelectionMode() {
+    // Update UI
     setState(() {
       multiSelectionMode = !multiSelectionMode;
     });
+
+    // Display a message
+    showMessage(context, 'Sélection multiple de cinéma '  + (multiSelectionMode ? 'activée' : 'désactivée'));
   }
 }
 
