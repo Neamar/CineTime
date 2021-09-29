@@ -23,61 +23,64 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: TextField(
-          decoration: InputDecoration(
-            hintText: 'Nom ou adresse de cinéma',
+    return ClearFocusBackground(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: TextField(
+            decoration: InputDecoration(
+              hintText: 'Nom ou adresse de cinéma',
+            ),
+            style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.white),
+            textInputAction: TextInputAction.search,
+            onSubmitted: bloc.startQuerySearch,
           ),
-          textInputAction: TextInputAction.search,
-          onSubmitted: bloc.startQuerySearch,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.my_location),
+              onPressed: bloc.startGeoSearch,
+            ),
+            if (context.canPop)   // Hide when page is shown at app start
+              MultiSelectionModeButton(
+                onPressed: toggleSelectionMode,
+              ),
+          ],
         ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.my_location),
-            onPressed: bloc.startGeoSearch,
-          ),
-          if (context.canPop)   // Hide when page is shown at app start
-            MultiSelectionModeButton(
-              onPressed: toggleSelectionMode,
-            ),
-        ],
-      ),
-      body: FetchBuilder<_SearchResult>(
-        controller: bloc.fetchBuilderController,
-        task: bloc.fetchTheaters,
-        builder: (context, searchResult) {
-          // No data
-          if (searchResult.theaters == null)
-            return _NoResultMessage(
-              icon: FontAwesomeIcons.search,
-              message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
-            );
+        body: FetchBuilder<_SearchResult>(
+          controller: bloc.fetchBuilderController,
+          task: bloc.fetchTheaters,
+          builder: (context, searchResult) {
+            // No data
+            if (searchResult.theaters == null)
+              return _NoResultMessage(
+                icon: FontAwesomeIcons.search,
+                message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
+              );
 
-          // Empty list
-          if (searchResult.theaters!.isEmpty)
-            return _NoResultMessage(
-              icon: IconMessage.iconSad,
-              message: 'Aucun résultat',
-            );
+            // Empty list
+            if (searchResult.theaters!.isEmpty)
+              return _NoResultMessage(
+                icon: IconMessage.iconSad,
+                message: 'Aucun résultat',
+              );
 
-          return Scaffold(
-            resizeToAvoidBottomInset: true,
-            body: ListView.builder(
-              itemExtent: 100,
-              itemCount: searchResult.theaters!.length,
-              itemBuilder: (context, index) {
-                final theater = searchResult.theaters![index];
-                return TheaterCard(
-                  key: ObjectKey(theater),
-                  theater: theater,
-                  multiSelectionMode: multiSelectionMode,
-                );
-              },
-            ),
-          );
-        },
+            return Scaffold(
+              resizeToAvoidBottomInset: true,
+              body: ListView.builder(
+                itemExtent: 100,
+                itemCount: searchResult.theaters!.length,
+                itemBuilder: (context, index) {
+                  final theater = searchResult.theaters![index];
+                  return TheaterCard(
+                    key: ObjectKey(theater),
+                    theater: theater,
+                    multiSelectionMode: multiSelectionMode,
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
