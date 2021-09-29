@@ -1,5 +1,6 @@
-import 'package:cinetime/resources/resources.dart';
 import 'package:flutter/material.dart';
+
+import 'themed_widgets.dart';
 
 class ShowMoreText extends StatefulWidget {
   final String text;
@@ -17,9 +18,7 @@ class _ShowMoreTextState extends State<ShowMoreText> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      child: AnimatedSwitcher(
-        duration: AppResources.durationAnimationMedium,
-        layoutBuilder: _animatedSwitcherLayoutBuilder,
+      child: CtAnimatedSwitcher(
         child: () {
           final text =  Text(
             widget.text,
@@ -50,17 +49,6 @@ class _ShowMoreTextState extends State<ShowMoreText> {
           isExpanded = !isExpanded;
         });
       },
-    );
-  }
-
-  /// Copied from AnimatedSwitcher.defaultLayoutBuilder
-  static Widget _animatedSwitcherLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
-    return Stack(
-      children: <Widget>[
-        ...previousChildren,
-        if (currentChild != null) currentChild,
-      ],
-      alignment: Alignment.topLeft,
     );
   }
 }

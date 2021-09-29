@@ -16,6 +16,7 @@ class FetchBuilder<T> extends StatefulWidget {
     this.builder,
     this.onSuccess,
     this.isDense = false,
+    this.fade = true,
   }) : super(key: key);
 
   /// Task that fetch and return the data
@@ -40,6 +41,9 @@ class FetchBuilder<T> extends StatefulWidget {
   /// Whether this widget is in a low space environment
   /// Will affect default error widget density
   final bool isDense;
+
+  /// Whether to enable a fading transition
+  final bool fade;
 
   @override
   _FetchBuilderState createState() => _FetchBuilderState<T>();
@@ -67,19 +71,28 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
     return BehaviorSubjectBuilder<T?>(
       subject: data,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return _ErrorWidget(
-            onRetry: _fetch,
-            isDense: widget.isDense,
+        final child = () {
+          if (snapshot.hasError) {
+            return _ErrorWidget(
+              onRetry: _fetch,
+              isDense: widget.isDense,
+            );
+          } else if (!snapshot.hasData) {
+            return widget.fetchingBuilder?.call(context) ?? SpinKitFadingCube(
+              color: Theme.of(context).primaryColor,
+              size: 25.0,
+            );
+          } else {
+            return widget.builder?.call(context, snapshot.data!) ?? const SizedBox();
+          }
+        } ();
+
+        if (widget.fade)
+          return CtAnimatedSwitcher(
+            child: child,
           );
-        } else if (!snapshot.hasData) {
-          return widget.fetchingBuilder?.call(context) ?? SpinKitFadingCube(
-            color: Theme.of(context).primaryColor,
-            size: 25.0,
-          );
-        } else {
-          return widget.builder?.call(context, snapshot.data!) ?? const SizedBox();
-        }
+
+        return child;
       }
     );
   }

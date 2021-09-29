@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -13,7 +14,6 @@ class CtProgressIndicator extends StatelessWidget {
     );
   }
 }
-
 
 class CtCachedImage extends StatelessWidget {
   final String? path;
@@ -45,6 +45,32 @@ class CtCachedImage extends StatelessWidget {
       ),
       placeholder: (_, url) => CtProgressIndicator(),
       errorWidget: (_, url, error) => errorWidget,
+    );
+  }
+}
+
+class CtAnimatedSwitcher extends StatelessWidget {
+  const CtAnimatedSwitcher({Key? key, this.child}) : super(key: key);
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: AppResources.durationAnimationMedium,
+      layoutBuilder: _animatedSwitcherLayoutBuilder,
+      child: child,
+    );
+  }
+
+  /// Copied from AnimatedSwitcher.defaultLayoutBuilder
+  static Widget _animatedSwitcherLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+    return Stack(
+      children: <Widget>[
+        ...previousChildren,
+        if (currentChild != null) currentChild,
+      ],
+      alignment: Alignment.topLeft,
     );
   }
 }
