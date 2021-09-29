@@ -5,10 +5,8 @@ import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
-import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '_pages.dart';
 
@@ -78,7 +76,10 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                           Expanded(
                             child: Align(
                               alignment: Alignment.centerRight,
-                              child: Icon(Icons.edit),
+                              child: Icon(
+                                CineTimeIcons.pencil,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ],

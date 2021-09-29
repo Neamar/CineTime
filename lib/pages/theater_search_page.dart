@@ -5,7 +5,6 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/permission_exception.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 
 import 'theaters_page.dart';
@@ -37,7 +36,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
           ),
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.my_location),
+              icon: Icon(CineTimeIcons.location),
               onPressed: bloc.startGeoSearch,
             ),
             if (context.canPop)   // Hide when page is shown at app start
@@ -53,7 +52,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             // No data
             if (searchResult.theaters == null)
               return _NoResultMessage(
-                icon: FontAwesomeIcons.search,
+                icon: CineTimeIcons.search,
                 message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
               );
 
@@ -67,7 +66,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             return Scaffold(
               resizeToAvoidBottomInset: true,
               body: ListView.builder(
-                itemExtent: 100,
+                itemExtent: TheaterCard.height,
                 itemCount: searchResult.theaters!.length,
                 itemBuilder: (context, index) {
                   final theater = searchResult.theaters![index];

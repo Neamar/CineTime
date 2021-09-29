@@ -16,6 +16,10 @@
 ///         Author:    Designmodo for Smashing Magazine
 ///         License:   CC BY ()
 ///         Homepage:  http://designmodo.com/linecons-free/
+/// * Font Awesome 4, Copyright (C) 2016 by Dave Gandy
+///         Author:    Dave Gandy
+///         License:   SIL ()
+///         Homepage:  http://fortawesome.github.com/Font-Awesome/
 /// * Linearicons Free, Copyright (C) Linearicons.com
 ///         Author:    Perxis
 ///         License:   CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
@@ -34,16 +38,17 @@ class CineTimeIcons {
   static const String? _kFontPkg = null;
 
   static const IconData search = IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData star = IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData paper_plane = IconData(0xe802, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData calendar = IconData(0xe803, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData pencil = IconData(0xe804, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData location = IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData videocam = IconData(0xe806, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData star_half = IconData(0xe815, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData star_empty = IconData(0xe816, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData star_empty = IconData(0xe807, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData pencil = IconData(0xe808, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData film_play = IconData(0xe824, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData list = IconData(0xe872, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData star = IconData(0xf005, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData list_1 = IconData(0xf03a, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData plus = IconData(0xf067, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData link_ext = IconData(0xf08e, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData frown = IconData(0xf119, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData sad_tear = IconData(0xf5b4, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }

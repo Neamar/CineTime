@@ -7,6 +7,8 @@ import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
 
 class TheaterCard extends StatefulWidget {
+  static const height = 80.0;
+
   const TheaterCard({Key? key, required this.theater, this.multiSelectionMode = false}) : super(key: key);
 
   /// Theater
@@ -54,8 +56,8 @@ class _TheaterCardState extends State<TheaterCard> {
                         ),
                       )
                     : Icon(
-                        Icons.theaters,
-                        size: 50,
+                        CineTimeIcons.videocam,
+                        color: AppResources.colorDarkRed,
                       ),
                 ),
 
@@ -94,20 +96,20 @@ class _TheaterCardState extends State<TheaterCard> {
             top: 0,
             right: 0,
             child: Material(
-              color: isFavorite ? Theme.of(context).primaryColor : Colors.white,
+              color: isFavorite ? Theme.of(context).primaryColor : AppResources.colorDarkGrey,
               shape: CornerBorder(CornerBorderPosition.topRight),
               clipBehavior: Clip.antiAlias,
               elevation: 2,
               child: SizedBox.fromSize(
                 size: Size.square(50),
                 child: InkWell(
-                  child: Align(
+                  child: const Align(
                     alignment: Alignment.topRight,
-                    child: Padding(
+                    child: const Padding(
                       padding: const EdgeInsets.all(5),
-                      child: Icon(
-                        isFavorite ? Icons.star : Icons.star_border,
-                        color: isFavorite ? Colors.white : Colors.black,
+                      child: const Icon(
+                        Icons.star,
+                        color: Colors.white,
                         size: 20,
                       ),
                     ),

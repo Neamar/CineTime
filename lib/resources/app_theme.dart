@@ -5,9 +5,6 @@ ThemeData appTheme() {
   final theme = ThemeData(
     primarySwatch: _createMaterialColor(AppResources.colorRed),
     scaffoldBackgroundColor: AppResources.colorGrey,
-    iconTheme: const IconThemeData(
-      color: Colors.white,
-    ),
     textSelectionTheme: const TextSelectionThemeData(
       cursorColor: Colors.white,
       selectionColor: AppResources.colorLightRed,

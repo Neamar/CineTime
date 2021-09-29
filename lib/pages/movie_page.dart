@@ -8,7 +8,6 @@ import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
@@ -59,8 +58,8 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        FaIcon(
-                          FontAwesomeIcons.video,
+                        Icon(
+                          Icons.ondemand_video_outlined,
                           color: hasTrailer ? Colors.white : AppResources.colorDarkGrey,
                         ),
                         SizedBox(width: 8.0),
@@ -78,8 +77,8 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        FaIcon(
-                          FontAwesomeIcons.externalLinkAlt,
+                        Icon(
+                          CineTimeIcons.link_ext,
                           color: Colors.white,
                         ),
                         SizedBox(width: 8.0),
@@ -568,7 +567,7 @@ class _ShowtimeDialog extends StatelessWidget {
               Tooltip(
                 message: 'Partager la séance',
                 child: IconButton(
-                  icon: FaIcon(Icons.share),
+                  icon: Icon(Icons.share),
                   onPressed: _share,
                 ),
               ),
@@ -577,7 +576,7 @@ class _ShowtimeDialog extends StatelessWidget {
                 Tooltip(
                   message: 'Ajouter au calendrier',
                   child: IconButton(
-                    icon: FaIcon(Icons.calendar_today),
+                    icon: Icon(CineTimeIcons.calendar),
                     onPressed: _addToCalendar,
                   ),
                 ),

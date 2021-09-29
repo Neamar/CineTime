@@ -1,5 +1,5 @@
+import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cinetime/utils/_utils.dart';
 
 class StarRating extends StatelessWidget {
@@ -27,8 +27,8 @@ class StarRating extends StatelessWidget {
   }
 
   Widget _buildStar(bool solid) {
-    return FaIcon(
-      solid ? FontAwesomeIcons.solidStar : FontAwesomeIcons.star,
+    return Icon(
+      solid ? CineTimeIcons.star : CineTimeIcons.star_empty,
       color: Colors.orange,
       size: 15,
     );

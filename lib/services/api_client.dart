@@ -106,7 +106,6 @@ class ApiClient {
     return theatersJson.map((theaterJson) {
       theaterJson = theaterJson['node']!;
       final JsonObject? address = theaterJson['location'];
-      String? posterUrl = theaterJson['poster']?['url'];
 
       return Theater(
         id: ApiId.fromEncoded(theaterJson['id']),
