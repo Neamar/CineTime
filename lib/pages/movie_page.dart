@@ -1,7 +1,7 @@
 import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';

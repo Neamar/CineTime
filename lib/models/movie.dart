@@ -1,5 +1,5 @@
 import 'package:cinetime/models/_models.dart';
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 
 class Movie extends Identifiable with Comparable<Movie> {

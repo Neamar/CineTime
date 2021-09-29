@@ -2,7 +2,7 @@ import 'package:cinetime/models/theater.dart';
 import 'package:cinetime/pages/movies_page.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/services/app_service.dart';
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
 

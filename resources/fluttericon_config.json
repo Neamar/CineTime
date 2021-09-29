@@ -1,0 +1,88 @@
+{
+  "name": "CineTimeIcons",
+  "css_prefix_text": "",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "cdf7270e5dcec27c452fb33f334f8284",
+      "css": "list",
+      "code": 59506,
+      "src": "linearicons"
+    },
+    {
+      "uid": "9725db89b610135dc76cd8a21afffa83",
+      "css": "search",
+      "code": 59392,
+      "src": "linecons"
+    },
+    {
+      "uid": "4dd970a79ff089e664cd87049685f189",
+      "css": "film-play",
+      "code": 59428,
+      "src": "linearicons"
+    },
+    {
+      "uid": "6fbd93c0d220507921015a15575009e5",
+      "css": "paper-plane",
+      "code": 59394,
+      "src": "linecons"
+    },
+    {
+      "uid": "43e4647c57186b5e06874621b5e665be",
+      "css": "calendar",
+      "code": 59395,
+      "src": "linecons"
+    },
+    {
+      "uid": "2aeb4987b469d22fcb8b471b6d2cdfff",
+      "css": "pencil",
+      "code": 59396,
+      "src": "linecons"
+    },
+    {
+      "uid": "1ea8ad6dbe1ae9a73565ad16cf88de19",
+      "css": "location",
+      "code": 59397,
+      "src": "linecons"
+    },
+    {
+      "uid": "f2a37db235ca1951d60d7ebc9733eb54",
+      "css": "videocam",
+      "code": 59398,
+      "src": "linecons"
+    },
+    {
+      "uid": "d3b5ca19943a9f54ef819e206923b8b5",
+      "css": "star-empty",
+      "code": 59414,
+      "src": "linearicons"
+    },
+    {
+      "uid": "dd56d564673c6ab3e0b34b3da1c377c2",
+      "css": "star-half",
+      "code": 59413,
+      "src": "linearicons"
+    },
+    {
+      "uid": "239ea52880dbe3526573ff6cf99ad0cf",
+      "css": "star",
+      "code": 61445,
+      "src": "fontawesome5"
+    },
+    {
+      "uid": "cdb1727fbe90b79abe3c0e498e8d099a",
+      "css": "plus",
+      "code": 61543,
+      "src": "fontawesome5"
+    },
+    {
+      "uid": "181e4015f18b9d7bf9765bef5a1b0bb0",
+      "css": "list-1",
+      "code": 61498,
+      "src": "fontawesome5"
+    }
+  ]
+}

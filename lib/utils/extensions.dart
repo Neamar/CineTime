@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:cinetime/models/date_time.dart';
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/subjects.dart';

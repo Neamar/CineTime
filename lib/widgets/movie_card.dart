@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/movie_page.dart';
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
