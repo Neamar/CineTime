@@ -17,6 +17,9 @@ class AppResources {
   static const spacerTiny = SizedBox(width: 5, height: 5);
   static const spacerExtraTiny = SizedBox(width: 2, height: 2);
 
+  // Border Radius
+  static const borderRadiusMedium = BorderRadius.all(Radius.circular(15));
+
   // Duration
   static const durationAnimationShort = Duration(milliseconds: 150);
   static const durationAnimationMedium = Duration(milliseconds: 250);

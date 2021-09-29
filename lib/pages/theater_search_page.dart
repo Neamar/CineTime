@@ -29,7 +29,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
         appBar: AppBar(
           title: TextField(
             decoration: InputDecoration(
-              hintText: 'Nom ou adresse de cinéma',
+              hintText: 'Nom ou adresse',
             ),
             style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.white),
             textInputAction: TextInputAction.search,
@@ -107,6 +107,7 @@ class _NoResultMessage extends StatelessWidget {
               children: [
                 Icon(
                   icon,
+                  color: AppResources.colorGrey,
                   size: 50,
                 ),
                 AppResources.spacerLarge,
@@ -114,7 +115,7 @@ class _NoResultMessage extends StatelessWidget {
                   Text(
                     lines[i],
                     textAlign: TextAlign.center,
-                    style: (i.isOdd ? textTheme.headline5 : textTheme.headline6)?.copyWith(color: Colors.white),
+                    style: (i.isOdd ? textTheme.headline5 : textTheme.headline6)?.copyWith(color: AppResources.colorGrey),
                   ),
               ],
             ),

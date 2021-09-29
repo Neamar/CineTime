@@ -2,11 +2,35 @@ import 'package:cinetime/resources/resources.dart';
 import 'package:flutter/material.dart';
 
 ThemeData appTheme() {
-  return ThemeData(
+  final theme = ThemeData(
     primarySwatch: _createMaterialColor(AppResources.colorRed),
     scaffoldBackgroundColor: AppResources.colorGrey,
-    iconTheme: IconThemeData(
+    iconTheme: const IconThemeData(
       color: Colors.white,
+    ),
+    textSelectionTheme: const TextSelectionThemeData(
+      cursorColor: Colors.white,
+      selectionColor: AppResources.colorLightRed,
+      selectionHandleColor: Colors.white,
+    ),
+  );
+  return theme.copyWith(
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: theme.textTheme.bodyText2?.copyWith(color: AppResources.colorDarkRed),
+      enabledBorder: const OutlineInputBorder(
+        borderRadius: AppResources.borderRadiusMedium,
+        borderSide: const BorderSide(
+          color: AppResources.colorDarkRed,
+        ),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: AppResources.borderRadiusMedium,
+        borderSide: const BorderSide(
+          color: Colors.white,
+        ),
+      ),
+      isDense: true,
+      contentPadding: EdgeInsets.all(10),
     ),
   );
 }
