@@ -3,6 +3,7 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -68,6 +69,20 @@ class App extends StatelessWidget {
       home: AppService.instance.selectedTheaters.isEmpty
         ? TheaterSearchPage()
         : MoviesPage(),
+      builder: (context, child) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          // Set system status & navigation bars colors.
+          // Using [AnnotatedRegion] is better than calling [SystemChrome.setSystemUIOverlayStyle] because it allows some pages to override colors and automatically restore default theme when page is disposed.
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: child!,
+        );
+      },
     );
   }
 }
