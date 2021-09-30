@@ -7,6 +7,8 @@ class AppResources {
   static const colorLightRed = Color(0xFFFF6659);
   static const colorDarkRed = Color(0xFF9A0007);
 
+  static const colorDarkBlue = Color(0xFF101E39);
+
   static const colorGrey = Color(0xFFFAFAFA);
   static const colorDarkGrey = Color(0xFFC7C7C7);
 

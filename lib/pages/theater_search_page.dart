@@ -54,13 +54,17 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
               return _NoResultMessage(
                 icon: CineTimeIcons.search,
                 message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
+                backgroundColor: AppResources.colorDarkRed,
+                imageAssetPath: 'assets/welcome.png',
               );
 
             // Empty list
             if (searchResult.theaters!.isEmpty)
               return _NoResultMessage(
                 icon: IconMessage.iconSad,
-                message: 'Aucun résultat',
+                message: 'Aucun\nRÉSULTAT',
+                backgroundColor: AppResources.colorDarkBlue,
+                imageAssetPath: 'assets/empty.png',
               );
 
             return Scaffold(
@@ -86,17 +90,24 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
 }
 
 class _NoResultMessage extends StatelessWidget {
-  const _NoResultMessage({Key? key, required this.icon, required this.message}) : super(key: key);
+  const _NoResultMessage({Key? key,
+    required this.icon,
+    required this.message,
+    required this.backgroundColor,
+    required this.imageAssetPath,
+  }) : super(key: key);
 
   final IconData icon;
   final String message;
+  final Color backgroundColor;
+  final String imageAssetPath;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final lines = message.split('\n');
     return Container(
-      color: AppResources.colorDarkRed,
+      color: backgroundColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -121,7 +132,7 @@ class _NoResultMessage extends StatelessWidget {
           ),
 
           // Image
-          Image.asset('assets/illus.png'),
+          Image.asset(imageAssetPath),
         ],
       ),
     );
