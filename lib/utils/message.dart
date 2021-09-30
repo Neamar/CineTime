@@ -39,6 +39,7 @@ Future<void> showMessage(BuildContext context, String message, {bool? isError, O
           child: FlashBar(
             content: Text(
               message,
+              textAlign: TextAlign.center,
               style: context.textTheme.bodyText1?.copyWith(color: isError ? Colors.white : null),
             ),
             primaryAction: exception == null

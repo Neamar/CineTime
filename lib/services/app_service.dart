@@ -34,7 +34,7 @@ class AppService {
       return true;
     } else {
       if (_selectedTheaters.length >= _maxSelected) {
-        showMessage(App.navigatorContext, 'Impossible d\'afficher plus de $_maxSelected cinémas à la fois 😢', isError: true); // Do not await
+        showMessage(App.navigatorContext, 'Maximum $_maxSelected cinémas 😢', isError: true); // Do not await
         return false;
       } else {
         await StorageService.saveSelectedTheaters(_selectedTheaters..add(theater));
@@ -45,7 +45,7 @@ class AppService {
 
   Future<bool> unselectTheater(Theater theater) async {
     if (_selectedTheaters.length <= 1) {
-      showMessage(App.navigatorContext, 'Minimun 1', isError: true); // Do not await
+      showMessage(App.navigatorContext, 'Minium 1 cinéma', isError: true); // Do not await
       return false;
     } else {
       await StorageService.saveSelectedTheaters(_selectedTheaters..remove(theater));
