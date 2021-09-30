@@ -14,9 +14,9 @@ class AppService {
   final ApiClient apiClient = ApiClient();
   static ApiClient get api => instance.apiClient;
 
-  AppService() :
-      _selectedTheaters = StorageService.readSelectedTheaters().toSet(),
-      _favoriteTheaters = StorageService.readFavoriteTheaters().toSet();
+  AppService()
+      : _selectedTheaters = StorageService.readSelectedTheaters().toSet(),
+        _favoriteTheaters = StorageService.readFavoriteTheaters().toSet();
   //#endregion
 
   //#region Selected theaters
@@ -28,11 +28,13 @@ class AppService {
 
   Future<bool> selectTheater(Theater theater, {bool clearFirst = false}) async {
     if (clearFirst) {
-      await StorageService.saveSelectedTheaters(_selectedTheaters..clear()..add(theater));
+      await StorageService.saveSelectedTheaters(_selectedTheaters
+        ..clear()
+        ..add(theater));
       return true;
     } else {
       if (_selectedTheaters.length >= _maxSelected) {
-        showMessage(App.navigatorContext, 'Maximum $_maxSelected', isError: true); // Do not await
+        showMessage(App.navigatorContext, 'Impossible d\'afficher plus de $_maxSelected cinémas à la fois 😢', isError: true); // Do not await
         return false;
       } else {
         await StorageService.saveSelectedTheaters(_selectedTheaters..add(theater));
@@ -40,9 +42,10 @@ class AppService {
       }
     }
   }
+
   Future<bool> unselectTheater(Theater theater) async {
     if (_selectedTheaters.length <= 1) {
-      showMessage(App.navigatorContext, 'Minimun 1', isError: true);    // Do not await
+      showMessage(App.navigatorContext, 'Minimun 1', isError: true); // Do not await
       return false;
     } else {
       await StorageService.saveSelectedTheaters(_selectedTheaters..remove(theater));
