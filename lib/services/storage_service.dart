@@ -1,57 +1,70 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
-  static const _FavoriteTheatersKey = "favoriteTheaters";
+  static const _selectedTheatersKey = "selectedTheaters";
+  static const _favoriteTheatersKey = "favoriteTheaters";
+  static String _theatersKey(String theaterId) => "theater:$theaterId";
+  static const _listSeparator = '|';
 
   static late SharedPreferences _storage;
 
   static Future<void> init() async => _storage = await SharedPreferences.getInstance();
 
-  static Future<void> saveFavoriteTheaters(Iterable<Theater> theaters) =>
-    _storage.setString(_FavoriteTheatersKey, json.encode(theaters.map((theater) => theater.toJson()).toList(growable: false)));
+  static Future<void> saveSelectedTheaters(Iterable<Theater> theaters) => _saveTheaters(_selectedTheatersKey, theaters);
+  static List<Theater> readSelectedTheaters() => _readTheaters(_selectedTheatersKey);
 
-  static Iterable<Theater> readFavoriteTheaters() {
-    //Read json
-    final theatersString = _storage.getString(_FavoriteTheatersKey);
-    if (theatersString?.isNotEmpty != true)
-      return [];
+  static Future<void> saveFavoriteTheaters(Iterable<Theater> theaters) => _saveTheaters(_favoriteTheatersKey, theaters);
+  static List<Theater> readFavoriteTheaters() => _readTheaters(_favoriteTheatersKey);
 
-    //Decode json
-    List<dynamic> usersJson = json.decode(theatersString!);
+  static Future<void> _saveTheaters(String key, Iterable<Theater> theaters) async {
+    // Save theater data
+    await _saveTheatersData(theaters);
 
-    //Convert to Theater
-    return usersJson.map((json) => Theater.fromJson(json));
+    // Save favorite theaters ids
+    await _storage.setString(key, theaters.map((theater) => theater.id.id).join(_listSeparator));
   }
 
-  static DateTime? dateFromString(String? dateString) => DateTime.tryParse(dateString ?? '')?.toLocal();
+  static List<Theater> _readTheaters(String key) {
+    // Read
+    final theatersString = _storage.getString(key);
+    if (isStringNullOrEmpty(theatersString)) return [];
 
-  static String? dateToString(DateTime? date) => date?.toUtc().toIso8601String();
-}
+    // Decode
+    final theatersIds = theatersString!.split(_listSeparator);
 
-class FavoriteTheatersHandler {
-  static FavoriteTheatersHandler? instance;
-  static void init() => instance = FavoriteTheatersHandler();
-
-  final Set<Theater> _theaters;
-  UnmodifiableListView<Theater> get theaters => UnmodifiableListView(_theaters);
-
-  FavoriteTheatersHandler() : _theaters = StorageService.readFavoriteTheaters().toSet();
-
-  bool isFavorite(Theater theater) => _theaters.contains(theater);
-
-  Future<void> add(Theater theater) async {
-    _theaters.add(theater);
-    await StorageService.saveFavoriteTheaters(_theaters);
+    // Convert to Theater
+    final theaters = <Theater>[];
+    for (final id in theatersIds) {
+      final theater = _readTheaterData(id);
+      theaters.addNotNull(theater);
+    }
+    return theaters;
   }
 
-  Future<void> remove(Theater theater) async {
-    _theaters.remove(theater);
-    await StorageService.saveFavoriteTheaters(_theaters);
+  static Future<void> _saveTheatersData(Iterable<Theater> theaters) async {
+    for (final theater in theaters) {
+      final key = _theatersKey(theater.id.id);
+      if (!_storage.containsKey(key)) {
+        await _storage.setString(key, json.encode(theater.toJson()));
+      }
+    }
   }
 
-  int get length => _theaters.length;
+  static Theater? _readTheaterData(String theaterId) {
+    // Read
+    final theaterString = _storage.getString(_theatersKey(theaterId));
+    if (isStringNullOrEmpty(theaterString)) return null;
+
+    // Decode
+    try {
+      return Theater.fromJson(json.decode(theaterString!));
+    } catch(e, s) {
+      reportError(e, s);
+      return null;
+    }
+  }
 }

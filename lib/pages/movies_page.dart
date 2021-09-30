@@ -1,21 +1,17 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
-import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '_pages.dart';
 
 class MoviesPage extends StatefulWidget {
-  const MoviesPage([this.selectedTheaters]);
-
-  final Iterable<Theater>? selectedTheaters;
+  const MoviesPage();
 
   @override
   State<MoviesPage> createState() => _MoviesPageState();
@@ -23,13 +19,14 @@ class MoviesPage extends StatefulWidget {
 
 class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, MoviesPageBloc> {
   @override
-  initBloc() => MoviesPageBloc(widget.selectedTheaters);
+  initBloc() => MoviesPageBloc();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FetchBuilder<MoviesShowTimes>(
         controller: bloc.fetchController,
+        fetchAtInit: false,
         task: bloc.fetch,
         builder: (context, moviesShowtimesData) {
           return Column(
@@ -52,22 +49,19 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                           Column(
                             children: [
                               // Theater info
-                              BehaviorSubjectBuilder<SplayTreeSet<Theater>>(   //OPTI because BehaviorSubjectBuilder of moviesShowTimes is above, and theses two streams are linked, this BehaviorSubjectBuilder is useless.
-                                subject: bloc.theaters,
-                                builder: (context, snapshot) {
-                                  final theaters = snapshot.data;
-                                  final theatersCount = theaters?.length ?? 0;
-                                  return Text(
-                                    () {
-                                      if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                                      if (theatersCount == 1) return 'Films pour ${theaters!.first.name}';
-                                      return 'Films dans $theatersCount cinémas';
-                                    } (),
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
-                                  );
-                                },
-                              ),
+                              () {
+                                final theaters = moviesShowtimesData.theaters;
+                                final theatersCount = theaters.length;
+                                return Text(
+                                  () {
+                                    if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                                    if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
+                                    return 'Films dans $theatersCount cinémas';
+                                  } (),
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                                );
+                              } (),
 
                               // Period
                               AppResources.spacerTiny,
@@ -83,7 +77,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Icon(
-                                Icons.edit,
+                                CineTimeIcons.pencil,
                                 color: Colors.white,
                               ),
                             ),
@@ -92,7 +86,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       ),
                     ),
                   ),
-                  onTap: () => bloc.goToTheatersPage(context),
+                  onTap: _goToTheatersPage,
                 ),
               ),
 
@@ -110,10 +104,11 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                     itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
                     padding: EdgeInsets.zero,
                     itemBuilder: (context, index) {
-                      return MovieTile(
-                        key: ValueKey(index),
-                        movieShowTimes: moviesShowtimesData.moviesShowTimes[index],
-                        showTheaterName: bloc.theaters.value.length > 1,
+                      final movieShowTimes = moviesShowtimesData.moviesShowTimes[index];
+                      return MovieCard(
+                        key: ObjectKey(movieShowTimes),
+                        movieShowTimes: movieShowTimes,
+                        showTheaterName: moviesShowtimesData.theaters.length > 1,
                       );
                     },
                   );
@@ -125,47 +120,46 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
       ),
     );
   }
+
+  Future<void> _goToTheatersPage() async {
+    // Go to TheatersPage
+    await navigateTo(context, (_) => TheatersPage(), returnAfterPageTransition: false);
+
+    // Update UI
+    bloc.refresh();
+  }
 }
 
 
 class MoviesPageBloc with Disposable {
-  final theaters = BehaviorSubject<SplayTreeSet<Theater>>();
-  final favoriteTheaters = FavoriteTheatersHandler.instance;
-
-  final fetchController = FetchBuilderController();
-
-  MoviesPageBloc(Iterable<Theater>? selectedTheaters)  {
-    // Init list with the favorites
-    theaters.add(SplayTreeSet.from(selectedTheaters ?? favoriteTheaters!.theaters, (t1, t2) => t1.name.compareTo(t2.name)));
-
-    // Update data when theaters list change
-    theaters.listen((value) => fetchController.refresh());
+  MoviesPageBloc() {
+    // Initial fetch, after widget is initialised
+    WidgetsBinding.instance!.addPostFrameCallback((_) => refresh());
   }
+
+  UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
+  final fetchController = FetchBuilderController();
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data
-    final moviesShowTimes = await AppService.api.getMoviesList(theaters.value);
+    final moviesShowTimes = await AppService.api.getMoviesList(_theaters.toList(growable: false)..sort());
 
     // Sort
-    moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => (mst2.movie.userRating ?? 0).compareTo(mst1.movie.userRating ?? 0));
+    moviesShowTimes.moviesShowTimes.sort();
 
     // Return data
     return moviesShowTimes;
   }
 
-  void goToTheatersPage(BuildContext context) async {
-    // Go to TheatersPage
-    var selectedTheaters = await navigateTo<Iterable<Theater>>(context, (_) => TheatersPage(selectedTheaters: theaters.value));
-    if (selectedTheaters == null)
+  void refresh() {
+    // Compare new list with current one
+    if (AppService.instance.selectedTheaters.isEqualTo(_theaters))
       return;
 
-    // Add result to selection & Update UI
-    theaters.add(theaters.value..clear()..addAll(selectedTheaters));
-  }
+    // Copy selected theater to a local list
+    _theaters = UnmodifiableSetView(Set.from(AppService.instance.selectedTheaters));
 
-  @override
-  void dispose() {
-    theaters.close();
-    super.dispose();
+    // Refresh data
+    fetchController.refresh();
   }
 }

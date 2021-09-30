@@ -1,4 +1,4 @@
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/foundation.dart';
@@ -11,15 +11,20 @@ class FetchBuilder<T> extends StatefulWidget {
     Key? key,
     this.controller,
     required this.task,
+    this.fetchAtInit = true,
     this.fetchingBuilder,
     this.builder,
     this.onSuccess,
     this.isDense = false,
+    this.fade = true,
   }) : super(key: key);
 
   /// Task that fetch and return the data
   /// May throw
   final AsyncTask<T> task;
+
+  /// Whether to automatically start [task] when widget is initialised.
+  final bool fetchAtInit;
 
   /// Optional Widget to display while fetching
   final WidgetBuilder? fetchingBuilder;
@@ -37,6 +42,9 @@ class FetchBuilder<T> extends StatefulWidget {
   /// Will affect default error widget density
   final bool isDense;
 
+  /// Whether to enable a fading transition
+  final bool fade;
+
   @override
   _FetchBuilderState createState() => _FetchBuilderState<T>();
 }
@@ -48,7 +56,7 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
   void initState() {
     super.initState();
     _setControllerCallback();
-    _fetch();
+    if (widget.fetchAtInit) _fetch();
   }
 
   @override
@@ -63,19 +71,28 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
     return BehaviorSubjectBuilder<T?>(
       subject: data,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return _ErrorWidget(
-            onRetry: _fetch,
-            isDense: widget.isDense,
+        final child = () {
+          if (snapshot.hasError) {
+            return _ErrorWidget(
+              onRetry: _fetch,
+              isDense: widget.isDense,
+            );
+          } else if (!snapshot.hasData) {
+            return widget.fetchingBuilder?.call(context) ?? SpinKitFadingCube(
+              color: Theme.of(context).primaryColor,
+              size: 25.0,
+            );
+          } else {
+            return widget.builder?.call(context, snapshot.data!) ?? const SizedBox();
+          }
+        } ();
+
+        if (widget.fade)
+          return CtAnimatedSwitcher(
+            child: child,
           );
-        } else if (!snapshot.hasData) {
-          return widget.fetchingBuilder?.call(context) ?? SpinKitFadingCube(
-            color: Theme.of(context).primaryColor,
-            size: 25.0,
-          );
-        } else {
-          return widget.builder?.call(context, snapshot.data!) ?? const SizedBox();
-        }
+
+        return child;
       }
     );
   }
@@ -138,36 +155,38 @@ class _ErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: isDense ? onRetry : null,
-      child: Flex(
-        mainAxisAlignment: MainAxisAlignment.center,
-        direction: isDense ? Axis.horizontal : Axis.vertical,
-        children: [
-          // Icon
-          Icon(
-            Icons.error_outline,
-            color: AppResources.colorRed,
-            size: isDense ? null : 40,
-          ),
-
-          // Caption
-          AppResources.spacerTiny,
-          Text('Impossible de récupérer les données'),
-
-          // Retry
-          if (isDense)...[
-            AppResources.spacerTiny,
+    return Center(
+      child: InkWell(
+        onTap: isDense ? onRetry : null,
+        child: Flex(
+          mainAxisSize: MainAxisSize.min,
+          direction: isDense ? Axis.horizontal : Axis.vertical,
+          children: [
+            // Icon
             Icon(
-              Icons.refresh,
+              Icons.error_outline,
+              color: AppResources.colorRed,
+              size: isDense ? null : 40,
             ),
-          ]
-          else
-            TextButton(
-              child: Text('Re-essayer'),
-              onPressed: onRetry,
-            ),
-        ],
+
+            // Caption
+            AppResources.spacerTiny,
+            Text('Impossible de récupérer les données'),
+
+            // Retry
+            if (isDense)...[
+              AppResources.spacerTiny,
+              Icon(
+                Icons.refresh,
+              ),
+            ]
+            else
+              TextButton(
+                child: Text('Re-essayer'),
+                onPressed: onRetry,
+              ),
+          ],
+        ),
       ),
     );
   }

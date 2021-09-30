@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:cinetime/models/date_time.dart';
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/subjects.dart';
@@ -88,6 +88,9 @@ extension ExtendedBehaviorSubject<T> on BehaviorSubject<T> {
     }
     return false;
   }
+
+  /// Add current [value] to subject;
+  void reAdd() => add(value);
 }
 
 extension ExtendedIterable<T> on Iterable<T> {
@@ -127,10 +130,10 @@ extension ExtendedIterable<T> on Iterable<T> {
 }
 
 extension ExtendedList<T> on List<T> {
-  T? elementAtOrNull(int index) {
-    if (index < 0 || index >= this.length)
-      return null;
-    return this.elementAt(index);
+  void addNotNull(T? value) {
+    if (value != null) {
+      this.add(value);
+    }
   }
 
   /// Insert [widget] between each member of this list
@@ -140,9 +143,23 @@ extension ExtendedList<T> on List<T> {
     }
   }
 
+  T? elementAtOrNull(int index) {
+    if (index < 0 || index >= this.length)
+      return null;
+    return this.elementAt(index);
+  }
+
   /// Return true if this list's content is equals to [other]'s.
   bool isEqualTo(List<T>? other) {
     const comparator = ListEquality();
+    return comparator.equals(this, other);
+  }
+}
+
+extension ExtendedSet<T> on Set<T> {
+  /// Return true if this set's content is equals to [other]'s.
+  bool isEqualTo(Set<T>? other) {
+    const comparator = SetEquality();
     return comparator.equals(this, other);
   }
 }

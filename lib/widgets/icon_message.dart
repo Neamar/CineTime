@@ -1,10 +1,9 @@
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class IconMessage extends StatelessWidget {
-  static const IconData iconSad = FontAwesomeIcons.frown;
-  static const IconData iconError = FontAwesomeIcons.sadTear;
+  static const IconData iconSad = CineTimeIcons.frown;
+  static const IconData iconError = CineTimeIcons.sad_tear;
 
   final IconData icon;
   final String message;

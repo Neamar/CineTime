@@ -1,0 +1,94 @@
+{
+  "name": "CineTimeIcons",
+  "css_prefix_text": "",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "cdf7270e5dcec27c452fb33f334f8284",
+      "css": "list",
+      "code": 59506,
+      "src": "linearicons"
+    },
+    {
+      "uid": "9725db89b610135dc76cd8a21afffa83",
+      "css": "search",
+      "code": 59392,
+      "src": "linecons"
+    },
+    {
+      "uid": "4dd970a79ff089e664cd87049685f189",
+      "css": "film-play",
+      "code": 59428,
+      "src": "linearicons"
+    },
+    {
+      "uid": "6fbd93c0d220507921015a15575009e5",
+      "css": "paper-plane",
+      "code": 59394,
+      "src": "linecons"
+    },
+    {
+      "uid": "43e4647c57186b5e06874621b5e665be",
+      "css": "calendar",
+      "code": 59395,
+      "src": "linecons"
+    },
+    {
+      "uid": "1ea8ad6dbe1ae9a73565ad16cf88de19",
+      "css": "location",
+      "code": 59397,
+      "src": "linecons"
+    },
+    {
+      "uid": "f2a37db235ca1951d60d7ebc9733eb54",
+      "css": "videocam",
+      "code": 59398,
+      "src": "linecons"
+    },
+    {
+      "uid": "cdb1727fbe90b79abe3c0e498e8d099a",
+      "css": "plus",
+      "code": 61543,
+      "src": "fontawesome5"
+    },
+    {
+      "uid": "d929a4fc4af1ef09d267a8b90394b725",
+      "css": "sad_tear",
+      "code": 62900,
+      "src": "fontawesome5"
+    },
+    {
+      "uid": "714d39639e242209c46de420b43d5b72",
+      "css": "frown",
+      "code": 61721,
+      "src": "fontawesome5"
+    },
+    {
+      "uid": "474656633f79ea2f1dad59ff63f6bf07",
+      "css": "star",
+      "code": 59393,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "d17030afaecc1e1c22349b99f3c4992a",
+      "css": "star-empty-1",
+      "code": 59399,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "d35a1d35efeb784d1dc9ac18b9b6c2b6",
+      "css": "pencil-1",
+      "code": 59400,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "e15f0d620a7897e2035c18c80142f6d9",
+      "css": "link-ext",
+      "code": 61582,
+      "src": "fontawesome"
+    }
+  ]
+}

@@ -7,6 +7,8 @@ class AppResources {
   static const colorLightRed = Color(0xFFFF6659);
   static const colorDarkRed = Color(0xFF9A0007);
 
+  static const colorDarkBlue = Color(0xFF101E39);
+
   static const colorGrey = Color(0xFFFAFAFA);
   static const colorDarkGrey = Color(0xFFC7C7C7);
 
@@ -16,6 +18,9 @@ class AppResources {
   static const spacerSmall = SizedBox(width: 10, height: 10);
   static const spacerTiny = SizedBox(width: 5, height: 5);
   static const spacerExtraTiny = SizedBox(width: 2, height: 2);
+
+  // Border Radius
+  static const borderRadiusMedium = BorderRadius.all(Radius.circular(15));
 
   // Duration
   static const durationAnimationShort = Duration(milliseconds: 150);

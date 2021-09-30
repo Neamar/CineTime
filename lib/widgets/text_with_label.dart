@@ -1,4 +1,4 @@
-import 'package:cinetime/resources/resources.dart';
+import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
 
 class TextWithLabel extends StatelessWidget {

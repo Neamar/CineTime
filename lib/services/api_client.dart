@@ -76,7 +76,6 @@ class ApiClient {
         street: theaterInfo['address'],
         zipCode: theaterInfo['zip'],
         city: theaterInfo['city'],
-        poster: theaterInfo['poster_path'],
       );
     }).toList(growable: false);
   }
@@ -107,7 +106,6 @@ class ApiClient {
     return theatersJson.map((theaterJson) {
       theaterJson = theaterJson['node']!;
       final JsonObject? address = theaterJson['location'];
-      String? posterUrl = theaterJson['poster']?['url'];
 
       return Theater(
         id: ApiId.fromEncoded(theaterJson['id']),
@@ -115,13 +113,12 @@ class ApiClient {
         street: address?['address'],
         zipCode: address?['zip'],
         city: address?['city'],
-        poster: _getPathFromUrl(posterUrl),
         distance: theaterJson['coordinates']?['distance']?.toDouble(),
       );
     }).toList(growable: false);
   }
 
-  Future<MoviesShowTimes> getMoviesList(Iterable<Theater> theaters, { bool useCache = true }) async {
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = true }) async {
     // Prepare period
     final from = mockedNow;
     final to = mockedNow.add(Duration(days: 8));
@@ -273,6 +270,7 @@ class ApiClient {
 
     // Return data
     return MoviesShowTimes(
+      theaters: theaters,
       moviesShowTimes: moviesShowTimesMap.values.toList(growable: false),
       fetchedFrom: from,
       fetchedTo: to,

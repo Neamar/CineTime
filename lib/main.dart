@@ -1,7 +1,9 @@
 import 'package:cinetime/pages/_pages.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -28,7 +30,6 @@ Future<void> main() async {
 
   // Init shared pref
   await StorageService.init();
-  FavoriteTheatersHandler.init();
 
   // TEMP to be removed once https://github.com/ja2375/add_2_calendar/issues/83 is closed
   DeviceInfoPlugin().androidInfo.then((info) => App.androidSdkVersion = info.version.sdkInt);
@@ -65,9 +66,23 @@ class App extends StatelessWidget {
       title: 'CinéTime',
       theme: appTheme(),
       navigatorKey: _navigatorKey,
-      home: FavoriteTheatersHandler.instance!.theaters.isEmpty
-        ? TheatersPage()
+      home: AppService.instance.selectedTheaters.isEmpty
+        ? TheaterSearchPage()
         : MoviesPage(),
+      builder: (context, child) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          // Set system status & navigation bars colors.
+          // Using [AnnotatedRegion] is better than calling [SystemChrome.setSystemUIOverlayStyle] because it allows some pages to override colors and automatically restore default theme when page is disposed.
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: child!,
+        );
+      },
     );
   }
 }

@@ -5,14 +5,15 @@ import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
 class MoviesShowTimes {
-  const MoviesShowTimes({required this.moviesShowTimes, required this.fetchedFrom, required this.fetchedTo});
+  const MoviesShowTimes({required this.theaters, required this.moviesShowTimes, required this.fetchedFrom, required this.fetchedTo});
 
+  final List<Theater> theaters;
   final List<MovieShowTimes> moviesShowTimes;
   final DateTime fetchedFrom;
   final DateTime fetchedTo;
 }
 
-class MovieShowTimes {
+class MovieShowTimes with Comparable<MovieShowTimes> {
   MovieShowTimes(this.movie, {List<TheaterShowTimes>? theatersShowTimes}) :
     this.theatersShowTimes = theatersShowTimes ?? [];
 
@@ -47,6 +48,9 @@ class MovieShowTimes {
     }
     return _showTimesSpecOptions!;
   }
+
+  @override
+  int compareTo(MovieShowTimes other) => movie.compareTo(other.movie);
 }
 
 typedef FormattedShowTimes = SplayTreeMap<Date, List<ShowTime?>>;
