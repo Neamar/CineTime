@@ -11,6 +11,12 @@ class MoviesShowTimes {
   final List<MovieShowTimes> moviesShowTimes;
   final DateTime fetchedFrom;
   final DateTime fetchedTo;
+
+  String get periodDisplay {
+    var fetchedTo = this.fetchedTo;
+    if(fetchedTo == fetchedTo.toDate) fetchedTo = fetchedTo.subtract(const Duration(minutes: 5));
+    return 'Entre le ${fetchedFrom.day} et le ${fetchedTo.day}';
+  }
 }
 
 class MovieShowTimes with Comparable<MovieShowTimes> {

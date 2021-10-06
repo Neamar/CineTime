@@ -120,8 +120,8 @@ class ApiClient {
 
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = true }) async {
     // Prepare period
-    final from = mockedNow;
-    final to = mockedNow.add(Duration(days: 8));
+    final from = mockedNow.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
+    final to = from.add(const Duration(days: 8));
 
     // Build movieShowTimes list
     final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
