@@ -236,8 +236,8 @@ class ApiClient {
               return [
                 personJson?['firstName'],
                 personJson?['lastName'],
-              ].joinNotNull(' ');
-            }).joinNotNull(', ');
+              ].joinNotEmpty(' ');
+            }).joinNotEmpty(', ');
           }
 
           movie = Movie(

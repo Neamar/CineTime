@@ -165,14 +165,14 @@ extension ExtendedSet<T> on Set<T> {
 }
 
 extension ExtendedObjectIterable<Object> on Iterable<Object> {
-  /// Converts each element to a String and concatenates the strings, ignoring null values.
-  String joinNotNull(String separator) => this
+  /// Converts each element to a String and concatenates the strings, ignoring null and empty values.
+  String joinNotEmpty(String separator) => this
       .map((e) => e?.toString())
       .where((string) => !isStringNullOrEmpty(string))
       .join(separator);
 
   /// Returns a string separated by a newline character for each non-null element
-  String toLines() => this.joinNotNull('\n');
+  String toLines() => this.joinNotEmpty('\n');
 }
 
 extension ExtendedDateTime on DateTime {

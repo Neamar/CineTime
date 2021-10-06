@@ -57,7 +57,7 @@ class Movie extends Identifiable with Comparable<Movie> {
     return this.title.compareTo(other.title);
   }
 
-  static String? _buildGenresFromApi(JsonList? genresApi) => genresApi?.map((genreApi) => _genresMap[genreApi]).joinNotNull(', ');
+  static String? _buildGenresFromApi(JsonList? genresApi) => genresApi?.map((genreApi) => _genresMap[genreApi]).joinNotEmpty(', ');
   static String? _buildDurationFromApi(String? durationApi) {
     if (isStringNullOrEmpty(durationApi)) return null;
 
