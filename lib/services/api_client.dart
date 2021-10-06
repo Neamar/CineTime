@@ -232,12 +232,12 @@ class ApiClient {
             if (personsJson == null) return null;
             return personsJson.map((json) {
               json = json['node'];
-              final JsonObject? personJson = json['person'] ?? json['actor'];
+              final JsonObject? personJson = json['person'] ?? json['actor'] ?? json['voiceActor'] ?? json['originalVoiceActor'];
               return [
                 personJson?['firstName'],
                 personJson?['lastName'],
               ].joinNotNull(' ');
-            }).join(', ');
+            }).joinNotNull(', ');
           }
 
           movie = Movie(
