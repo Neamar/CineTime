@@ -159,6 +159,9 @@ String convertBasicHtmlTags(String htmlText) {
   // Replace all remaining line break
   htmlText = htmlText.replaceAll('<br>', '\n');
 
+  // Replace all html spaces by space
+  htmlText = htmlText.replaceAll('&nbsp;', ' ');
+
   // Remove other tags
   RegExp exp = RegExp(
     r"<[^>]*>",
