@@ -66,7 +66,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                               // Period
                               AppResources.spacerTiny,
                               Text(
-                                'Entre le ${moviesShowtimesData.fetchedFrom.day} et le ${moviesShowtimesData.fetchedTo.day}',
+                                moviesShowtimesData.periodDisplay,
                                 style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
                               ),
                             ],
