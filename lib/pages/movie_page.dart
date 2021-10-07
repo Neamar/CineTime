@@ -1,4 +1,3 @@
-import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/resources/_resources.dart';
@@ -571,16 +570,14 @@ class _ShowtimeDialog extends StatelessWidget {
                   onPressed: _share,
                 ),
               ),
-              if (App.androidSdkVersion != 30)...[   //TEMP to be removed once https://github.com/ja2375/add_2_calendar/issues/83 is closed
-                AppResources.spacerLarge,
-                Tooltip(
-                  message: 'Ajouter au calendrier',
-                  child: IconButton(
-                    icon: Icon(CineTimeIcons.calendar),
-                    onPressed: _addToCalendar,
-                  ),
+              AppResources.spacerLarge,
+              Tooltip(
+                message: 'Ajouter au calendrier',
+                child: IconButton(
+                  icon: Icon(CineTimeIcons.calendar),
+                  onPressed: _addToCalendar,
                 ),
-              ],
+              ),
             ],
           ),
         ],

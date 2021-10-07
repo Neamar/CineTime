@@ -1,4 +1,4 @@
-# Contribuer à Cinétime
+# Contribuer à CinéTime
 
 ## Installation locale
 Le projet est codé en Flutter. `git clone`, puis importer le projet dans Android Studio ou VSCode avec le plugin Flutter installé.
