@@ -35,7 +35,7 @@ dependencies:
   url_launcher: ^6.0.12
   share_plus: ^2.1.4
   geolocator: ^7.6.2
-  add_2_calendar: ^2.1.1
+  add_2_calendar: ^2.1.2
   device_info_plus: ^2.1.0  # TEMP to be removed once https://github.com/ja2375/add_2_calendar/issues/83 is closed
 
   # Internationalization
