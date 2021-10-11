@@ -543,16 +543,19 @@ class _ShowtimeDialog extends StatelessWidget {
           Text(
             movie.title,
             style: Theme.of(context).textTheme.headline4,
+            textAlign: TextAlign.center,
           ),
           AppResources.spacerLarge,
           Text(
             theater.name,
             style: Theme.of(context).textTheme.headline6,
+            textAlign: TextAlign.center,
           ),
           AppResources.spacerSmall,
           Text(
             dateDisplay,
             style: Theme.of(context).textTheme.subtitle1,
+            textAlign: TextAlign.center,
           ),
           AppResources.spacerSmall,
           Text(
