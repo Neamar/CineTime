@@ -76,7 +76,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
         final child = () {
           if (snapshot.hasError) {
             return _ErrorWidget(
-              onRetry: _fetch,
+              onRetry: (snapshot.error as FetchException).retry,
               isDense: widget.isDense,
             );
           } else if (!snapshot.hasData) {
@@ -133,7 +133,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
 
       // Update UI
       if (isTaskValid()) {
-        data.addError(e);
+        data.addError(FetchException(e, () => _fetch(param: param)));
         showError(context, e);
       }
     }
@@ -194,6 +194,13 @@ class _ErrorWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+class FetchException {
+  const FetchException(this.innerException, this.retry);
+
+  final Object innerException;
+  final VoidCallback retry;
 }
 
 class FetchBuilderController<T, R> {
