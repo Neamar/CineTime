@@ -24,10 +24,10 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FetchBuilder<MoviesShowTimes>(
+      body: FetchBuilder<Never, MoviesShowTimes>(
         controller: bloc.fetchController,
         fetchAtInit: false,
-        task: bloc.fetch,
+        task: ([_]) => bloc.fetch(),
         builder: (context, moviesShowtimesData) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -138,7 +138,7 @@ class MoviesPageBloc with Disposable {
   }
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
-  final fetchController = FetchBuilderController();
+  final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data

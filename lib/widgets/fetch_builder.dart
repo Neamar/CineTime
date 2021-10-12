@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rxdart/rxdart.dart';
 
-class FetchBuilder<T> extends StatefulWidget {
+typedef AsyncTask<T, R> = Future<R> Function([T? param]);
+
+class FetchBuilder<T, R> extends StatefulWidget {
   const FetchBuilder({
     Key? key,
     this.controller,
@@ -19,9 +21,9 @@ class FetchBuilder<T> extends StatefulWidget {
     this.fade = true,
   }) : super(key: key);
 
-  /// Task that fetch and return the data
-  /// May throw
-  final AsyncTask<T> task;
+  /// Task that fetch and return the data, with optional parameter
+  /// If task throws, it will be properly handled (message displayed + report error)
+  final AsyncTask<T, R> task;
 
   /// Whether to automatically start [task] when widget is initialised.
   final bool fetchAtInit;
@@ -30,13 +32,13 @@ class FetchBuilder<T> extends StatefulWidget {
   final WidgetBuilder? fetchingBuilder;
 
   /// Child to display when data is available
-  final DataWidgetBuilder<T>? builder;
+  final DataWidgetBuilder<R>? builder;
 
   /// Called when [task] has completed with success
-  final AsyncValueChanged<T>? onSuccess;
+  final AsyncValueChanged<R>? onSuccess;
 
   /// A controller used to programmatically show the refresh indicator and call the [onRefresh] callback.
-  final FetchBuilderController? controller;
+  final FetchBuilderController<T, R?>? controller;
 
   /// Whether this widget is in a low space environment
   /// Will affect default error widget density
@@ -46,11 +48,11 @@ class FetchBuilder<T> extends StatefulWidget {
   final bool fade;
 
   @override
-  _FetchBuilderState createState() => _FetchBuilderState<T>();
+  _FetchBuilderState createState() => _FetchBuilderState<T, R>();
 }
 
-class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
-  final data = BehaviorSubject<T?>();
+class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
+  final data = BehaviorSubject<R?>();
 
   @override
   void initState() {
@@ -60,7 +62,7 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
   }
 
   @override
-  void didUpdateWidget(FetchBuilder<T> oldWidget) {
+  void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
     oldWidget.controller?._refreshCallback = null;
     _setControllerCallback();
@@ -68,7 +70,7 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return BehaviorSubjectBuilder<T?>(
+    return BehaviorSubjectBuilder<R?>(
       subject: data,
       builder: (context, snapshot) {
         final child = () {
@@ -100,13 +102,13 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
   /// Store last started task id
   int _lastFetchTaskId = 0;
 
-  Future<void> _fetch({bool? clearDataFirst}) async {
+  Future<R?> _fetch({T? param, bool? clearDataFirst}) async {
     // Save task id
     final taskId = ++_lastFetchTaskId;
     final isTaskValid = () => mounted && taskId == _lastFetchTaskId;
 
     // Skip if disposed
-    if (!mounted) return;
+    if (!mounted) return null;
 
     try {
       // Clear current data
@@ -114,15 +116,17 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
       if (clearDataFirst) data.add(null);
 
       // Run task
-      final result = await widget.task();
+      final result = await widget.task(param);
 
       // Call onSuccess
       if (isTaskValid())
         await widget.onSuccess?.call(result);
 
       // Update UI
-      if (isTaskValid())
+      if (isTaskValid()) {
         data.add(result);
+        return result;
+      }
     } catch (e, s) {
       // Report error first
       reportError(e, s); // Do not await
@@ -136,7 +140,7 @@ class _FetchBuilderState<T> extends State<FetchBuilder<T>> {
   }
 
   void _setControllerCallback() {
-    widget.controller?._refreshCallback = () => _fetch(clearDataFirst: true);
+    widget.controller?._refreshCallback = ([param]) => _fetch(param: param, clearDataFirst: true);
   }
 
   @override
@@ -192,10 +196,10 @@ class _ErrorWidget extends StatelessWidget {
   }
 }
 
-class FetchBuilderController {
-  AsyncCallback? _refreshCallback;
-  Future<void> refresh() {
+class FetchBuilderController<T, R> {
+  AsyncTask<T, R?>? _refreshCallback;
+  Future<R?> refresh([T? param]) {
     assert(_refreshCallback != null);
-    return _refreshCallback!();
+    return _refreshCallback!(param);
   }
 }

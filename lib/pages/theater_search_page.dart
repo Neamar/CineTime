@@ -45,9 +45,9 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
               ),
           ],
         ),
-        body: FetchBuilder<_SearchResult>(
+        body: FetchBuilder<Never, _SearchResult>(
           controller: bloc.fetchBuilderController,
-          task: bloc.fetchTheaters,
+          task: ([_]) => bloc.fetchTheaters(),
           builder: (context, searchResult) {
             // No data
             if (searchResult.theaters == null)
@@ -141,7 +141,7 @@ class _NoResultMessage extends StatelessWidget {
 
 
 class TheaterSearchPageBloc with Disposable {
-  final fetchBuilderController = FetchBuilderController();
+  final fetchBuilderController = FetchBuilderController<Never, _SearchResult>();
 
   _SearchParams? _searchParams;
 
