@@ -6,7 +6,9 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '_pages.dart';
 
@@ -42,45 +44,57 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         children: [
-                          // Spacer for alignment
-                          Spacer(),
-
                           // Info
-                          Column(
-                            children: [
-                              // Theater info
-                              () {
-                                final theaters = moviesShowtimesData.theaters;
-                                final theatersCount = theaters.length;
-                                return Text(
-                                  () {
-                                    if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                                    if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
-                                    return 'Films dans $theatersCount cinémas';
-                                  } (),
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
-                                );
-                              } (),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Theater info
+                                () {
+                                  final theaters = moviesShowtimesData.theaters;
+                                  final theatersCount = theaters.length;
+                                  return Text(
+                                    () {
+                                      if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                                      if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
+                                      return 'Films dans $theatersCount cinémas';
+                                    } (),
+                                    style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  );
+                                } (),
 
-                              // Period
-                              AppResources.spacerTiny,
-                              Text(
-                                moviesShowtimesData.periodDisplay,
-                                style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
-                              ),
-                            ],
+                                // Period
+                                AppResources.spacerTiny,
+                                Text(
+                                  moviesShowtimesData.periodDisplay,
+                                  style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
+                                ),
+                              ],
+                            ),
                           ),
 
                           // Actions
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Icon(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              AppResources.spacerSmall,
+                              Icon(
                                 CineTimeIcons.pencil,
                                 color: Colors.white,
                               ),
-                            ),
+                              AppResources.spacerMedium,
+                              BehaviorSubjectBuilder<MovieSortType>(
+                                subject: bloc.sortType,
+                                builder: (context, snapshot) {
+                                  return _SortButton(
+                                    value: snapshot.data!,
+                                    onChanged: bloc.sortType.add,
+                                  );
+                                }
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -130,6 +144,61 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
   }
 }
 
+class _SortButton extends StatelessWidget {
+  static const _typesStrings = {
+    MovieSortType.rating: 'Note',
+    MovieSortType.releaseDate: 'Date de sortie',
+    MovieSortType.duration: 'Durée',
+  };
+
+  const _SortButton({Key? key, required this.value, this.onChanged}) : super(key: key);
+
+  final MovieSortType value;
+  final ValueChanged<MovieSortType>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.sort),
+      color: Colors.white,
+      constraints: const BoxConstraints(),
+      padding: EdgeInsets.zero,
+      onPressed: () => openOverlay(context),
+    );
+  }
+
+  void openOverlay(BuildContext context) {
+    showOverlay(
+      context,
+      builder: (dismissCallback) {
+        return Material(
+          elevation: 5,
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: MovieSortType.values.map((value) {
+                return RadioListTile<MovieSortType>(
+                  title: Text(
+                    _typesStrings[value]!,
+                  ),
+                  value: value,
+                  groupValue: this.value,
+                  onChanged: (value) {
+                    dismissCallback();
+                    onChanged?.call(value!);
+                  },
+                );
+              }).toList(growable: false),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+enum MovieSortType { rating, releaseDate, duration }
 
 class MoviesPageBloc with Disposable {
   MoviesPageBloc() {
@@ -139,6 +208,7 @@ class MoviesPageBloc with Disposable {
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
   final fetchController = FetchBuilderController();
+  final sortType = BehaviorSubject.seeded(MovieSortType.rating);
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data
@@ -161,5 +231,11 @@ class MoviesPageBloc with Disposable {
 
     // Refresh data
     fetchController.refresh();
+  }
+
+  @override
+  void dispose() {
+    sortType.close();
+    super.dispose();
   }
 }
