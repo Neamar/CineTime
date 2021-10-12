@@ -25,110 +25,81 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(    // Needed for background color
       body: FetchBuilder<MoviesShowTimes>(
         controller: bloc.fetchController,
         fetchAtInit: false,
         task: bloc.fetch,
         builder: (context, moviesShowtimesData) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-
-              // Header
-              Material(
-                color: Theme.of(context).primaryColor,
-                child: InkWell(
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          // Info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                // Theater info
-                                () {
-                                  final theaters = moviesShowtimesData.theaters;
-                                  final theatersCount = theaters.length;
-                                  return Text(
-                                    () {
-                                      if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                                      if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
-                                      return 'Films dans $theatersCount cinémas';
-                                    } (),
-                                    style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  );
-                                } (),
-
-                                // Period
-                                AppResources.spacerTiny,
-                                Text(
-                                  moviesShowtimesData.periodDisplay,
-                                  style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Actions
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              AppResources.spacerSmall,
-                              Icon(
-                                CineTimeIcons.pencil,
-                                color: Colors.white,
-                              ),
-                              AppResources.spacerMedium,
-                              BehaviorSubjectBuilder<MovieSortType>(
-                                subject: bloc.sortType,
-                                builder: (context, snapshot) {
-                                  return _SortButton(
-                                    value: snapshot.data!,
-                                    onChanged: bloc.sortType.add,
-                                  );
-                                }
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: _goToTheatersPage,
-                ),
-              ),
-
-              // Content
-              Expanded(
-                child: () {
-                  if (moviesShowtimesData.moviesShowTimes.isEmpty)
-                    return IconMessage(
-                      icon: Icons.theaters,
-                      message: 'Aucune séance',
+          return Scaffold(
+            appBar: AppBar(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Theater info
+                  () {
+                    final theaters = moviesShowtimesData.theaters;
+                    final theatersCount = theaters.length;
+                    return Text(
+                      () {
+                        if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                        if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
+                        return 'Films dans $theatersCount cinémas';
+                      } (),
+                      style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     );
+                  } (),
 
-                  return ListView.builder(
-                    itemCount: moviesShowtimesData.moviesShowTimes.length,
-                    itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
-                    padding: EdgeInsets.zero,
-                    itemBuilder: (context, index) {
-                      final movieShowTimes = moviesShowtimesData.moviesShowTimes[index];
-                      return MovieCard(
-                        key: ObjectKey(movieShowTimes),
-                        movieShowTimes: movieShowTimes,
-                        showTheaterName: moviesShowtimesData.theaters.length > 1,
-                      );
-                    },
-                  );
-                } (),
+                  // Period
+                  AppResources.spacerTiny,
+                  Text(
+                    moviesShowtimesData.periodDisplay,
+                    style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
+                  ),
+                ],
               ),
-            ],
+              actions: [
+                IconButton(
+                  icon: Icon(
+                    CineTimeIcons.pencil,
+                  ),
+                  onPressed: _goToTheatersPage,
+                ),
+                AppResources.spacerMedium,
+                BehaviorSubjectBuilder<MovieSortType>(
+                  subject: bloc.sortType,
+                  builder: (context, snapshot) {
+                    return _SortButton(
+                      value: snapshot.data!,
+                      onChanged: bloc.sortType.add,
+                    );
+                  },
+                ),
+              ],
+            ),
+            body: () {
+              if (moviesShowtimesData.moviesShowTimes.isEmpty)
+                return IconMessage(
+                  icon: Icons.theaters,
+                  message: 'Aucune séance',
+                );
+
+              return ListView.builder(
+                itemCount: moviesShowtimesData.moviesShowTimes.length,
+                itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
+                padding: EdgeInsets.zero,
+                itemBuilder: (context, index) {
+                  final movieShowTimes = moviesShowtimesData.moviesShowTimes[index];
+                  return MovieCard(
+                    key: ObjectKey(movieShowTimes),
+                    movieShowTimes: movieShowTimes,
+                    showTheaterName: moviesShowtimesData.theaters.length > 1,
+                  );
+                },
+              );
+            } (),
           );
         },
       ),
@@ -158,41 +129,18 @@ class _SortButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    return PopupMenuButton<MovieSortType>(
       icon: const Icon(Icons.sort),
-      color: Colors.white,
-      constraints: const BoxConstraints(),
-      padding: EdgeInsets.zero,
-      onPressed: () => openOverlay(context),
-    );
-  }
-
-  void openOverlay(BuildContext context) {
-    showOverlay(
-      context,
-      builder: (dismissCallback) {
-        return Material(
-          elevation: 5,
-          child: IntrinsicWidth(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: MovieSortType.values.map((value) {
-                return RadioListTile<MovieSortType>(
-                  title: Text(
-                    _typesStrings[value]!,
-                  ),
-                  value: value,
-                  groupValue: this.value,
-                  onChanged: (value) {
-                    dismissCallback();
-                    onChanged?.call(value!);
-                  },
-                );
-              }).toList(growable: false),
-            ),
+      onSelected: onChanged,
+      itemBuilder: (context) => MovieSortType.values.map((value) {
+        return PopupMenuItem<MovieSortType>(
+          value: value,
+          textStyle: context.textTheme.subtitle1?.copyWith(color: this.value == value ? Theme.of(context).primaryColor : null),
+          child: Text(
+            _typesStrings[value]!,
           ),
         );
-      },
+      }).toList(growable: false),
     );
   }
 }

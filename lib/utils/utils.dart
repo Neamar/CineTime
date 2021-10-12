@@ -130,35 +130,6 @@ bool shouldReportException(Object? exception) =>
     exception is! TimeoutException &&
     (exception is! HttpResponseException || exception.shouldBeReported);
 
-
-void showOverlay(BuildContext context, { required Widget builder(VoidCallback dismissCallback) }) {
-  final buttonRenderBox = context.findRenderObject() as RenderBox;
-  final buttonSize = buttonRenderBox.size;
-  final buttonPosition = buttonRenderBox.localToGlobal(Offset.zero);
-
-  VoidCallback? dismissCallback;
-
-  final overlay = OverlayEntry(
-    builder: (context) => Stack(
-      alignment: Alignment.topRight,
-      children: <Widget>[
-        GestureDetector(
-          child: Container(color: Colors.transparent),
-          onTap: dismissCallback,
-        ),
-        Positioned(
-          top: buttonPosition.dy + buttonSize.height + 5.0,
-          child: builder(dismissCallback!),
-        ),
-      ],
-    ),
-  );
-
-  dismissCallback = () => overlay.remove();
-
-  Overlay.of(context)?.insert(overlay);
-}
-
 bool isIterableNullOrEmpty<T>(Iterable<T>? iterable) => iterable == null || iterable.isEmpty;
 bool isMapNullOrEmpty<K, V>(Map<K, V>? map) => map == null || map.isEmpty;
 bool isStringNullOrEmpty(String? s) => s == null || s.isEmpty;
