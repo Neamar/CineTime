@@ -67,7 +67,6 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                   ),
                   onPressed: _goToTheatersPage,
                 ),
-                AppResources.spacerMedium,
                 BehaviorSubjectBuilder<MovieSortType>(
                   subject: bloc.sortType,
                   builder: (context, snapshot) {
