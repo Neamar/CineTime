@@ -73,7 +73,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                   builder: (context, snapshot) {
                     return _SortButton(
                       value: snapshot.data!,
-                      onChanged: bloc.sortType.add,
+                      onChanged: bloc.sortType.addDistinct,
                     );
                   },
                 ),
@@ -146,12 +146,13 @@ class _SortButton extends StatelessWidget {
 }
 
 
-enum MovieSortType { rating, releaseDate, duration }
-
 class MoviesPageBloc with Disposable {
   MoviesPageBloc() {
     // Initial fetch, after widget is initialised
     WidgetsBinding.instance!.addPostFrameCallback((_) => refresh());
+
+    // Refresh on sort change
+    sortType.listen((value) => fetchController.refresh());
   }
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
@@ -163,7 +164,7 @@ class MoviesPageBloc with Disposable {
     final moviesShowTimes = await AppService.api.getMoviesList(_theaters.toList(growable: false)..sort());
 
     // Sort
-    moviesShowTimes.moviesShowTimes.sort();
+    moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, sortType.value));
 
     // Return data
     return moviesShowTimes;
