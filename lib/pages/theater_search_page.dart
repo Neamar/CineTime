@@ -45,9 +45,9 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
               ),
           ],
         ),
-        body: FetchBuilder<Never, _SearchResult>(
+        body: FetchBuilder<_SearchParams, _SearchResult>(
           controller: bloc.fetchBuilderController,
-          task: ([_]) => bloc.fetchTheaters(),
+          task: ([param]) => bloc.fetchTheaters(param),
           builder: (context, searchResult) {
             // No data
             if (searchResult.theaters == null)
@@ -141,26 +141,18 @@ class _NoResultMessage extends StatelessWidget {
 
 
 class TheaterSearchPageBloc with Disposable {
-  final fetchBuilderController = FetchBuilderController<Never, _SearchResult>();
+  final fetchBuilderController = FetchBuilderController<_SearchParams, _SearchResult>();
 
-  _SearchParams? _searchParams;
+  void startGeoSearch() => fetchBuilderController.refresh(const _SearchParams(isGeo: true));
 
-  void startGeoSearch() {
-    _searchParams = const _SearchParams(isGeo: true);
-    fetchBuilderController.refresh();
-  }
+  void startQuerySearch(String query) => fetchBuilderController.refresh(_SearchParams(query: query));
 
-  void startQuerySearch(String query) {
-    _searchParams = _SearchParams(query: query);
-    fetchBuilderController.refresh();
-  }
-
-  Future<_SearchResult> fetchTheaters() async {
+  Future<_SearchResult> fetchTheaters(_SearchParams? searchParams) async {
     // If search hasn't started yet
-    if (_searchParams == null) return _SearchResult.none();
+    if (searchParams == null) return const _SearchResult.none();
 
     // Search
-    final theaters = await (_searchParams!.isGeo ? _geoSearch() : _querySearch(_searchParams!.query!));
+    final theaters = await (searchParams.isGeo ? _geoSearch() : _querySearch(searchParams.query!));
 
     // Return result
     return _SearchResult(theaters);
