@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rxdart/rxdart.dart';
 
-typedef AsyncTask<T, R> = Future<R> Function([T? param]);
+typedef AsyncTask<T, R> = Future<R> Function(T? param);
 
 class FetchBuilder<T, R> extends StatefulWidget {
   const FetchBuilder({
@@ -140,7 +140,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
   }
 
   void _setControllerCallback() {
-    widget.controller?._refreshCallback = ([param]) => _fetch(param: param, clearDataFirst: true);
+    widget.controller?._refreshCallback = (param) => _fetch(param: param, clearDataFirst: true);
   }
 
   @override

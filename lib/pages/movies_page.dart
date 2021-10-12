@@ -27,7 +27,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
       body: FetchBuilder<Never, MoviesShowTimes>(
         controller: bloc.fetchController,
         fetchAtInit: false,
-        task: ([_]) => bloc.fetch(),
+        task: (_) => bloc.fetch(),
         builder: (context, moviesShowtimesData) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -19,7 +19,7 @@ class TrailerPage extends StatelessWidget {
       ),
       backgroundColor: Colors.black,
       body: FetchBuilder<Never, String>(
-        task: ([_]) => AppService.api.getVideoUrl(trailerId),
+        task: (_) => AppService.api.getVideoUrl(trailerId),
         builder: (context, trailerUrl) {
           return _VideoPlayerWidget(
             videoUrl: trailerUrl,

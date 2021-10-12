@@ -47,7 +47,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
         ),
         body: FetchBuilder<_SearchParams, _SearchResult>(
           controller: bloc.fetchBuilderController,
-          task: ([param]) => bloc.fetchTheaters(param),
+          task: bloc.fetchTheaters,
           builder: (context, searchResult) {
             // No data
             if (searchResult.theaters == null)
