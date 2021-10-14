@@ -33,7 +33,7 @@ Future<void> main() async {
   // Start App inside Sentry's scope
   await SentryFlutter.init(
     (options) {
-      options.dsn = 'https://bdfc16e5af644dcdb5dd9c684e584334@o1004143.ingest.sentry.io/5965118';
+      options.dsn = 'https://f0a7dfef9b5249c7a57c355ac9d30856@o1038499.ingest.sentry.io/6006844';
       options.debug = !kReleaseMode;
       options.environment = kReleaseMode ? 'release' : 'debug';
     },
