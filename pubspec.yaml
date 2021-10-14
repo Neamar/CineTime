@@ -29,7 +29,7 @@ dependencies:
   connectivity_plus: ^2.0.2
   flutter_cache_manager: ^3.1.2
   cached_network_image: ^3.1.0
-  amplitude_flutter: ^3.2.1
+  amplitude_flutter: ^3.5.0
 
   # Device
   sentry_flutter: ^6.0.1

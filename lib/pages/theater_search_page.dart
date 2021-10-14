@@ -1,5 +1,6 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/permission_exception.dart';
@@ -161,6 +162,17 @@ class TheaterSearchPageBloc with Disposable {
 
     // Search
     final theaters = await (_searchParams!.isGeo ? _geoSearch() : _querySearch(_searchParams!.query!));
+
+    // Analytics
+    if (_searchParams!.isGeo)
+      AnalyticsService.trackEvent('Theater geolocation search', {
+        'resultCount': theaters.length,
+      });
+    else
+      AnalyticsService.trackEvent('Theater search', {
+        'query': _searchParams!.query!,
+        'resultCount': theaters.length,
+      });
 
     // Return result
     return _SearchResult(theaters);

@@ -10,6 +10,8 @@ class AnalyticsService {
   static Future<void> init() async {
     await _amplitude.init(kReleaseMode ? _amplitudeKey : _amplitudeDevKey);
     await _amplitude.setServerUrl('https://api.eu.amplitude.com');
+    await _amplitude.enableCoppaControl();
+    await _amplitude.trackingSessionEvents(true);
   }
 
   static Future<void> trackEvent(String eventName, [Map<String, dynamic>? properties]) => _amplitude.logEvent(eventName, eventProperties: properties);
