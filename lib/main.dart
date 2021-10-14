@@ -1,4 +1,6 @@
+import 'package:amplitude_flutter/amplitude.dart';
 import 'package:cinetime/pages/_pages.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,9 @@ Future<void> main() async {
 
   // Init shared pref
   await StorageService.init();
+
+  // Init analytics
+  await AnalyticsService.init();
 
   // Start App inside Sentry's scope
   await SentryFlutter.init(
