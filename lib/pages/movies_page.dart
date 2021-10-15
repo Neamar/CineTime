@@ -173,6 +173,13 @@ class MoviesPageBloc with Disposable {
     // Sort
     moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, sortType.value));
 
+    // Analytics
+    AnalyticsService.trackEvent('Movie list displayed', {
+      'resultCount': moviesShowTimes.moviesShowTimes.length,
+      'theaterCount': _theaters.length,
+      'theatersId': _theaters.toIdListString(),
+    });
+
     // Return data
     return moviesShowTimes;
   }
