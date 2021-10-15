@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cinetime/models/date_time.dart';
+import 'package:cinetime/models/theater.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -255,4 +256,8 @@ extension ExtendedDateTimeIterable on Iterable<DateTime> {
 
     return true;
   }
+}
+
+extension ExtendedTheaterIterable on Iterable<Theater> {
+  String toIdListString() => this.map((t) => t.id.id).join(',');
 }
