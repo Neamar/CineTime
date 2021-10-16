@@ -1,6 +1,7 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
@@ -228,7 +229,13 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                           child: _TagFilterSelector(
                                             options: widget.movieShowTimes.showTimesSpecOptions,
                                             selected: filter,
-                                            onChanged: bloc.selectedSpec.add,
+                                            onChanged: (value) {
+                                              bloc.selectedSpec.add(value);
+                                              AnalyticsService.trackEvent('Movie spec changed', {
+                                                'value': value.toString(),
+                                                'options': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+                                              });
+                                            },
                                           ),
                                         ),
                                       ),

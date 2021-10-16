@@ -152,7 +152,7 @@ class MoviesPageBloc with Disposable {
     WidgetsBinding.instance!.addPostFrameCallback((_) => refresh());
 
     // Refresh on sort change
-    sortType.listen((value) {
+    sortType.skip(1).listen((value) {
       fetchController.refresh();
       AnalyticsService.trackEvent('Sort order', {
         'theatersId': _theaters.toIdListString(),
