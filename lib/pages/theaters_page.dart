@@ -49,6 +49,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
                 key: ValueKey(theater.id.id + bloc.refreshID.toString()),
                 theater: theater,
                 multiSelectionMode: multiSelectionMode,
+                onLongPress: toggleSelectionMode,
               );
             },
           );
