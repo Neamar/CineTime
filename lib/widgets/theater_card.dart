@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 class TheaterCard extends StatefulWidget {
   static const height = 80.0;
 
-  const TheaterCard({Key? key, required this.theater, this.multiSelectionMode = false}) : super(key: key);
+  const TheaterCard({Key? key, required this.theater, this.multiSelectionMode = false, this.onLongPress}) : super(key: key);
 
   /// Theater
   final Theater theater;
@@ -17,6 +17,10 @@ class TheaterCard extends StatefulWidget {
   /// If false, it will clear selection, select [theater] and pop when pressed.
   /// If true, it will display a checkbox, and just select/unselect this [theater] when pressed.
   final bool multiSelectionMode;
+
+  /// Only enabled if [multiSelectionMode] is false.
+  /// On a long press, it will select [theater] and then call [onLongPress].
+  final VoidCallback? onLongPress;
 
   @override
   State<TheaterCard> createState() => _TheaterCardState();
@@ -42,6 +46,8 @@ class _TheaterCardState extends State<TheaterCard> {
 
           // Main content
           InkWell(
+            onTap: _onSelected,
+            onLongPress: widget.multiSelectionMode ? null : _onLongPress,
             child: Row(
               children: <Widget>[
 
@@ -88,7 +94,6 @@ class _TheaterCardState extends State<TheaterCard> {
                 ),
               ],
             ),
-            onTap: _onSelected,
           ),
 
           // Star button
@@ -146,6 +151,19 @@ class _TheaterCardState extends State<TheaterCard> {
       else
         navigateTo(context, (_) => MoviesPage(), clearHistory: true);
     }
+  }
+
+  Future<void> _onLongPress() async {
+    // Save value
+    await AppService.instance.selectTheater(widget.theater);
+
+    // Update UI
+    setState(() {
+      _refreshStatus();
+    });
+
+    // Callback
+    widget.onLongPress?.call();
   }
 
   Future<void> _onFavoriteTap() async {
