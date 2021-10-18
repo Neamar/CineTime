@@ -111,14 +111,11 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         children: <Widget>[
                           SizedBox(
                             height: 100,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: GestureDetector(
-                                onTap: _openPoster,
-                                child: CtCachedImage(
-                                  path: widget.movieShowTimes.movie.poster,
-                                  isThumbnail: true,
-                                ),
+                            child: GestureDetector(
+                              onTap: _openPoster,
+                              child: HeroPoster(
+                                posterPath: widget.movieShowTimes.movie.poster,
+                                borderRadius: AppResources.borderRadiusTiny,
                               ),
                             ),
                           ),
@@ -330,6 +327,50 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
         );
       },
     );
+  }
+}
+
+class HeroPoster extends StatelessWidget {
+  const HeroPoster({Key? key, this.posterPath, required this.borderRadius}) : super(key: key);
+
+  final String? posterPath;
+  final BorderRadius borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = CtCachedImage(
+      path: posterPath,
+      isThumbnail: true,
+    );
+
+    final staticContent = ClipRRect(
+      borderRadius: borderRadius,
+      child: child,
+    );
+
+    if (posterPath != null)
+      return Hero(
+        tag: posterPath!,
+        flightShuttleBuilder: (flightContext, animation, flightDirection, fromHeroContext, toHeroContext) {
+          final from = ((fromHeroContext.widget as Hero).child as ClipRRect).borderRadius;
+          final to = ((toHeroContext.widget as Hero).child as ClipRRect).borderRadius;
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) {
+              return ClipRRect(
+                borderRadius: flightDirection == HeroFlightDirection.push
+                  ? Tween(begin: from, end: to).evaluate(animation)
+                  : Tween(begin: to, end: from).evaluate(animation),
+                child: child,
+              );
+            },
+            child: child,
+          );
+        },
+        child: staticContent,
+      );
+
+    return staticContent;
   }
 }
 

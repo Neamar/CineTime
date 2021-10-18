@@ -10,6 +10,11 @@ ThemeData appTheme() {
       selectionColor: AppResources.colorLightRed,
       selectionHandleColor: Colors.white,
     ),
+    cardTheme: const CardTheme(
+      shape: RoundedRectangleBorder(
+        borderRadius: AppResources.borderRadiusTiny,
+      ),
+    ),
   );
   return theme.copyWith(
     inputDecorationTheme: InputDecorationTheme(

@@ -20,6 +20,8 @@ class AppResources {
   static const spacerExtraTiny = SizedBox(width: 2, height: 2);
 
   // Border Radius
+  static const borderRadiusTiny = BorderRadius.all(Radius.circular(5));
+  static const borderRadiusSmall = BorderRadius.all(Radius.circular(10));
   static const borderRadiusMedium = BorderRadius.all(Radius.circular(15));
 
   // Duration
