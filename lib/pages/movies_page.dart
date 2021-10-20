@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
@@ -110,7 +111,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
     await navigateTo(context, (_) => TheatersPage(), returnAfterPageTransition: false);
 
     // Update UI
-    bloc.refresh();
+    bloc.refresh(userAsked: true);
   }
 }
 
@@ -151,7 +152,14 @@ class MoviesPageBloc with Disposable {
     WidgetsBinding.instance!.addPostFrameCallback((_) => refresh());
 
     // Refresh on sort change
-    sortType.listen((value) => fetchController.refresh());
+    sortType.skip(1).listen((value) {
+      fetchController.refresh();
+      AnalyticsService.trackEvent('Sort order', {
+        'theatersId': _theaters.toIdListString(),
+        'theaterCount': _theaters.length,
+        'sortType': describeEnum(value),
+      });
+    });
   }
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
@@ -165,14 +173,27 @@ class MoviesPageBloc with Disposable {
     // Sort
     moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, sortType.value));
 
+    // Analytics
+    AnalyticsService.trackEvent('Movie list displayed', {
+      'resultCount': moviesShowTimes.moviesShowTimes.length,
+      'theaterCount': _theaters.length,
+      'theatersId': _theaters.toIdListString(),
+    });
+
     // Return data
     return moviesShowTimes;
   }
 
-  void refresh() {
+  void refresh({bool userAsked = false}) {
     // Compare new list with current one
     if (AppService.instance.selectedTheaters.isEqualTo(_theaters))
       return;
+
+    // Analytics
+    if (userAsked)
+      AnalyticsService.trackEvent('Theater selected', {
+        'count': AppService.instance.selectedTheaters.length - _theaters.length,
+      });
 
     // Copy selected theater to a local list
     _theaters = UnmodifiableSetView(Set.from(AppService.instance.selectedTheaters));

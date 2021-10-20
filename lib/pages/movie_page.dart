@@ -1,6 +1,7 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
@@ -68,9 +69,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         )
                       ],
                     ),
-                    onPressed: hasTrailer
-                        ? () => navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!))
-                        : null,
+                    onPressed: hasTrailer ? _openTrailer : null,
                   ),
                   TextButton(
                     child: Row(
@@ -87,7 +86,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         )
                       ],
                     ),
-                    onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
+                    onPressed: _openMovieDataSheetWebPage,
                   )
                 ],
               ),
@@ -225,7 +224,13 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                           child: _TagFilterSelector(
                                             options: widget.movieShowTimes.showTimesSpecOptions,
                                             selected: filter,
-                                            onChanged: bloc.selectedSpec.add,
+                                            onChanged: (value) {
+                                              bloc.selectedSpec.add(value);
+                                              AnalyticsService.trackEvent('Movie spec changed', {
+                                                'value': value.toString(),
+                                                'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+                                              });
+                                            },
                                           ),
                                         ),
                                       ),
@@ -312,6 +317,20 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
   }
 
   void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
+
+  void _openTrailer() {
+    navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!));
+    AnalyticsService.trackEvent('Trailer displayed', {
+      'movieTitle': widget.movieShowTimes.movie.title,
+    });
+  }
+
+  void _openMovieDataSheetWebPage() {
+    launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id));
+    AnalyticsService.trackEvent('Movie datasheet webpage displayed', {
+      'movieTitle': widget.movieShowTimes.movie.title,
+    });
+  }
 
   void _openShowtimeDialog({required Movie movie, required Theater theater, required ShowTime showtime}) {
     showDialog(
@@ -652,7 +671,14 @@ $dateDisplay""";
 
 class MoviePageBloc with Disposable {
   MoviePageBloc(MovieShowTimes movieShowTimes) :
-    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first);
+    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first) {
+    AnalyticsService.trackEvent('Movie displayed', {
+      'movieTitle': movieShowTimes.movie.title,
+      'theaterCount': movieShowTimes.theatersShowTimes.length,
+      'theatersId': movieShowTimes.theatersShowTimes.map((tst) => tst.theater).toIdListString(),
+      'availableSpec': movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+    });
+  }
 
   final BehaviorSubject<ShowTimeSpec> selectedSpec;
 
