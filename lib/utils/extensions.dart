@@ -257,7 +257,3 @@ extension ExtendedDateTimeIterable on Iterable<DateTime> {
     return true;
   }
 }
-
-extension ExtendedTheaterIterable on Iterable<Theater> {
-  String toIdListString() => this.map((t) => t.id.id).join(',');
-}

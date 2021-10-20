@@ -233,7 +233,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                               bloc.selectedSpec.add(value);
                                               AnalyticsService.trackEvent('Movie spec changed', {
                                                 'value': value.toString(),
-                                                'options': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+                                                'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
                                               });
                                             },
                                           ),
@@ -618,7 +618,14 @@ $dateDisplay""";
 
 class MoviePageBloc with Disposable {
   MoviePageBloc(MovieShowTimes movieShowTimes) :
-    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first);
+    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first) {
+    AnalyticsService.trackEvent('Movie displayed', {
+      'movieTitle': movieShowTimes.movie.title,
+      'theaterCount': movieShowTimes.theatersShowTimes.length,
+      'theatersId': movieShowTimes.theatersShowTimes.map((tst) => tst.theater).toIdListString(),
+      'availableSpec': movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+    });
+  }
 
   final BehaviorSubject<ShowTimeSpec> selectedSpec;
 
