@@ -69,9 +69,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         )
                       ],
                     ),
-                    onPressed: hasTrailer
-                        ? () => navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!))
-                        : null,
+                    onPressed: hasTrailer ? _openTrailer : null,
                   ),
                   TextButton(
                     child: Row(
@@ -88,7 +86,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         )
                       ],
                     ),
-                    onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
+                    onPressed: _openMovieDataSheetWebPage,
                   )
                 ],
               ),
@@ -322,6 +320,20 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
   }
 
   void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
+
+  void _openTrailer() {
+    navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!));
+    AnalyticsService.trackEvent('Trailer displayed', {
+      'movieTitle': widget.movieShowTimes.movie.title,
+    });
+  }
+
+  void _openMovieDataSheetWebPage() {
+    launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id));
+    AnalyticsService.trackEvent('Movie datasheet webpage displayed', {
+      'movieTitle': widget.movieShowTimes.movie.title,
+    });
+  }
 
   void _openShowtimeDialog({required Movie movie, required Theater theater, required ShowTime showtime}) {
     showDialog(
