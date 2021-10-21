@@ -62,6 +62,7 @@ class ApiClient {
     if (useMocks) {
       responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/be59b0f453dcc6c4efbb8bb659a7d96b/raw/4074465c4602086d45fd5d5a42b0238152f15a56/theaters-search.json');
     } else {
+      query = Uri.encodeComponent(query);   // Encode query, so char like '?' are correctly encoded
       responseJson = await _send<JsonObject>(_httpMethodGet, 'https://www.all' + 'ocine.fr/_/autocomplete/mobile/theater/$query');
     }
 
