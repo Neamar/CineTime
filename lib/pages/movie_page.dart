@@ -257,7 +257,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                     padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
                                     child: TheaterShowTimesWidget(
                                       theaterName: theaterShowTimes.theater.name,
-                                      formattedShowTimes: theaterShowTimes.getFormattedShowTimes(filter),
+                                      showTimes: theaterShowTimes.getFormattedShowTimes(filter),
                                       filterName: filter.toString(),
                                       onShowtimePressed: (showtime) => _openShowtimeDialog(
                                         movie: widget.movieShowTimes.movie,
@@ -477,13 +477,13 @@ class TheaterShowTimesWidget extends StatelessWidget {
   const TheaterShowTimesWidget({
     Key? key,
     required this.theaterName,
-    required this.formattedShowTimes,
+    required this.showTimes,
     required this.filterName,
     this.onShowtimePressed,
   }) : super(key: key);
 
   final String theaterName;
-  final FormattedShowTimes formattedShowTimes;
+  final List<DayShowTimes> showTimes;
   final String filterName;
   final ValueChanged<ShowTime>? onShowtimePressed;
 
@@ -501,14 +501,14 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
         // Showtimes
         AppResources.spacerSmall,
-        if (formattedShowTimes.isNotEmpty)
+        if (showTimes.isNotEmpty)
           Row(
-            children: formattedShowTimes.keys.mapIndexed<Widget>((index, day) {
+            children: showTimes.mapIndexed<Widget>((index, dayShowTimes) {
               return _DayShowTimes(
-                day: day,
-                showtimes: formattedShowTimes[day]!,
+                day: dayShowTimes.date,
+                showtimes: dayShowTimes.showTimes,
                 backgroundColor: () {
-                  if (day == ApiClient.mockedNow.toDate) return AppResources.colorLightRed;
+                  if (dayShowTimes.date == ApiClient.mockedNow.toDate) return AppResources.colorLightRed;
                   if (index.isEven) return Colors.black12;
                 } (),
                 onPressed: onShowtimePressed,
