@@ -192,6 +192,8 @@ extension ExtendedDateTime on DateTime {
   /// Return a Time (without the date part)
   Time get toTime => Time(this.hour, this.minute);
 
+  bool isAfterOrSame(DateTime other) => this == other || this.isAfter(other);
+
   String toWeekdayString({bool withDay = false, bool withMonth = false}) {
     var formattedDate = AppResources.weekdayNamesShort[this.weekday]!;
 
@@ -204,56 +206,5 @@ extension ExtendedDateTime on DateTime {
       return formattedDate;
 
     return formattedDate + ' ' + AppResources.formatterMonth.format(this);
-  }
-}
-
-extension ExtendedDateTimeIterable on Iterable<DateTime> {
-  /// Return a formatted string like :
-  /// - 'Tous les jours'              (if dates are each days until next tuesday)
-  /// - 'jeu., ven. et dim.'          (if dates are before or is next tuesday)
-  /// - 'ven. 28, sam. 29, mar. 1 avril et lun. 2 mai'  (if dates are after next tuesday. Add month if not current one)
-  String toShortWeekdaysString(DateTime from) {
-    // Get all dates after [from], remove duplicates, and sort.
-    var weekdays = this
-        .map((dateTime) => dateTime.toDate)
-        .toSet()   //OPTI remove toSet and .sort from this method, supposing it's done before ?
-        .toList(growable: false)
-      ..sort();   //OPTI already sorted ?
-    var nextWednesday = from.getNextWednesday();
-
-    // If dates are each days until next tuesday
-    if (nextWednesday.difference(from).inDays == weekdays.length)
-      return 'Tous les jours';
-
-    // Define function to format date
-    var formatDate = (DateTime date) {
-      if (date.isBefore(nextWednesday))
-        return date.toWeekdayString();
-
-      return date.toWeekdayString(withDay: true, withMonth: date.month != from.month);
-    };
-
-    // Fill a list of formatted weekday string
-    final weekdaysString = <String?>[];
-    for (var weekday in weekdays) {
-      // Add formatted string to list
-      weekdaysString.add(formatDate(weekday));
-    }
-
-    // Return formatted line
-    return weekdaysString.join(' ');
-  }
-
-  /// Supposing [this] is sorted, return true if all dates have consecutive days.
-  bool areAllConsecutiveDay() {
-    if (this.length <= 1)
-      return false;
-
-    for (var i = 1; i < this.length; i++) {
-      if (this.elementAt(i).toDate.difference(this.elementAt(i - 1).toDate).inDays != 1)
-        return false;
-    }
-
-    return true;
   }
 }
