@@ -90,9 +90,14 @@ class MovieCard extends StatelessWidget {
                         // Info line 2
                         AppResources.spacerTiny,
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text(movieShowTimes.movie.genres!),    //TODO smaller
+                            Expanded(
+                              child: Text(
+                                movieShowTimes.movie.genres!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                             if (movieShowTimes.movie.durationDisplay != null)
                               Text(movieShowTimes.movie.durationDisplay!),
                           ],
