@@ -13,9 +13,7 @@ class ScalingHeader extends StatefulWidget {
     this.bottom,
     this.elevation = 0,
     this.backgroundColor,
-    this.brightness,
     this.iconTheme,
-    this.textTheme,
     this.primary = true,
     this.centerTitle,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
@@ -50,14 +48,8 @@ class ScalingHeader extends StatefulWidget {
   /// See [AppBar.backgroundColor]
   final Color? backgroundColor;
 
-  /// See [AppBar.brightness]
-  final Brightness? brightness;
-
   /// See [AppBar.iconTheme]
   final IconThemeData? iconTheme;
-
-  /// See [AppBar.textTheme]
-  final TextTheme? textTheme;
 
   /// See [AppBar.primary]
   final bool primary;
@@ -135,9 +127,7 @@ class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProvider
       backgroundColor: widget.backgroundColor != null
           ? widget.backgroundColor!.withOpacity(_animationController.value)
           : Theme.of(context).primaryColor.withOpacity(_animationController.value),
-      brightness: widget.brightness,
       iconTheme: widget.iconTheme,
-      textTheme: widget.textTheme,
       primary: widget.primary,
       centerTitle: widget.centerTitle,
       titleSpacing: widget.titleSpacing,
