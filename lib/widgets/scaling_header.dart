@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 /// Based on https://github.com/figengungor/scaling_header/blob/9cab2415f1478f23c76ab7f5cc2ac2bce5c1d971/lib/scaling_header.dart
-/// Updated to null safety and upgraded.
+/// Updated to null safety and improved.
 class ScalingHeader extends StatefulWidget {
   const ScalingHeader({
     Key? key,
