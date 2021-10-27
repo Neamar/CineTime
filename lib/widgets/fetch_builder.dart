@@ -6,10 +6,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rxdart/rxdart.dart';
 
-typedef AsyncTask<T, R> = Future<R> Function(T? param);
+typedef AsyncTask<R> = Future<R> Function();
+typedef ParameterizedAsyncTask<T, R> = Future<R> Function(T? param);
 
 class FetchBuilder<T, R> extends StatefulWidget {
-  const FetchBuilder({
+  // Because constructor or factory must be of type <T, R>, we must use a static method instead
+  static FetchBuilder<Never, R> simple<R>({
+    Key? key,
+    FetchBuilderController<Never, R?>? controller,
+    required AsyncTask<R> task,
+    bool fetchAtInit = true,
+    WidgetBuilder? fetchingBuilder,
+    DataWidgetBuilder<R>? builder,
+    AsyncValueChanged<R>? onSuccess,
+    bool isDense = false,
+    bool fade = true,
+  }) => FetchBuilder.withParam(
+    key: key,
+    controller: controller,
+    task: (_) => task(),
+    fetchAtInit: fetchAtInit,
+    fetchingBuilder: fetchingBuilder,
+    builder: builder,
+    onSuccess: onSuccess,
+    isDense: isDense,
+    fade: fade,
+  );
+
+  const FetchBuilder.withParam({
     Key? key,
     this.controller,
     required this.task,
@@ -23,7 +47,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
 
   /// Task that fetch and return the data, with optional parameter
   /// If task throws, it will be properly handled (message displayed + report error)
-  final AsyncTask<T, R> task;
+  final ParameterizedAsyncTask<T, R> task;
 
   /// Whether to automatically start [task] when widget is initialised.
   final bool fetchAtInit;
@@ -204,7 +228,7 @@ class FetchException {
 }
 
 class FetchBuilderController<T, R> {
-  AsyncTask<T, R?>? _refreshCallback;
+  ParameterizedAsyncTask<T, R?>? _refreshCallback;
   Future<R?> refresh([T? param]) {
     assert(_refreshCallback != null);
     return _refreshCallback!(param);

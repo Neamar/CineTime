@@ -24,10 +24,10 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FetchBuilder<Never, MoviesShowTimes>(
+      body: FetchBuilder.simple<MoviesShowTimes>(
         controller: bloc.fetchController,
         fetchAtInit: false,
-        task: (_) => bloc.fetch(),
+        task: bloc.fetch,
         builder: (context, moviesShowtimesData) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
