@@ -402,7 +402,7 @@ class SynopsisWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FetchBuilder<MovieInfo>(
+    return FetchBuilder.basic<MovieInfo>(
       task: () => AppService.api.getMovieInfo(movieId),
       isDense: true,
       fetchingBuilder: (context) {

@@ -27,7 +27,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
   @override
   Widget build(BuildContext context) {
     return Scaffold(    // Needed for background color
-      body: FetchBuilder<MoviesShowTimes>(
+      body: FetchBuilder.basic<MoviesShowTimes>(
         controller: bloc.fetchController,
         fetchAtInit: false,
         task: bloc.fetch,
@@ -163,7 +163,7 @@ class MoviesPageBloc with Disposable {
   }
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
-  final fetchController = FetchBuilderController();
+  final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
   final sortType = BehaviorSubject.seeded(MovieSortType.rating);
 
   Future<MoviesShowTimes> fetch() async {
