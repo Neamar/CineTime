@@ -17,10 +17,19 @@ Future<void> main() async {
   // Init Flutter
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Disable logging in release mode
-  if (kReleaseMode) {
-    debugPrint = (message, {wrapWidth}) {};
-  }
+  // Override debugPrint to pass all messages to Sentry
+  debugPrint = (message, {wrapWidth}) {
+    // Disable logging in release mode
+    if (!kReleaseMode)
+      debugPrintThrottled(message, wrapWidth: wrapWidth);
+
+    // Sent message to Sentry
+    Sentry.addBreadcrumb(Breadcrumb(
+      message: message,
+      category: 'debugPrint',
+    ));
+  };
+
 
   // Get android version info
   try {
