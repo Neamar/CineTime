@@ -217,17 +217,17 @@ class ApiClient {
         if (showTimes.isEmpty) continue;
 
         // Build Movie info
-        JsonObject movieJson = movieShowTimesJson['movie']!;
+        final JsonObject movieJson = movieShowTimesJson['movie']!;
         final String movieId = movieJson['id'];
         var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.id.id == movieId);
 
         if (movie == null) {
-          JsonList releasesJson = movieJson['releases'] ?? [];
-          JsonList genresJson = movieJson['genres'] ?? [];
-          String? posterUrl = movieJson['poster']?['url'];
-          JsonList videosJson = movieJson['videos'] ?? [];
-          String? trailerId = videosJson.firstOrNull?['id'];
-          JsonObject statisticsJson = movieJson['stats'] ?? {};
+          final JsonList releasesJson = movieJson['releases'] ?? [];
+          final JsonList genresJson = movieJson['genres'] ?? [];
+          final String? posterUrl = movieJson['poster']?['url'];
+          final JsonList videosJson = movieJson['videos'] ?? [];
+          final String? trailerId = videosJson.firstOrNull?['id'];
+          final JsonObject statisticsJson = movieJson['stats'] ?? {};
 
           String? personsFromJson(JsonList? personsJson) {
             if (personsJson == null) return null;
@@ -278,8 +278,9 @@ class ApiClient {
     );
   }
 
-  /// Get the synopsis of the movie corresponding to [movieCode]
-  Future<String> getSynopsis(ApiId movieId) async {
+  /// Get detailed movie info
+  /// Return synopsis and certificate
+  Future<MovieInfo> getMovieInfo(ApiId movieId) async {
     // Send request
     JsonObject? responseJson;
     if (useMocks) {
@@ -294,12 +295,22 @@ class ApiClient {
       );
     }
 
-    // Return result
-    final String? synopsis = responseJson?['data']?['movie']?['synopsis'];
-    if (synopsis == null) return '\nAucun synopsis\n';
+    // Process data
+    final JsonObject? movieJson = responseJson?['data']?['movie'];
 
-    // Return cleaned data
-    return convertBasicHtmlTags(synopsis);
+    // Synopsis
+    String? synopsis = movieJson?['synopsis'];
+    if (synopsis != null) synopsis = convertBasicHtmlTags(synopsis);
+
+    // Certificate
+    final JsonList releasesJson = movieJson?['releases'] ?? [];
+    final String? certificate = releasesJson.firstOrNull?['certificate']?['label'];
+
+    // Return data
+    return MovieInfo(
+      synopsis: synopsis,
+      certificate: certificate,
+    );
   }
 
   Future<String> getVideoUrl(ApiId videoId) async {

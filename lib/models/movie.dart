@@ -84,6 +84,13 @@ class Movie extends Identifiable {
   }
 }
 
+class MovieInfo {
+  const MovieInfo({this.synopsis, this.certificate});
+
+  final String? synopsis;
+  final String? certificate;
+}
+
 class MovieVideo {
   const MovieVideo({
     this.quality,
