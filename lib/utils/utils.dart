@@ -14,6 +14,8 @@ import 'exceptions/unreported_exception.dart';
 
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
+typedef AsyncTask<R> = Future<R> Function();
+typedef ParameterizedAsyncTask<T, R> = Future<R> Function(T? param);
 typedef AsyncValueChanged<T> = Future<void> Function(T value);
 typedef SubtreeBuilder = Widget Function(BuildContext context, Widget child);
 typedef DataWidgetBuilder<T> = Widget Function(BuildContext context, T data);

@@ -6,12 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rxdart/rxdart.dart';
 
-typedef AsyncTask<R> = Future<R> Function();
-typedef ParameterizedAsyncTask<T, R> = Future<R> Function(T? param);
-
 class FetchBuilder<T, R> extends StatefulWidget {
-  // Because constructor or factory must be of type <T, R>, we must use a static method instead
-  static FetchBuilder<Never, R> simple<R>({
+  /// Basic [FetchBuilder] constructor.
+  /// Because constructor or factory must be of type <T, R>, we must use a static method instead.
+  static FetchBuilder<Never, R> basic<R>({
     Key? key,
     FetchBuilderController<Never, R?>? controller,
     required AsyncTask<R> task,
@@ -33,6 +31,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
     fade: fade,
   );
 
+  /// A [FetchBuilder] where [controller.refresh()] takes a parameter that will be passed to [task].
   const FetchBuilder.withParam({
     Key? key,
     this.controller,

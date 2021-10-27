@@ -24,7 +24,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FetchBuilder.simple<MoviesShowTimes>(
+      body: FetchBuilder.basic<MoviesShowTimes>(
         controller: bloc.fetchController,
         fetchAtInit: false,
         task: bloc.fetch,
