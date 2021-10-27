@@ -21,6 +21,7 @@ class _ShowMoreTextState extends State<ShowMoreText> {
   Widget build(BuildContext context) {
     return GestureDetector(
       child: CtAnimatedSwitcher(
+        sizeAnimation: true,
         child: () {
           final text = RichText(
             text: TextSpan(
