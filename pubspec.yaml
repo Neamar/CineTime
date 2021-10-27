@@ -34,7 +34,7 @@ dependencies:
   # Device
   sentry_flutter: ^6.0.1
   url_launcher: ^6.0.12
-  share_plus: ^3.0.2
+  share_plus: ^3.0.4
   geolocator: 7.6.2  # Next version needs compileSdkVersion = 31
   add_2_calendar: ^2.1.2
 
