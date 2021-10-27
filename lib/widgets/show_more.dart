@@ -1,12 +1,14 @@
+import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
 
 import 'themed_widgets.dart';
 
 class ShowMoreText extends StatefulWidget {
-  final String text;
-  final int collapsedMaxLines;
+  const ShowMoreText({Key? key, this.header, required this.text, required this.collapsedHeight}) : super(key: key);
 
-  ShowMoreText({Key? key, required this.text, this.collapsedMaxLines = 3}) : super(key: key);
+  final String? header;
+  final String text;
+  final double collapsedHeight;
 
   @override
   _ShowMoreTextState createState() => _ShowMoreTextState();
@@ -20,10 +22,19 @@ class _ShowMoreTextState extends State<ShowMoreText> {
     return GestureDetector(
       child: CtAnimatedSwitcher(
         child: () {
-          final text =  Text(
-            widget.text,
+          final text = RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.bodyText2,
+              children: [
+                if (widget.header != null)...[
+                  TextSpan(text: widget.header! + '\n', style: TextStyle(color: AppResources.colorDarkRed, fontWeight: FontWeight.w500)),
+                  WidgetSpan(child: Container(height: AppResources.spacerTiny.height, width: double.infinity)),
+                ],
+                TextSpan(text: widget.text),
+              ],
+            ),
             textAlign: TextAlign.justify,
-            maxLines: isExpanded ? 100 : widget.collapsedMaxLines,
+            maxLines: 100,
             overflow: TextOverflow.ellipsis,
           );
 
@@ -39,7 +50,10 @@ class _ShowMoreTextState extends State<ShowMoreText> {
                 ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
               },
               blendMode: BlendMode.dstIn,
-              child: text,
+              child: SizedBox(
+                height: widget.collapsedHeight,
+                child: text,
+              ),
             );
           }
         } (),

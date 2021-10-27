@@ -394,7 +394,7 @@ class HeroPoster extends StatelessWidget {
 }
 
 class SynopsisWidget extends StatelessWidget {
-  static const collapsedMaxLines = 3;
+  static const collapsedHeight = 48.0;
 
   const SynopsisWidget({Key? key, required this.movieId}) : super(key: key);
 
@@ -402,44 +402,35 @@ class SynopsisWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FetchBuilder<String>(
+    return FetchBuilder<MovieInfo>(
       task: () => AppService.api.getMovieInfo(movieId),
       isDense: true,
       fetchingBuilder: (context) {
-        return Stack(
-          children: [
-            // Fake empty text to set the Widget's height (equals to [collapsedMaxLines] time a text line height)
-            Column(
+        return SizedBox(
+          height: collapsedHeight,
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: List.generate(collapsedMaxLines, (index) => Text(' ')),
-            ),
-
-            // Content that take the previous Column's height
-            Positioned.fill(
-              child: Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: List.generate(collapsedMaxLines, (index) => Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 3),
-                      child: Container(
-                        color: Colors.white,
-                      ),
-                    ),
-                  )),
+              children: List.generate(3, (index) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Container(
+                    color: Colors.white,
+                  ),
                 ),
-              ),
+              )),
             ),
-          ],
+          ),
         );
       },
-      builder: (context, synopsis) {
+      builder: (context, info) {
         return ShowMoreText(
-          text: synopsis,
-          collapsedMaxLines: collapsedMaxLines,
+          header: info.certificate,
+          text: info.synopsis ?? '\nAucun synopsis\n',
+          collapsedHeight: collapsedHeight,
         );
       },
     );
