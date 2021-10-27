@@ -1,31 +1,33 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
-/// Copied from https://github.com/figengungor/scaling_header/blob/master/lib/scaling_header.dart
+/// Based on https://github.com/figengungor/scaling_header/blob/9cab2415f1478f23c76ab7f5cc2ac2bce5c1d971/lib/scaling_header.dart
+/// Updated to null safety and upgraded.
 class ScalingHeader extends StatefulWidget {
-  ScalingHeader(
-      {Key? key,
-      this.leading,
-      this.automaticallyImplyLeading = true,
-      this.title,
-      this.actions,
-      this.bottom,
-      this.elevation = 0,
-      this.backgroundColor,
-      this.brightness,
-      this.iconTheme,
-      this.textTheme,
-      this.primary = true,
-      this.centerTitle,
-      this.titleSpacing = NavigationToolbar.kMiddleSpacing,
-      this.bottomOpacity = 1.0,
-      this.flexibleSpace,
-      this.flexibleSpaceHeight = 275,
-      this.overlapContentHeight = 50,
-      this.overlapContentWidth = 300,
-      required this.overlapContent,
-      required this.overlapContentBackgroundColor,
-      this.overlapContentRadius = 30});
+  ScalingHeader({
+    Key? key,
+    this.leading,
+    this.automaticallyImplyLeading = true,
+    this.title,
+    this.actions,
+    this.bottom,
+    this.elevation = 0,
+    this.backgroundColor,
+    this.brightness,
+    this.iconTheme,
+    this.textTheme,
+    this.primary = true,
+    this.centerTitle,
+    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.bottomOpacity = 1.0,
+    this.flexibleSpace,
+    this.flexibleSpaceHeight = 275,
+    this.overlapContentHeight = 50,
+    this.overlapContentWidth = 300,
+    required this.overlapContent,
+    required this.overlapContentBackgroundColor,
+    this.overlapContentRadius = 30,
+  });
 
   /// See [AppBar.leading]
   final Widget? leading;
@@ -94,8 +96,7 @@ class ScalingHeader extends StatefulWidget {
   _ScalingHeaderState createState() => _ScalingHeaderState();
 }
 
-class _ScalingHeaderState extends State<ScalingHeader>
-    with SingleTickerProviderStateMixin {
+class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProviderStateMixin {
   ValueNotifier<double> _shrinkOffsetNotifier = ValueNotifier<double>(0);
   late AnimationController _animationController;
   bool _isExpanded = true;
@@ -105,14 +106,14 @@ class _ScalingHeaderState extends State<ScalingHeader>
 
   @override
   void initState() {
-    expandedHeight =
-        widget.flexibleSpaceHeight + widget.overlapContentHeight / 2;
+    super.initState();
+
+    expandedHeight = widget.flexibleSpaceHeight + widget.overlapContentHeight / 2;
     overlapContentHeight = widget.overlapContentHeight;
     overlapContentWidth = widget.overlapContentWidth;
 
     _shrinkOffsetNotifier.addListener(() {
-      final offset =
-          expandedHeight! - (kToolbarHeight + overlapContentHeight! / 2);
+      final offset = expandedHeight! - (kToolbarHeight + overlapContentHeight! / 2);
       if (_isExpanded && _shrinkOffsetNotifier.value > offset) {
         _isExpanded = false;
         _animationController.forward();
@@ -122,17 +123,13 @@ class _ScalingHeaderState extends State<ScalingHeader>
       }
     });
 
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-
+    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     _animationController.addListener(() => setState(() {}));
-
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    var appBar = AppBar(
+    final appBar = AppBar(
       leading: widget.leading,
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       title: widget.title,
@@ -141,9 +138,7 @@ class _ScalingHeaderState extends State<ScalingHeader>
       elevation: widget.elevation,
       backgroundColor: widget.backgroundColor != null
           ? widget.backgroundColor!.withOpacity(_animationController.value)
-          : Theme.of(context)
-              .primaryColor
-              .withOpacity(_animationController.value),
+          : Theme.of(context).primaryColor.withOpacity(_animationController.value),
       brightness: widget.brightness,
       iconTheme: widget.iconTheme,
       textTheme: widget.textTheme,
@@ -154,34 +149,16 @@ class _ScalingHeaderState extends State<ScalingHeader>
     );
 
     return SliverPersistentHeader(
-      delegate: Header(
-          expandedHeight,
-          overlapContentHeight,
-          overlapContentWidth,
-          _shrinkOffsetNotifier,
-          appBar,
-          widget.flexibleSpace,
-          widget.overlapContent,
-          widget.overlapContentBackgroundColor,
-          widget.overlapContentRadius,
-          MediaQuery.of(context).padding.top),
+      delegate: Header(expandedHeight, overlapContentHeight, overlapContentWidth, _shrinkOffsetNotifier, appBar, widget.flexibleSpace,
+          widget.overlapContent, widget.overlapContentBackgroundColor, widget.overlapContentRadius, MediaQuery.of(context).padding.top),
       pinned: true,
     );
   }
 }
 
 class Header extends SliverPersistentHeaderDelegate {
-  Header(
-      this.expandedHeight,
-      this.overlapContentHeight,
-      this.overlapContentWidth,
-      this.shrinkOffsetNotifier,
-      this.appBar,
-      this.flexibleSpace,
-      this.overlapContent,
-      this.overlapContentBackgroundColor,
-      this.overlapContentRadius,
-      this.topPadding);
+  Header(this.expandedHeight, this.overlapContentHeight, this.overlapContentWidth, this.shrinkOffsetNotifier, this.appBar,
+      this.flexibleSpace, this.overlapContent, this.overlapContentBackgroundColor, this.overlapContentRadius, this.topPadding);
 
   final ValueNotifier<double> shrinkOffsetNotifier;
   final double? expandedHeight;
@@ -195,12 +172,10 @@ class Header extends SliverPersistentHeaderDelegate {
   final double topPadding;
 
   @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     shrinkOffsetNotifier.value = shrinkOffset;
     final width = MediaQuery.of(context).size.width;
-    final offset =
-        expandedHeight! - (kToolbarHeight + topPadding + overlapContentHeight!);
+    final offset = expandedHeight! - (kToolbarHeight + topPadding + overlapContentHeight!);
     final distance = width - overlapContentWidth!;
     return Stack(
       fit: StackFit.expand,
@@ -232,8 +207,7 @@ class Header extends SliverPersistentHeaderDelegate {
             child: Container(
               decoration: BoxDecoration(
                 color: overlapContentBackgroundColor,
-                borderRadius: BorderRadius.circular(overlapContentRadius -
-                    overlapContentRadius / offset * shrinkOffset),
+                borderRadius: BorderRadius.circular(overlapContentRadius - overlapContentRadius / offset * shrinkOffset),
               ),
               height: overlapContentHeight,
               width: distance / offset * shrinkOffset + overlapContentWidth!,
