@@ -661,7 +661,7 @@ $dateDisplay""";
     await Add2Calendar.addEvent2Cal(Event(
       title: movie.title,
       description: 'Séance de cinéma pour ${movie.title} en ${showtime.spec}',
-      location: theater.fullAddress,
+      location: theater.name + '\n' + theater.fullAddress,
       startDate: showtime.dateTime,
       endDate: showtime.dateTime.add(movie.duration),
     ));
