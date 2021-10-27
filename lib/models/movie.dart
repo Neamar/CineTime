@@ -50,7 +50,7 @@ class Movie extends Identifiable {
 
   final double? pressRating;
   final double? userRating;
-  double? get rating => (pressRating != null && userRating != null ? (pressRating! + userRating!) / 2 : pressRating) ?? userRating;
+  double? get rating => userRating ?? pressRating;
 
   int compareTo(Movie other, MovieSortType type) {
     switch(type) {
