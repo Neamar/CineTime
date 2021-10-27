@@ -1,6 +1,6 @@
 name: cinetime
 description: CinéTime
-version: 2.2.2+51
+version: 2.2.4+53
 
 environment:
   sdk: '>=2.14.0 <3.0.0'
@@ -29,11 +29,12 @@ dependencies:
   connectivity_plus: ^2.0.2
   flutter_cache_manager: ^3.1.2
   cached_network_image: ^3.1.0
+  amplitude_flutter: ^3.5.0
 
   # Device
   sentry_flutter: ^6.0.1
   url_launcher: ^6.0.12
-  share_plus: ^3.0.2
+  share_plus: ^3.0.4
   geolocator: 7.6.2  # Next version needs compileSdkVersion = 31
   add_2_calendar: ^2.1.2
 

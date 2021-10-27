@@ -8,6 +8,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.2"
+  amplitude_flutter:
+    dependency: "direct main"
+    description:
+      name: amplitude_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.5.0"
   args:
     dependency: transitive
     description:
@@ -498,7 +505,7 @@ packages:
       name: share_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.2"
+    version: "3.0.4"
   share_plus_linux:
     dependency: transitive
     description:

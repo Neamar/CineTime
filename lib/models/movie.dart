@@ -2,7 +2,9 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 
-class Movie extends Identifiable with Comparable<Movie> {
+enum MovieSortType { rating, releaseDate, duration }
+
+class Movie extends Identifiable {
   Movie({
     required ApiId id,
     required this.title,
@@ -48,13 +50,21 @@ class Movie extends Identifiable with Comparable<Movie> {
 
   final double? pressRating;
   final double? userRating;
-  double? get rating => (pressRating != null && userRating != null ? (pressRating! + userRating!) / 2 : pressRating) ?? userRating;
+  double? get rating => userRating ?? pressRating;
 
-  @override
-  int compareTo(Movie other) {
-    if (this.userRating != null && other.userRating != null) return other.userRating!.compareTo(this.userRating!);
-    if (this.pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(this.pressRating!);
-    return this.title.compareTo(other.title);
+  int compareTo(Movie other, MovieSortType type) {
+    switch(type) {
+      case MovieSortType.rating:
+        if (this.userRating != null && other.userRating != null) return other.userRating!.compareTo(this.userRating!);
+        if (this.pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(this.pressRating!);
+        return this.title.compareTo(other.title);
+      case MovieSortType.releaseDate:
+        final date1 = this.releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final date2 = other.releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return date2.compareTo(date1);
+      case MovieSortType.duration:
+        return this.duration.compareTo(other.duration);
+    }
   }
 
   static String? _buildGenresFromApi(JsonList? genresApi) => genresApi?.map((genreApi) => _genresMap[genreApi]).joinNotEmpty(', ');
@@ -72,6 +82,13 @@ class Movie extends Identifiable with Comparable<Movie> {
 
     return '${hours}h${minutes.toTwoDigitsString()}';
   }
+}
+
+class MovieInfo {
+  const MovieInfo({this.synopsis, this.certificate});
+
+  final String? synopsis;
+  final String? certificate;
 }
 
 class MovieVideo {

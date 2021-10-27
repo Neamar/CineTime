@@ -1,6 +1,7 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
@@ -68,9 +69,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         )
                       ],
                     ),
-                    onPressed: hasTrailer
-                        ? () => navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!))
-                        : null,
+                    onPressed: hasTrailer ? _openTrailer : null,
                   ),
                   TextButton(
                     child: Row(
@@ -87,7 +86,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         )
                       ],
                     ),
-                    onPressed: () => launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id)),
+                    onPressed: _openMovieDataSheetWebPage,
                   )
                 ],
               ),
@@ -111,14 +110,11 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         children: <Widget>[
                           SizedBox(
                             height: 100,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: GestureDetector(
-                                onTap: _openPoster,
-                                child: CtCachedImage(
-                                  path: widget.movieShowTimes.movie.poster,
-                                  isThumbnail: true,
-                                ),
+                            child: GestureDetector(
+                              onTap: _openPoster,
+                              child: HeroPoster(
+                                posterPath: widget.movieShowTimes.movie.poster,
+                                borderRadius: AppResources.borderRadiusTiny,
                               ),
                             ),
                           ),
@@ -228,7 +224,13 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                           child: _TagFilterSelector(
                                             options: widget.movieShowTimes.showTimesSpecOptions,
                                             selected: filter,
-                                            onChanged: bloc.selectedSpec.add,
+                                            onChanged: (value) {
+                                              bloc.selectedSpec.add(value);
+                                              AnalyticsService.trackEvent('Movie spec changed', {
+                                                'value': value.toString(),
+                                                'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+                                              });
+                                            },
                                           ),
                                         ),
                                       ),
@@ -255,7 +257,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                     padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
                                     child: TheaterShowTimesWidget(
                                       theaterName: theaterShowTimes.theater.name,
-                                      formattedShowTimes: theaterShowTimes.getFormattedShowTimes(filter),
+                                      showTimes: theaterShowTimes.getFormattedShowTimes(filter),
                                       filterName: filter.toString(),
                                       onShowtimePressed: (showtime) => _openShowtimeDialog(
                                         movie: widget.movieShowTimes.movie,
@@ -316,6 +318,20 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
   void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
 
+  void _openTrailer() {
+    navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!));
+    AnalyticsService.trackEvent('Trailer displayed', {
+      'movieTitle': widget.movieShowTimes.movie.title,
+    });
+  }
+
+  void _openMovieDataSheetWebPage() {
+    launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id));
+    AnalyticsService.trackEvent('Movie datasheet webpage displayed', {
+      'movieTitle': widget.movieShowTimes.movie.title,
+    });
+  }
+
   void _openShowtimeDialog({required Movie movie, required Theater theater, required ShowTime showtime}) {
     showDialog(
       context: context,
@@ -333,8 +349,52 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
   }
 }
 
+class HeroPoster extends StatelessWidget {
+  const HeroPoster({Key? key, this.posterPath, required this.borderRadius}) : super(key: key);
+
+  final String? posterPath;
+  final BorderRadius borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = CtCachedImage(
+      path: posterPath,
+      isThumbnail: true,
+    );
+
+    final staticContent = ClipRRect(
+      borderRadius: borderRadius,
+      child: child,
+    );
+
+    if (posterPath != null)
+      return Hero(
+        tag: posterPath!,
+        flightShuttleBuilder: (flightContext, animation, flightDirection, fromHeroContext, toHeroContext) {
+          final from = ((fromHeroContext.widget as Hero).child as ClipRRect).borderRadius;
+          final to = ((toHeroContext.widget as Hero).child as ClipRRect).borderRadius;
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) {
+              return ClipRRect(
+                borderRadius: flightDirection == HeroFlightDirection.push
+                  ? Tween(begin: from, end: to).evaluate(animation)
+                  : Tween(begin: to, end: from).evaluate(animation),
+                child: child,
+              );
+            },
+            child: child,
+          );
+        },
+        child: staticContent,
+      );
+
+    return staticContent;
+  }
+}
+
 class SynopsisWidget extends StatelessWidget {
-  static const collapsedMaxLines = 3;
+  static const collapsedHeight = 48.0;
 
   const SynopsisWidget({Key? key, required this.movieId}) : super(key: key);
 
@@ -342,44 +402,35 @@ class SynopsisWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FetchBuilder.basic<String>(
-      task: () => AppService.api.getSynopsis(movieId),
+    return FetchBuilder.basic<MovieInfo>(
+      task: () => AppService.api.getMovieInfo(movieId),
       isDense: true,
       fetchingBuilder: (context) {
-        return Stack(
-          children: [
-            // Fake empty text to set the Widget's height (equals to [collapsedMaxLines] time a text line height)
-            Column(
+        return SizedBox(
+          height: collapsedHeight,
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: List.generate(collapsedMaxLines, (index) => Text(' ')),
-            ),
-
-            // Content that take the previous Column's height
-            Positioned.fill(
-              child: Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: List.generate(collapsedMaxLines, (index) => Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 3),
-                      child: Container(
-                        color: Colors.white,
-                      ),
-                    ),
-                  )),
+              children: List.generate(3, (index) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Container(
+                    color: Colors.white,
+                  ),
                 ),
-              ),
+              )),
             ),
-          ],
+          ),
         );
       },
-      builder: (context, synopsis) {
+      builder: (context, info) {
         return ShowMoreText(
-          text: synopsis,
-          collapsedMaxLines: collapsedMaxLines,
+          header: info.certificate,
+          text: info.synopsis ?? '\nAucun synopsis\n',
+          collapsedHeight: collapsedHeight,
         );
       },
     );
@@ -417,13 +468,13 @@ class TheaterShowTimesWidget extends StatelessWidget {
   const TheaterShowTimesWidget({
     Key? key,
     required this.theaterName,
-    required this.formattedShowTimes,
+    required this.showTimes,
     required this.filterName,
     this.onShowtimePressed,
   }) : super(key: key);
 
   final String theaterName;
-  final FormattedShowTimes formattedShowTimes;
+  final List<DayShowTimes> showTimes;
   final String filterName;
   final ValueChanged<ShowTime>? onShowtimePressed;
 
@@ -441,14 +492,14 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
         // Showtimes
         AppResources.spacerSmall,
-        if (formattedShowTimes.isNotEmpty)
+        if (showTimes.isNotEmpty)
           Row(
-            children: formattedShowTimes.keys.mapIndexed<Widget>((index, day) {
+            children: showTimes.mapIndexed<Widget>((index, dayShowTimes) {
               return _DayShowTimes(
-                day: day,
-                showtimes: formattedShowTimes[day]!,
+                day: dayShowTimes.date,
+                showtimes: dayShowTimes.showTimes,
                 backgroundColor: () {
-                  if (day == ApiClient.mockedNow.toDate) return AppResources.colorLightRed;
+                  if (dayShowTimes.date == ApiClient.mockedNow.toDate) return AppResources.colorLightRed;
                   if (index.isEven) return Colors.black12;
                 } (),
                 onPressed: onShowtimePressed,
@@ -611,7 +662,14 @@ $dateDisplay""";
 
 class MoviePageBloc with Disposable {
   MoviePageBloc(MovieShowTimes movieShowTimes) :
-    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first);
+    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first) {
+    AnalyticsService.trackEvent('Movie displayed', {
+      'movieTitle': movieShowTimes.movie.title,
+      'theaterCount': movieShowTimes.theatersShowTimes.length,
+      'theatersId': movieShowTimes.theatersShowTimes.map((tst) => tst.theater).toIdListString(),
+      'availableSpec': movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+    });
+  }
 
   final BehaviorSubject<ShowTimeSpec> selectedSpec;
 

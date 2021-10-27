@@ -24,7 +24,6 @@ class MovieCard extends StatelessWidget {
       releaseYear = releaseDate.year;
 
     return Card(
-      clipBehavior: Clip.antiAlias,
       child: InkWell(
         child: LayoutBuilder(
           builder: (context, box) {
@@ -35,9 +34,12 @@ class MovieCard extends StatelessWidget {
                 // Poster
                 SizedBox(
                   width: box.maxHeight * 0.75,
-                  child: CtCachedImage(
-                    path: movieShowTimes.movie.poster,
-                    isThumbnail: true,
+                  child: HeroPoster(
+                    posterPath: movieShowTimes.movie.poster,
+                    borderRadius: BorderRadius.only(
+                      topLeft: AppResources.borderRadiusTiny.topLeft,
+                      bottomLeft: AppResources.borderRadiusTiny.bottomLeft,
+                    ),
                   ),
                 ),
 
@@ -88,9 +90,14 @@ class MovieCard extends StatelessWidget {
                         // Info line 2
                         AppResources.spacerTiny,
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text(movieShowTimes.movie.genres!),    //TODO smaller
+                            Expanded(
+                              child: Text(
+                                movieShowTimes.movie.genres!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                             if (movieShowTimes.movie.durationDisplay != null)
                               Text(movieShowTimes.movie.durationDisplay!),
                           ],

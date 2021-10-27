@@ -1,4 +1,6 @@
+import 'package:amplitude_flutter/amplitude.dart';
 import 'package:cinetime/pages/_pages.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -30,10 +32,13 @@ Future<void> main() async {
   // Init shared pref
   await StorageService.init();
 
+  // Init analytics
+  await AnalyticsService.init();
+
   // Start App inside Sentry's scope
   await SentryFlutter.init(
     (options) {
-      options.dsn = 'https://bdfc16e5af644dcdb5dd9c684e584334@o1004143.ingest.sentry.io/5965118';
+      options.dsn = 'https://f0a7dfef9b5249c7a57c355ac9d30856@o1038499.ingest.sentry.io/6006844';
       options.debug = !kReleaseMode;
       options.environment = kReleaseMode ? 'release' : 'debug';
     },

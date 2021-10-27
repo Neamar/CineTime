@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 
@@ -60,7 +61,13 @@ class AppService {
 
   bool isFavorite(Theater theater) => _favoriteTheaters.contains(theater);
 
-  Future<void> addToFavorites(Theater theater) => StorageService.saveFavoriteTheaters(_favoriteTheaters..add(theater));
+  Future<void> addToFavorites(Theater theater) async {
+    await StorageService.saveFavoriteTheaters(_favoriteTheaters..add(theater));
+    AnalyticsService.trackEvent('Theater favorited', {
+      'theaterId': theater.id.id,
+      'favoriteCount': _favoriteTheaters.length,
+    });   // Do not await
+  }
   Future<void> removeFromFavorites(Theater theater) => StorageService.saveFavoriteTheaters(_favoriteTheaters..remove(theater));
   //#endregion
 }
