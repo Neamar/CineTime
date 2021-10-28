@@ -1,7 +1,7 @@
-import 'package:amplitude_flutter/amplitude.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,9 +17,25 @@ Future<void> main() async {
   // Init Flutter
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Disable logging in release mode
-  if (kReleaseMode) {
-    debugPrint = (message, {wrapWidth}) {};
+  // Override debugPrint to pass all messages to Sentry
+  debugPrint = (message, {wrapWidth}) {
+    // Disable logging in release mode
+    if (!kReleaseMode)
+      debugPrintThrottled(message, wrapWidth: wrapWidth);
+
+    // Sent message to Sentry
+    Sentry.addBreadcrumb(Breadcrumb(
+      message: message,
+      category: 'debugPrint',
+    ));
+  };
+
+
+  // Get android version info
+  try {
+    App.androidSdkVersion = (await DeviceInfoPlugin().androidInfo).version.sdkInt ?? App.androidSdkVersion;
+  } catch(e) {
+    // Ignore
   }
 
   // Init intl package
@@ -56,6 +72,9 @@ class App extends StatelessWidget {
   /// The [BuildContext] of the main navigator.
   /// We may use this on showMessage, showError, openDialog, etc.
   static BuildContext get navigatorContext => _navigatorKey.currentContext!;
+
+  /// Current android API version
+  static int androidSdkVersion = 0;
 
   // This widget is the root of your application.
   @override

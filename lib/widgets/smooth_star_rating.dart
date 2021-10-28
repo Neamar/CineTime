@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 
-typedef void RatingChangeCallback(double rating);
+typedef void _RatingChangeCallback(double rating);
 
-/// Copied from https://github.com/thangmam/smoothratingbar/blob/master/lib/smooth_star_rating.dart
+/// Based on https://github.com/thangmam/smoothratingbar/blob/ee3067f133a461f70d1e5e02690547d746760e16/lib/smooth_star_rating.dart
+/// Updated to null safety and improved.
 class SmoothStarRating extends StatelessWidget {
   final int starCount;
   final double rating;
-  final RatingChangeCallback? onRatingChanged;
+  final _RatingChangeCallback? onRatingChanged;
   final Color? color;
   final Color? borderColor;
   final double size;
   final bool allowHalfRating;
   final IconData? filledIconData;
   final IconData? halfFilledIconData;
-  final IconData?
-      defaultIconData; //this is needed only when having fullRatedIconData && halfRatedIconData
+  final IconData? defaultIconData; //this is needed only when having fullRatedIconData && halfRatedIconData
   final double spacing;
+
   SmoothStarRating({
     this.starCount = 5,
-    this.spacing=0.0,
+    this.spacing = 0.0,
     this.rating = 0.0,
     this.defaultIconData,
     this.onRatingChanged,
@@ -28,34 +29,31 @@ class SmoothStarRating extends StatelessWidget {
     this.filledIconData,
     this.halfFilledIconData,
     this.allowHalfRating = true,
-  }) {
-    assert(this.rating != null);
-  }
+  });
 
   Widget buildStar(BuildContext context, int index) {
     Icon icon;
     if (index >= rating) {
-      icon = new Icon(
+      icon = Icon(
         defaultIconData != null ? defaultIconData : Icons.star_border,
         color: borderColor ?? Theme.of(context).primaryColor,
         size: size,
       );
-    } else if (index > rating - (allowHalfRating ? 0.5 : 1.0) &&
-        index < rating) {
-      icon = new Icon(
+    } else if (index > rating - (allowHalfRating ? 0.5 : 1.0) && index < rating) {
+      icon = Icon(
         halfFilledIconData != null ? halfFilledIconData : Icons.star_half,
         color: color ?? Theme.of(context).primaryColor,
         size: size,
       );
     } else {
-      icon = new Icon(
+      icon = Icon(
         filledIconData != null ? filledIconData : Icons.star,
         color: color ?? Theme.of(context).primaryColor,
         size: size,
       );
     }
 
-    return new GestureDetector(
+    return GestureDetector(
       onTap: () {
         if (this.onRatingChanged != null) onRatingChanged!(index + 1.0);
       },
@@ -78,13 +76,13 @@ class SmoothStarRating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Material(
+    return Material(
       color: Colors.transparent,
-      child: new Wrap(
-          alignment: WrapAlignment.start,
-          spacing: spacing,
-          children: new List.generate(
-              starCount, (index) => buildStar(context, index))),
+      child: Wrap(
+        alignment: WrapAlignment.start, 
+        spacing: spacing, 
+        children: List.generate(starCount, (index) => buildStar(context, index)),
+      ),
     );
   }
 }
