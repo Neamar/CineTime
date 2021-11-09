@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AppResources {
-  // Colors
+  // Color
   static const colorRed = Color(0xFFD32F2F);
   static const colorLightRed = Color(0xFFFF6659);
   static const colorDarkRed = Color(0xFF9A0007);
@@ -12,7 +12,7 @@ class AppResources {
   static const colorGrey = Color(0xFFFAFAFA);
   static const colorDarkGrey = Color(0xFFC7C7C7);
 
-  // Widgets
+  // Spacer
   static const spacerLarge = SizedBox(width: 20, height: 20);
   static const spacerMedium = SizedBox(width: 15, height: 15);
   static const spacerSmall = SizedBox(width: 10, height: 10);
@@ -34,7 +34,7 @@ class AppResources {
   static final formatterDate = DateFormat("dd MMMM yyyy");
   static final formatterMonth = DateFormat("MMM");
 
-  // Translations
+  // Translation
   static const weekdayNamesShort = {
     DateTime.monday: 'Lu',
     DateTime.tuesday: 'Ma',

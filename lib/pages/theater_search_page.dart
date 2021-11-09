@@ -157,13 +157,13 @@ class TheaterSearchPageBloc with Disposable {
     final theaters = await (searchParams.isGeo ? _geoSearch() : _querySearch(searchParams.query!));
 
     // Analytics
-    if (_searchParams!.isGeo)
+    if (searchParams.isGeo)
       AnalyticsService.trackEvent('Theater geolocation search', {
         'resultCount': theaters.length,
       });
     else
       AnalyticsService.trackEvent('Theater search', {
-        'query': _searchParams!.query!,
+        'query': searchParams.query!,
         'resultCount': theaters.length,
       });
 
