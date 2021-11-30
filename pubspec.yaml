@@ -33,7 +33,7 @@ dependencies:
 
   # Device
   device_info_plus: ^3.1.1
-  sentry_flutter: ^6.0.1
+  sentry_flutter: ^6.1.2
   url_launcher: ^6.0.16
   share_plus: ^3.0.4
   geolocator: 7.6.2  # Next version needs compileSdkVersion = 31
