@@ -21,18 +21,18 @@ ThemeData appTheme() {
       hintStyle: theme.textTheme.bodyText2?.copyWith(color: AppResources.colorDarkRed),
       enabledBorder: const OutlineInputBorder(
         borderRadius: AppResources.borderRadiusMedium,
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: AppResources.colorDarkRed,
         ),
       ),
       focusedBorder: const OutlineInputBorder(
         borderRadius: AppResources.borderRadiusMedium,
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: Colors.white,
         ),
       ),
       isDense: true,
-      contentPadding: EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(10),
     ),
   );
 }

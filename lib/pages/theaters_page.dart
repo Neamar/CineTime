@@ -59,7 +59,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
   }
 
   Future<void> _goToSearchPage() async {
-    final singleSelectionMode = await navigateTo<bool>(context, (_) => TheaterSearchPage());
+    final singleSelectionMode = await navigateTo<bool>(context, (_) => const TheaterSearchPage());
     if (singleSelectionMode == true) {
       Navigator.pop(context);
     } else {
@@ -79,7 +79,7 @@ class MultiSelectionModeButton extends StatelessWidget {
     return Tooltip(
       message: 'Sélection multiple',
       child: IconButton(
-        icon: Icon(CineTimeIcons.list),
+        icon: const Icon(CineTimeIcons.list),
         onPressed: onPressed,
       ),
     );

@@ -381,7 +381,7 @@ class ApiClient {
   /// Send a graphQL request
   Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true}) async {
     // Headers
-    const headers = const {
+    const headers = {
       'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1' + 'MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x' + '6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
       'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbG' + 'ciOiJSUzI1NiJ9.eyJpYXQiOjE1NzE4NDM5NTcsInVzZXJuYW1lIjoiYW5vbnltb3VzIiw' + 'iYXBwbGljYXRpb25fbmFtZSI6Im1vYmlsZSIsInV1aWQiOiJmMDg3YTZiZi05YTdlLTQ3YTUtYjc5YS0zMDNiNWEwOWZkOWYiLCJzY29wZSI6bnVsbCwiZXhwIjoxNjg2NzAwNzk5f' + 'Q.oRS_jzmvfFAQ47wH0pU3eKKnlCy93FhblrBXxPZx2iwUUINibd70MBkI8C8wmZ-AeRhVCR8kavW8dLIqs5rUfA6piFwdYpt0lsAhTR417ABOxVrZ8dv0FX3qg1JLIzan-kSN4TwUZ3yeTjls0PB3OtSBKzoywGvFAu2jMYG1IZyBjx' + 'nkfi1nf1qGXbYsBfEaSjrj-LDV6Jjq_MPyMVvngNYKWzFNyzVAKIpAZ-UzzAQujAKwNQcg2j3Y3wfImydZEOW_wqkOKCyDOw9sWCWE2D-SObbFOSrjqKBywI-Q9GlfsUz-rW7ptea_HzLnjZ9mymXc6yq7KMzbgG4W9CZd8-qvHejCXVN9oM2RJ7Xrq5tDD345NoZ5plfCmhwSYA0DSZLw21n3SL3xl78fMITNQqpjlUWRPV8YqZA1o-UNgwMpOWIoojLWx-XBX33znnWlwSa174peZ1k60BQ3ZdCt9A7kyOukzvjNn3IOIVVgS04bBxl4holc5lzcEZSgjoP6dDIEJKib1v_AAxA34alVqWngeDYhd0wAO-crYW1HEd8ogtCoBjugwSy7526qrh68mSJxY66nr4Cle21z1wLC5lOsex0FbuwvOeFba0ycaI' + '8NJPTUriOdvtHAjhDRSem4HjypGvKs5AzlZ3LAJACCHICNwo3NzYjcxfT4Wo1ur-M',
       'host': 'graph.all' + 'ocine.fr',
@@ -462,7 +462,7 @@ class ApiClient {
           response = await http.Response.fromStream(streamedResponse);
         }()).timeout(_timeOutDuration);
       } on TimeoutException {
-        throw ConnectivityException(ConnectivityExceptionType.timeout);
+        throw const ConnectivityException(ConnectivityExceptionType.timeout);
       }
 
       // Store in cache
@@ -573,7 +573,7 @@ class ApiClient {
   static Future<void> throwIfNoInternet() async {
     if (!(await isConnectedToInternet())) {
       debugPrint('WS (✕) NO INTERNET');
-      throw ConnectivityException(ConnectivityExceptionType.noInternet);
+      throw const ConnectivityException(ConnectivityExceptionType.noInternet);
     }
   }
 

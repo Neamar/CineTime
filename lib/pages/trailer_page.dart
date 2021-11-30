@@ -15,14 +15,14 @@ class TrailerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Trailer'),
+        title: const Text('Trailer'),
       ),
       backgroundColor: Colors.black,
       body: FetchBuilder.basic<String?>(
         task: () => AppService.api.getVideoUrl(trailerId),
         builder: (context, trailerUrl) {
           if (trailerUrl == null) {
-            return IconMessage(
+            return const IconMessage(
               icon: IconMessage.iconError,
               message: 'Aucune bande annonce trouvée',
               redIcon: true,

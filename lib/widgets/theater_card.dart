@@ -110,9 +110,9 @@ class _TheaterCardState extends State<TheaterCard> {
                 child: InkWell(
                   child: const Align(
                     alignment: Alignment.topRight,
-                    child: const Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: const Icon(
+                    child: Padding(
+                      padding: EdgeInsets.all(5),
+                      child: Icon(
                         Icons.star,
                         color: Colors.white,
                         size: 20,

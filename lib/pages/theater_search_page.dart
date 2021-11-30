@@ -28,7 +28,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: TextField(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Nom ou adresse',
             ),
             style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.white),
@@ -37,7 +37,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
           ),
           actions: <Widget>[
             IconButton(
-              icon: Icon(CineTimeIcons.location),
+              icon: const Icon(CineTimeIcons.location),
               onPressed: bloc.startGeoSearch,
             ),
             if (context.canPop)   // Hide when page is shown at app start
@@ -52,7 +52,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
           builder: (context, searchResult) {
             // No data
             if (searchResult.theaters == null)
-              return _NoResultMessage(
+              return const _NoResultMessage(
                 icon: CineTimeIcons.search,
                 message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
                 backgroundColor: AppResources.colorDarkRed,
@@ -61,7 +61,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
 
             // Empty list
             if (searchResult.theaters!.isEmpty)
-              return _NoResultMessage(
+              return const _NoResultMessage(
                 icon: IconMessage.iconSad,
                 message: 'Aucun\nRÉSULTAT',
                 backgroundColor: AppResources.colorDarkBlue,
@@ -181,7 +181,7 @@ class TheaterSearchPageBloc with Disposable {
       );
     } catch(e) {
       if (e is geo.PermissionDeniedException || e is geo.LocationServiceDisabledException)
-        throw PermissionDeniedException();
+        throw const PermissionDeniedException();
       rethrow;
     }
 
