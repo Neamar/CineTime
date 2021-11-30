@@ -21,7 +21,7 @@ class MoviesShowTimes {
 
 class MovieShowTimes {
   MovieShowTimes(this.movie, {List<TheaterShowTimes>? theatersShowTimes}) :
-    this.theatersShowTimes = theatersShowTimes ?? [];
+    theatersShowTimes = theatersShowTimes ?? [];
 
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
@@ -60,7 +60,7 @@ class MovieShowTimes {
 
 class TheaterShowTimes {
   TheaterShowTimes(this.theater, { List<ShowTime>? showTimes }) :
-    this.showTimes = showTimes ?? <ShowTime>[];
+    showTimes = showTimes ?? <ShowTime>[];
 
   /// Theater data
   final Theater theater;
@@ -77,37 +77,35 @@ class TheaterShowTimes {
   /// - 'Me Je Ve Sa Di'
   /// - 'Prochaine séance le Me 25 mars'
   String? get showTimesSummary {
-    if (_showTimesSummary == null) {
-      // Compute & cache value
-      _showTimesSummary = () {
-        final today = ApiClient.mockedNow.toDate;
-        final nextWednesday = today.getNextWednesday();
+    // Compute & cache value
+    _showTimesSummary ??= () {
+      final today = ApiClient.mockedNow.toDate;
+      final nextWednesday = today.getNextWednesday();
 
-        // Get all date with a show, from [now], without duplicates, sorted.
-        final daysWithShow = showTimes
-            .map((s) => s.dateTime.toDate)
-            .toSet()
-            .toList(growable: false)
-          ..sort();
+      // Get all date with a show, from [now], without duplicates, sorted.
+      final daysWithShow = showTimes
+          .map((s) => s.dateTime.toDate)
+          .toSet()
+          .toList(growable: false)
+        ..sort();
 
-        // If there are no date before next wednesday
-        if (daysWithShow.first.isAfterOrSame(nextWednesday))
-          return 'Prochaine séance le ${daysWithShow.first.toWeekdayString(withDay: true, withMonth: true)}';
+      // If there are no date before next wednesday
+      if (daysWithShow.first.isAfterOrSame(nextWednesday))
+        return 'Prochaine séance le ${daysWithShow.first.toWeekdayString(withDay: true, withMonth: true)}';
 
-        // Get all dates with a show before next wednesday
-        final currentWeekShowTimes = daysWithShow.where((date) => date.isBefore(nextWednesday));
+      // Get all dates with a show before next wednesday
+      final currentWeekShowTimes = daysWithShow.where((date) => date.isBefore(nextWednesday));
 
-        // If dates are each days until next tuesday
-        if (nextWednesday.difference(today).inDays == currentWeekShowTimes.length)
-          return 'Tous les jours';
+      // If dates are each days until next tuesday
+      if (nextWednesday.difference(today).inDays == currentWeekShowTimes.length)
+        return 'Tous les jours';
 
-        // Fill a list of formatted weekday string
-        final weekdaysString = currentWeekShowTimes.map((weekday) => weekday.toWeekdayString());
+      // Fill a list of formatted weekday string
+      final weekdaysString = currentWeekShowTimes.map((weekday) => weekday.toWeekdayString());
 
-        // Return formatted line
-        return weekdaysString.join(' ');
-      } ();
-    }
+      // Return formatted line
+      return weekdaysString.join(' ');
+    } ();
 
     return _showTimesSummary;
   }

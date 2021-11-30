@@ -72,7 +72,7 @@ class ApiClient {
       final JsonObject theaterInfo = theaterJson['data']!;
 
       return Theater(
-        id: ApiId(theaterInfo['id'], ApiId.TypeTheater),
+        id: ApiId(theaterInfo['id'], ApiId.typeTheater),
         name: theaterJson['label'],
         street: theaterInfo['address'],
         zipCode: theaterInfo['zip'],

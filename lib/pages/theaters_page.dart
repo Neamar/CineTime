@@ -23,7 +23,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Mes cinémas',
         ),
         actions: <Widget>[

@@ -63,7 +63,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
               ),
               actions: [
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     CineTimeIcons.pencil,
                   ),
                   onPressed: _goToTheatersPage,

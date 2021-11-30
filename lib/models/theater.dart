@@ -45,7 +45,7 @@ class Theater extends Identifiable with Comparable<Theater> {
   }
 
   @override
-  int compareTo(Theater other) => this.name.compareTo(other.name);
+  int compareTo(Theater other) => name.compareTo(other.name);
 
   factory Theater.fromJson(Map<String, dynamic> json) => Theater(
     id: ApiId.fromEncoded(json['id']),
