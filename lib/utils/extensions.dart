@@ -30,8 +30,8 @@ extension ExtendedNum on num {
   /// Copied from DateTime._twoDigits()
   /// This is lighter than NumberFormat("00") and avoid depending on a package
   String toTwoDigitsString() {
-    if (this >= 10) return "$this";
-    return "0$this";
+    if (this >= 10) return '$this';
+    return '0$this';
   }
 }
 

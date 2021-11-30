@@ -641,9 +641,9 @@ class _ShowtimeDialog extends StatelessWidget {
 
   Future<void> _share() async {
     final text =
-"""${movie.title} [${showtime.spec}]
+'''${movie.title} [${showtime.spec}]
 ${theater.name}
-$dateDisplay""";
+$dateDisplay''';
 
     await Share.share(text);
   }

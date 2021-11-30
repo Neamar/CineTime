@@ -5,9 +5,9 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
-  static const _selectedTheatersKey = "selectedTheaters";
-  static const _favoriteTheatersKey = "favoriteTheaters";
-  static String _theatersKey(String theaterId) => "theater:$theaterId";
+  static const _selectedTheatersKey = 'selectedTheaters';
+  static const _favoriteTheatersKey = 'favoriteTheaters';
+  static String _theatersKey(String theaterId) => 'theater:$theaterId';
   static const _listSeparator = '|';
 
   static late SharedPreferences _storage;
