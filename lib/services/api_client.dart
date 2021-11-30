@@ -313,7 +313,7 @@ class ApiClient {
     );
   }
 
-  Future<String> getVideoUrl(ApiId videoId) async {
+  Future<String?> getVideoUrl(ApiId videoId) async {
     // Send request
     JsonObject? responseJson;
     if (useMocks) {
@@ -329,9 +329,13 @@ class ApiClient {
     }
 
     // Process result
-    responseJson = responseJson!['data']!['video'];
-    final JsonList? videosJson = responseJson!['files'];
-    if (videosJson!.length == 1) return MovieVideo.fromJson(videosJson.first).url;
+    responseJson = responseJson!['data']?['video'];
+    final JsonList? videosJson = responseJson?['files'];
+    if (videosJson == null) {
+      reportError(UnimplementedError('Video query result contains no files (title: ${responseJson?['title']} | videoId: ${videoId.id})'), StackTrace.current);
+      return null;
+    }
+    if (videosJson.length == 1) return MovieVideo.fromJson(videosJson.first).url;
 
     // Find highest quality video, but not greater than 720p
     final videos = videosJson.map((json) => MovieVideo.fromJson(json)).toList();

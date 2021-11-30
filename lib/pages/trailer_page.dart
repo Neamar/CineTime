@@ -18,9 +18,17 @@ class TrailerPage extends StatelessWidget {
         title: Text('Trailer'),
       ),
       backgroundColor: Colors.black,
-      body: FetchBuilder.basic<String>(
+      body: FetchBuilder.basic<String?>(
         task: () => AppService.api.getVideoUrl(trailerId),
         builder: (context, trailerUrl) {
+          if (trailerUrl == null) {
+            return IconMessage(
+              icon: IconMessage.iconError,
+              message: 'Aucune bande annonce trouvée',
+              redIcon: true,
+              textColor: Colors.white,
+            );
+          }
           return _VideoPlayerWidget(
             videoUrl: trailerUrl,
           );

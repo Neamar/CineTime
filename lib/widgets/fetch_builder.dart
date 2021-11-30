@@ -75,7 +75,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
 }
 
 class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
-  final data = BehaviorSubject<R?>();
+  final data = BehaviorSubject<_DataWrapper<R>?>();
 
   @override
   void initState() {
@@ -93,7 +93,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
 
   @override
   Widget build(BuildContext context) {
-    return BehaviorSubjectBuilder<R?>(
+    return BehaviorSubjectBuilder<_DataWrapper<R>?>(
       subject: data,
       builder: (context, snapshot) {
         final child = () {
@@ -108,7 +108,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
               size: 25.0,
             );
           } else {
-            return widget.builder?.call(context, snapshot.data!) ?? const SizedBox();
+            return widget.builder?.call(context, snapshot.data!.data) ?? const SizedBox();
           }
         } ();
 
@@ -147,7 +147,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
 
       // Update UI
       if (isTaskValid()) {
-        data.add(result);
+        data.add(_DataWrapper(result));
         return result;
       }
     } catch (e, s) {
@@ -172,6 +172,14 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
     data.close();
     super.dispose();
   }
+}
+
+/// Small data wrapper, that allow data to be null when himself isn't.
+/// Allow to properly handle loading state when data may be null.
+class _DataWrapper<T> {
+  const _DataWrapper(this.data);
+
+  final T data;
 }
 
 class _ErrorWidget extends StatelessWidget {
