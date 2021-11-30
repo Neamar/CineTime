@@ -27,7 +27,7 @@ Future<void> showMessage(BuildContext context, String message, {bool? isError, O
       return Flash(
         controller: controller,
         backgroundColor: isError! ? Colors.orange : Colors.white,
-        margin: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
         position: FlashPosition.top,
         behavior: FlashBehavior.floating,
         horizontalDismissDirection: HorizontalDismissDirection.horizontal,
@@ -35,7 +35,7 @@ Future<void> showMessage(BuildContext context, String message, {bool? isError, O
         boxShadows: kElevationToShadow[8],
         onTap: exception == null ? controller.dismiss : null,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 350),
+          constraints: const BoxConstraints(maxWidth: 350),
           child: FlashBar(
             content: Text(
               message,
