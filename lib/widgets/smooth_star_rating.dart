@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-typedef void _RatingChangeCallback(double rating);
+typedef _RatingChangeCallback = void Function(double rating);
 
 /// Based on https://github.com/thangmam/smoothratingbar/blob/ee3067f133a461f70d1e5e02690547d746760e16/lib/smooth_star_rating.dart
 /// Updated to null safety and improved.
@@ -17,7 +17,7 @@ class SmoothStarRating extends StatelessWidget {
   final IconData? defaultIconData; //this is needed only when having fullRatedIconData && halfRatedIconData
   final double spacing;
 
-  SmoothStarRating({
+  const SmoothStarRating({
     this.starCount = 5,
     this.spacing = 0.0,
     this.rating = 0.0,

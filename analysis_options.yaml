@@ -26,6 +26,7 @@ linter:
     use_key_in_widget_constructors: false
     prefer_single_quotes: true
     prefer_adjacent_string_concatenation: false
+    prefer_void_to_null: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

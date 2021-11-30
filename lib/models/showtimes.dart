@@ -182,6 +182,7 @@ extension ExtendedShowVersion on ShowVersion {
   String toDisplayString() => _versionMap[this]!;
 }
 
+// ignore: constant_identifier_names
 enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
 extension ExtendedShowFormat on ShowFormat {
   static const _formatMap = {
