@@ -17,20 +17,6 @@ Future<void> main() async {
   // Init Flutter
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Override debugPrint to pass all messages to Sentry
-  debugPrint = (message, {wrapWidth}) {
-    // Disable logging in release mode
-    if (!kReleaseMode)
-      debugPrintThrottled(message, wrapWidth: wrapWidth);
-
-    // Sent message to Sentry
-    Sentry.addBreadcrumb(Breadcrumb(
-      message: message,
-      category: 'debugPrint',
-    ));
-  };
-
-
   // Get android version info
   try {
     App.androidSdkVersion = (await DeviceInfoPlugin().androidInfo).version.sdkInt ?? App.androidSdkVersion;
@@ -57,6 +43,7 @@ Future<void> main() async {
       options.dsn = 'https://f0a7dfef9b5249c7a57c355ac9d30856@o1038499.ingest.sentry.io/6006844';
       options.debug = !kReleaseMode;
       options.environment = kReleaseMode ? 'release' : 'debug';
+      options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
     },
     appRunner: () => runApp(App()),
   );
