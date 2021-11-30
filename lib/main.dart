@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
+import 'package:timeago/timeago.dart' as timeago;
 
 import 'resources/app_theme.dart';
 import 'services/storage_service.dart';
@@ -29,7 +29,7 @@ Future<void> main() async {
   initializeDateFormatting(App.defaultLocale.toString());
 
   // Set default TimeAgo package locale
-  timeAgo.setLocaleMessages('en', timeAgo.FrShortMessages()); // Set default timeAgo local to fr
+  timeago.setLocaleMessages('en', timeago.FrShortMessages()); // Set default timeAgo local to fr
 
   // Init shared pref
   await StorageService.init();
@@ -45,7 +45,7 @@ Future<void> main() async {
       options.environment = kReleaseMode ? 'release' : 'debug';
       options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
     },
-    appRunner: () => runApp(App()),
+    appRunner: () => runApp(const App()),
   );
 }
 
@@ -54,7 +54,9 @@ class App extends StatelessWidget {
   static const defaultLocale = Locale('fr');
 
   /// Global key for the App's main navigator
-  static GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  const App({Key? key}) : super(key: key);
 
   /// The [BuildContext] of the main navigator.
   /// We may use this on showMessage, showError, openDialog, etc.
@@ -71,8 +73,8 @@ class App extends StatelessWidget {
       theme: appTheme(),
       navigatorKey: _navigatorKey,
       home: AppService.instance.selectedTheaters.isEmpty
-        ? TheaterSearchPage()
-        : MoviesPage(),
+        ? const TheaterSearchPage()
+        : const MoviesPage(),
       builder: (context, child) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           // Set system status & navigation bars colors.

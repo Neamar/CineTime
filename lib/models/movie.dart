@@ -55,15 +55,15 @@ class Movie extends Identifiable {
   int compareTo(Movie other, MovieSortType type) {
     switch(type) {
       case MovieSortType.rating:
-        if (this.userRating != null && other.userRating != null) return other.userRating!.compareTo(this.userRating!);
-        if (this.pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(this.pressRating!);
-        return this.title.compareTo(other.title);
+        if (userRating != null && other.userRating != null) return other.userRating!.compareTo(userRating!);
+        if (pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(pressRating!);
+        return title.compareTo(other.title);
       case MovieSortType.releaseDate:
-        final date1 = this.releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final date1 = releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
         final date2 = other.releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
         return date2.compareTo(date1);
       case MovieSortType.duration:
-        return this.duration.compareTo(other.duration);
+        return duration.compareTo(other.duration);
     }
   }
 

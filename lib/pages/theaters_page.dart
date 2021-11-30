@@ -23,7 +23,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Mes cinémas',
         ),
         actions: <Widget>[
@@ -59,7 +59,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
   }
 
   Future<void> _goToSearchPage() async {
-    final singleSelectionMode = await navigateTo<bool>(context, (_) => TheaterSearchPage());
+    final singleSelectionMode = await navigateTo<bool>(context, (_) => const TheaterSearchPage());
     if (singleSelectionMode == true) {
       Navigator.pop(context);
     } else {
@@ -79,7 +79,7 @@ class MultiSelectionModeButton extends StatelessWidget {
     return Tooltip(
       message: 'Sélection multiple',
       child: IconButton(
-        icon: Icon(CineTimeIcons.list),
+        icon: const Icon(CineTimeIcons.list),
         onPressed: onPressed,
       ),
     );
@@ -126,10 +126,10 @@ class TheatersPageBloc with Disposable {
 
   refresh() {
     refreshID++;
-    theaters.add(Set.of([
+    theaters.add({
       ...AppService.instance.selectedTheaters,
       ...AppService.instance.favoriteTheaters,
-    ]).toList()..sort());
+    }.toList()..sort());
   }
 
   @override

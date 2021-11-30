@@ -25,7 +25,7 @@ class CtCachedImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final errorWidget = Center(
+    const errorWidget = Center(
       child: Icon(Icons.image),
     );
 

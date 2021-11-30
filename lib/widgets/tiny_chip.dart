@@ -8,7 +8,7 @@ class TinyChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: ShapeDecoration(
+      decoration: const ShapeDecoration(
         shape: StadiumBorder(),
         color: Colors.cyan
       ),

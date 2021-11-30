@@ -17,21 +17,21 @@ extension ExtendedString on String {
 
   /// Returns a new string in which the last occurrence of [from] in this string is replaced with [to]
   String replaceLast(Pattern from, String to) {
-    var startIndex = this.lastIndexOf(from);
-    return this.replaceFirst(from, to, startIndex != -1 ? startIndex : 0);
+    var startIndex = lastIndexOf(from);
+    return replaceFirst(from, to, startIndex != -1 ? startIndex : 0);
   }
 }
 
 extension ExtendedNum on num {
   bool isBetween(num min, num max) => this >= min && this <= max;
 
-  bool get isPositive => !this.isNegative;
+  bool get isPositive => !isNegative;
 
   /// Copied from DateTime._twoDigits()
   /// This is lighter than NumberFormat("00") and avoid depending on a package
   String toTwoDigitsString() {
-    if (this >= 10) return "$this";
-    return "0$this";
+    if (this >= 10) return '$this';
+    return '0$this';
   }
 }
 
@@ -55,7 +55,7 @@ extension ExtendedBuildContext on BuildContext {
 
   /// Validate the enclosing [Form]
   Future<void> validateForm({VoidCallback? onSuccess}) async {
-    this.clearFocus();
+    clearFocus();
     final form = Form.of(this);
     if (form == null) return;
 
@@ -68,14 +68,14 @@ extension ExtendedBuildContext on BuildContext {
 
 extension ExtendedBehaviorSubject<T> on BehaviorSubject<T> {
   void tryAdd(T value) {
-    if (!this.isClosed) {
-      this.add(value);
+    if (!isClosed) {
+      add(value);
     }
   }
 
   void addNotNull(T? value) {
     if (value != null) {
-      this.add(value);
+      add(value);
     }
   }
 
@@ -83,7 +83,7 @@ extension ExtendedBehaviorSubject<T> on BehaviorSubject<T> {
   /// Return true if [value] was added.
   bool addDistinct(T value) {
     if (value != this.value) {
-      this.add(value);
+      add(value);
       return true;
     }
     return false;
@@ -95,8 +95,8 @@ extension ExtendedBehaviorSubject<T> on BehaviorSubject<T> {
 
 extension ExtendedIterable<T> on Iterable<T> {
   T? elementAtOrDefault(int? index, [T? defaultReturn]) {
-    if (index == null || index < 0 || index >= this.length) return defaultReturn;
-    return this.elementAt(index);
+    if (index == null || index < 0 || index >= length) return defaultReturn;
+    return elementAt(index);
   }
 
   /// The first element satisfying test, or null if there are none.
@@ -110,17 +110,17 @@ extension ExtendedIterable<T> on Iterable<T> {
   }
 
   T? elementAtOrNull(int index) {
-    if (index < 0 || index >= this.length)
+    if (index < 0 || index >= length)
       return null;
-    return this.elementAt(index);
+    return elementAt(index);
   }
 
   T? get firstOrNull {
-    if (this.isEmpty) return null;
-    return this.first;
+    if (isEmpty) return null;
+    return first;
   }
 
-  Iterable<E> mapIndexed<E>(E f(int index, T item)) sync* {
+  Iterable<E> mapIndexed<E>(E Function(int index, T item) f) sync* {
     var index = 0;
     for (final item in this) {
       yield f(index, item);
@@ -132,21 +132,21 @@ extension ExtendedIterable<T> on Iterable<T> {
 extension ExtendedList<T> on List<T> {
   void addNotNull(T? value) {
     if (value != null) {
-      this.add(value);
+      add(value);
     }
   }
 
   /// Insert [widget] between each member of this list
   void insertBetween(T item) {
-    if (this.length > 1) {
-      for (var i = this.length - 1; i > 0; i--) this.insert(i, item);
+    if (length > 1) {
+      for (var i = length - 1; i > 0; i--) insert(i, item);
     }
   }
 
   T? elementAtOrNull(int index) {
-    if (index < 0 || index >= this.length)
+    if (index < 0 || index >= length)
       return null;
-    return this.elementAt(index);
+    return elementAt(index);
   }
 
   /// Return true if this list's content is equals to [other]'s.
@@ -166,40 +166,39 @@ extension ExtendedSet<T> on Set<T> {
 
 extension ExtendedObjectIterable<Object> on Iterable<Object> {
   /// Converts each element to a String and concatenates the strings, ignoring null and empty values.
-  String joinNotEmpty(String separator) => this
-      .map((e) => e?.toString())
+  String joinNotEmpty(String separator) => map((e) => e?.toString())
       .where((string) => !isStringNullOrEmpty(string))
       .join(separator);
 
   /// Returns a string separated by a newline character for each non-null element
-  String toLines() => this.joinNotEmpty('\n');
+  String toLines() => joinNotEmpty('\n');
 }
 
 extension ExtendedDateTime on DateTime {
   Date getNextWeekdayDate(int weekday) {
     var current = this;
-    while ((current = current.add(Duration(days: 1))).weekday != weekday)
+    while ((current = current.add(const Duration(days: 1))).weekday != weekday)
       continue;
     return current.toDate;
   }
 
-  DateTime getNextWednesday() => this.getNextWeekdayDate(DateTime.wednesday);
+  DateTime getNextWednesday() => getNextWeekdayDate(DateTime.wednesday);
 
   /// Return a Date (without the time part)
-  Date get toDate => Date(this.year, this.month, this.day);
+  Date get toDate => Date(year, month, day);
 
   /// Return a Time (without the date part)
-  Time get toTime => Time(this.hour, this.minute);
+  Time get toTime => Time(hour, minute);
 
-  bool isAfterOrSame(DateTime other) => this == other || this.isAfter(other);
+  bool isAfterOrSame(DateTime other) => this == other || isAfter(other);
 
   String toWeekdayString({bool withDay = false, bool withMonth = false}) {
-    var formattedDate = AppResources.weekdayNamesShort[this.weekday]!;
+    var formattedDate = AppResources.weekdayNamesShort[weekday]!;
 
     if (!withDay && !withMonth)
       return formattedDate;
 
-    formattedDate += ' ' + this.day.toTwoDigitsString();
+    formattedDate += ' ' + day.toTwoDigitsString();
 
     if (!withMonth)
       return formattedDate;

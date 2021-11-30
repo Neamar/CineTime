@@ -62,7 +62,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                           Icons.ondemand_video_outlined,
                           color: hasTrailer ? Colors.white : AppResources.colorDarkGrey,
                         ),
-                        SizedBox(width: 8.0),
+                        const SizedBox(width: 8.0),
                         Text(
                           'Bande annonce',
                           style: TextStyle(color: hasTrailer ? Colors.white : AppResources.colorDarkGrey),
@@ -74,7 +74,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                   TextButton(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
+                      children: const <Widget>[
                         Icon(
                           CineTimeIcons.link_ext,
                           color: Colors.white,
@@ -99,7 +99,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
                 // Movie info
                 Padding(
-                  padding: EdgeInsets.all(contentPadding).copyWith(bottom: 0),
+                  padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
@@ -448,7 +448,7 @@ class _TagFilterSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToggleButtons(
       isSelected: options.map((option) => option == selected).toList(growable: false),
-      constraints: BoxConstraints(minHeight: 0, minWidth: 0),
+      constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
       borderRadius: BorderRadius.circular(5),
       onPressed: (int index) {
         final tapped = options[index];
@@ -620,7 +620,7 @@ class _ShowtimeDialog extends StatelessWidget {
               Tooltip(
                 message: 'Partager la séance',
                 child: IconButton(
-                  icon: Icon(Icons.share),
+                  icon: const Icon(Icons.share),
                   onPressed: _share,
                 ),
               ),
@@ -628,7 +628,7 @@ class _ShowtimeDialog extends StatelessWidget {
               Tooltip(
                 message: 'Ajouter au calendrier',
                 child: IconButton(
-                  icon: Icon(CineTimeIcons.calendar),
+                  icon: const Icon(CineTimeIcons.calendar),
                   onPressed: _addToCalendar,
                 ),
               ),
@@ -641,9 +641,9 @@ class _ShowtimeDialog extends StatelessWidget {
 
   Future<void> _share() async {
     final text =
-"""${movie.title} [${showtime.spec}]
+'''${movie.title} [${showtime.spec}]
 ${theater.name}
-$dateDisplay""";
+$dateDisplay''';
 
     await Share.share(text);
   }

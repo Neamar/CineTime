@@ -165,7 +165,7 @@ String convertBasicHtmlTags(String htmlText) {
 
   // Remove other tags
   RegExp exp = RegExp(
-    r"<[^>]*>",
+    r'<[^>]*>',
     multiLine: true,
     caseSensitive: true,
   );

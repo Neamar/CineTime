@@ -89,7 +89,7 @@ class ScalingHeader extends StatefulWidget {
 }
 
 class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProviderStateMixin {
-  ValueNotifier<double> _shrinkOffsetNotifier = ValueNotifier<double>(0);
+  final ValueNotifier<double> _shrinkOffsetNotifier = ValueNotifier<double>(0);
   late AnimationController _animationController;
   bool _isExpanded = true;
   late double expandedHeight;
@@ -111,7 +111,7 @@ class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProvider
       }
     });
 
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
     _animationController.addListener(() => setState(() {}));
   }
 

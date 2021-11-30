@@ -15,7 +15,7 @@ class AnalyticsService {
 
     _amplitude = Amplitude.getInstance();
     await _amplitude!.init(kReleaseMode ? _amplitudeKey : _amplitudeDevKey);
-    //await _amplitude.setServerUrl('https://api.eu.amplitude.com');    // Setting EU server throw a silence "wrong apiKey" error
+    //await _amplitude!.setServerZone('EU');    // Setting EU server throw a silence "wrong apiKey" error  (even with _amplitude.setServerUrl('https://api.eu.amplitude.com'))
     await _amplitude!.enableCoppaControl();
     await _amplitude!.trackingSessionEvents(true);
   }

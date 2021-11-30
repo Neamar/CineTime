@@ -1,7 +1,7 @@
 import 'package:cinetime/utils/_utils.dart';
 
 class Date extends DateTime {
-  static final _unsupportedError = UnsupportedError("Date class only support date-related fields (without time)");
+  static final _unsupportedError = UnsupportedError('Date class only support date-related fields (without time)');
 
   Date(int year, int month, int day) : super(year, month, day);
 

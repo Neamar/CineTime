@@ -63,7 +63,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
               ),
               actions: [
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     CineTimeIcons.pencil,
                   ),
                   onPressed: _goToTheatersPage,
@@ -81,7 +81,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
             ),
             body: () {
               if (moviesShowtimesData.moviesShowTimes.isEmpty)
-                return IconMessage(
+                return const IconMessage(
                   icon: Icons.theaters,
                   message: 'Aucune séance',
                 );
@@ -108,7 +108,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 
   Future<void> _goToTheatersPage() async {
     // Go to TheatersPage
-    await navigateTo(context, (_) => TheatersPage(), returnAfterPageTransition: false);
+    await navigateTo(context, (_) => const TheatersPage(), returnAfterPageTransition: false);
 
     // Update UI
     bloc.refresh(userAsked: true);
