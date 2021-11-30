@@ -206,18 +206,18 @@ class _ErrorWidget extends StatelessWidget {
 
             // Caption
             AppResources.spacerTiny,
-            Text('Impossible de récupérer les données'),
+            const Text('Impossible de récupérer les données'),
 
             // Retry
             if (isDense)...[
               AppResources.spacerTiny,
-              Icon(
+              const Icon(
                 Icons.refresh,
               ),
             ]
             else
               TextButton(
-                child: Text('Re-essayer'),
+                child: const Text('Re-essayer'),
                 onPressed: onRetry,
               ),
           ],

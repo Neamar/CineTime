@@ -64,5 +64,5 @@ class Theater extends Identifiable with Comparable<Theater> {
 }
 
 extension ExtendedTheaterIterable on Iterable<Theater> {
-  String toIdListString() => this.map((t) => t.id.id).join(',');
+  String toIdListString() => map((t) => t.id.id).join(',');
 }

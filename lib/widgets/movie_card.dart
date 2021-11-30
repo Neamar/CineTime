@@ -20,7 +20,7 @@ class MovieCard extends StatelessWidget {
     // Display release year if movie is more than 6 month old
     final releaseDate = movieShowTimes.movie.releaseDate;
     int? releaseYear;
-    if (releaseDate != null && ApiClient.mockedNow.difference(releaseDate) > Duration(days: 6 * 30))
+    if (releaseDate != null && ApiClient.mockedNow.difference(releaseDate) > const Duration(days: 6 * 30))
       releaseYear = releaseDate.year;
 
     return Card(
@@ -104,7 +104,7 @@ class MovieCard extends StatelessWidget {
                         ),
 
                         // Show time summary
-                        Spacer(),
+                        const Spacer(),
                         AppResources.spacerTiny,
                         for (var i = 0; i < math.min(movieShowTimes.theatersShowTimes.length, 2); i++)
                           Builder(

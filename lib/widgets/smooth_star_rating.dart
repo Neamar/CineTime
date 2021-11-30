@@ -35,19 +35,19 @@ class SmoothStarRating extends StatelessWidget {
     Icon icon;
     if (index >= rating) {
       icon = Icon(
-        defaultIconData != null ? defaultIconData : Icons.star_border,
+        defaultIconData ?? Icons.star_border,
         color: borderColor ?? Theme.of(context).primaryColor,
         size: size,
       );
     } else if (index > rating - (allowHalfRating ? 0.5 : 1.0) && index < rating) {
       icon = Icon(
-        halfFilledIconData != null ? halfFilledIconData : Icons.star_half,
+        halfFilledIconData ?? Icons.star_half,
         color: color ?? Theme.of(context).primaryColor,
         size: size,
       );
     } else {
       icon = Icon(
-        filledIconData != null ? filledIconData : Icons.star,
+        filledIconData ?? Icons.star,
         color: color ?? Theme.of(context).primaryColor,
         size: size,
       );
@@ -55,7 +55,7 @@ class SmoothStarRating extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        if (this.onRatingChanged != null) onRatingChanged!(index + 1.0);
+        if (onRatingChanged != null) onRatingChanged!(index + 1.0);
       },
       onHorizontalDragUpdate: (dragDetails) {
         RenderBox box = context.findRenderObject() as RenderBox;
@@ -68,7 +68,7 @@ class SmoothStarRating extends StatelessWidget {
         if (newRating < 0) {
           newRating = 0.0;
         }
-        if (this.onRatingChanged != null) onRatingChanged!(newRating);
+        if (onRatingChanged != null) onRatingChanged!(newRating);
       },
       child: icon,
     );

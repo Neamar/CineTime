@@ -61,7 +61,7 @@ class _TheaterCardState extends State<TheaterCard> {
                           onChanged: (_) {},
                         ),
                       )
-                    : Icon(
+                    : const Icon(
                         CineTimeIcons.videocam,
                         color: AppResources.colorDarkRed,
                       ),
@@ -78,7 +78,7 @@ class _TheaterCardState extends State<TheaterCard> {
                           widget.theater.name,
                           style: Theme.of(context).textTheme.subtitle1,
                         ),
-                        Spacer(),
+                        const Spacer(),
                         if (widget.theater.distanceDisplay != null)
                           Text(
                             widget.theater.distanceDisplay!,
@@ -102,11 +102,11 @@ class _TheaterCardState extends State<TheaterCard> {
             right: 0,
             child: Material(
               color: isFavorite ? Theme.of(context).primaryColor : AppResources.colorDarkGrey,
-              shape: CornerBorder(CornerBorderPosition.topRight),
+              shape: const CornerBorder(CornerBorderPosition.topRight),
               clipBehavior: Clip.antiAlias,
               elevation: 2,
               child: SizedBox.fromSize(
-                size: Size.square(50),
+                size: const Size.square(50),
                 child: InkWell(
                   child: const Align(
                     alignment: Alignment.topRight,
@@ -149,7 +149,7 @@ class _TheaterCardState extends State<TheaterCard> {
       if (context.canPop)
         Navigator.of(context).pop(!widget.multiSelectionMode);
       else
-        navigateTo(context, (_) => MoviesPage(), clearHistory: true);
+        navigateTo(context, (_) => const MoviesPage(), clearHistory: true);
     }
   }
 

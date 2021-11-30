@@ -125,7 +125,7 @@ class ApiClient {
     final to = from.add(const Duration(days: 8));
 
     // Build movieShowTimes list
-    final moviesShowTimesMap = Map<Movie, MovieShowTimes>();
+    final moviesShowTimesMap = <Movie, MovieShowTimes>{};
 
     // For each theater
     for (final theater in theaters) {
@@ -341,7 +341,7 @@ class ApiClient {
     final videos = videosJson.map((json) => MovieVideo.fromJson(json)).toList();
     videos.sort((v1, v2) => v1.height.compareTo(v2.height));
     var bestVideo = videos.firstWhereOrNull((video) => video.height > 700);
-    if (bestVideo == null) bestVideo = videos.last;
+    bestVideo ??= videos.last;
     return bestVideo.url;
   }
 

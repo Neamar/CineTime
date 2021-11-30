@@ -28,8 +28,8 @@ class _ShowMoreTextState extends State<ShowMoreText> {
               style: Theme.of(context).textTheme.bodyText2,
               children: [
                 if (widget.header != null)...[
-                  TextSpan(text: widget.header! + '\n', style: TextStyle(color: AppResources.colorDarkRed, fontWeight: FontWeight.w500)),
-                  WidgetSpan(child: Container(height: AppResources.spacerTiny.height, width: double.infinity)),
+                  TextSpan(text: widget.header! + '\n', style: const TextStyle(color: AppResources.colorDarkRed, fontWeight: FontWeight.w500)),
+                  WidgetSpan(child: SizedBox(height: AppResources.spacerTiny.height, width: double.infinity)),
                 ],
                 TextSpan(text: widget.text),
               ],

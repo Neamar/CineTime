@@ -126,10 +126,10 @@ class TheatersPageBloc with Disposable {
 
   refresh() {
     refreshID++;
-    theaters.add(Set.of([
+    theaters.add({
       ...AppService.instance.selectedTheaters,
       ...AppService.instance.favoriteTheaters,
-    ]).toList()..sort());
+    }.toList()..sort());
   }
 
   @override
