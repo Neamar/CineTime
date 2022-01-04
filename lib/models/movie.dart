@@ -52,6 +52,15 @@ class Movie extends Identifiable {
   final double? userRating;
   double? get rating => userRating ?? pressRating;
 
+  /// Return true if this movie match the [search] query
+  bool matchSearch(String search) {
+    search = search.normalized;
+    if (title.normalized.contains(search)) return true;
+    if (directors?.normalized.contains(search) == true) return true;
+    if (actors?.normalized.contains(search) == true) return true;
+    return false;
+  }
+
   int compareTo(Movie other, MovieSortType type) {
     switch(type) {
       case MovieSortType.rating:
