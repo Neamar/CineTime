@@ -68,6 +68,12 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                   ),
                   onPressed: _goToTheatersPage,
                 ),
+                IconButton(
+                  icon: const Icon(
+                    CineTimeIcons.search,
+                  ),
+                  onPressed: () {}, // TODO
+                ),
                 BehaviorSubjectBuilder<MovieSortType>(
                   subject: bloc.sortType,
                   builder: (context, snapshot) {
