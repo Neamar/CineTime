@@ -8,7 +8,6 @@ import 'package:cinetime/utils/exceptions/connectivity_exception.dart';
 import 'package:cinetime/utils/exceptions/detailed_exception.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -38,7 +37,8 @@ class ApiClient {
   static const _timeOutDuration = Duration(seconds: 30);
 
   /// Json mime type
-  static const contentTypeJson = 'application/json; charset=utf-8';
+  static const contentTypeJsonMimeType = 'application/json';
+  static const contentTypeJson = '$contentTypeJsonMimeType; charset=utf-8';
 
   /// Whether to log headers also or not.
   static const _logHeaders = false;
@@ -589,7 +589,7 @@ class ApiClient {
 class _ResponseHandler {
   _ResponseHandler(this.response) :
     isSuccess = ApiClient.isHttpSuccessCode(response.statusCode),
-    isBodyJson = ContentType.parse(response.headers[HttpHeaders.contentTypeHeader] ?? '').mimeType == ApiClient.contentTypeJson;
+    isBodyJson = ContentType.parse(response.headers[HttpHeaders.contentTypeHeader] ?? '').mimeType == ApiClient.contentTypeJsonMimeType;
 
   final http.Response response;
 
@@ -641,7 +641,7 @@ class HttpResponseException extends DetailedException {
   bool get shouldBeReported => statusCode != 401;
 
   static String _buildMessage(http.Response response, JsonObject? responseJson) {
-    final errorMessage = responseJson?.elementAt('error');    // May be a String, or a more complex json
+    final errorMessage = responseJson?['error'];    // May be a String, or a more complex json
     return 'Erreur ${response.statusCode}' + (errorMessage != null && errorMessage is String ? ' : $errorMessage' : '');
   }
 }
