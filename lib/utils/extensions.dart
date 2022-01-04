@@ -19,6 +19,9 @@ extension ExtendedString on String {
     var startIndex = lastIndexOf(from);
     return replaceFirst(from, to, startIndex != -1 ? startIndex : 0);
   }
+
+  /// Remove all whitespaces
+  String removeAllWhitespaces() => replaceAll(RegExp(r'\s+'), '');
 }
 
 extension ExtendedNum on num {

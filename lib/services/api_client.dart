@@ -539,9 +539,14 @@ class ApiClient {
       statusCode = r.statusCode != 200 ? '(${r.statusCode}) ' : '';
       if (includeBody) {
         if (responseHandler.isBodyJson) {
-          body = responseHandler.bodyString;
+          body = responseHandler.bodyString.removeAllWhitespaces();
         } else {
-          body = '${r.contentLength} bytes';
+          final sizeInKo = ((r.contentLength ?? 0) / 1024).round();
+          if (sizeInKo <= 10) {
+            body = responseHandler.bodyString.removeAllWhitespaces();
+          } else {
+            body = '$sizeInKo ko';
+          }
         }
       }
       if (_logHeaders) {
