@@ -140,14 +140,16 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       message: 'Aucune séance',
                     );
 
-                  return BehaviorSubjectBuilder<String>(
-                    subject: bloc.search,
+                  return BehaviorSubjectBuilder<_FilterSortData>(
+                    subject: bloc.filterSortData,
                     builder: (context, snapshot) {
+                      final filterSortData = snapshot.data!;
                       return _FilteredMovieListView(
                         key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
                         moviesShowTimes: moviesShowtimesData.moviesShowTimes,
                         showTheaterName: moviesShowtimesData.theaters.length > 1,
-                        search: snapshot.data,
+                        sortType: filterSortData.sortType,
+                        filter: filterSortData.filter,
                       );
                     },
                   );
@@ -209,12 +211,14 @@ class _FilteredMovieListView extends StatefulWidget {
     Key? key,
     required this.moviesShowTimes,
     required this.showTheaterName,
-    this.search,
+    required this.sortType,
+    this.filter,
   }) : super(key: key);
 
   final List<MovieShowTimes> moviesShowTimes;
   final bool showTheaterName;
-  final String? search;
+  final MovieSortType sortType;
+  final String? filter;
 
   @override
   _FilteredMovieListViewState createState() => _FilteredMovieListViewState();
@@ -227,15 +231,18 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
   void initState() {
     super.initState();
     applyFilter();
+    applySort();
+  }
+
+  void applySort() {
+    filteredMoviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, widget.sortType));
   }
 
   void applyFilter() {
-    setState(() {
-      filteredMoviesShowTimes = () {
-        if (isStringNullOrEmpty(widget.search)) return widget.moviesShowTimes;
-        return widget.moviesShowTimes.where((mst) => mst.movie.matchSearch(widget.search!)).toList(growable: false);
-      } ();
-    });
+    filteredMoviesShowTimes = () {
+      if (isStringNullOrEmpty(widget.filter)) return widget.moviesShowTimes;
+      return widget.moviesShowTimes.where((mst) => mst.movie.matchSearch(widget.filter!)).toList(growable: false);
+    } ();
   }
 
   @override
@@ -258,10 +265,32 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
   @override
   void didUpdateWidget(covariant _FilteredMovieListView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.search != oldWidget.search) {
+    var hasChanged = false;
+    if (widget.filter != oldWidget.filter) {
       applyFilter();
+      hasChanged = true;
+    }
+    if (widget.sortType != oldWidget.sortType) {
+      applySort();
+      hasChanged = true;
+    }
+    if (hasChanged) {
+      setState(() { });
     }
   }
+}
+
+class _FilterSortData {
+  const _FilterSortData({required this.sortType, this.filter});
+  const _FilterSortData._default() : sortType = MovieSortType.rating, filter = null;
+
+  final MovieSortType sortType;
+  final String? filter;
+
+  _FilterSortData copyWith({MovieSortType? sortType, String? filter}) => _FilterSortData(
+    sortType: sortType ?? this.sortType,
+    filter: filter ?? filter,
+  );
 }
 
 
@@ -272,7 +301,7 @@ class MoviesPageBloc with Disposable {
 
     // Refresh on sort change
     sortType.skip(1).listen((value) {
-      fetchController.refresh();
+      filterSortData.add(filterSortData.value!.copyWith(sortType: value));
       AnalyticsService.trackEvent('Sort order', {
         'theatersId': _theaters.toIdListString(),
         'theaterCount': _theaters.length,
@@ -281,24 +310,20 @@ class MoviesPageBloc with Disposable {
     });
 
     // Listen for search changes
-    searchController.addListener(() => search.add(searchController.text));
+    searchController.addListener(() => filterSortData.add(filterSortData.value!.copyWith(filter: searchController.text)));
   }
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
   final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
 
+  final sortType = BehaviorSubject.seeded(MovieSortType.rating);
   final isSearchVisible = BehaviorSubject.seeded(false);
   final searchController = TextEditingController();
-  final search = BehaviorSubject<String>();
-
-  final sortType = BehaviorSubject.seeded(MovieSortType.rating);
+  final filterSortData = BehaviorSubject.seeded(const _FilterSortData._default());
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data
     final moviesShowTimes = await AppService.api.getMoviesList(_theaters.toList(growable: false)..sort());
-
-    // Sort
-    moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, sortType.value!));
 
     // Analytics
     AnalyticsService.trackEvent('Movie list displayed', {
@@ -331,10 +356,10 @@ class MoviesPageBloc with Disposable {
 
   @override
   void dispose() {
-    isSearchVisible.close();
-    search.close();
-    searchController.dispose();
     sortType.close();
+    isSearchVisible.close();
+    searchController.dispose();
+    filterSortData.close();
     super.dispose();
   }
 }
