@@ -79,7 +79,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
                     key: ObjectKey(theater),
                     theater: theater,
                     multiSelectionMode: multiSelectionMode,
-                    onLongPress: toggleSelectionMode,
+                    onLongPress: context.canPop ? toggleSelectionMode : null,  // Disable when page is shown at app start
                   );
                 },
               ),
