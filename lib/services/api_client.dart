@@ -426,10 +426,11 @@ class ApiClient {
     // Log
     _log(request: request);
 
+    // Prepare cache key
+    final cacheKey = _getCacheKeyFromRequest(request);
+
     // Get response
     final response = await () async {
-      final cacheKey = _getCacheKeyFromRequest(request);
-
       // If we can use cache
       if (useCache) {
         // Check cache
@@ -439,6 +440,7 @@ class ApiClient {
         if (cachedResponseFile != null) {
           // Read response from cached file
           final cachedResponse = await cachedResponseFile.file.readAsString();
+          useCache = false;
 
           // Process response
           return http.Response(cachedResponse, 200,
@@ -452,34 +454,27 @@ class ApiClient {
       await throwIfNoInternet();
 
       // All in one Future to handle timeout
-      http.Response? response;
       try {
-        await(() async {
+        return await(() async {
           //Send request
           final streamedResponse = await _client.send(request);
 
           //Wait for the full response
-          response = await http.Response.fromStream(streamedResponse);
+          return await http.Response.fromStream(streamedResponse);
         }()).timeout(_timeOutDuration);
       } on TimeoutException {
         throw const ConnectivityException(ConnectivityExceptionType.timeout);
       }
-
-      // Store in cache
-      try {
-        _cacheManager.putFile(cacheKey, response!.bodyBytes);
-        debugPrint('WS (˅) [CACHED $cacheKey]');
-      } catch (e, s) {
-        reportError(e, s);
-      }
-      return response;
     } ();
 
     // Process response
-    return _processResponse<T>(response!);
+    return _processResponse<T>(response, useCache ? cacheKey : null);
   }
 
-  static T? _processResponse<T>(http.Response response) {
+  /// Process server's [response].
+  /// Returns processed result as Json or String.
+  /// Cache body if [cacheKey] is provided.
+  T? _processResponse<T>(http.Response response, String? cacheKey) {
     // Wrap response in a ResponseHandler to facilitate treatment
     final responseHandler = _ResponseHandler(response);
 
@@ -488,6 +483,16 @@ class ApiClient {
 
     // Process response - Success
     if (responseHandler.isSuccess) {
+      // Store in cache
+      if (cacheKey != null) {
+        try {
+          _cacheManager.putFile(cacheKey, response.bodyBytes);
+          debugPrint('WS (˅) [CACHED $cacheKey]');
+        } catch (e, s) {
+          reportError(e, s);
+        }
+      }
+
       // If body doesn't need to be processed
       if (isTypeUndefined<T>()) {
         return null;
