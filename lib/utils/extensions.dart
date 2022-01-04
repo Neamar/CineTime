@@ -5,6 +5,7 @@ import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
+import 'package:diacritic/diacritic.dart';
 
 import 'utils.dart';
 
@@ -13,6 +14,9 @@ extension ExtendedString on String {
   String toBase64() => base64.encode(utf8.encode(this));
 
   String plural(int count) => '$count ${this}${count > 1 ? 's' : ''}';
+
+  /// Normalize a string by removing diacritics and transform to lower case
+  String get normalized => removeDiacritics(toLowerCase());
 
   /// Returns a new string in which the last occurrence of [from] in this string is replaced with [to]
   String replaceLast(Pattern from, String to) {
