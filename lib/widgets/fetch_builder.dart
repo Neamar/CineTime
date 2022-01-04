@@ -1,7 +1,6 @@
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rxdart/rxdart.dart';
@@ -128,7 +127,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
   Future<R?> _fetch({T? param, bool? clearDataFirst}) async {
     // Save task id
     final taskId = ++_lastFetchTaskId;
-    final isTaskValid = () => mounted && taskId == _lastFetchTaskId;
+    bool isTaskValid() => mounted && taskId == _lastFetchTaskId;
 
     // Skip if disposed
     if (!mounted) return null;
