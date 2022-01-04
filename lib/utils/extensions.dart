@@ -2,9 +2,8 @@ import 'dart:convert';
 
 import 'package:cinetime/models/date_time.dart';
 import 'package:cinetime/resources/_resources.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/subjects.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
 
 import 'utils.dart';
@@ -20,6 +19,9 @@ extension ExtendedString on String {
     var startIndex = lastIndexOf(from);
     return replaceFirst(from, to, startIndex != -1 ? startIndex : 0);
   }
+
+  /// Remove all whitespaces
+  String removeAllWhitespaces() => replaceAll(RegExp(r'\s+'), '');
 }
 
 extension ExtendedNum on num {
@@ -33,11 +35,6 @@ extension ExtendedNum on num {
     if (this >= 10) return '$this';
     return '0$this';
   }
-}
-
-extension ExtendedMap<K, V> on Map<K, V> {
-  // Allow to use nullable syntax : map?.elementAt('key')
-  V? elementAt(K key) => this[key];
 }
 
 extension ExtendedBuildContext on BuildContext {
@@ -88,9 +85,6 @@ extension ExtendedBehaviorSubject<T> on BehaviorSubject<T> {
     }
     return false;
   }
-
-  /// Add current [value] to subject;
-  void reAdd() => add(value);
 }
 
 extension ExtendedIterable<T> on Iterable<T> {

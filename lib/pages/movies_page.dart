@@ -171,7 +171,7 @@ class MoviesPageBloc with Disposable {
     final moviesShowTimes = await AppService.api.getMoviesList(_theaters.toList(growable: false)..sort());
 
     // Sort
-    moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, sortType.value));
+    moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, sortType.value!));
 
     // Analytics
     AnalyticsService.trackEvent('Movie list displayed', {

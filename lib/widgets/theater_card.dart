@@ -47,7 +47,7 @@ class _TheaterCardState extends State<TheaterCard> {
           // Main content
           InkWell(
             onTap: _onSelected,
-            onLongPress: widget.multiSelectionMode ? null : _onLongPress,
+            onLongPress: widget.multiSelectionMode || widget.onLongPress == null  ? null : _onLongPress,
             child: Row(
               children: <Widget>[
 
