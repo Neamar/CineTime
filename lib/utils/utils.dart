@@ -140,7 +140,7 @@ bool isStringNullOrEmpty(String? s) => s == null || s.isEmpty;
 bool typesEqual<T1, T2>() => T1 == T2;
 
 /// Returns true if T is not set, Null, void or dynamic.
-bool isTypeUndefined<T>() => typesEqual<T, Null>() || typesEqual<T, void>() || typesEqual<T, dynamic>();
+bool isTypeUndefined<T>() => typesEqual<T, Object?>() || typesEqual<T, Null>() || typesEqual<T, void>() || typesEqual<T, dynamic>();
 
 /// Returns true if T is nullable.
 /// Like [isTypeUndefined] but will also return true for nullable types like <bool?> or <Object?>.
