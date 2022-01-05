@@ -133,6 +133,8 @@ bool shouldReportException(Object? exception) =>
 
 bool isIterableNullOrEmpty<T>(Iterable<T>? iterable) => iterable == null || iterable.isEmpty;
 bool isMapNullOrEmpty<K, V>(Map<K, V>? map) => map == null || map.isEmpty;
+
+/// Return true if string is null or empty
 bool isStringNullOrEmpty(String? s) => s == null || s.isEmpty;
 
 /// Returns true if T1 and T2 are identical types.

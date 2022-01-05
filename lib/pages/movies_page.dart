@@ -26,82 +26,138 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(    // Needed for background color
-      body: FetchBuilder.basic<MoviesShowTimes>(
-        controller: bloc.fetchController,
-        fetchAtInit: false,
-        task: bloc.fetch,
-        builder: (context, moviesShowtimesData) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Theater info
-                  () {
-                    final theaters = moviesShowtimesData.theaters;
-                    final theatersCount = theaters.length;
-                    return Text(
-                      () {
-                        if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                        if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
-                        return 'Films dans $theatersCount cinémas';
-                      } (),
-                      style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    );
-                  } (),
+    return WillPopScope(
+      onWillPop: () async {
+        if (bloc.isSearchVisible.value == true) {
+          _cancelSearch();
+          return false;
+        }
+        return true;
+      },
+      child: ClearFocusBackground(
+        child: Scaffold(    // Needed for background color
+          body: FetchBuilder.basic<MoviesShowTimes>(
+            controller: bloc.fetchController,
+            fetchAtInit: false,
+            task: bloc.fetch,
+            builder: (context, moviesShowtimesData) {
+              return Scaffold(
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(kToolbarHeight),
+                  child: BehaviorSubjectBuilder<bool>(
+                    subject: bloc.isSearchVisible,
+                    builder: (context, snapshot) {
+                      final isSearchVisible = snapshot.data!;
 
-                  // Period
-                  AppResources.spacerTiny,
-                  Text(
-                    moviesShowtimesData.periodDisplay,
-                    style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
-                  ),
-                ],
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(
-                    CineTimeIcons.pencil,
-                  ),
-                  onPressed: _goToTheatersPage,
-                ),
-                BehaviorSubjectBuilder<MovieSortType>(
-                  subject: bloc.sortType,
-                  builder: (context, snapshot) {
-                    return _SortButton(
-                      value: snapshot.data!,
-                      onChanged: bloc.sortType.addDistinct,
-                    );
-                  },
-                ),
-              ],
-            ),
-            body: () {
-              if (moviesShowtimesData.moviesShowTimes.isEmpty)
-                return const IconMessage(
-                  icon: Icons.theaters,
-                  message: 'Aucune séance',
-                );
+                      // Normal AppBar
+                      if (!isSearchVisible) {
+                        return AppBar(
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Theater info
+                              () {
+                                final theaters = moviesShowtimesData.theaters;
+                                final theatersCount = theaters.length;
+                                return Text(
+                                  () {
+                                    if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                                    if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
+                                    return 'Films dans $theatersCount cinémas';
+                                  }(),
+                                  style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                );
+                              } (),
 
-              return ListView.builder(
-                itemCount: moviesShowtimesData.moviesShowTimes.length,
-                itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
-                padding: EdgeInsets.zero,
-                itemBuilder: (context, index) {
-                  final movieShowTimes = moviesShowtimesData.moviesShowTimes[index];
-                  return MovieCard(
-                    key: ObjectKey(movieShowTimes),
-                    movieShowTimes: movieShowTimes,
-                    showTheaterName: moviesShowtimesData.theaters.length > 1,
+                              // Period
+                              AppResources.spacerTiny,
+                              Text(
+                                moviesShowtimesData.periodDisplay,
+                                style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            IconButton(
+                              icon: const Icon(CineTimeIcons.pencil),
+                              onPressed: _goToTheatersPage,
+                            ),
+                            IconButton(
+                              icon: const Icon(CineTimeIcons.search),
+                              onPressed: () => bloc.isSearchVisible.add(true),
+                            ),
+                            BehaviorSubjectBuilder<MovieSortType>(
+                              subject: bloc.sortType,
+                              builder: (context, snapshot) {
+                                return _SortButton(
+                                  value: snapshot.data!,
+                                  onChanged: bloc.sortType.addDistinct,
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      }
+
+                      // Search bar
+                      else {
+                        return AppBar(
+                          title: TextField(
+                            controller: bloc.searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Filtrer par titre, acteurs, ...',
+                              iconColor: Colors.white,
+                              prefixIcon: IconButton(
+                                icon: const Icon(
+                                  Icons.arrow_back,
+                                  color: Colors.white,
+                                ),
+                                onPressed: _cancelSearch,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                                onPressed: bloc.searchController.clear,
+                              ),
+                            ),
+                            autofocus: true,
+                            style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.white),
+                            textInputAction: TextInputAction.search,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                body: () {
+                  if (moviesShowtimesData.moviesShowTimes.isEmpty)
+                    return const IconMessage(
+                      icon: Icons.theaters,
+                      message: 'Aucune séance',
+                    );
+
+                  return BehaviorSubjectBuilder<_FilterSortData>(
+                    subject: bloc.filterSortData,
+                    builder: (context, snapshot) {
+                      final filterSortData = snapshot.data!;
+                      return _FilteredMovieListView(
+                        key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
+                        moviesShowTimes: moviesShowtimesData.moviesShowTimes,
+                        showTheaterName: moviesShowtimesData.theaters.length > 1,
+                        sortType: filterSortData.sortType,
+                        filter: filterSortData.filter,
+                      );
+                    },
                   );
-                },
+                } (),
               );
-            } (),
-          );
-        },
+            },
+          ),
+        ),
       ),
     );
   }
@@ -112,6 +168,11 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 
     // Update UI
     bloc.refresh(userAsked: true);
+  }
+
+  void _cancelSearch() {
+    bloc.isSearchVisible.add(false);
+    bloc.searchController.clear();
   }
 }
 
@@ -145,6 +206,93 @@ class _SortButton extends StatelessWidget {
   }
 }
 
+class _FilteredMovieListView extends StatefulWidget {
+  const _FilteredMovieListView({
+    Key? key,
+    required this.moviesShowTimes,
+    required this.showTheaterName,
+    required this.sortType,
+    this.filter,
+  }) : super(key: key);
+
+  final List<MovieShowTimes> moviesShowTimes;
+  final bool showTheaterName;
+  final MovieSortType sortType;
+  final String? filter;
+
+  @override
+  _FilteredMovieListViewState createState() => _FilteredMovieListViewState();
+}
+
+class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
+  List<MovieShowTimes> filteredMoviesShowTimes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    applyFilter();
+    applySort();
+  }
+
+  void applySort() {
+    filteredMoviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, widget.sortType));
+  }
+
+  void applyFilter() {
+    filteredMoviesShowTimes = () {
+      if (isStringNullOrEmpty(widget.filter)) return widget.moviesShowTimes;
+      return widget.moviesShowTimes.where((mst) => mst.movie.matchSearch(widget.filter!)).toList(growable: false);
+    } ();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: filteredMoviesShowTimes.length,
+      itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
+      padding: EdgeInsets.zero,
+      itemBuilder: (context, index) {
+        final movieShowTimes = filteredMoviesShowTimes[index];
+        return MovieCard(
+          key: ObjectKey(movieShowTimes),
+          movieShowTimes: movieShowTimes,
+          showTheaterName: widget.showTheaterName,
+        );
+      },
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _FilteredMovieListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    var hasChanged = false;
+    if (widget.filter != oldWidget.filter) {
+      applyFilter();
+      hasChanged = true;
+    }
+    if (widget.sortType != oldWidget.sortType) {
+      applySort();
+      hasChanged = true;
+    }
+    if (hasChanged) {
+      setState(() { });
+    }
+  }
+}
+
+class _FilterSortData {
+  const _FilterSortData({required this.sortType, this.filter});
+  const _FilterSortData._default() : sortType = MovieSortType.rating, filter = null;
+
+  final MovieSortType sortType;
+  final String? filter;
+
+  _FilterSortData copyWith({MovieSortType? sortType, String? filter}) => _FilterSortData(
+    sortType: sortType ?? this.sortType,
+    filter: filter ?? filter,
+  );
+}
+
 
 class MoviesPageBloc with Disposable {
   MoviesPageBloc() {
@@ -153,25 +301,29 @@ class MoviesPageBloc with Disposable {
 
     // Refresh on sort change
     sortType.skip(1).listen((value) {
-      fetchController.refresh();
+      filterSortData.add(filterSortData.value!.copyWith(sortType: value));
       AnalyticsService.trackEvent('Sort order', {
         'theatersId': _theaters.toIdListString(),
         'theaterCount': _theaters.length,
         'sortType': describeEnum(value),
       });
     });
+
+    // Listen for search changes
+    searchController.addListener(() => filterSortData.add(filterSortData.value!.copyWith(filter: searchController.text)));
   }
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
   final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
+
   final sortType = BehaviorSubject.seeded(MovieSortType.rating);
+  final isSearchVisible = BehaviorSubject.seeded(false);
+  final searchController = TextEditingController();
+  final filterSortData = BehaviorSubject.seeded(const _FilterSortData._default());
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data
     final moviesShowTimes = await AppService.api.getMoviesList(_theaters.toList(growable: false)..sort());
-
-    // Sort
-    moviesShowTimes.moviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, sortType.value));
 
     // Analytics
     AnalyticsService.trackEvent('Movie list displayed', {
@@ -205,6 +357,9 @@ class MoviesPageBloc with Disposable {
   @override
   void dispose() {
     sortType.close();
+    isSearchVisible.close();
+    searchController.dispose();
+    filterSortData.close();
     super.dispose();
   }
 }

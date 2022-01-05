@@ -37,7 +37,8 @@ class ApiClient {
   static const _timeOutDuration = Duration(seconds: 30);
 
   /// Json mime type
-  static const contentTypeJson = 'application/json; charset=utf-8';
+  static const contentTypeJsonMimeType = 'application/json';
+  static const contentTypeJson = '$contentTypeJsonMimeType; charset=utf-8';
 
   /// Whether to log headers also or not.
   static const _logHeaders = false;
@@ -548,9 +549,14 @@ class ApiClient {
       statusCode = r.statusCode != 200 ? '(${r.statusCode}) ' : '';
       if (includeBody) {
         if (responseHandler.isBodyJson) {
-          body = responseHandler.bodyString;
+          body = responseHandler.bodyString.removeAllWhitespaces();
         } else {
-          body = '${r.contentLength} bytes';
+          final sizeInKo = ((r.contentLength ?? 0) / 1024).round();
+          if (sizeInKo <= 10) {
+            body = responseHandler.bodyString.removeAllWhitespaces();
+          } else {
+            body = '$sizeInKo ko';
+          }
         }
       }
       if (_logHeaders) {
@@ -598,7 +604,7 @@ class ApiClient {
 class _ResponseHandler {
   _ResponseHandler(this.response) :
     isSuccess = ApiClient.isHttpSuccessCode(response.statusCode),
-    isBodyJson = ContentType.parse(response.headers[HttpHeaders.contentTypeHeader] ?? '').mimeType == ApiClient.contentTypeJson;
+    isBodyJson = ContentType.parse(response.headers[HttpHeaders.contentTypeHeader] ?? '').mimeType == ApiClient.contentTypeJsonMimeType;
 
   final http.Response response;
 
@@ -648,7 +654,7 @@ class HttpResponseException extends DetailedException {
   bool get shouldBeReported => statusCode != 401;
 
   static String _buildMessage(http.Response response, JsonObject? responseJson) {
-    final errorMessage = responseJson?.elementAt('error');    // May be a String, or a more complex json
+    final errorMessage = responseJson?['error'];    // May be a String, or a more complex json
     return 'Erreur ${response.statusCode}' + (errorMessage != null && errorMessage is String ? ' : $errorMessage' : '');
   }
 }
