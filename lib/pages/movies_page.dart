@@ -311,6 +311,13 @@ class MoviesPageBloc with Disposable {
 
     // Listen for search changes
     searchController.addListener(() => filterSortData.add(filterSortData.value!.copyWith(filter: searchController.text)));
+
+    // Analytics
+    isSearchVisible.listen((value) {
+      if (value) {
+        AnalyticsService.trackEvent('Filter movies');
+      }
+    });
   }
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
