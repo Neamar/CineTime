@@ -67,7 +67,7 @@ class ApiClient {
     }
 
     // Process result
-    final JsonList theatersJson = responseJson!['results']!;
+    final JsonList theatersJson = responseJson['results']!;
     return theatersJson.map((theaterJson) {
       final JsonObject theaterInfo = theaterJson['data']!;
 
@@ -103,7 +103,7 @@ class ApiClient {
     }
 
     // Process result
-    final JsonList theatersJson = responseJson!['data']!['theaterList']!['edges']!;
+    final JsonList theatersJson = responseJson['data']!['theaterList']!['edges']!;
     return theatersJson.map((theaterJson) {
       theaterJson = theaterJson['node']!;
       final JsonObject? address = theaterJson['location'];
@@ -165,7 +165,7 @@ class ApiClient {
       }
 
       // Process response
-      responseJson = responseJson!['data']!;
+      responseJson = responseJson['data']!;
 
       // Check data
       final JsonObject moviesShowTimesDataJson = responseJson!['movieShowtimeList']!;
@@ -296,7 +296,7 @@ class ApiClient {
     }
 
     // Process data
-    final JsonObject? movieJson = responseJson?['data']?['movie'];
+    final JsonObject? movieJson = responseJson['data']?['movie'];
 
     // Synopsis
     String? synopsis = movieJson?['synopsis'];
@@ -329,7 +329,7 @@ class ApiClient {
     }
 
     // Process result
-    responseJson = responseJson!['data']?['video'];
+    responseJson = responseJson['data']?['video'];
     final JsonList? videosJson = responseJson?['files'];
     if (videosJson == null) {
       reportError(UnimplementedError('Video query result contains no files (title: ${responseJson?['title']} | videoId: ${videoId.id})'), StackTrace.current);
@@ -379,7 +379,7 @@ class ApiClient {
   }
 
   /// Send a graphQL request
-  Future<T?> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true}) async {
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true}) async {
     // Headers
     const headers = {
       'ac-auth-token': 'c4O6_g8tU74:APA91bF2NxCVPnWjh28JmIG1' + 'MOR46BLg-YqZOyG1dpA9bc1m7SrB99GBBryokSmdYTL11WoW-bUS0pQmu2D2Y_9KwoWZW3x' + '6UH4nl5GOIOpyvefse-E7vwsiKStN3ncSRmjWsdR8rK7b',
@@ -394,11 +394,11 @@ class ApiClient {
     };
 
     // Send request
-    return await _send(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
+    return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
   }
 
   /// Send a classic request
-  Future<T?> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = true}) async {
+  Future<T> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = true}) async {
     // Create request
     final request = http.Request(method, Uri.parse(url));
 
@@ -422,14 +422,15 @@ class ApiClient {
   }
 
   /// Send a generic request
-  Future<T?> _sendRequest<T>(http.Request request, {bool useCache = true}) async {
+  Future<T> _sendRequest<T>(http.Request request, {bool useCache = true}) async {
     // Log
     _log(request: request);
 
+    // Prepare cache key
+    final cacheKey = _getCacheKeyFromRequest(request);
+
     // Get response
     final response = await () async {
-      final cacheKey = _getCacheKeyFromRequest(request);
-
       // If we can use cache
       if (useCache) {
         // Check cache
@@ -439,6 +440,7 @@ class ApiClient {
         if (cachedResponseFile != null) {
           // Read response from cached file
           final cachedResponse = await cachedResponseFile.file.readAsString();
+          useCache = false;
 
           // Process response
           return http.Response(cachedResponse, 200,
@@ -452,34 +454,27 @@ class ApiClient {
       await throwIfNoInternet();
 
       // All in one Future to handle timeout
-      http.Response? response;
       try {
-        await(() async {
+        return await(() async {
           //Send request
           final streamedResponse = await _client.send(request);
 
           //Wait for the full response
-          response = await http.Response.fromStream(streamedResponse);
+          return await http.Response.fromStream(streamedResponse);
         }()).timeout(_timeOutDuration);
       } on TimeoutException {
         throw const ConnectivityException(ConnectivityExceptionType.timeout);
       }
-
-      // Store in cache
-      try {
-        _cacheManager.putFile(cacheKey, response!.bodyBytes);
-        debugPrint('WS (˅) [CACHED $cacheKey]');
-      } catch (e, s) {
-        reportError(e, s);
-      }
-      return response;
     } ();
 
     // Process response
-    return _processResponse<T>(response!);
+    return _processResponse<T>(response, useCache ? cacheKey : null);
   }
 
-  static T? _processResponse<T>(http.Response response) {
+  /// Process server's [response].
+  /// Returns processed result as Json or String.
+  /// Cache body if [cacheKey] is provided.
+  T _processResponse<T>(http.Response response, String? cacheKey) {
     // Wrap response in a ResponseHandler to facilitate treatment
     final responseHandler = _ResponseHandler(response);
 
@@ -488,19 +483,34 @@ class ApiClient {
 
     // Process response - Success
     if (responseHandler.isSuccess) {
-      // If body doesn't need to be processed
-      if (isTypeUndefined<T>()) {
-        return null;
+      // Store in cache
+      if (cacheKey != null) {
+        try {
+          _cacheManager.putFile(cacheKey, response.bodyBytes);
+          debugPrint('WS (˅) [CACHED $cacheKey]');
+        } catch (e, s) {
+          reportError(e, s);
+        }
       }
 
       // If raw string is asked
-      else if (T == String) {
+      if (T == String) {
         return responseHandler.bodyString as T;
       }
 
-      // Other case : try json
-      else {
+      // Json
+      else if (T == JsonObject || T == JsonList) {
         return responseHandler.bodyJson<T>();
+      }
+
+      // If body doesn't need to be processed
+      else if (isTypeUndefined<T>()) {
+        return null as T;
+      }
+
+      // Unhandled types
+      else {
+        throw UnimplementedError('$T is not a supported type');
       }
     }
 
@@ -508,7 +518,7 @@ class ApiClient {
     else {
       JsonObject? processedResponse;
       if (responseHandler.isBodyJson) {
-        processedResponse = responseHandler.bodyJson();
+        processedResponse = responseHandler.bodyJsonOrNull();
       }
 
       throw HttpResponseException(response, responseJson: processedResponse);
@@ -604,24 +614,22 @@ class _ResponseHandler {
   String? _bodyString;
   String get bodyString => _bodyString ?? (_bodyString = response.body);
 
-  dynamic _bodyJson;
-  T? bodyJson<T>() {
+  /// Decode body as JSON and cast as [T].
+  /// May throw if unexpected format.
+  T bodyJson<T>() {
     // Decode json
-    if (_bodyJson == null && bodyString.isNotEmpty) {
-      try {
-        _bodyJson = json.decode(bodyString);
-      } catch (e) {
-        // Error is handled bellow
-        debugPrint('ResponseHandler.Error : Could not decode json : $e : $bodyString');
-      }
-    }
+    final bodyJson = json.decode(bodyString);
 
     // cast
+    return bodyJson as T;
+  }
+
+  /// Same as [bodyJson], but will return null if operation fails.
+  T? bodyJsonOrNull<T>() {
     try {
-      return _bodyJson as T;
-    } catch (e) {
-      debugPrint('ResponseHandler.Error : Could not cast : $e');
-      return null;
+      return bodyJson<T>();
+    } catch(e) {
+      debugPrint('ResponseHandler.Error : Could not decode json : $e : $bodyString');
     }
   }
 }
