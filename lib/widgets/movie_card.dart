@@ -80,9 +80,7 @@ class MovieCard extends StatelessWidget {
                             // Rating
                             if (movieShowTimes.movie.rating != null && movieShowTimes.movie.rating! > 0)...[
                               AppResources.spacerLarge,
-                              StarRating(
-                                rating: movieShowTimes.movie.rating!,
-                              ),
+                              StarRating(movieShowTimes.movie.rating!),
                             ],
                           ],
                         ),
