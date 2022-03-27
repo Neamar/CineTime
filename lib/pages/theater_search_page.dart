@@ -175,6 +175,8 @@ class TheaterSearchPageBloc with Disposable {
     // Get geo-position
     geo.Position? position;
     try {
+      // TODO ask permission and check location service
+
       position = await geo.Geolocator.getCurrentPosition(
         desiredAccuracy: geo.LocationAccuracy.low,
         timeLimit: const Duration(seconds: 10),

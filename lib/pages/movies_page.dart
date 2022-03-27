@@ -275,7 +275,7 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
       hasChanged = true;
     }
     if (hasChanged) {
-      setState(() { });
+      setState(() { });   // TODO check this line is really needed
     }
   }
 }

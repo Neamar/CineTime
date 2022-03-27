@@ -79,15 +79,8 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
   @override
   void initState() {
     super.initState();
-    _setControllerCallback();
+    widget.controller?._mountState(this);
     if (widget.fetchAtInit) _fetch();
-  }
-
-  @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    oldWidget.controller?._refreshCallback = null;
-    _setControllerCallback();
   }
 
   @override
@@ -161,13 +154,11 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
     }
   }
 
-  void _setControllerCallback() {
-    widget.controller?._refreshCallback = (param) => _fetch(param: param, clearDataFirst: true);
-  }
+  Future<R?> refresh([T? param]) => _fetch(param: param, clearDataFirst: true);
 
   @override
   void dispose() {
-    widget.controller?._refreshCallback = null;
+    widget.controller?._unmountState(this);
     data.close();
     super.dispose();
   }
@@ -233,10 +224,25 @@ class FetchException {
   final VoidCallback retry;
 }
 
+/// A controller for an FetchBuilder.
+///
+/// One support one widget per controller.
+/// If multiple widget are using the same controller, only the last one will work.
 class FetchBuilderController<T, R> {
-  ParameterizedAsyncTask<T, R?>? _refreshCallback;
-  Future<R?> refresh([T? param]) {
-    assert(_refreshCallback != null);
-    return _refreshCallback!(param);
+  _FetchBuilderState<T, R>? _state;
+
+  void _mountState(_FetchBuilderState<T, R> state) {
+    _state = state;
   }
+
+  void _unmountState(_FetchBuilderState<T, R> state) {
+    /// When a widget is rebuilt with another key,
+    /// the state of the new widget is first initialised,
+    /// then the state of the old widget is disposed.
+    /// So we need to unmount state only if it hasn't changed since.
+    if (_state == state)
+      _state = null;
+  }
+
+  Future<R?> refresh([T? param]) => _state!.refresh(param);
 }
