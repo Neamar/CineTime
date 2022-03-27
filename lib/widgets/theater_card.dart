@@ -74,16 +74,20 @@ class _TheaterCardState extends State<TheaterCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        Text(
-                          widget.theater.name,
-                          style: Theme.of(context).textTheme.subtitle1,
+                        Row(
+                          children: [
+                            Text(
+                              widget.theater.name,
+                              style: Theme.of(context).textTheme.subtitle1,
+                            ),
+                            if (widget.theater.distanceDisplay != null)
+                              Text(
+                                ' à ${widget.theater.distanceDisplay!}',
+                                style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.black54),
+                              ),
+                          ],
                         ),
                         const Spacer(),
-                        if (widget.theater.distanceDisplay != null)
-                          Text(
-                            widget.theater.distanceDisplay!,
-                            style: Theme.of(context).textTheme.bodyText2,
-                          ),
                         Text(
                           widget.theater.fullAddress,
                           style: Theme.of(context).textTheme.caption,
