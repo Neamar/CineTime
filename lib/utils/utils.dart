@@ -11,6 +11,7 @@ import 'exceptions/displayable_exception.dart';
 import 'exceptions/operation_canceled_exception.dart';
 import 'exceptions/permission_exception.dart';
 import 'exceptions/unreported_exception.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
@@ -130,6 +131,26 @@ bool shouldReportException(Object? exception) =>
     exception is! SocketException &&
     exception is! TimeoutException &&
     (exception is! HttpResponseException || exception.shouldBeReported);
+
+/// Get current user location, with low precision.
+Future<geo.Position> getCurrentLocation() async {
+  // Get geo-position
+  try {
+    // Request permissions
+    // Do nothing if already granted
+    await geo.Geolocator.requestPermission();
+
+    // Get localisation
+    return await geo.Geolocator.getCurrentPosition(
+      desiredAccuracy: geo.LocationAccuracy.low,
+      timeLimit: const Duration(seconds: 10),
+    );
+  } catch(e) {
+    if (e is geo.PermissionDeniedException || e is geo.LocationServiceDisabledException)
+      throw const PermissionDeniedException();
+    rethrow;
+  }
+}
 
 bool isIterableNullOrEmpty<T>(Iterable<T>? iterable) => iterable == null || iterable.isEmpty;
 bool isMapNullOrEmpty<K, V>(Map<K, V>? map) => map == null || map.isEmpty;
