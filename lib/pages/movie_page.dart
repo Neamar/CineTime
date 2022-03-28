@@ -159,7 +159,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                 ),
                               ],
                             ),
-                          )
+                          ),
                         ],
                       ),
 
@@ -301,9 +301,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
             AppResources.spacerSmall,
             Row(
               children: <Widget>[
-                StarRating(
-                  rating: rating,
-                ),
+                StarRating(rating),
                 AppResources.spacerSmall,
                 Text(
                   rating.toStringAsFixed(1),

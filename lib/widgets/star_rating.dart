@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cinetime/utils/_utils.dart';
 
 class StarRating extends StatelessWidget {
-  const StarRating({Key? key, required this.rating}) :
-    assert(rating > 0),
+  const StarRating(this.rating, {Key? key}) :
+    assert(rating >= 0 && rating <= 5),
     super(key: key);
 
   final double rating;
@@ -16,7 +16,8 @@ class StarRating extends StatelessWidget {
       children: <Widget>[
         for (var i = 0; i < rating.floor(); i ++)
           _buildStar(true),
-        _buildPartialStar(rating % 1),
+        if (rating % 1 != 0)
+          _buildPartialStar(rating % 1),
         for (var i = rating.ceil(); i < 5; i ++)
           _buildStar(false),
       ]..insertBetween(

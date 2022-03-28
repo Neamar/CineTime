@@ -487,7 +487,7 @@ class ApiClient {
       if (cacheKey != null) {
         try {
           _cacheManager.putFile(cacheKey, response.bodyBytes);
-          debugPrint('WS (˅) [CACHED $cacheKey]');
+          debugPrint('API (˅) [CACHED $cacheKey]');
         } catch (e, s) {
           reportError(e, s);
         }
@@ -579,15 +579,15 @@ class ApiClient {
     }
 
     // Build log string
-    debugPrint('WS ($typeSymbol) $statusCode[$method $url] $body');
+    debugPrint('API ($typeSymbol) $statusCode[$method $url] $body');
     if (headers != null) {
-      debugPrint('WS (${typeSymbol}H) $headers');
+      debugPrint('API (${typeSymbol}H) $headers');
     }
   }
 
   static Future<void> throwIfNoInternet() async {
     if (!(await isConnectedToInternet())) {
-      debugPrint('WS (✕) NO INTERNET');
+      debugPrint('API (✕) NO INTERNET');
       throw const ConnectivityException(ConnectivityExceptionType.noInternet);
     }
   }

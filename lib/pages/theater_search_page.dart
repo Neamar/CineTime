@@ -173,17 +173,7 @@ class TheaterSearchPageBloc with Disposable {
 
   Future<List<Theater>> _geoSearch() async {
     // Get geo-position
-    geo.Position? position;
-    try {
-      position = await geo.Geolocator.getCurrentPosition(
-        desiredAccuracy: geo.LocationAccuracy.low,
-        timeLimit: const Duration(seconds: 10),
-      );
-    } catch(e) {
-      if (e is geo.PermissionDeniedException || e is geo.LocationServiceDisabledException)
-        throw const PermissionDeniedException();
-      rethrow;
-    }
+    final position = await getCurrentLocation();
 
     // Get local theaters
     return await AppService.api.searchTheatersGeo(position.latitude, position.longitude);
