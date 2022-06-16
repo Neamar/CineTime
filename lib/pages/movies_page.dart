@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/analytics_service.dart';
+import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
@@ -282,7 +283,6 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
 
 class _FilterSortData {
   const _FilterSortData({required this.sortType, this.filter});
-  const _FilterSortData._default() : sortType = MovieSortType.rating, filter = null;
 
   final MovieSortType sortType;
   final String? filter;
@@ -299,9 +299,13 @@ class MoviesPageBloc with Disposable {
     // Initial fetch, after widget is initialised
     WidgetsBinding.instance.addPostFrameCallback((_) => refresh());
 
+    // Init filter
+    filterSortData.add(_FilterSortData(sortType: sortType.value!));
+
     // Refresh on sort change
     sortType.skip(1).listen((value) {
       filterSortData.add(filterSortData.value!.copyWith(sortType: value));
+      StorageService.saveMovieSorting(value);   // No need to await
       AnalyticsService.trackEvent('Sort order', {
         'theatersId': _theaters.toIdListString(),
         'theaterCount': _theaters.length,
@@ -323,10 +327,10 @@ class MoviesPageBloc with Disposable {
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
   final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
 
-  final sortType = BehaviorSubject.seeded(MovieSortType.rating);
+  final sortType = BehaviorSubject.seeded(StorageService.readMovieSorting() ?? MovieSortType.rating);
   final isSearchVisible = BehaviorSubject.seeded(false);
   final searchController = TextEditingController();
-  final filterSortData = BehaviorSubject.seeded(const _FilterSortData._default());
+  final filterSortData = BehaviorSubject<_FilterSortData>();
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data

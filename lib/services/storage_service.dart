@@ -11,6 +11,13 @@ class StorageService {
   static Future<void> init() async => _storage = await SharedPreferences.getInstance();
   //#endregion
 
+  //#region Last movie sorting
+  static const _movieSortingKey = 'movieSorting';
+
+  static Future<void> saveMovieSorting(MovieSortType value) => _storage.setString(_movieSortingKey, value.name);
+  static MovieSortType? readMovieSorting() => MovieSortType.values.firstWhereOrNull((e) => e.name == _storage.getString(_movieSortingKey));
+  //#endregion
+
   //#region Theaters
   static const _selectedTheatersKey = 'selectedTheaters';
   static const _favoriteTheatersKey = 'favoriteTheaters';
