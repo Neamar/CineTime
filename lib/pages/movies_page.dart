@@ -75,7 +75,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                               AppResources.spacerTiny,
                               Text(
                                 moviesShowtimesData.periodDisplay,
-                                style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorDarkGrey),
+                                style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorGrey),
                               ),
                             ],
                           ),

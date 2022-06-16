@@ -117,7 +117,7 @@ class _NoResultMessage extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: AppResources.colorGrey,
+                  color: AppResources.colorLightGrey,
                   size: 50,
                 ),
                 AppResources.spacerLarge,
@@ -125,7 +125,7 @@ class _NoResultMessage extends StatelessWidget {
                   Text(
                     lines[i],
                     textAlign: TextAlign.center,
-                    style: (i.isOdd ? textTheme.headline5 : textTheme.headline6)?.copyWith(color: AppResources.colorGrey),
+                    style: (i.isOdd ? textTheme.headline5 : textTheme.headline6)?.copyWith(color: AppResources.colorLightGrey),
                   ),
               ],
             ),

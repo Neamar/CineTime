@@ -71,6 +71,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'CinéTime',
       theme: appTheme(),
+      darkTheme: appTheme(darkMode: true),
       navigatorKey: _navigatorKey,
       home: AppService.instance.selectedTheaters.isEmpty
         ? const TheaterSearchPage()
@@ -79,13 +80,21 @@ class App extends StatelessWidget {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           // Set system status & navigation bars colors.
           // Using [AnnotatedRegion] is better than calling [SystemChrome.setSystemUIOverlayStyle] because it allows some pages to override colors and automatically restore default theme when page is disposed.
-          value: const SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarBrightness: Brightness.light,
-            statusBarIconBrightness: Brightness.light,
-            systemNavigationBarColor: Colors.white,
-            systemNavigationBarIconBrightness: Brightness.dark,
-          ),
+          value: MediaQuery.of(context).platformBrightness == Brightness.light
+            ? const SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarBrightness: Brightness.light,
+                statusBarIconBrightness: Brightness.light,
+                systemNavigationBarColor: Colors.white,
+                systemNavigationBarIconBrightness: Brightness.dark,
+              )
+            : const SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarBrightness: Brightness.dark,
+                statusBarIconBrightness: Brightness.dark,
+                systemNavigationBarColor: Colors.black,
+                systemNavigationBarIconBrightness: Brightness.light,
+              ),
           child: child!,
         );
       },

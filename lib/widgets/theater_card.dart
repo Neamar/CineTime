@@ -105,7 +105,7 @@ class _TheaterCardState extends State<TheaterCard> {
             top: 0,
             right: 0,
             child: Material(
-              color: isFavorite ? Theme.of(context).primaryColor : AppResources.colorDarkGrey,
+              color: isFavorite ? Theme.of(context).primaryColor : AppResources.colorGrey,
               shape: const CornerBorder(CornerBorderPosition.topRight),
               clipBehavior: Clip.antiAlias,
               elevation: 2,

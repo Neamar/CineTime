@@ -60,12 +60,12 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                       children: <Widget>[
                         Icon(
                           Icons.ondemand_video_outlined,
-                          color: hasTrailer ? Colors.white : AppResources.colorDarkGrey,
+                          color: hasTrailer ? Colors.white : AppResources.colorGrey,
                         ),
                         const SizedBox(width: 8.0),
                         Text(
                           'Bande annonce',
-                          style: TextStyle(color: hasTrailer ? Colors.white : AppResources.colorDarkGrey),
+                          style: TextStyle(color: hasTrailer ? Colors.white : AppResources.colorGrey),
                         )
                       ],
                     ),
@@ -192,7 +192,6 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                   builder: (context, snapshot) {
                     final filter = snapshot.data!;
                     return Material(
-                      color: Colors.white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
@@ -498,7 +497,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
                 showtimes: dayShowTimes.showTimes,
                 backgroundColor: () {
                   if (dayShowTimes.date == ApiClient.mockedNow.toDate) return AppResources.colorLightRed;
-                  if (index.isEven) return Colors.black12;
+                  if (index.isEven) return Theme.of(context).scaffoldBackgroundColor;
                 } (),
                 onPressed: onShowtimePressed,
               );

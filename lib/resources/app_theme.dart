@@ -1,22 +1,43 @@
 import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
 
-ThemeData appTheme() {
+ThemeData appTheme({bool darkMode = false}) {
+  final backgroundColor = darkMode ? Colors.black : AppResources.colorLightGrey;
+  final backgroundLightColor = darkMode ? AppResources.colorDarkGrey : Colors.white;
+  final foregroundColor = darkMode ? Colors.white : AppResources.colorDarkGrey;
+
   final theme = ThemeData(
     primarySwatch: _createMaterialColor(AppResources.colorRed),
-    scaffoldBackgroundColor: AppResources.colorGrey,
+    scaffoldBackgroundColor: backgroundColor,
+    canvasColor: backgroundLightColor,
     textSelectionTheme: const TextSelectionThemeData(
       cursorColor: Colors.white,
       selectionColor: AppResources.colorLightRed,
       selectionHandleColor: Colors.white,
     ),
-    cardTheme: const CardTheme(
-      shape: RoundedRectangleBorder(
+    cardTheme: CardTheme(
+      color: backgroundLightColor,
+      shape: const RoundedRectangleBorder(
         borderRadius: AppResources.borderRadiusTiny,
       ),
     ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: backgroundLightColor,
+    ),
+    toggleButtonsTheme: ToggleButtonsThemeData(
+      borderColor: AppResources.colorGrey,
+      selectedBorderColor: AppResources.colorGrey,
+      color: foregroundColor,
+    ),
+    dialogTheme: DialogTheme(
+      backgroundColor: backgroundLightColor,
+    ),
   );
   return theme.copyWith(
+    textTheme: theme.textTheme.apply(
+      bodyColor: foregroundColor,
+      displayColor: foregroundColor,
+    ),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: theme.textTheme.bodyText2?.copyWith(color: AppResources.colorDarkRed),
       enabledBorder: const OutlineInputBorder(
