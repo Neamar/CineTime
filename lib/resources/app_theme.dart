@@ -24,6 +24,12 @@ ThemeData appTheme({bool darkMode = false}) {
         borderRadius: AppResources.borderRadiusTiny,
       ),
     ),
+    checkboxTheme: CheckboxThemeData(
+      side: BorderSide(
+        width: 2,
+        color: foregroundColor,
+      ),
+    ),
     popupMenuTheme: PopupMenuThemeData(
       color: backgroundLightColor,
     ),

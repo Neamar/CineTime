@@ -83,7 +83,7 @@ class _TheaterCardState extends State<TheaterCard> {
                             if (widget.theater.distanceDisplay != null)
                               Text(
                                 ' à ${widget.theater.distanceDisplay!}',
-                                style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.black54),
+                                style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Theme.of(context).textTheme.bodyText2?.color?.withOpacity(0.5)),
                               ),
                           ],
                         ),
