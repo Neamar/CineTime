@@ -55,7 +55,7 @@ extension ExtendedBuildContext on BuildContext {
   void clearFocus2() => FocusScope.of(this).requestFocus(FocusNode());
 
   /// Validate the enclosing [Form]
-  Future<void> validateForm({VoidCallback? onSuccess}) async {
+  void validateForm({VoidCallback? onSuccess}) {
     clearFocus();
     final form = Form.of(this);
     if (form == null) return;

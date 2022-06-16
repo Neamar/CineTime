@@ -3,10 +3,8 @@ import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
-import 'package:cinetime/utils/exceptions/permission_exception.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart' as geo;
 
 import 'theaters_page.dart';
 

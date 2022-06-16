@@ -297,7 +297,7 @@ class _FilterSortData {
 class MoviesPageBloc with Disposable {
   MoviesPageBloc() {
     // Initial fetch, after widget is initialised
-    WidgetsBinding.instance!.addPostFrameCallback((_) => refresh());
+    WidgetsBinding.instance.addPostFrameCallback((_) => refresh());
 
     // Refresh on sort change
     sortType.skip(1).listen((value) {

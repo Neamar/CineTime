@@ -1,7 +1,6 @@
 import 'package:chewie/chewie.dart';
 import 'package:cinetime/models/api_id.dart';
 import 'package:cinetime/services/app_service.dart';
-import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
