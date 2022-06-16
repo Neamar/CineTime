@@ -112,17 +112,11 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                               hintText: 'Filtrer par titre, acteurs, ...',
                               iconColor: Colors.white,
                               prefixIcon: IconButton(
-                                icon: const Icon(
-                                  Icons.arrow_back,
-                                  color: Colors.white,
-                                ),
+                                icon: const Icon(Icons.arrow_back),
                                 onPressed: _cancelSearch,
                               ),
                               suffixIcon: IconButton(
-                                icon: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                ),
+                                icon: const Icon(Icons.close),
                                 onPressed: bloc.searchController.clear,
                               ),
                             ),

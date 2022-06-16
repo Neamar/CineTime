@@ -10,6 +10,9 @@ ThemeData appTheme({bool darkMode = false}) {
     primarySwatch: _createMaterialColor(AppResources.colorRed),
     scaffoldBackgroundColor: backgroundColor,
     canvasColor: backgroundLightColor,
+    iconTheme: IconThemeData(
+      color: foregroundColor,
+    ),
     textSelectionTheme: const TextSelectionThemeData(
       cursorColor: Colors.white,
       selectionColor: AppResources.colorLightRed,
@@ -40,6 +43,7 @@ ThemeData appTheme({bool darkMode = false}) {
     ),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: theme.textTheme.bodyText2?.copyWith(color: AppResources.colorDarkRed),
+      iconColor: Colors.white,
       enabledBorder: const OutlineInputBorder(
         borderRadius: AppResources.borderRadiusMedium,
         borderSide: BorderSide(
