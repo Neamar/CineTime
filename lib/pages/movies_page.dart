@@ -36,12 +36,14 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
       },
       child: ClearFocusBackground(
         child: Scaffold(    // Needed for background color
+          resizeToAvoidBottomInset: false,
           body: FetchBuilder.basic<MoviesShowTimes>(
             controller: bloc.fetchController,
             fetchAtInit: false,
             task: bloc.fetch,
             builder: (context, moviesShowtimesData) {
               return Scaffold(
+                resizeToAvoidBottomInset: false,
                 appBar: PreferredSize(
                   preferredSize: const Size.fromHeight(kToolbarHeight),
                   child: BehaviorSubjectBuilder<bool>(
@@ -247,18 +249,24 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: filteredMoviesShowTimes.length,
-      itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
-      padding: EdgeInsets.zero,
-      itemBuilder: (context, index) {
-        final movieShowTimes = filteredMoviesShowTimes[index];
-        return MovieCard(
-          key: ObjectKey(movieShowTimes),
-          movieShowTimes: movieShowTimes,
-          showTheaterName: widget.showTheaterName,
-        );
-      },
+    if (filteredMoviesShowTimes.isEmpty)
+      return EmptySearchResultMessage.noResult;
+
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: ListView.builder(
+        itemCount: filteredMoviesShowTimes.length,
+        itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
+        padding: EdgeInsets.zero,
+        itemBuilder: (context, index) {
+          final movieShowTimes = filteredMoviesShowTimes[index];
+          return MovieCard(
+            key: ObjectKey(movieShowTimes),
+            movieShowTimes: movieShowTimes,
+            showTheaterName: widget.showTheaterName,
+          );
+        },
+      ),
     );
   }
 
