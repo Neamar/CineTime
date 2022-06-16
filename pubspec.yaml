@@ -34,7 +34,7 @@ dependencies:
   device_info_plus: ^3.2.4
   sentry_flutter: ^6.5.1
   url_launcher: 6.0.20  # Next version has breaking changes
-  share_plus: 3.1.0     # Next version requires minSdkVersion 23
+  share_plus: ^4.0.8
   geolocator: ^8.2.1
   add_2_calendar: ^2.1.3
 
