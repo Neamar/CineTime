@@ -56,6 +56,7 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
     _videoPlayerController = VideoPlayerController.network(widget.videoUrl);
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
+      showOptions: false,
       autoInitialize: true,
       autoPlay: true,
       errorBuilder: (_, error) => _buildError(error),
