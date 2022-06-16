@@ -50,7 +50,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
           builder: (context, searchResult) {
             // No data
             if (searchResult.theaters == null)
-              return const _NoResultMessage(
+              return const EmptySearchResultMessage(
                 icon: CineTimeIcons.search,
                 message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
                 backgroundColor: AppResources.colorDarkRed,
@@ -59,12 +59,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
 
             // Empty list
             if (searchResult.theaters!.isEmpty)
-              return const _NoResultMessage(
-                icon: IconMessage.iconSad,
-                message: 'Aucun\nRÉSULTAT',
-                backgroundColor: AppResources.colorDarkBlue,
-                imageAssetPath: 'assets/empty.png',
-              );
+              return EmptySearchResultMessage.noResult;
 
             return Scaffold(
               resizeToAvoidBottomInset: true,
@@ -84,56 +79,6 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-class _NoResultMessage extends StatelessWidget {
-  const _NoResultMessage({Key? key,
-    required this.icon,
-    required this.message,
-    required this.backgroundColor,
-    required this.imageAssetPath,
-  }) : super(key: key);
-
-  final IconData icon;
-  final String message;
-  final Color backgroundColor;
-  final String imageAssetPath;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final lines = message.split('\n');
-    return Container(
-      color: backgroundColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  color: AppResources.colorGrey,
-                  size: 50,
-                ),
-                AppResources.spacerLarge,
-                for(int i = 0; i < lines.length; i++)
-                  Text(
-                    lines[i],
-                    textAlign: TextAlign.center,
-                    style: (i.isOdd ? textTheme.headline5 : textTheme.headline6)?.copyWith(color: AppResources.colorGrey),
-                  ),
-              ],
-            ),
-          ),
-
-          // Image
-          Image.asset(imageAssetPath),
-        ],
       ),
     );
   }

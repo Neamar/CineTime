@@ -201,9 +201,7 @@ class _ErrorWidget extends StatelessWidget {
             // Retry
             if (isDense)...[
               AppResources.spacerTiny,
-              const Icon(
-                Icons.refresh,
-              ),
+              const Icon(Icons.refresh),
             ]
             else
               TextButton(

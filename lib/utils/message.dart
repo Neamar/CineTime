@@ -26,7 +26,7 @@ Future<void> showMessage(BuildContext context, String message, {bool? isError, O
 
       return Flash(
         controller: controller,
-        backgroundColor: isError! ? Colors.orange : Colors.white,
+        backgroundColor: isError! ? Colors.orange : Theme.of(context).canvasColor,
         margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
         position: FlashPosition.top,
         behavior: FlashBehavior.floating,
