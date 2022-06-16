@@ -1,8 +1,17 @@
 import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
 
-class NoResultMessage extends StatelessWidget {
-  const NoResultMessage({Key? key,
+import 'icon_message.dart';
+
+class EmptySearchResultMessage extends StatelessWidget {
+  static const noResult = EmptySearchResultMessage(
+    icon: IconMessage.iconSad,
+    message: 'Aucun\nRÉSULTAT',
+    backgroundColor: AppResources.colorDarkBlue,
+    imageAssetPath: 'assets/empty.png',
+  );
+
+  const EmptySearchResultMessage({Key? key,
     required this.icon,
     required this.message,
     required this.backgroundColor,

@@ -50,7 +50,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
           builder: (context, searchResult) {
             // No data
             if (searchResult.theaters == null)
-              return const NoResultMessage(
+              return const EmptySearchResultMessage(
                 icon: CineTimeIcons.search,
                 message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
                 backgroundColor: AppResources.colorDarkRed,
@@ -59,12 +59,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
 
             // Empty list
             if (searchResult.theaters!.isEmpty)
-              return const NoResultMessage(
-                icon: IconMessage.iconSad,
-                message: 'Aucun\nRÉSULTAT',
-                backgroundColor: AppResources.colorDarkBlue,
-                imageAssetPath: 'assets/empty.png',
-              );
+              return EmptySearchResultMessage.noResult;
 
             return Scaffold(
               resizeToAvoidBottomInset: true,

@@ -11,4 +11,4 @@ export 'tiny_chip.dart';
 export 'scaling_header.dart';
 export 'smooth_star_rating.dart';
 export 'clear_focus_background.dart';
-export 'no_result_message.dart';
+export 'empty_search_result_message.dart';
