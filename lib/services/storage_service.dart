@@ -5,14 +5,17 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
+  //#region Init
+  static late SharedPreferences _storage;
+
+  static Future<void> init() async => _storage = await SharedPreferences.getInstance();
+  //#endregion
+
+  //#region Theaters
   static const _selectedTheatersKey = 'selectedTheaters';
   static const _favoriteTheatersKey = 'favoriteTheaters';
   static String _theatersKey(String theaterId) => 'theater:$theaterId';
   static const _listSeparator = '|';
-
-  static late SharedPreferences _storage;
-
-  static Future<void> init() async => _storage = await SharedPreferences.getInstance();
 
   static Future<void> saveSelectedTheaters(Iterable<Theater> theaters) => _saveTheaters(_selectedTheatersKey, theaters);
   static List<Theater> readSelectedTheaters() => _readTheaters(_selectedTheatersKey);
@@ -67,4 +70,5 @@ class StorageService {
       return null;
     }
   }
+  //#endregion
 }
