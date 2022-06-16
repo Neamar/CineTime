@@ -42,6 +42,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
             title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
               path: widget.movieShowTimes.movie.poster,
+              placeHolderBackground: true,
               onPressed: _openPoster,
               isThumbnail: false,
               applyDarken: true,

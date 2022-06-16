@@ -19,9 +19,10 @@ class CtCachedImage extends StatelessWidget {
   final String? path;
   final bool isThumbnail;
   final bool applyDarken;   //TODO find better name
+  final bool placeHolderBackground;
   final VoidCallback? onPressed;
 
-  const CtCachedImage({Key? key, this.path, this.isThumbnail = false, this.applyDarken = false, this.onPressed}) : super(key: key);
+  const CtCachedImage({Key? key, this.path, this.isThumbnail = false, this.applyDarken = false, this.placeHolderBackground = false, this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,10 @@ class CtCachedImage extends StatelessWidget {
           colorBlendMode: BlendMode.srcATop,
         ),
       ),
-      placeholder: (_, url) => CtProgressIndicator(),
+      placeholder: (_, url) => Container(
+        color: placeHolderBackground ? AppResources.colorGrey : null,
+        child: CtProgressIndicator(),
+      ),
       errorWidget: (_, url, error) => errorWidget,
     );
   }
