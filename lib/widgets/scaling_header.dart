@@ -97,6 +97,9 @@ class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProvider
   void initState() {
     super.initState();
 
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _animationController.addListener(() => setState(() {}));
+
     expandedHeight = widget.flexibleSpaceHeight + widget.overlapContentHeight / 2;
 
     _shrinkOffsetNotifier.addListener(() {
@@ -109,9 +112,6 @@ class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProvider
         _animationController.reverse();
       }
     });
-
-    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _animationController.addListener(() => setState(() {}));
   }
 
   @override

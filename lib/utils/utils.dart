@@ -115,13 +115,14 @@ Future<void> showError(BuildContext context, Object error) async {
 
 /// Report error to Crashlytics
 Future<void> reportError(Object exception, StackTrace stack, {dynamic reason}) async {
-  if (!shouldReportException(exception)) return;
-
-  if (exception is DetailedException)
-    exception = exception.toStringVerbose();
-
-  // Report to Sentry;
-  Sentry.captureException(exception, stackTrace: stack, hint: reason);
+  if (shouldReportException(exception)) {
+    // Report to Sentry;
+    if (exception is DetailedException) exception = exception.toStringVerbose();
+    Sentry.captureException(exception, stackTrace: stack, hint: reason);
+  } else {
+    // Just log
+    debugPrint('Unreported error thrown: $exception');
+  }
 }
 
 /// Indicate whether this exception should be reported
