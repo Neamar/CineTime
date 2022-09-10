@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
@@ -79,7 +79,7 @@ class TheaterShowTimes {
   String? get showTimesSummary {
     // Compute & cache value
     _showTimesSummary ??= () {
-      final today = ApiClient.mockedNow.toDate;
+      final today = AppService.now.toDate;
       final nextWednesday = today.getNextWednesday();
 
       // Get all date with a show, from [now], without duplicates, sorted.

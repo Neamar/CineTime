@@ -497,7 +497,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
                 day: dayShowTimes.date,
                 showtimes: dayShowTimes.showTimes,
                 backgroundColor: () {
-                  if (dayShowTimes.date == ApiClient.mockedNow.toDate) return AppResources.colorLightRed;
+                  if (dayShowTimes.date == AppService.now.toDate) return AppResources.colorLightRed;
                   if (index.isEven) return Theme.of(context).scaffoldBackgroundColor;
                 } (),
                 onPressed: onShowtimePressed,

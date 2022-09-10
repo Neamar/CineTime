@@ -15,6 +15,9 @@ class AppService {
   final ApiClient apiClient = ApiClient();
   static ApiClient get api => instance.apiClient;
 
+  /// Mockable [DateTime.now()], to be consistent with mocked data
+  static DateTime get now => ApiClient.useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
+
   AppService()
       : _selectedTheaters = StorageService.readSelectedTheaters().toSet(),
         _favoriteTheaters = StorageService.readFavoriteTheaters().toSet();
