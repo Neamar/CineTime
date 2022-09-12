@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
@@ -14,7 +14,7 @@ class MoviesShowTimes {
 
   String get periodDisplay {
     var fetchedTo = this.fetchedTo;
-    if(fetchedTo == fetchedTo.toDate) fetchedTo = fetchedTo.subtract(const Duration(minutes: 5));
+    if(fetchedTo == fetchedTo.toDate) fetchedTo = fetchedTo.subtract(const Duration(minutes: 5));   // If [fetchedTo] is midnight, means it's excluded
     return 'Entre le ${fetchedFrom.day} et le ${fetchedTo.day}';
   }
 }
@@ -68,6 +68,19 @@ class TheaterShowTimes {
   /// Unfiltered list of showtimes, sorted by date
   final List<ShowTime> showTimes;
 
+
+  /// Simple cache for [daysWithShow]
+  List<Date>? _daysWithShow;
+
+  /// Get all date with a show, without duplicates, sorted.
+  List<Date> get daysWithShow {
+    return _daysWithShow ??= showTimes
+        .map((s) => s.dateTime.toDate)
+        .toSet()
+        .toList(growable: false)
+      ..sort();
+  }
+
   /// Simple cache for [showTimesSummary]
   String? _showTimesSummary;
 
@@ -79,15 +92,8 @@ class TheaterShowTimes {
   String? get showTimesSummary {
     // Compute & cache value
     _showTimesSummary ??= () {
-      final today = ApiClient.mockedNow.toDate;
+      final today = AppService.now.toDate;
       final nextWednesday = today.getNextWednesday();
-
-      // Get all date with a show, from [now], without duplicates, sorted.
-      final daysWithShow = showTimes
-          .map((s) => s.dateTime.toDate)
-          .toSet()
-          .toList(growable: false)
-        ..sort();
 
       // If there are no date before next wednesday
       if (daysWithShow.first.isAfterOrSame(nextWednesday))

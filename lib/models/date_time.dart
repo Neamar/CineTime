@@ -20,6 +20,9 @@ class Date extends DateTime {
   @override
   int get microsecond => throw _unsupportedError;
 
+  /// Adds a number of days to the date.
+  Date addDays(int days) => Date(year, month, day + days);
+
   @override
   String toString() => '${day.toTwoDigitsString()}-${month.toTwoDigitsString()}-$year';
 

@@ -13,6 +13,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
+import 'app_service.dart';
+
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
 
@@ -121,8 +123,8 @@ class ApiClient {
 
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = true }) async {
     // Prepare period
-    final from = mockedNow.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
-    final to = from.add(const Duration(days: 8));
+    final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
+    final to = from.add(const Duration(days: 8));     // Fetch next 7 days (seventh included)
 
     // Build movieShowTimes list
     final moviesShowTimesMap = <Movie, MovieShowTimes>{};
@@ -151,7 +153,7 @@ class ApiClient {
             'id': theater.id.encodedId,
             'from': _dateToString(from),
             'to': _dateToString(to),
-            'count': 50,
+            'count': 50,      // Max is 55 with default query
             'hasPreview': false,
             'order': [
               'PREVIEW',
@@ -211,7 +213,7 @@ class ApiClient {
         }).toList();
 
         // Filter passed shows
-        showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(mockedNow));
+        showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(AppService.now));
 
         // Skip this movie if there are no valid show time
         if (showTimes.isEmpty) continue;

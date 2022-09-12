@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/movie_page.dart';
 import 'package:cinetime/resources/_resources.dart';
-import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +20,7 @@ class MovieCard extends StatelessWidget {
     // Display release year if movie is more than 6 month old
     final releaseDate = movieShowTimes.movie.releaseDate;
     int? releaseYear;
-    if (releaseDate != null && ApiClient.mockedNow.difference(releaseDate) > const Duration(days: 6 * 30))
+    if (releaseDate != null && AppService.now.difference(releaseDate) > const Duration(days: 6 * 30))
       releaseYear = releaseDate.year;
 
     return Card(
