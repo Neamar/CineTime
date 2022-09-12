@@ -54,51 +54,51 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 
                       // Normal AppBar
                       if (!isSearchVisible) {
-                        return AppBar(
-                          title: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Theater info
-                              () {
-                                final theaters = moviesShowtimesData.theaters;
-                                final theatersCount = theaters.length;
-                                return Text(
+                        return BehaviorSubjectBuilder<Date?>(
+                          subject: bloc.dayFilter,
+                          builder: (context, snapshot) {
+                            final dayFilter = snapshot.data;
+                            return AppBar(
+                              title: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Theater info
                                   () {
-                                    if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                                    if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
-                                    return 'Films dans $theatersCount cinémas';
-                                  }(),
-                                  style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                );
-                              } (),
+                                    final theaters = moviesShowtimesData.theaters;
+                                    final theatersCount = theaters.length;
+                                    return Text(
+                                      () {
+                                        if (theatersCount == 0) return 'Aucun cinéma sélectionné';
+                                        if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
+                                        return 'Films dans $theatersCount cinémas';
+                                      }(),
+                                      style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    );
+                                  } (),
 
-                              // Period
-                              AppResources.spacerTiny,
-                              Text(
-                                moviesShowtimesData.periodDisplay,
-                                style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorGrey),
+                                  // Period
+                                  AppResources.spacerTiny,
+                                  Text(
+                                    dayFilter != null ? 'Le ${dayFilter.toDayString()}' : moviesShowtimesData.periodDisplay,
+                                    style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorGrey),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          actions: [
-                            IconButton(
-                              icon: const Icon(CineTimeIcons.pencil),
-                              onPressed: _goToTheatersPage,
-                            ),
-                            IconButton(
-                              icon: const Icon(CineTimeIcons.search),
-                              onPressed: () => bloc.isSearchVisible.add(true),
-                            ),
-                            BehaviorSubjectBuilder<MovieSortType>(
-                              subject: bloc.sortType,
-                              builder: (context, snapshot) {
-                                final sortType = snapshot.data!;
-                                return BehaviorSubjectBuilder<Date?>(
-                                  subject: bloc.dayFilter,
+                              actions: [
+                                IconButton(
+                                  icon: const Icon(CineTimeIcons.pencil),
+                                  onPressed: _goToTheatersPage,
+                                ),
+                                IconButton(
+                                  icon: const Icon(CineTimeIcons.search),
+                                  onPressed: () => bloc.isSearchVisible.add(true),
+                                ),
+                                BehaviorSubjectBuilder<MovieSortType>(
+                                  subject: bloc.sortType,
                                   builder: (context, snapshot) {
-                                    final dayFilter = snapshot.data;
+                                    final sortType = snapshot.data!;
                                     return _SortButton(
                                       sortValue: sortType,
                                       onSortChanged: bloc.sortType.addDistinct,
@@ -108,10 +108,10 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                       onDayFilterChanged: bloc.dayFilter.addDistinct,
                                     );
                                   },
-                                );
-                              },
-                            ),
-                          ],
+                                ),
+                              ],
+                            );
+                          },
                         );
                       }
 
@@ -264,7 +264,7 @@ class _SortButton extends StatelessWidget {
               return PopupMenuItem<Date>(
                 value: day,
                 textStyle: buildTextStyle(day == dayFilterValue),
-                child: Text(day.toDayString()),
+                child: Text(day.toDayString().capitalized),
               );
             });
           } (),

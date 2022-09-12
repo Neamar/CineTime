@@ -59,5 +59,5 @@ class AppResources {
 }
 
 extension ExtendedDateTime on DateTime {
-  String toDayString() => AppResources._formatterDay.format(this).capitalized;
+  String toDayString() => AppResources._formatterDay.format(this);
 }
