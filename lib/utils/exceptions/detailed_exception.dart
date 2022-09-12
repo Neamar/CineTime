@@ -1,18 +1,14 @@
-class DetailedException implements Exception {
-  // Technical message
-  final String message;
+import 'displayable_exception.dart';
 
-  // Technical details (only exported in toStringVerbose())
+class DetailedException extends DisplayableException {
+  const DetailedException(String message, { this.details }) : super(message);
+
   final Object? details;
 
-  const DetailedException(this.message, {this.details});
-
-  @override
-  String toString() => message;
-
   /// Output maximum technical details. Usually for error reporting.
-  String toStringVerbose() {
-    final detailsString = ((details is DetailedException) ? (details as DetailedException).toStringVerbose() : details?.toString());
-    return toString() + (detailsString?.isNotEmpty == true ? '\n$detailsString' : '');
+  @override
+  String toString() {
+    final detailsString = details?.toString();
+    return message + (detailsString?.isNotEmpty == true ? '\n$detailsString' : '');
   }
 }

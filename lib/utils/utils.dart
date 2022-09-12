@@ -80,36 +80,37 @@ void popToRoot(BuildContext context) => Navigator.of(context).popUntil((route) =
 
 /// Display an error to the user
 Future<void> showError(BuildContext context, Object error) async {
-  // Cancellation
-  if (error is OperationCanceledException) {
-    if (!error.silent) {
-      showMessage(context, 'Opération annulée', isError: true);
+  final message = () {
+    // Cancellation
+    if (error is OperationCanceledException) {
+      if (!error.silent) {
+        return 'Opération annulée';
+      }
     }
-  }
 
-  // Permission
-  else if (error is PermissionDeniedException) {
-    showMessage(context, 'Permission requise', isError: true);
-  }
+    // Permission
+    else if (error is PermissionDeniedException) {
+      return 'Permission requise';
+    }
 
-  // Bad connectivity
-  else if (error is ConnectivityException) {
-    showMessage(context, 'Vérifiez votre connexion internet', isError: true);
-  }
+    // Bad connectivity
+    else if (error is ConnectivityException) {
+      return 'Vérifiez votre connexion internet';
+    }
 
-  // Server error
-  else if (error is HttpResponseException) {
-    showMessage(context, 'Erreur serveur', exception: error);
-  }
+    // Displayable exception
+    else if (error is DisplayableException) {
+      return error.message;
+    }
 
-  // Displayable exception
-  else if (error is DisplayableException) {
-    showMessage(context, error.toString(), isError: true);
-  }
+    // Other
+    else {
+      return 'Une erreur est survenue';
+    }
+  } ();
 
-  // Other
-  else {
-    showMessage(context, 'Une erreur est survenue', isError: true);
+  if (message != null) {
+    showMessage(context, message, isError: true);
   }
 }
 
@@ -117,7 +118,6 @@ Future<void> showError(BuildContext context, Object error) async {
 Future<void> reportError(Object exception, StackTrace stack, {dynamic reason}) async {
   if (shouldReportException(exception)) {
     // Report to Sentry;
-    if (exception is DetailedException) exception = exception.toStringVerbose();
     Sentry.captureException(exception, stackTrace: stack, hint: reason);
   } else {
     // Just log
@@ -130,8 +130,7 @@ bool shouldReportException(Object? exception) =>
     exception != null &&
     exception is! UnreportedException &&
     exception is! SocketException &&
-    exception is! TimeoutException &&
-    (exception is! HttpResponseException || exception.shouldBeReported);
+    exception is! TimeoutException;
 
 /// Get current user location, with low precision.
 Future<geo.Position> getCurrentLocation() async {

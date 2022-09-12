@@ -64,7 +64,7 @@ class ApiClient {
     if (useMocks) {
       responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/be59b0f453dcc6c4efbb8bb659a7d96b/raw/4074465c4602086d45fd5d5a42b0238152f15a56/theaters-search.json');
     } else {
-      query = Uri.encodeComponent(query);   // Encode query, so char like '?' are correctly encoded
+      query = Uri.encodeQueryComponent(query);   // Encode query, so char like '?' are correctly encoded
       responseJson = await _send<JsonObject>(_httpMethodGet, 'https://www.all' + 'ocine.fr/_/autocomplete/mobile/theater/$query');
     }
 
@@ -485,6 +485,16 @@ class ApiClient {
 
     // Process response - Success
     if (responseHandler.isSuccess) {
+      // Check for errors
+      // A GraphQL request may return a 200 HTTP status code with errors
+      if (responseHandler.isBodyJson) {
+        final processedResponse = responseHandler.bodyJsonOrNull<JsonObject>();
+        final errors = processedResponse?['errors'];
+        if (errors != null) {
+          throw HttpResponseException(response);
+        }
+      }
+
       // Store in cache
       if (cacheKey != null) {
         try {
@@ -518,12 +528,7 @@ class ApiClient {
 
     // Process response - Error
     else {
-      JsonObject? processedResponse;
-      if (responseHandler.isBodyJson) {
-        processedResponse = responseHandler.bodyJsonOrNull();
-      }
-
-      throw HttpResponseException(response, responseJson: processedResponse);
+      throw HttpResponseException(response);
     }
   }
 
@@ -637,26 +642,11 @@ class _ResponseHandler {
 }
 
 class HttpResponseException extends DetailedException {
-  HttpResponseException(this.response, { JsonObject? responseJson }) :
-    super(
-      _buildMessage(response, responseJson),
-      details: '[${response.request?.method}] ${response.request?.url}\n${response.body}',
-    );
-
-  HttpResponseException.fromRaw(int statusCode, String url, {String? message}) :
-    response = http.Response(message ?? '', statusCode),
-    super(
-      'Erreur $statusCode',
-      details: '$url\n$message',
-    );
+  HttpResponseException(this.response) : super(
+    'Erreur serveur',
+    details: '[${response.request?.method}] ${response.request?.url}\n${response.body}',
+  );
 
   final http.Response response;
   int get statusCode => response.statusCode;
-
-  bool get shouldBeReported => statusCode != 401;
-
-  static String _buildMessage(http.Response response, JsonObject? responseJson) {
-    final errorMessage = responseJson?['error'];    // May be a String, or a more complex json
-    return 'Erreur ${response.statusCode}' + (errorMessage != null && errorMessage is String ? ' : $errorMessage' : '');
-  }
 }
