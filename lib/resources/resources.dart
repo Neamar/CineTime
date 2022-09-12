@@ -1,3 +1,4 @@
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -33,6 +34,7 @@ class AppResources {
   // Formatter
   static final formatterFullDate = DateFormat('EEEE dd MMMM à HH:mm');
   static final formatterDate = DateFormat('dd MMMM yyyy');
+  static final _formatterDay = DateFormat('EEEE dd');
   static final formatterMonth = DateFormat('MMM');
 
   // Translation
@@ -54,4 +56,8 @@ class AppResources {
     DateTime.saturday: 'Sam',
     DateTime.sunday: 'Dim',
   };
+}
+
+extension ExtendedDateTime on DateTime {
+  String toDayString() => AppResources._formatterDay.format(this).capitalized;
 }

@@ -15,6 +15,13 @@ extension ExtendedString on String {
 
   String plural(int count) => '$count ${this}${count > 1 ? 's' : ''}';
 
+  /// Return the string with first character converted to capital (uppercase) letter
+  String get capitalized {
+    if (isEmpty) return '';
+    if (length == 1) return toUpperCase();
+    return this[0].toUpperCase() + substring(1);
+  }
+
   /// Normalize a string by removing diacritics and transform to lower case
   String get normalized => removeDiacritics(toLowerCase());
 
@@ -181,6 +188,9 @@ extension ExtendedDateTime on DateTime {
   }
 
   DateTime getNextWednesday() => getNextWeekdayDate(DateTime.wednesday);
+
+  /// Adds a number of days to the date.
+  DateTime addDays(int days) => DateTime(year, month, day + days);
 
   /// Return a Date (without the time part)
   Date get toDate => Date(year, month, day);

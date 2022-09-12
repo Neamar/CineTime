@@ -33,6 +33,10 @@ ThemeData appTheme({bool darkMode = false}) {
     popupMenuTheme: PopupMenuThemeData(
       color: backgroundLightColor,
     ),
+    dividerTheme: DividerThemeData(
+      color: foregroundColor,
+      thickness: 1,
+    ),
     toggleButtonsTheme: ToggleButtonsThemeData(
       borderColor: AppResources.colorGrey,
       selectedBorderColor: AppResources.colorGrey,

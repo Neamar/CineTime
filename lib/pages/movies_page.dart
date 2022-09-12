@@ -94,9 +94,20 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                             BehaviorSubjectBuilder<MovieSortType>(
                               subject: bloc.sortType,
                               builder: (context, snapshot) {
-                                return _SortButton(
-                                  value: snapshot.data!,
-                                  onChanged: bloc.sortType.addDistinct,
+                                final sortType = snapshot.data!;
+                                return BehaviorSubjectBuilder<Date?>(
+                                  subject: bloc.dayFilter,
+                                  builder: (context, snapshot) {
+                                    final dayFilter = snapshot.data;
+                                    return _SortButton(
+                                      sortValue: sortType,
+                                      onSortChanged: bloc.sortType.addDistinct,
+                                      dayFilterValue: dayFilter,
+                                      dayFilterFrom: moviesShowtimesData.fetchedFrom.toDate,
+                                      dayFilterTo: moviesShowtimesData.fetchedTo.toDate,
+                                      onDayFilterChanged: bloc.dayFilter.addDistinct,
+                                    );
+                                  },
                                 );
                               },
                             ),
@@ -140,13 +151,11 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                   return BehaviorSubjectBuilder<_FilterSortData>(
                     subject: bloc.filterSortData,
                     builder: (context, snapshot) {
-                      final filterSortData = snapshot.data!;
                       return _FilteredMovieListView(
                         key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
                         moviesShowTimes: moviesShowtimesData.moviesShowTimes,
                         showTheaterName: moviesShowtimesData.theaters.length > 1,
-                        sortType: filterSortData.sortType,
-                        filter: filterSortData.filter,
+                        filterSort: snapshot.data!,
                       );
                     },
                   );
@@ -180,25 +189,87 @@ class _SortButton extends StatelessWidget {
     MovieSortType.duration: 'Durée',
   };
 
-  const _SortButton({Key? key, required this.value, this.onChanged}) : super(key: key);
+  const _SortButton({
+    Key? key,
+    required this.sortValue,
+    required this.onSortChanged,
+    required this.dayFilterValue,
+    required this.dayFilterFrom,
+    required this.dayFilterTo,
+    required this.onDayFilterChanged,
+  }) : super(key: key);
 
-  final MovieSortType value;
-  final ValueChanged<MovieSortType>? onChanged;
+  /// Current sort value
+  final MovieSortType sortValue;
+
+  /// Called when sort method is tapped
+  final ValueChanged<MovieSortType> onSortChanged;
+
+
+  /// Current day filter value
+  final Date? dayFilterValue;
+
+  /// Date from which to display day filters
+  final Date dayFilterFrom;
+
+  /// Date to which to display day filters, excluded
+  final Date dayFilterTo;
+
+  /// Called when day filter is tapped
+  /// Pass a null value when tap on the current selection (for unselect behavior)
+  final ValueChanged<Date?> onDayFilterChanged;
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<MovieSortType>(
-      icon: const Icon(Icons.sort),
-      onSelected: onChanged,
-      itemBuilder: (context) => MovieSortType.values.map((value) {
-        return PopupMenuItem<MovieSortType>(
-          value: value,
-          textStyle: context.textTheme.subtitle1?.copyWith(color: this.value == value ? Theme.of(context).primaryColor : null),
-          child: Text(
-            _typesStrings[value]!,
-          ),
-        );
-      }).toList(growable: false),
+    return PopupMenuButton<Object>(
+      icon: const Icon(Icons.filter_list),
+      onSelected: (value) {
+        if (value is MovieSortType && value != sortValue) {
+          onSortChanged(value);
+        } else if (value is Date) {
+          // Unselected date if selected value is tapped
+          onDayFilterChanged(value == dayFilterValue ? null : value);
+        } else {
+          throw UnimplementedError('Unhandled type');
+        }
+      },
+      itemBuilder: (context) {
+        TextStyle? buildTextStyle(bool isSelected) {
+          return context.textTheme.subtitle1?.copyWith(color: isSelected ? Theme.of(context).primaryColor : null);
+        }
+
+        return [
+          // Sort
+          ...MovieSortType.values.map((value) {
+            return PopupMenuItem<MovieSortType>(
+              value: value,
+              textStyle: buildTextStyle(value == sortValue),
+              child: Text(_typesStrings[value]!),
+            );
+          }),
+
+          // Divider
+          const PopupMenuDivider(),
+
+          // Day filter
+          ...() {
+            final days = <Date>[];
+            var day = dayFilterFrom;
+            while (day.isBefore(dayFilterTo)) {
+              days.add(day);
+              day = day.addDays(1);
+            }
+
+            return days.map((day) {
+              return PopupMenuItem<Date>(
+                value: day,
+                textStyle: buildTextStyle(day == dayFilterValue),
+                child: Text(day.toDayString()),
+              );
+            });
+          } (),
+        ];
+      },
     );
   }
 }
@@ -208,14 +279,12 @@ class _FilteredMovieListView extends StatefulWidget {
     Key? key,
     required this.moviesShowTimes,
     required this.showTheaterName,
-    required this.sortType,
-    this.filter,
+    required this.filterSort,
   }) : super(key: key);
 
   final List<MovieShowTimes> moviesShowTimes;
   final bool showTheaterName;
-  final MovieSortType sortType;
-  final String? filter;
+  final _FilterSortData filterSort;
 
   @override
   _FilteredMovieListViewState createState() => _FilteredMovieListViewState();
@@ -232,13 +301,18 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
   }
 
   void applySort() {
-    filteredMoviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, widget.sortType));
+    filteredMoviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, widget.filterSort.sortType));
   }
 
   void applyFilter() {
     filteredMoviesShowTimes = () {
-      if (isStringNullOrEmpty(widget.filter)) return widget.moviesShowTimes;
-      return widget.moviesShowTimes.where((mst) => mst.movie.matchSearch(widget.filter!)).toList(growable: false);
+      final textFilter = widget.filterSort.textFilter;
+      final dayFilter = widget.filterSort.dayFilter;
+      if (textFilter.isEmpty && dayFilter == null) return widget.moviesShowTimes;
+      return widget.moviesShowTimes.where((mst) {
+        return (textFilter.isEmpty || mst.movie.matchSearch(textFilter))
+            && (dayFilter == null || mst.theatersShowTimes.any((tst) => tst.daysWithShow.contains(dayFilter)));
+      }).toList(growable: false);
     } ();
   }
 
@@ -268,30 +342,26 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
   @override
   void didUpdateWidget(covariant _FilteredMovieListView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    var hasChanged = false;
-    if (widget.filter != oldWidget.filter) {
+    if (widget.filterSort.dayFilter != oldWidget.filterSort.dayFilter || widget.filterSort.textFilter != oldWidget.filterSort.textFilter) {
       applyFilter();
-      hasChanged = true;
     }
-    if (widget.sortType != oldWidget.sortType) {
+    if (widget.filterSort.sortType != oldWidget.filterSort.sortType) {
       applySort();
-      hasChanged = true;
-    }
-    if (hasChanged) {
-      setState(() { });   // TODO check this line is really needed
     }
   }
 }
 
 class _FilterSortData {
-  const _FilterSortData({required this.sortType, this.filter});
+  const _FilterSortData({required this.sortType, this.dayFilter, this.textFilter = ''});
 
   final MovieSortType sortType;
-  final String? filter;
+  final Date? dayFilter;
+  final String textFilter;
 
-  _FilterSortData copyWith({MovieSortType? sortType, String? filter}) => _FilterSortData(
+  _FilterSortData copyWith({MovieSortType? sortType, ValueGetter<Date?>? dayFilter, String? textFilter}) => _FilterSortData(
     sortType: sortType ?? this.sortType,
-    filter: filter ?? filter,
+    dayFilter: dayFilter != null ? dayFilter() : this.dayFilter,      // ValueGetter needed to properly handle null values
+    textFilter: textFilter ?? this.textFilter,
   );
 }
 
@@ -315,8 +385,11 @@ class MoviesPageBloc with Disposable {
       });
     });
 
+    // Refresh on day filter change
+    dayFilter.listen((value) => filterSortData.add(filterSortData.value!.copyWith(dayFilter: () => value)));
+
     // Listen for search changes
-    searchController.addListener(() => filterSortData.add(filterSortData.value!.copyWith(filter: searchController.text)));
+    searchController.addListener(() => filterSortData.add(filterSortData.value!.copyWith(textFilter: searchController.text)));
 
     // Analytics
     isSearchVisible.listen((value) {
@@ -330,6 +403,7 @@ class MoviesPageBloc with Disposable {
   final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
 
   final sortType = BehaviorSubject.seeded(StorageService.readMovieSorting() ?? MovieSortType.rating);
+  final dayFilter = BehaviorSubject<Date?>();
   final isSearchVisible = BehaviorSubject.seeded(false);
   final searchController = TextEditingController();
   final filterSortData = BehaviorSubject<_FilterSortData>();
@@ -370,6 +444,7 @@ class MoviesPageBloc with Disposable {
   @override
   void dispose() {
     sortType.close();
+    dayFilter.close();
     isSearchVisible.close();
     searchController.dispose();
     filterSortData.close();
