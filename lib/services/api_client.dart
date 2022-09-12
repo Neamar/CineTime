@@ -153,7 +153,7 @@ class ApiClient {
             'id': theater.id.encodedId,
             'from': _dateToString(from),
             'to': _dateToString(to),
-            'count': 50,
+            'count': 50,      // Max is 55 with default query
             'hasPreview': false,
             'order': [
               'PREVIEW',
