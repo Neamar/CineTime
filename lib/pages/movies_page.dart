@@ -105,6 +105,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                       dayFilterValue: dayFilter,
                                       dayFilterFrom: moviesShowtimesData.fetchedFrom.toDate,
                                       dayFilterTo: moviesShowtimesData.fetchedTo.toDate,
+                                      daysWithShow: moviesShowtimesData.daysWithShow,
                                       onDayFilterChanged: bloc.dayFilter.addDistinct,
                                     );
                                   },
@@ -196,6 +197,7 @@ class _SortButton extends StatelessWidget {
     required this.dayFilterValue,
     required this.dayFilterFrom,
     required this.dayFilterTo,
+    required this.daysWithShow,
     required this.onDayFilterChanged,
   }) : super(key: key);
 
@@ -214,6 +216,9 @@ class _SortButton extends StatelessWidget {
 
   /// Date to which to display day filters, excluded
   final Date dayFilterTo;
+
+  /// Days where at least one show exists
+  final Set<Date> daysWithShow;
 
   /// Called when day filter is tapped
   /// Pass a null value when tap on the current selection (for unselect behavior)
@@ -234,8 +239,9 @@ class _SortButton extends StatelessWidget {
         }
       },
       itemBuilder: (context) {
-        TextStyle? buildTextStyle(bool isSelected) {
-          return context.textTheme.subtitle1?.copyWith(color: isSelected ? Theme.of(context).primaryColor : null);
+        final textStyle = context.textTheme.subtitle1;
+        TextStyle? buildTextStyle(bool isSelected, {Color? color}) {
+          return textStyle?.copyWith(color: isSelected ? Theme.of(context).primaryColor : color);
         }
 
         return [
@@ -263,7 +269,7 @@ class _SortButton extends StatelessWidget {
             return days.map((day) {
               return PopupMenuItem<Date>(
                 value: day,
-                textStyle: buildTextStyle(day == dayFilterValue),
+                textStyle: buildTextStyle(day == dayFilterValue, color: daysWithShow.contains(day) ? null : textStyle?.color?.withOpacity(0.5)),
                 child: Text(day.toDayString().capitalized),
               );
             });

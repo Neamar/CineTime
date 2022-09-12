@@ -17,6 +17,17 @@ class MoviesShowTimes {
     if(fetchedTo == fetchedTo.toDate) fetchedTo = fetchedTo.subtract(const Duration(minutes: 5));   // If [fetchedTo] is midnight, means it's excluded
     return 'Entre le ${fetchedFrom.day} et le ${fetchedTo.day}';
   }
+
+  /// All dates with at least a show, without duplicates.
+  Set<Date> get daysWithShow {
+    final daysWithShow = <Date>{};
+    for (final mst in moviesShowTimes) {
+      for (final tst in mst.theatersShowTimes) {
+        daysWithShow.addAll(tst.daysWithShow);
+      }
+    }
+    return daysWithShow;
+  }
 }
 
 class MovieShowTimes {
@@ -72,7 +83,7 @@ class TheaterShowTimes {
   /// Simple cache for [daysWithShow]
   List<Date>? _daysWithShow;
 
-  /// Get all date with a show, without duplicates, sorted.
+  /// All dates with at least a show, without duplicates, sorted.
   List<Date> get daysWithShow {
     return _daysWithShow ??= showTimes
         .map((s) => s.dateTime.toDate)
