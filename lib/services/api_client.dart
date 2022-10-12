@@ -240,8 +240,14 @@ class ApiClient {
         // Skip this movie if there are no valid show time
         if (showTimes.isEmpty) continue;
 
+        // Check movie info
+        final JsonObject? movieJson = movieShowTimesJson['movie'];
+        if (movieJson == null) {      // May happen in some extremely rare cases
+          reportError(UnsupportedError('Movie data is empty on theater "${theater.name}" for ${showTimes.length} showTimes (first is at ${showTimes.first.dateTime.toIso8601String()})'), StackTrace.current);
+          continue;
+        }
+
         // Build Movie info
-        final JsonObject movieJson = movieShowTimesJson['movie']!;
         final String movieId = movieJson['id'];
         var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.id.id == movieId);
 
