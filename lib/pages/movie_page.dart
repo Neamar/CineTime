@@ -33,6 +33,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
     const double overlapContentHeight = 50;
 
     final hasTrailer = widget.movieShowTimes.movie.trailerId != null;
+    final poster = widget.movieShowTimes.movie.poster;
 
     return Scaffold(
       body: CustomScrollView(
@@ -41,7 +42,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
             backgroundColor: Theme.of(context).primaryColor,
             title: Text(widget.movieShowTimes.movie.title),
             flexibleSpace: CtCachedImage(
-              path: widget.movieShowTimes.movie.poster,
+              path: poster,
               placeHolderBackground: true,
               onPressed: _openPoster,
               isThumbnail: false,
@@ -56,6 +57,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   TextButton(
+                    onPressed: hasTrailer ? _openTrailer : null,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -70,9 +72,9 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         )
                       ],
                     ),
-                    onPressed: hasTrailer ? _openTrailer : null,
                   ),
                   TextButton(
+                    onPressed: _openMovieDataSheetWebPage,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const <Widget>[
@@ -87,7 +89,6 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         )
                       ],
                     ),
-                    onPressed: _openMovieDataSheetWebPage,
                   )
                 ],
               ),
@@ -109,17 +110,23 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          SizedBox(
-                            height: 100,
-                            child: GestureDetector(
-                              onTap: _openPoster,
-                              child: HeroPoster(
-                                posterPath: widget.movieShowTimes.movie.poster,
-                                borderRadius: AppResources.borderRadiusTiny,
+
+                          // Poster
+                          if (poster != null)...[
+                            SizedBox(
+                              height: 100,
+                              child: GestureDetector(
+                                onTap: _openPoster,
+                                child: HeroPoster(
+                                  posterPath: poster,
+                                  borderRadius: AppResources.borderRadiusTiny,
+                                ),
                               ),
                             ),
-                          ),
-                          AppResources.spacerMedium,
+                            AppResources.spacerMedium,
+                          ],
+
+                          // Info
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -314,7 +321,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
     );
   }
 
-  void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster));
+  void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster!));
 
   void _openTrailer() {
     navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!));
