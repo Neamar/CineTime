@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:add_2_calendar/add_2_calendar.dart';
 
 class MoviePage extends StatefulWidget {
@@ -324,7 +324,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
   }
 
   void _openMovieDataSheetWebPage() {
-    launch(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id));
+    launchUrlString(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id));
     AnalyticsService.trackEvent('Movie datasheet webpage displayed', {
       'movieTitle': widget.movieShowTimes.movie.title,
     });
