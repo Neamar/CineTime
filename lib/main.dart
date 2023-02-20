@@ -41,7 +41,7 @@ Future<void> main() async {
   await SentryFlutter.init(
     (options) {
       options.dsn = 'https://f0a7dfef9b5249c7a57c355ac9d30856@o1038499.ingest.sentry.io/6006844';
-      options.debug = !kReleaseMode;
+      //options.debug = !kReleaseMode;    // Only needed for extended debugging. If enabled, will flood the console.
       options.environment = kReleaseMode ? 'release' : 'debug';
       options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
     },
