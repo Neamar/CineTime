@@ -383,7 +383,7 @@ class ApiClient {
   }
 
   /// Return the external url of the movie
-  static getMovieUrl(ApiId movieId) => 'http://www.all' + 'ocine.fr/film/fichefilm_gen_cfilm=${movieId.id}.html';
+  static String getMovieUrl(ApiId movieId) => 'https://www.all' + 'ocine.fr/film/fichefilm_gen_cfilm=${movieId.id}.html';
   //#endregion
 
   //#region Generics

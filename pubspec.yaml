@@ -33,7 +33,7 @@ dependencies:
   # Device
   device_info_plus: ^8.1.0
   sentry_flutter: ^6.20.1
-  url_launcher: 6.0.20  # Next version has breaking changes
+  url_launcher: ^6.1.9
   share_plus: ^6.3.1
   geolocator: ^9.0.2
   add_2_calendar: ^2.2.3
