@@ -27,7 +27,7 @@ dependencies:
   http: ^0.13.5
   connectivity_plus: ^3.0.3
   flutter_cache_manager: ^3.3.0
-  cached_network_image: 3.2.1  # Next version requires Dart >= 2.18
+  cached_network_image: ^3.2.3
   amplitude_flutter: ^3.13.0
 
   # Device
