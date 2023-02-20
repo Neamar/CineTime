@@ -7,7 +7,7 @@ import 'package:cinetime/widgets/corner_border.dart';
 import 'package:flutter/material.dart';
 
 class TheaterCard extends StatefulWidget {
-  static const height = 80.0;
+  static const height = 85.0;     // Allow 3 lines addresses to fit
 
   const TheaterCard({Key? key, required this.theater, this.multiSelectionMode = false, this.onLongPress}) : super(key: key);
 
@@ -76,15 +76,25 @@ class _TheaterCardState extends State<TheaterCard> {
                       children: <Widget>[
                         Row(
                           children: [
-                            Text(
-                              widget.theater.name,
-                              style: Theme.of(context).textTheme.subtitle1,
+                            // Theater name
+                            Flexible(
+                              child: Text(
+                                widget.theater.name,
+                                style: Theme.of(context).textTheme.subtitle1,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
+
+                            // Distance
                             if (widget.theater.distanceDisplay != null)
                               Text(
                                 ' à ${widget.theater.distanceDisplay!}',
                                 style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Theme.of(context).textTheme.bodyText2?.color?.withOpacity(0.5)),
                               ),
+
+                            // Spacer for favorite button
+                            const SizedBox(width: 35),
                           ],
                         ),
                         const Spacer(),
