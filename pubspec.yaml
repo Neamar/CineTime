@@ -16,25 +16,25 @@ dependencies:
   shared_preferences: ^2.1.1
 
   # Widgets / UI
-  flash: ^2.0.5+1
-  flutter_spinkit: ^5.1.0
-  shimmer: ^2.0.0
+  flash: ^2.0.5+1  # Next version has breaking changes, and we don't need new features
+  flutter_spinkit: ^5.2.0
+  shimmer: ^3.0.0
   fading_edge_scrollview: ^3.0.0
   photo_view: ^0.14.0
   chewie: ^1.5.0
 
   # Web
-  http: ^0.13.6
-  connectivity_plus: ^3.0.6
+  http: ^0.13.6  # Next version requires flutter_cache_manager > 3.3.0
+  connectivity_plus: ^3.0.6  # Next version requires minSdkVersion >= 19
   flutter_cache_manager: ^3.3.0
   cached_network_image: ^3.2.3
   amplitude_flutter: ^3.14.0
 
   # Device
-  device_info_plus: ^8.2.2
-  sentry_flutter: ^6.22.0
+  device_info_plus: ^8.2.2  # Next version requires minSdkVersion >= 19
+  sentry_flutter: ^6.22.0 # Next version has breaking changes
   url_launcher: ^6.1.11
-  share_plus: ^6.3.4
+  share_plus: ^6.3.4  # Next version requires minSdkVersion >= 19
   geolocator: ^9.0.2
   add_2_calendar: ^2.2.3
 
