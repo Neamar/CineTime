@@ -6,7 +6,7 @@ import 'package:photo_view/photo_view.dart';
 class PosterPage extends StatelessWidget {
   const PosterPage(this.posterPath);
 
-  final String? posterPath;
+  final String posterPath;
 
   @override
   Widget build(BuildContext context) {
