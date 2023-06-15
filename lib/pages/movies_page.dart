@@ -229,8 +229,9 @@ class _SortButton extends StatelessWidget {
     return PopupMenuButton<Object>(
       icon: const Icon(Icons.filter_list),
       onSelected: (value) {
-        if (value is MovieSortType && value != sortValue) {
-          onSortChanged(value);
+        if (value is MovieSortType) {
+          // Ignore if same value
+          if (value != sortValue) onSortChanged(value);
         } else if (value is Date) {
           // Unselected date if selected value is tapped
           onDayFilterChanged(value == dayFilterValue ? null : value);

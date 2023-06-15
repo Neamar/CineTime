@@ -172,10 +172,6 @@ bool isTypeNullable<T>() => null is T;
 DateTime? dateFromString(String? dateString) => DateTime.tryParse(dateString ?? '');
 String? dateToString(DateTime? date) => date?.toIso8601String();
 
-/// Use this on [JsonKey.toJson] to ignore serialisation for this field
-/// @JsonKey(toJson: toEmptyJsonValue)
-String? toEmptyJsonValue<T>(T? value) => null;
-
 String convertBasicHtmlTags(String htmlText) {
   // Replace all double line break with single line break
   htmlText = htmlText.replaceAll('<br><br>', '\n');
