@@ -12,6 +12,13 @@ class StorageService {
   //#endregion
 
   //#region Last movie sorting
+  static const _authTokenKey = 'authToken';
+
+  static Future<void> saveAuthToken(String value) => _storage.setString(_authTokenKey, value);
+  static String? readAuthToken() => _storage.getString(_authTokenKey);
+  //#endregion
+
+  //#region Last movie sorting
   static const _movieSortingKey = 'movieSorting';
 
   static Future<void> saveMovieSorting(MovieSortType value) => _storage.setString(_movieSortingKey, value.name);

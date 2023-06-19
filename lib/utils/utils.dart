@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:cinetime/services/api_client.dart';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -190,4 +190,10 @@ String convertBasicHtmlTags(String htmlText) {
   );
 
   return htmlText.replaceAll(exp, '');
+}
+
+String generateRandomString(int length){
+  final random = Random();
+  const allChars='AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789';
+  return List.generate(length, (index) => allChars[random.nextInt(allChars.length)]).join();
 }
