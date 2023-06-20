@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/connectivity_exception.dart';
 import 'package:cinetime/utils/exceptions/detailed_exception.dart';
@@ -408,11 +409,49 @@ class ApiClient {
     }
   }
 
+  /// Basic authToken cached value
+  String? _authToken;
+
+  /// Get an auth token for GraphQL request.
+  /// Usually one per device.
+  Future<String> _getAuthToken() async {
+    // Is value cached ?
+    if (_authToken == null) {
+      // Read from local storage
+      var authToken = StorageService.readAuthToken();
+
+      // Ask for a auth token
+      if (authToken == null) {
+        // Build request
+        const headers = {
+          HttpHeaders.authorizationHeader: 'Ai' + 'dLogin 397273683' + '5735734666:8224063640' + '337276342',
+          HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded',
+          HttpHeaders.userAgentHeader: 'com.google.android.gms/225014047',
+        };
+
+        const projectNumber = '84854' + '8993493';
+        final appId = generateRandomString(11);
+        final body = 'X-subtype=$projectNumber&X-X-subscription=$projectNumber&sender=$projectNumber&X-X-subtype=$projectNumber&X-app_ver=435&X-osv=31&X-cliv=iid-12451000&X-gmsv=225014047&X-appid=$appId&X-scope=GRAPH&X-subscription=$projectNumber&X-app_ver_name=9.0.2&app=com.all' + 'ocine.androidapp&device=39727368' + '35735734666&app_ver=435&info=o2hWMhjDAzwYQKri5' + '41rkWWFnLJYgRg&gcm_ver=225014047&plat=0&cert=b708782e3014076a7' + '8bdd85b60f77fa797f7a021&target_ver=33';
+
+        // Send request
+        final response = await _send<String>(_httpMethodPost, 'https://android.apis.google.com/c2dm/regi' + 'ster3', headers: headers, stringBody: body, useCache: false);
+
+        // Parse value
+        authToken = response.substring(6);    // Remove var name
+
+        // Save value
+        unawaited(StorageService.saveAuthToken(authToken));
+      }
+      _authToken = authToken;
+    }
+    return _authToken!;
+  }
+
   /// Send a graphQL request
   Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true}) async {
     // Headers
-    const headers = {
-      'ac-auth-token': 'e7p_n82YjsI:APA91bHfqF' + 'hmpfs6wAi7Pdgu0jdZj45ZB3pAzo746fDjP1Irnsvsiruut7Y5m9NC4vIUw3T5S2i81qDsgWHrCtT' + 'Vad3mwo1RhtghjC6qvM0QXCamYGcDR9hy4jsEm82SxUAxteTFW5p1',
+    final headers = {
+      'ac-auth-token': await _getAuthToken(),
       'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciO' + 'iJSUzI1NiJ9.eyJpYXQiOjE2NzU0NDEwNTksImV4cCI6MTgzMzU4MDc5OSwidXNlcm5hbWUiOiJhbm9ueW1vdXMiLCJhcHBsaWNhdGlvbl9uYW1lIjoibW9iaWxlIiwidX' + 'VpZCI6ImJmMDQ3YjgzLWQ0MzktNGM0My1iYWQ4LTBhNTc3MzFkZGM4OCIsInNjb3BlIjpudWxsfQ.s-_yFAY2wLi0ggRE_GKjuoH4A1lPBaf9iVhbzqUu_ityjVMe4R' + 'UdQHwlXqedQv3cinnLszpwfMPDg78qrQEn2vfoWe6_Af_pj0WRJV3mhrf4EpTnBFy-7NZoXDLNDtobi99XRUJpG-89kreZXzBZbMuuirVyn0XwHgDk8Pnatdh6uLWiQHSxXz9qeXgNT-R1FOS0aNlS604oAvQ_PJa1CC6qmLFtmjOZUhWul' + 'yBSUos1rhrf3BvEHM4G0XME_ocr_79PIOKWP5c4PrW-8hydQRDQmu-OAaMldsRc9Rgy_8UAYSn4n-AqiUAa1Ckdjz3UpVbA75pJJ6HsbiMZBpNb4nVanaPisL0LuyqcMp0I49iIZbOF0szHK0wZMcVmCuU3ZLTHcQsDWhVhMpA2SdMV6-vR-Vgw86nGCJZ89KQ_-mnvBxI6fPPinzhaTsvspfcnoggJLcZjqV_bRzwB6wn4MjCbI1jEkTSng0ebPZSHXqNx6EHriQ7LEAoMKmckYVVuvKGaYkriemY6SWGSeNTDNn9QPnh4BKAIhitRN0Anxs6vE1IQYUBcpFm7GSxjGi2_wzEy6g5iobEn2MR80wIWLP9k932c' + '7mcE69NSD4y5iyFYIwcdxfBvsrVoPWoEWLdSkwXjsGBgtBv3MA6jRTkFUlZH90V' + 'xcIsNz0BEnH6G240',
       'host': 'graph.all' + 'ocine.fr',
     };
