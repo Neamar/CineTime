@@ -6,7 +6,7 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/connectivity_exception.dart';
-import 'package:cinetime/utils/exceptions/detailed_exception.dart';
+import 'package:cinetime/utils/exceptions/http_response_exception.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -706,14 +706,4 @@ class _ResponseHandler {
       debugPrint('ResponseHandler.Error : Could not decode json : $e : $bodyString');
     }
   }
-}
-
-class HttpResponseException extends DetailedException {
-  HttpResponseException(this.response) : super(
-    'Erreur serveur',
-    details: '[${response.request?.method}] ${response.request?.url}\n${response.body}',
-  );
-
-  final http.Response response;
-  int get statusCode => response.statusCode;
 }
