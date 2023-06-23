@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
+import 'package:cinetime/utils/exceptions/unauthorized_exception.dart';
 import 'package:cinetime/utils/exceptions/connectivity_exception.dart';
-import 'package:cinetime/utils/exceptions/detailed_exception.dart';
+import 'package:cinetime/utils/exceptions/http_response_exception.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -435,6 +437,7 @@ class ApiClient {
 
         // Send request
         final response = await _send<String>(_httpMethodPost, 'https://android.apis.google.com/c2dm/regi' + 'ster3', headers: headers, stringBody: body, useCache: false);
+        AnalyticsService.trackEvent('New auth token fetched');
 
         // Parse value
         authToken = response.substring(6);    // Remove var name
@@ -447,11 +450,18 @@ class ApiClient {
     return _authToken!;
   }
 
+  /// Delete all locally saved auth tokens
+  Future<void> clearAuthToken() async {
+    _authToken = null;
+    await StorageService.deleteAuthToken();
+  }
+
   /// Send a graphQL request
-  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true}) async {
+  /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true, bool enableAutoRetryOnUnauthorized = true }) async {
     // Headers
     final headers = {
-      'ac-auth-token': await _getAuthToken(),
+      'a' + 'c-auth-token': await _getAuthToken(),
       'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciO' + 'iJSUzI1NiJ9.eyJpYXQiOjE2NzU0NDEwNTksImV4cCI6MTgzMzU4MDc5OSwidXNlcm5hbWUiOiJhbm9ueW1vdXMiLCJhcHBsaWNhdGlvbl9uYW1lIjoibW9iaWxlIiwidX' + 'VpZCI6ImJmMDQ3YjgzLWQ0MzktNGM0My1iYWQ4LTBhNTc3MzFkZGM4OCIsInNjb3BlIjpudWxsfQ.s-_yFAY2wLi0ggRE_GKjuoH4A1lPBaf9iVhbzqUu_ityjVMe4R' + 'UdQHwlXqedQv3cinnLszpwfMPDg78qrQEn2vfoWe6_Af_pj0WRJV3mhrf4EpTnBFy-7NZoXDLNDtobi99XRUJpG-89kreZXzBZbMuuirVyn0XwHgDk8Pnatdh6uLWiQHSxXz9qeXgNT-R1FOS0aNlS604oAvQ_PJa1CC6qmLFtmjOZUhWul' + 'yBSUos1rhrf3BvEHM4G0XME_ocr_79PIOKWP5c4PrW-8hydQRDQmu-OAaMldsRc9Rgy_8UAYSn4n-AqiUAa1Ckdjz3UpVbA75pJJ6HsbiMZBpNb4nVanaPisL0LuyqcMp0I49iIZbOF0szHK0wZMcVmCuU3ZLTHcQsDWhVhMpA2SdMV6-vR-Vgw86nGCJZ89KQ_-mnvBxI6fPPinzhaTsvspfcnoggJLcZjqV_bRzwB6wn4MjCbI1jEkTSng0ebPZSHXqNx6EHriQ7LEAoMKmckYVVuvKGaYkriemY6SWGSeNTDNn9QPnh4BKAIhitRN0Anxs6vE1IQYUBcpFm7GSxjGi2_wzEy6g5iobEn2MR80wIWLP9k932c' + '7mcE69NSD4y5iyFYIwcdxfBvsrVoPWoEWLdSkwXjsGBgtBv3MA6jRTkFUlZH90V' + 'xcIsNz0BEnH6G240',
       'host': 'graph.all' + 'ocine.fr',
     };
@@ -463,7 +473,28 @@ class ApiClient {
     };
 
     // Send request
-    return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
+    try {
+      return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
+    } catch(e) {
+      // Unauthorized
+      if (e is HttpResponseException && e.statusCode == 400 && e.body.contains('Invalid token')) {
+        // Clear tokens (to get new ones next time)
+        await clearAuthToken();
+
+        // If allowed, retry
+        if (enableAutoRetryOnUnauthorized) {
+          return await _sendGraphQL(query: query, variables: variables, useCache: useCache, enableAutoRetryOnUnauthorized: false);
+        }
+
+        // If not allowed to retry, juts throw
+        else {
+          throw UnauthorizedException(e.toString());
+        }
+      }
+
+      // In all other cases, just rethrow
+      rethrow;
+    }
   }
 
   /// Send a classic request
@@ -706,14 +737,4 @@ class _ResponseHandler {
       debugPrint('ResponseHandler.Error : Could not decode json : $e : $bodyString');
     }
   }
-}
-
-class HttpResponseException extends DetailedException {
-  HttpResponseException(this.response) : super(
-    'Erreur serveur',
-    details: '[${response.request?.method}] ${response.request?.url}\n${response.body}',
-  );
-
-  final http.Response response;
-  int get statusCode => response.statusCode;
 }
