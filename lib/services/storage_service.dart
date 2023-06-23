@@ -16,6 +16,7 @@ class StorageService {
 
   static Future<void> saveAuthToken(String value) => _storage.setString(_authTokenKey, value);
   static String? readAuthToken() => _storage.getString(_authTokenKey);
+  static Future<void> deleteAuthToken() => _storage.remove(_authTokenKey);
   //#endregion
 
   //#region Last movie sorting

@@ -6,7 +6,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '_utils.dart';
 import 'exceptions/connectivity_exception.dart';
-import 'exceptions/detailed_exception.dart';
 import 'exceptions/displayable_exception.dart';
 import 'exceptions/operation_canceled_exception.dart';
 import 'exceptions/permission_exception.dart';

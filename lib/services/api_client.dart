@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
+import 'package:cinetime/utils/exceptions/unauthorized_exception.dart';
 import 'package:cinetime/utils/exceptions/connectivity_exception.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -447,8 +448,15 @@ class ApiClient {
     return _authToken!;
   }
 
+  /// Delete all locally saved auth tokens
+  Future<void> clearAuthToken() async {
+    _authToken = null;
+    await StorageService.deleteAuthToken();
+  }
+
   /// Send a graphQL request
-  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true}) async {
+  /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true, bool enableAutoRetryOnUnauthorized = true }) async {
     // Headers
     final headers = {
       'ac-auth-token': await _getAuthToken(),
@@ -463,7 +471,28 @@ class ApiClient {
     };
 
     // Send request
-    return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
+    try {
+      return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
+    } catch(e) {
+      // Unauthorized
+      if (e is HttpResponseException && e.statusCode == 400 && e.body.contains('Invalid token')) {
+        // Clear tokens (to get new ones next time)
+        await clearAuthToken();
+
+        // If allowed, retry
+        if (enableAutoRetryOnUnauthorized) {
+          return await _sendGraphQL(query: query, variables: variables, useCache: useCache, enableAutoRetryOnUnauthorized: false);
+        }
+
+        // If not allowed to retry, juts throw
+        else {
+          throw UnauthorizedException(e.toString());
+        }
+      }
+
+      // In all other cases, just rethrow
+      rethrow;
+    }
   }
 
   /// Send a classic request
