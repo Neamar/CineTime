@@ -13,7 +13,7 @@ dependencies:
   rxdart: 0.26.0  # Stuck on this version for now : https://github.com/ReactiveX/rxdart/issues/603
 
   # Data management
-  shared_preferences: ^2.1.1
+  shared_preferences: ^2.2.0
 
   # Widgets / UI
   flash: ^2.0.5+1  # Next version has breaking changes, and we don't need new features
@@ -26,9 +26,9 @@ dependencies:
   # Web
   http: ^0.13.6  # Next version requires flutter_cache_manager > 3.3.0
   connectivity_plus: ^3.0.6  # Next version requires minSdkVersion >= 19
-  flutter_cache_manager: ^3.3.0
+  flutter_cache_manager: ^3.3.1
   cached_network_image: ^3.2.3
-  amplitude_flutter: ^3.14.0
+  amplitude_flutter: ^3.16.0
 
   # Device
   device_info_plus: ^8.2.2  # Next version requires minSdkVersion >= 19
@@ -36,18 +36,18 @@ dependencies:
   url_launcher: ^6.1.11
   share_plus: ^6.3.4  # Next version requires minSdkVersion >= 19
   geolocator: ^9.0.2
-  add_2_calendar: ^2.2.3
+  add_2_calendar: ^2.2.4
 
   # Internationalization
   intl: ^0.18.1
-  timeago: ^3.4.0
-  diacritic: ^0.1.3
+  timeago: ^3.5.0
+  diacritic: ^0.1.4
 
   # Other
   file: ^6.1.4  # TEMP Not used directly, but needed to force dependencies to use updated version
 
 dev_dependencies:
-  flutter_lints: ^2.0.1
+  flutter_lints: ^2.0.2
 
 dependency_overrides:
   # TEMP fix
