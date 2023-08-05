@@ -174,7 +174,7 @@ class ApiClient {
            * Example: for count = 200 : 19400 points
            *
            */
-          query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion } movie { id title credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
+          query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion data { ticketing { urls provider } } } movie { id title credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
           variables: {
             'id': theater.id.encodedId,
             'from': _dateToString(from),
@@ -234,6 +234,12 @@ class ApiClient {
               version: versionMap[showTimeJson['diffusionVersion']] ?? ShowVersion.original,
               format: parseFormat(showTimeJson['projection']),
             ),
+            ticketingUrl: () {    // Needs to be in multiple steps to enforce [firstOrNull] extension static resolution
+              final JsonList? ticketing = showTimeJson['data']?['ticketing'];
+              if (ticketing == null) return null;
+              final JsonList? urls = (ticketing.firstWhereOrNull((t) => t['provider'] == 'default') ?? ticketing.firstOrNull)?['urls'];
+              return urls?.firstOrNull as String?;
+            } (),
           );
         }).toList();
 

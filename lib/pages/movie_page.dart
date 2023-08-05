@@ -629,6 +629,16 @@ class _ShowtimeDialog extends StatelessWidget {
                   onPressed: _share,
                 ),
               ),
+              if (showtime.ticketingUrl != null)...[
+                AppResources.spacerLarge,
+                Tooltip(
+                  message: 'Réserver la séance',
+                  child: IconButton(
+                    icon: const Icon(Icons.confirmation_number_outlined),
+                    onPressed: _openBookingUrl,
+                  ),
+                ),
+              ],
               AppResources.spacerLarge,
               Tooltip(
                 message: 'Ajouter au calendrier',
@@ -644,24 +654,21 @@ class _ShowtimeDialog extends StatelessWidget {
     );
   }
 
-  Future<void> _share() async {
-    final text =
+  Future<void> _share() => Share.share(
 '''${movie.title} [${showtime.spec}]
 ${theater.name}
-$dateDisplay''';
+$dateDisplay'''
+  );
 
-    await Share.share(text);
-  }
+  Future<void> _openBookingUrl() => launchUrlString(showtime.ticketingUrl!, mode: LaunchMode.externalApplication);
 
-  Future<void> _addToCalendar() async {
-    await Add2Calendar.addEvent2Cal(Event(
-      title: movie.title,
-      description: 'Séance de cinéma pour ${movie.title} en ${showtime.spec}',
-      location: theater.name + '\n' + theater.fullAddress,
-      startDate: showtime.dateTime,
-      endDate: showtime.dateTime.add(movie.duration),
-    ));
-  }
+  Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
+    title: movie.title,
+    description: 'Séance de cinéma pour ${movie.title} en ${showtime.spec}',
+    location: theater.name + '\n' + theater.fullAddress,
+    startDate: showtime.dateTime,
+    endDate: showtime.dateTime.add(movie.duration),
+  ));
 }
 
 

@@ -213,13 +213,16 @@ extension ExtendedShowFormat on ShowFormat {
 }
 
 class ShowTime {
-  const ShowTime(this.dateTime, {required this.spec});
+  const ShowTime(this.dateTime, {required this.spec, this.ticketingUrl});
 
   /// Date and Time
   final DateTime dateTime;
 
   /// Spec
   final ShowTimeSpec spec;
+
+  /// Ticketing/booking URL
+  final String? ticketingUrl;
 }
 
 class ShowTimeSpec {
