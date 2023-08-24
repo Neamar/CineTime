@@ -26,7 +26,7 @@ Future<void> main() async {
 
   // Init intl package
   Intl.defaultLocale = App.defaultLocale.toString();
-  initializeDateFormatting(App.defaultLocale.toString());
+  await initializeDateFormatting(App.defaultLocale.toString());
 
   // Set default TimeAgo package locale
   timeago.setLocaleMessages('en', timeago.FrShortMessages()); // Set default timeAgo local to fr
