@@ -44,6 +44,7 @@ Future<void> main() async {
       //options.debug = !kReleaseMode;    // Only needed for extended debugging. If enabled, will flood the console.
       options.environment = kReleaseMode ? 'release' : 'debug';
       options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
+      options.captureFailedRequests = false;    // Ignore network errors
     },
     appRunner: () => runApp(const App()),
   );

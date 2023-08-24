@@ -49,7 +49,9 @@ class ApiClient {
   static const _logHeaders = false;
 
   ApiClient() : _client = SentryHttpClient(
-    captureFailedRequests: false,   // Ignore, happens mostly because the connection was interrupted.
+    failedRequestStatusCodes: [
+      SentryStatusCode.range(400, 599),   // Report all errors
+    ],
   );
 
   final http.Client _client;

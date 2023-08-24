@@ -32,7 +32,7 @@ dependencies:
 
   # Device
   device_info_plus: ^8.2.2  # Next version requires minSdkVersion >= 19
-  sentry_flutter: ^6.22.0 # Next version has breaking changes
+  sentry_flutter: 7.5.2    # Next version requires minSdkVersion >= 19
   url_launcher: ^6.1.11
   share_plus: ^6.3.4  # Next version requires minSdkVersion >= 19
   geolocator: ^9.0.2
