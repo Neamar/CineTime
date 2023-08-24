@@ -26,7 +26,7 @@ Future<void> main() async {
 
   // Init intl package
   Intl.defaultLocale = App.defaultLocale.toString();
-  initializeDateFormatting(App.defaultLocale.toString());
+  await initializeDateFormatting(App.defaultLocale.toString());
 
   // Set default TimeAgo package locale
   timeago.setLocaleMessages('en', timeago.FrShortMessages()); // Set default timeAgo local to fr
@@ -44,6 +44,7 @@ Future<void> main() async {
       //options.debug = !kReleaseMode;    // Only needed for extended debugging. If enabled, will flood the console.
       options.environment = kReleaseMode ? 'release' : 'debug';
       options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
+      options.captureFailedRequests = false;    // Ignore network errors
     },
     appRunner: () => runApp(const App()),
   );
