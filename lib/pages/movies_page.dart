@@ -391,7 +391,6 @@ class _GhostShowtimesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = context.textTheme.caption;
-    final textStyleGrey = textStyle?.copyWith(color: AppResources.colorGrey);
     return Padding(
       padding: const EdgeInsets.all(5),
       child: Column(
@@ -420,14 +419,14 @@ class _GhostShowtimesCard extends StatelessWidget {
               children: [
                 Text(
                   '${theaterShowTimes.theater.name} : ',
-                  style: textStyleGrey,
+                  style: textStyle,
                 ),
                 Expanded(
                   child: RichText(
                     textAlign: TextAlign.end,
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
-                      style: textStyleGrey,
+                      style: textStyle,
                       children: theaterShowTimes.showTimes.map((showtime) {
                         return TextSpan(
                           text: AppResources.formatterDateTime.format(showtime.dateTime),
