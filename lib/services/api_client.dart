@@ -253,7 +253,12 @@ class ApiClient {
 
         // Check movie info
         final JsonObject? movieJson = movieShowTimesJson['movie'];
-        if (movieJson == null) {      // May happen in some extremely rare cases
+        if (movieJson == null) {
+          // This may happen when an event (usually a movie, but may be a special local show) doesn't have a proper page on API provider.
+          // In that case, showTimes are still available (and ticketing links works), but movie info is empty.
+          // On the official Android app, it is displayed as a "blank" movie session: we can add to calendar and book, but no movie info is displayed.
+          // On the web site, session is just not displayed at all.
+          // In that case, we just ignore this event completely.
           reportError(UnsupportedError('Movie data is empty on theater "${theater.name}" for ${showTimes.length} showTimes (first is at ${showTimes.first.dateTime.toIso8601String()})'), StackTrace.current);
           continue;
         }
