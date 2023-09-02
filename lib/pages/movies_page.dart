@@ -8,7 +8,9 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
+import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -396,8 +398,9 @@ class _GhostShowtimesCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Tooltip(
-            message: 'Certaines séances ne sont pas affichées par manque de données sur le film',
+            message: 'Certaines séances ne sont pas affichées par manque de données sur le film.\nVous pouvez toujours cliquer sur une séance pour accéder à ses informations.',
             triggerMode: TooltipTriggerMode.tap,
+            showDuration: const Duration(seconds: 5),
             child: Row(
               children: [
                 Text(
@@ -420,11 +423,22 @@ class _GhostShowtimesCard extends StatelessWidget {
                   style: textStyleGrey,
                 ),
                 Expanded(
-                  child: Text(
-                    theaterShowTimes.showTimes.map((showtime) => AppResources.formatterDateTime.format(showtime.dateTime)).join(', '),
-                    style: textStyleGrey,
+                  child: RichText(
                     textAlign: TextAlign.end,
                     overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      style: textStyleGrey,
+                      children: theaterShowTimes.showTimes.map((showtime) {
+                        return TextSpan(
+                          text: AppResources.formatterDateTime.format(showtime.dateTime),
+                          recognizer: TapGestureRecognizer()..onTap = () => ShowtimeDialog.open(
+                            context: context,
+                            theater: theaterShowTimes.theater,
+                            showtime: showtime,
+                          ),
+                        );
+                      }).toList()..insertBetween(const TextSpan(text: ', ')),
+                    ),
                   ),
                 ),
               ],

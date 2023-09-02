@@ -8,17 +8,19 @@ import 'package:url_launcher/url_launcher_string.dart';
 class ShowtimeDialog extends StatelessWidget {
   ShowtimeDialog({
     Key? key,
-    required this.movie,
+    this.movie,
     required this.theater,
     required this.showtime,
-  }) : dateDisplay = AppResources.formatterFullDateTime.format(showtime.dateTime), super(key: key);
+  }) :  movieTitle = movie?.title ?? 'Titre inconnu',
+        dateDisplay = AppResources.formatterFullDateTime.format(showtime.dateTime), super(key: key);
 
-  final Movie movie;
+  final Movie? movie;
+  final String movieTitle;
   final Theater theater;
   final ShowTime showtime;
   final String dateDisplay;
 
-  static void open({required BuildContext context, required Movie movie, required Theater theater, required ShowTime showtime}) {
+  static void open({required BuildContext context, Movie? movie, required Theater theater, required ShowTime showtime}) {
     showDialog(
       context: context,
       builder: (context) {
@@ -42,7 +44,7 @@ class ShowtimeDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            movie.title,
+            movieTitle,
             style: Theme.of(context).textTheme.headline4,
             textAlign: TextAlign.center,
           ),
@@ -100,7 +102,7 @@ class ShowtimeDialog extends StatelessWidget {
   }
 
   Future<void> _share() => Share.share(
-'''${movie.title} [${showtime.spec}]
+'''${movieTitle} [${showtime.spec}]
 ${theater.name}
 $dateDisplay'''
   );
@@ -108,10 +110,10 @@ $dateDisplay'''
   Future<void> _openBookingUrl() => launchUrlString(showtime.ticketingUrl!, mode: LaunchMode.externalApplication);
 
   Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
-    title: movie.title,
-    description: 'Séance de cinéma pour ${movie.title} en ${showtime.spec}',
+    title: movieTitle,
+    description: 'Séance de cinéma pour $movieTitle en ${showtime.spec}',
     location: theater.name + '\n' + theater.fullAddress,
     startDate: showtime.dateTime,
-    endDate: showtime.dateTime.add(movie.duration),
+    endDate: showtime.dateTime.add(movie?.duration ?? const Duration(hours: 2)),
   ));
 }
