@@ -6,6 +6,7 @@ import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/utils/_utils.dart';
+import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -266,7 +267,8 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                       theaterName: theaterShowTimes.theater.name,
                                       showTimes: theaterShowTimes.getFormattedShowTimes(filter),
                                       filterName: filter.toString(),
-                                      onShowtimePressed: (showtime) => _openShowtimeDialog(
+                                      onShowtimePressed: (showtime) => ShowtimeDialog.open(
+                                        context: context,
                                         movie: widget.movieShowTimes.movie,
                                         theater: theaterShowTimes.theater,
                                         showtime: showtime,
@@ -335,22 +337,6 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
     AnalyticsService.trackEvent('Movie datasheet webpage displayed', {
       'movieTitle': widget.movieShowTimes.movie.title,
     });
-  }
-
-  void _openShowtimeDialog({required Movie movie, required Theater theater, required ShowTime showtime}) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          clipBehavior: Clip.antiAlias,
-          child: _ShowtimeDialog(
-            movie: movie,
-            theater: theater,
-            showtime: showtime,
-          ),
-        );
-      },
-    );
   }
 }
 
@@ -574,101 +560,6 @@ class _DayShowTimes extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ShowtimeDialog extends StatelessWidget {
-  _ShowtimeDialog({
-    Key? key,
-    required this.movie,
-    required this.theater,
-    required this.showtime,
-  }) : dateDisplay = AppResources.formatterFullDateTime.format(showtime.dateTime), super(key: key);
-
-  final Movie movie;
-  final Theater theater;
-  final ShowTime showtime;
-  final String dateDisplay;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            movie.title,
-            style: Theme.of(context).textTheme.headline4,
-            textAlign: TextAlign.center,
-          ),
-          AppResources.spacerLarge,
-          Text(
-            theater.name,
-            style: Theme.of(context).textTheme.headline6,
-            textAlign: TextAlign.center,
-          ),
-          AppResources.spacerSmall,
-          Text(
-            dateDisplay,
-            style: Theme.of(context).textTheme.subtitle1,
-            textAlign: TextAlign.center,
-          ),
-          AppResources.spacerSmall,
-          Text(
-            showtime.spec.toString(),
-            style: Theme.of(context).textTheme.headline6,
-          ),
-          AppResources.spacerLarge,
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Tooltip(
-                message: 'Partager la séance',
-                child: IconButton(
-                  icon: const Icon(Icons.share),
-                  onPressed: _share,
-                ),
-              ),
-              if (showtime.ticketingUrl != null)...[
-                AppResources.spacerLarge,
-                Tooltip(
-                  message: 'Réserver la séance',
-                  child: IconButton(
-                    icon: const Icon(Icons.confirmation_number_outlined),
-                    onPressed: _openBookingUrl,
-                  ),
-                ),
-              ],
-              AppResources.spacerLarge,
-              Tooltip(
-                message: 'Ajouter au calendrier',
-                child: IconButton(
-                  icon: const Icon(CineTimeIcons.calendar),
-                  onPressed: _addToCalendar,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _share() => Share.share(
-'''${movie.title} [${showtime.spec}]
-${theater.name}
-$dateDisplay'''
-  );
-
-  Future<void> _openBookingUrl() => launchUrlString(showtime.ticketingUrl!, mode: LaunchMode.externalApplication);
-
-  Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
-    title: movie.title,
-    description: 'Séance de cinéma pour ${movie.title} en ${showtime.spec}',
-    location: theater.name + '\n' + theater.fullAddress,
-    startDate: showtime.dateTime,
-    endDate: showtime.dateTime.add(movie.duration),
-  ));
 }
 
 
