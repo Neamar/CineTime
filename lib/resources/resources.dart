@@ -32,7 +32,8 @@ class AppResources {
   static const durationAnimationLong = Duration(milliseconds: 500);
 
   // Formatter
-  static final formatterFullDate = DateFormat('EEEE dd MMMM à HH:mm');
+  static final formatterFullDateTime = DateFormat('EEEE dd MMMM à HH:mm');
+  static final formatterDateTime = DateFormat('EEEE dd à HH:mm');
   static final formatterDate = DateFormat('dd MMMM yyyy');
   static final _formatterDay = DateFormat('EEEE dd');
   static final formatterMonth = DateFormat('MMM');

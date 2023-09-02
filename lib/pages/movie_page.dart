@@ -582,7 +582,7 @@ class _ShowtimeDialog extends StatelessWidget {
     required this.movie,
     required this.theater,
     required this.showtime,
-  }) : dateDisplay = AppResources.formatterFullDate.format(showtime.dateTime), super(key: key);
+  }) : dateDisplay = AppResources.formatterFullDateTime.format(showtime.dateTime), super(key: key);
 
   final Movie movie;
   final Theater theater;

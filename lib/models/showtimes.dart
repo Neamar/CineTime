@@ -5,11 +5,21 @@ import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
 class MoviesShowTimes {
-  const MoviesShowTimes({required this.theaters, required this.moviesShowTimes, required this.fetchedFrom, required this.fetchedTo});
+  const MoviesShowTimes({required this.theaters, required this.moviesShowTimes, required this.ghostShowTimes, required this.fetchedFrom, required this.fetchedTo});
 
+  /// List of all theaters
   final List<Theater> theaters;
+
+  /// List of movies, containing showtimes for each theater
   final List<MovieShowTimes> moviesShowTimes;
+
+  /// List of ghost showtimes (showtimes without movie info), grouped by theater.
+  final List<TheaterShowTimes> ghostShowTimes;
+
+  /// Date from which showtimes were fetched
   final DateTime fetchedFrom;
+
+  /// Date until which showtimes were fetched
   final DateTime fetchedTo;
 
   String get periodDisplay {
