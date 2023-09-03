@@ -46,6 +46,7 @@ ThemeData appTheme({bool darkMode = false}) {
       backgroundColor: backgroundLightColor,
     ),
   );
+  final inputDecorationIconColor = MaterialStateColor.resolveWith((states) => states.contains(MaterialState.focused) ? Colors.white : AppResources.colorDarkRed);
   return theme.copyWith(
     textTheme: theme.textTheme.apply(
       bodyColor: foregroundColor,
@@ -53,7 +54,8 @@ ThemeData appTheme({bool darkMode = false}) {
     ),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: theme.textTheme.bodyText2?.copyWith(color: AppResources.colorDarkRed),
-      iconColor: Colors.white,
+      prefixIconColor: inputDecorationIconColor,
+      suffixIconColor: inputDecorationIconColor,
       enabledBorder: const OutlineInputBorder(
         borderRadius: AppResources.borderRadiusMedium,
         borderSide: BorderSide(
