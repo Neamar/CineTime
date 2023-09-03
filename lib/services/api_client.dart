@@ -135,6 +135,9 @@ class ApiClient {
     // Build movieShowTimes list
     final moviesShowTimesMap = <Movie, MovieShowTimes>{};
 
+    // Prepare ghost showtimes map
+    final ghostShowTimesMap = <Theater, List<ShowTime>>{};
+
     // For each theater
     for (final theater in theaters) {
       // Send request
@@ -249,7 +252,7 @@ class ApiClient {
         // Filter passed shows
         showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(AppService.now));
 
-        // Skip this movie if there are no valid show time
+        // Skip this movie if there are no valid showtimes (all passed)
         if (showTimes.isEmpty) continue;
 
         // Check movie info
@@ -259,8 +262,12 @@ class ApiClient {
           // In that case, showTimes are still available (and ticketing links works), but movie info is empty.
           // On the official Android app, it is displayed as a "blank" movie session: we can add to calendar and book, but no movie info is displayed.
           // On the web site, session is just not displayed at all.
-          // In that case, we just ignore this event completely.
           reportError(DataError('Movie data is empty on theater "${theater.name}" for ${showTimes.length} showTimes (first is at ${showTimes.first.dateTime.toIso8601String()})'), StackTrace.current);
+
+          // In that case, collect ghost showtimes in a separate map
+          ghostShowTimesMap.putIfAbsent(theater, () => []).addAll(showTimes);
+
+          // And skip movie processing
           continue;
         }
 
@@ -320,6 +327,7 @@ class ApiClient {
     return MoviesShowTimes(
       theaters: theaters,
       moviesShowTimes: moviesShowTimesMap.values.toList(growable: false),
+      ghostShowTimes: ghostShowTimesMap.entries.map((e) => TheaterShowTimes(e.key, showTimes: e.value)).toList(growable: false),
       fetchedFrom: from,
       fetchedTo: to,
     );

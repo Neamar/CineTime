@@ -8,7 +8,9 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
+import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -141,25 +143,37 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                     },
                   ),
                 ),
-                body: () {
-                  if (moviesShowtimesData.moviesShowTimes.isEmpty)
-                    return const IconMessage(
-                      icon: Icons.theaters,
-                      message: 'Aucune séance',
-                    );
+                body: Column(
+                  children: [
+                    // Content
+                    Expanded(
+                      child: () {
+                        if (moviesShowtimesData.moviesShowTimes.isEmpty)
+                          return const IconMessage(
+                            icon: Icons.theaters,
+                            message: 'Aucune séance',
+                          );
 
-                  return BehaviorSubjectBuilder<_FilterSortData>(
-                    subject: bloc.filterSortData,
-                    builder: (context, snapshot) {
-                      return _FilteredMovieListView(
-                        key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
-                        moviesShowTimes: moviesShowtimesData.moviesShowTimes,
-                        showTheaterName: moviesShowtimesData.theaters.length > 1,
-                        filterSort: snapshot.data!,
-                      );
-                    },
-                  );
-                } (),
+                        return BehaviorSubjectBuilder<_FilterSortData>(
+                          subject: bloc.filterSortData,
+                          builder: (context, snapshot) {
+                            return _FilteredMovieListView(
+                              key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
+                              moviesShowTimes: moviesShowtimesData.moviesShowTimes,
+                              showTheaterName: moviesShowtimesData.theaters.length > 1,
+                              filterSort: snapshot.data!,
+                            );
+                          },
+                        );
+                      } (),
+                    ),
+
+                    // Bottom data
+                    if (moviesShowtimesData.ghostShowTimes.isNotEmpty)
+                      _GhostShowtimesCard(moviesShowtimesData.ghostShowTimes),
+
+                  ],
+                )
               );
             },
           ),
@@ -327,21 +341,18 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
     if (filteredMoviesShowTimes.isEmpty)
       return EmptySearchResultMessage.noResult;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: ListView.builder(
-        itemCount: filteredMoviesShowTimes.length,
-        itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
-        padding: EdgeInsets.zero,
-        itemBuilder: (context, index) {
-          final movieShowTimes = filteredMoviesShowTimes[index];
-          return MovieCard(
-            key: ObjectKey(movieShowTimes),
-            movieShowTimes: movieShowTimes,
-            showTheaterName: widget.showTheaterName,
-          );
-        },
-      ),
+    return ListView.builder(
+      itemCount: filteredMoviesShowTimes.length,
+      itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
+      padding: EdgeInsets.zero,
+      itemBuilder: (context, index) {
+        final movieShowTimes = filteredMoviesShowTimes[index];
+        return MovieCard(
+          key: ObjectKey(movieShowTimes),
+          movieShowTimes: movieShowTimes,
+          showTheaterName: widget.showTheaterName,
+        );
+      },
     );
   }
 
@@ -369,6 +380,72 @@ class _FilterSortData {
     dayFilter: dayFilter != null ? dayFilter() : this.dayFilter,      // ValueGetter needed to properly handle null values
     textFilter: textFilter ?? this.textFilter,
   );
+}
+
+class _GhostShowtimesCard extends StatelessWidget {
+  const _GhostShowtimesCard(this.ghostShowTimes, {Key? key}) : super(key: key);
+
+  final List<TheaterShowTimes> ghostShowTimes;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = context.textTheme.caption;
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Tooltip(
+            message: 'Certaines séances ne sont pas affichées par manque de données sur le film.\nVous pouvez toujours cliquer sur une séance pour accéder à ses informations.',
+            triggerMode: TooltipTriggerMode.tap,
+            showDuration: const Duration(seconds: 5),
+            child: Row(
+              children: [
+                Text(
+                  'Séances sans données ',
+                  style: textStyle,
+                ),
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+          AppResources.spacerTiny,
+          ...ghostShowTimes.map((theaterShowTimes) {
+            return Row(
+              children: [
+                Text(
+                  '${theaterShowTimes.theater.name} : ',
+                  style: textStyle,
+                ),
+                Expanded(
+                  child: RichText(
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      style: textStyle,
+                      children: theaterShowTimes.showTimes.map((showtime) {
+                        return TextSpan(
+                          text: AppResources.formatterDateTime.format(showtime.dateTime),
+                          recognizer: TapGestureRecognizer()..onTap = () => ShowtimeDialog.open(
+                            context: context,
+                            theater: theaterShowTimes.theater,
+                            showtime: showtime,
+                          ),
+                        );
+                      }).toList()..insertBetween(const TextSpan(text: ', ')),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
 }
 
 
