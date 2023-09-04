@@ -214,3 +214,7 @@ extension ExtendedDateTime on DateTime {
     return formattedDate + ' ' + AppResources.formatterMonth.format(this);
   }
 }
+
+extension ExtendedColor on Color {
+  Color get foregroundTextColor => computeLuminance() > 0.5 ? Colors.black : Colors.white;
+}
