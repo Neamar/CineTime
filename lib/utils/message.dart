@@ -6,41 +6,51 @@ import 'package:cinetime/utils/_utils.dart';
 FlashController? _messageController;
 
 /// Display a message to the user, like a SnackBar
-Future<void> showMessage(BuildContext context, String message, {bool isError = false, int durationInSeconds = 4}) async {
-  //Try to get higher level context, so the Flash message's position is relative to the phone screen (and not a child widget)
+Future<void> showMessage(BuildContext context, String message, {bool isError = false, String? details, int? durationInSeconds, Color? backgroundColor}) async {
+  // Try to get higher level context, so the Flash message's position is relative to the phone screen (and not a child widget)
   final scaffoldContext = Scaffold.maybeOf(context)?.context;
-  if (scaffoldContext != null)
-    context = scaffoldContext;
+  if (scaffoldContext != null) context = scaffoldContext;
 
-  //Dismiss previous message
+  // Dismiss previous message
   _messageController?.dismiss();
 
-  //Display new message
+  // Display new message
+  backgroundColor ??= (isError ? Colors.orange : Colors.white);
   await showFlash(
     context: context,
-    duration: Duration(seconds: durationInSeconds),
+    duration: Duration(seconds: durationInSeconds ?? (details == null ? 4 : 8)),
     builder: (context, controller) {
       _messageController = controller;
 
-      return Flash(
+      return FlashBar(
         controller: controller,
-        backgroundColor: isError ? Colors.orange : Theme.of(context).canvasColor,
-        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
         position: FlashPosition.top,
         behavior: FlashBehavior.floating,
-        horizontalDismissDirection: HorizontalDismissDirection.horizontal,
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadows: kElevationToShadow[8],
-        onTap: controller.dismiss,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 350),
-          child: FlashBar(
-            content: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: context.textTheme.bodyText1?.copyWith(color: isError ? Colors.white : null),
-            ),
+        backgroundColor: backgroundColor,
+        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        elevation: 2,
+        primaryAction: details == null ? null : TextButton(
+          child: const Text(
+            'Détails',
           ),
+          onPressed: () {
+            controller.dismiss();
+            showDialog(
+              context: context,     // context and NOT parent context must be used, otherwise it may throw error
+              builder: (context) => AlertDialog(
+                title: SelectableText(message),
+                content: SelectableText(details),
+              ),
+            );
+          },
+        ),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: context.textTheme.bodyMedium?.copyWith(color: backgroundColor?.foregroundTextColor),
         ),
       );
     },
