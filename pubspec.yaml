@@ -1,6 +1,6 @@
 name: cinetime
 description: CinéTime
-version: 2.7.3+68
+version: 2.7.4+69
 
 environment:
   sdk: '>=2.15.0 <3.0.0'
