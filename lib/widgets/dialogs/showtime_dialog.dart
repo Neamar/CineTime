@@ -102,7 +102,7 @@ class ShowtimeDialog extends StatelessWidget {
   }
 
   Future<void> _share() => Share.share(
-'''${movieTitle} [${showtime.spec}]
+'''$movieTitle [${showtime.spec}]
 ${theater.name}
 $dateDisplay'''
   );
@@ -111,7 +111,7 @@ $dateDisplay'''
 
   Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
     title: movieTitle,
-    description: 'Séance de cinéma pour $movieTitle en ${showtime.spec}',
+    description: 'Séance de cinéma pour $movieTitle en ${showtime.spec}' + (showtime.ticketingUrl != null ? '\n\nRéservation:\n${showtime.ticketingUrl}' : ''),
     location: theater.name + '\n' + theater.fullAddress,
     startDate: showtime.dateTime,
     endDate: showtime.dateTime.add(movie?.duration ?? const Duration(hours: 2)),
