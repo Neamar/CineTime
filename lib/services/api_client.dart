@@ -754,9 +754,10 @@ class _ResponseHandler {
   /// Same as [bodyJson], but will return null if operation fails.
   T? bodyJsonOrNull<T>() {
     try {
-      return bodyJson<T>();
+      return bodyJson<T?>();
     } catch(e) {
       debugPrint('ResponseHandler.Error : Could not decode json : $e : $bodyString');
     }
+    return null;
   }
 }

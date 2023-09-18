@@ -10,10 +10,8 @@ import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:add_2_calendar/add_2_calendar.dart';
 
 class MoviePage extends StatefulWidget {
   const MoviePage(this.movieShowTimes);
