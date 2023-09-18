@@ -10,10 +10,8 @@ import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:add_2_calendar/add_2_calendar.dart';
 
 class MoviePage extends StatefulWidget {
   const MoviePage(this.movieShowTimes);
@@ -134,7 +132,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                               children: <Widget>[
                                 Text(
                                   widget.movieShowTimes.movie.title,
-                                  style: Theme.of(context).textTheme.headline6,
+                                  style: context.textTheme.headline6,
                                 ),
                                 if (widget.movieShowTimes.movie.directors != null)
                                   TextWithLabel(
@@ -214,7 +212,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                 // Title
                                 Text(
                                   'Séances',
-                                  style: Theme.of(context).textTheme.headline6,
+                                  style: context.textTheme.headline6,
                                 ),
 
                                 // Filters
@@ -478,7 +476,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
         // Theater name
         Text(
           theaterName,
-          style: Theme.of(context).textTheme.headline6,
+          style: context.textTheme.headline6,
         ),
 
         // Showtimes
@@ -532,14 +530,14 @@ class _DayShowTimes extends StatelessWidget {
           // Week day
           Text(
             AppResources.weekdayNames[day.weekday]!,
-            style: Theme.of(context).textTheme.subtitle1,
+            style: context.textTheme.subtitle1,
           ),
 
           // Day
           AppResources.spacerTiny,
           Text(
             day.day.toString(),
-            style: Theme.of(context).textTheme.headline6,
+            style: context.textTheme.headline6,
           ),
 
           // Times

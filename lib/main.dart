@@ -19,7 +19,7 @@ Future<void> main() async {
 
   // Get android version info
   try {
-    App.androidSdkVersion = (await DeviceInfoPlugin().androidInfo).version.sdkInt ?? App.androidSdkVersion;
+    App.androidSdkVersion = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
   } catch(e) {
     // Ignore
   }

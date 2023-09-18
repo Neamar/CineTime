@@ -29,7 +29,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             decoration: const InputDecoration(
               hintText: 'Nom ou adresse',
             ),
-            style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.white),
+            style: context.textTheme.subtitle1?.copyWith(color: Colors.white),
             textInputAction: TextInputAction.search,
             onSubmitted: bloc.startQuerySearch,
           ),

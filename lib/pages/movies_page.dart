@@ -74,7 +74,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                         if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
                                         return 'Films dans $theatersCount cinémas';
                                       }(),
-                                      style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Colors.white),
+                                      style: context.textTheme.bodyText2?.copyWith(color: Colors.white),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                     );
@@ -84,7 +84,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                   AppResources.spacerTiny,
                                   Text(
                                     dayFilter != null ? 'Le ${dayFilter.toDayString()}' : moviesShowtimesData.periodDisplay,
-                                    style: Theme.of(context).textTheme.caption?.copyWith(color: AppResources.colorGrey),
+                                    style: context.textTheme.caption?.copyWith(color: AppResources.colorGrey),
                                   ),
                                 ],
                               ),
@@ -135,7 +135,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                               ),
                             ),
                             autofocus: true,
-                            style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.white),
+                            style: context.textTheme.subtitle1?.copyWith(color: Colors.white),
                             textInputAction: TextInputAction.search,
                           ),
                         );

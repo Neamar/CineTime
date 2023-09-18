@@ -1,6 +1,7 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -45,25 +46,25 @@ class ShowtimeDialog extends StatelessWidget {
         children: [
           Text(
             movieTitle,
-            style: Theme.of(context).textTheme.headline4,
+            style: context.textTheme.headline4,
             textAlign: TextAlign.center,
           ),
           AppResources.spacerLarge,
           Text(
             theater.name,
-            style: Theme.of(context).textTheme.headline6,
+            style: context.textTheme.headline6,
             textAlign: TextAlign.center,
           ),
           AppResources.spacerSmall,
           Text(
             dateDisplay,
-            style: Theme.of(context).textTheme.subtitle1,
+            style: context.textTheme.subtitle1,
             textAlign: TextAlign.center,
           ),
           AppResources.spacerSmall,
           Text(
             showtime.spec.toString(),
-            style: Theme.of(context).textTheme.headline6,
+            style: context.textTheme.headline6,
           ),
           AppResources.spacerLarge,
           Row(

@@ -80,7 +80,7 @@ class _TheaterCardState extends State<TheaterCard> {
                             Flexible(
                               child: Text(
                                 widget.theater.name,
-                                style: Theme.of(context).textTheme.subtitle1,
+                                style: context.textTheme.subtitle1,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -90,7 +90,7 @@ class _TheaterCardState extends State<TheaterCard> {
                             if (widget.theater.distanceDisplay != null)
                               Text(
                                 ' à ${widget.theater.distanceDisplay!}',
-                                style: Theme.of(context).textTheme.bodyText2?.copyWith(color: Theme.of(context).textTheme.bodyText2?.color?.withOpacity(0.5)),
+                                style: context.textTheme.bodyText2?.copyWith(color: context.textTheme.bodyText2?.color?.withOpacity(0.5)),
                               ),
 
                             // Spacer for favorite button
@@ -100,7 +100,7 @@ class _TheaterCardState extends State<TheaterCard> {
                         const Spacer(),
                         Text(
                           widget.theater.fullAddress,
-                          style: Theme.of(context).textTheme.caption,
+                          style: context.textTheme.caption,
                         ),
                       ],
                     ),
