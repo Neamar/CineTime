@@ -1,3 +1,4 @@
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
 class TinyChip extends StatelessWidget {
@@ -16,7 +17,7 @@ class TinyChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 6),
+          style: context.textTheme.caption!.copyWith(fontSize: 6),
         ),
       )
     );

@@ -1,4 +1,5 @@
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'themed_widgets.dart';
@@ -25,7 +26,7 @@ class _ShowMoreTextState extends State<ShowMoreText> {
         child: () {
           final text = RichText(
             text: TextSpan(
-              style: Theme.of(context).textTheme.bodyText2,
+              style: context.textTheme.bodyText2,
               children: [
                 if (widget.header != null)...[
                   TextSpan(text: widget.header! + '\n', style: const TextStyle(color: AppResources.colorDarkRed, fontWeight: FontWeight.w500)),

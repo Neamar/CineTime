@@ -134,7 +134,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                               children: <Widget>[
                                 Text(
                                   widget.movieShowTimes.movie.title,
-                                  style: Theme.of(context).textTheme.headline6,
+                                  style: context.textTheme.headline6,
                                 ),
                                 if (widget.movieShowTimes.movie.directors != null)
                                   TextWithLabel(
@@ -214,7 +214,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                 // Title
                                 Text(
                                   'Séances',
-                                  style: Theme.of(context).textTheme.headline6,
+                                  style: context.textTheme.headline6,
                                 ),
 
                                 // Filters
@@ -478,7 +478,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
         // Theater name
         Text(
           theaterName,
-          style: Theme.of(context).textTheme.headline6,
+          style: context.textTheme.headline6,
         ),
 
         // Showtimes
@@ -532,14 +532,14 @@ class _DayShowTimes extends StatelessWidget {
           // Week day
           Text(
             AppResources.weekdayNames[day.weekday]!,
-            style: Theme.of(context).textTheme.subtitle1,
+            style: context.textTheme.subtitle1,
           ),
 
           // Day
           AppResources.spacerTiny,
           Text(
             day.day.toString(),
-            style: Theme.of(context).textTheme.headline6,
+            style: context.textTheme.headline6,
           ),
 
           // Times

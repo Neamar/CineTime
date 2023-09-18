@@ -64,7 +64,7 @@ class MovieCard extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       movieShowTimes.movie.title,
-                                      style: Theme.of(context).textTheme.headline6,
+                                      style: context.textTheme.headline6,
                                       overflow: TextOverflow.fade,
                                       softWrap: false,
                                     ),
@@ -117,7 +117,7 @@ class MovieCard extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       showTheaterName ? theaterShowTimes.theater.name : '',
-                                      style: Theme.of(context).textTheme.caption,
+                                      style: context.textTheme.caption,
                                       softWrap: false,
                                       overflow: TextOverflow.fade,
                                     ),
@@ -127,7 +127,7 @@ class MovieCard extends StatelessWidget {
                                   AppResources.spacerMedium,
                                   Text(
                                     theaterShowTimes.showTimesSummary!,
-                                    style: Theme.of(context).textTheme.caption,
+                                    style: context.textTheme.caption,
                                   ),
 
                                 ],

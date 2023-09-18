@@ -1,4 +1,5 @@
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
 class TextWithLabel extends StatelessWidget {
@@ -16,7 +17,7 @@ class TextWithLabel extends StatelessWidget {
       children: <Widget>[
         Text(
           label,
-          style: Theme.of(context).textTheme.caption,
+          style: context.textTheme.caption,
         ),
         AppResources.spacerTiny,
         Flexible(
