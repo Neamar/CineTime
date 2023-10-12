@@ -458,11 +458,16 @@ class ApiClient {
         final body = 'X-subtype=$projectNumber&X-X-subscription=$projectNumber&sender=$projectNumber&X-X-subtype=$projectNumber&X-app_ver=435&X-osv=31&X-cliv=iid-12451000&X-gmsv=225014047&X-appid=$appId&X-scope=GRAPH&X-subscription=$projectNumber&X-app_ver_name=9.0.2&app=com.all' + 'ocine.androidapp&device=39727368' + '35735734666&app_ver=435&info=o2hWMhjDAzwYQKri5' + '41rkWWFnLJYgRg&gcm_ver=225014047&plat=0&cert=b708782e3014076a7' + '8bdd85b60f77fa797f7a021&target_ver=33';
 
         // Send request
-        final response = await _send<String>(_httpMethodPost, 'https://android.apis.google.com/c2dm/regi' + 'ster3', headers: headers, stringBody: body, useCache: false);
-        AnalyticsService.trackEvent('New auth token fetched');
+        try {
+          final response = await _send<String>(_httpMethodPost, 'https://android.apis.google.com/c2dm/regi' + 'ster3', headers: headers, stringBody: body, useCache: false);
+          AnalyticsService.trackEvent('New auth token fetched');
 
-        // Parse value
-        authToken = response.substring(6);    // Remove var name
+          // Parse value
+          authToken = response.substring(6); // Remove var name
+        } catch(e) {
+          // Just use an empty token value
+          authToken = '';
+        }
 
         // Save value
         unawaited(StorageService.saveAuthToken(authToken));
