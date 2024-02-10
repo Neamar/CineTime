@@ -37,22 +37,31 @@ Future<void> main() async {
   // Init analytics
   await AnalyticsService.init();
 
-  // Start App inside Sentry's scope
-  await SentryFlutter.init(
-    (options) {
-      options.dsn = 'https://f0a7dfef9b5249c7a57c355ac9d30856@o1038499.ingest.sentry.io/6006844';
-      //options.debug = !kReleaseMode;    // Only needed for extended debugging. If enabled, will flood the console.
-      options.environment = kReleaseMode ? 'release' : 'debug';
-      options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
-      options.captureFailedRequests = false;    // Ignore network errors
-    },
-    appRunner: () => runApp(const App()),
-  );
+  // Start app
+  if (App.enableBugReport) {
+    // Start App inside Sentry's scope
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = 'https://f0a7dfef9b5249c7a57c355ac9d30856@o1038499.ingest.sentry.io/6006844';
+        //options.debug = !kReleaseMode;    // Only needed for extended debugging. If enabled, will flood the console.
+        options.environment = kReleaseMode ? 'release' : 'debug';
+        options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
+        options.captureFailedRequests = false;    // Ignore network errors
+      },
+      appRunner: () => runApp(const App()),
+    );
+  } else {
+    // Start App directly
+    runApp(const App());
+  }
 }
 
 class App extends StatelessWidget {
   // Default locale
   static const defaultLocale = Locale('fr');
+
+  /// Enable bug report
+  static bool enableBugReport = kReleaseMode;   // Disable completely bug reporting in debug mode (not need to send data)
 
   /// Global key for the App's main navigator
   static final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
