@@ -1,6 +1,6 @@
 import '_models.dart';
 
-class Theater extends Identifiable with Comparable<Theater> {
+class Theater extends Identifiable implements Comparable<Theater> {
   const Theater({
     required ApiId id,
     required this.name,
