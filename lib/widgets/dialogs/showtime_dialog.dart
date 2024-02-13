@@ -111,7 +111,7 @@ $dateDisplay'''
   Future<void> _openBookingUrl() => launchUrlString(showtime.ticketingUrl!, mode: LaunchMode.externalApplication);
 
   Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
-    title: movieTitle,
+    title: 'Cinema : $movieTitle',    // Adding 'Cinema' to the title makes Google Calendar show a nice picture automatically, make it easier to find in the calendar
     description: 'Séance de cinéma pour $movieTitle en ${showtime.spec}' + (showtime.ticketingUrl != null ? '\n\nRéservation:\n${showtime.ticketingUrl}' : ''),
     location: theater.name + '\n' + theater.fullAddress,
     startDate: showtime.dateTime,

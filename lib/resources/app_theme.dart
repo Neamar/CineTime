@@ -7,6 +7,7 @@ ThemeData appTheme({bool darkMode = false}) {
   final foregroundColor = darkMode ? Colors.white : AppResources.colorDarkGrey;
 
   final theme = ThemeData(
+    useMaterial3: false,
     primarySwatch: _createMaterialColor(AppResources.colorRed),
     scaffoldBackgroundColor: backgroundColor,
     canvasColor: backgroundLightColor,

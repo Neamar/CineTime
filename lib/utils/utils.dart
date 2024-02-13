@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'package:cinetime/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -115,12 +116,18 @@ Future<void> showError(BuildContext context, Object error) async {
 
 /// Report error to Crashlytics
 Future<void> reportError(Object exception, StackTrace stack, {dynamic reason}) async {
+  final logMessage = '$exception\n$stack';
   if (shouldReportException(exception)) {
-    // Report to Sentry;
-    Sentry.captureException(exception, stackTrace: stack, hint: reason);
+    if (App.enableBugReport) {
+      // Report to Sentry;
+      Sentry.captureException(exception, stackTrace: stack, hint: reason);
+    } else {
+      // Just log
+      debugPrint('Reported error thrown: $logMessage');
+    }
   } else {
     // Just log
-    debugPrint('Unreported error thrown: $exception');
+    debugPrint('Unreported error thrown: $logMessage');
   }
 }
 

@@ -3,7 +3,7 @@ description: CinéTime
 version: 2.8.1+71
 
 environment:
-  sdk: '>=2.15.0 <3.0.0'
+  sdk: '>=3.1.4 <4.0.0'
 
 dependencies:
   flutter:
@@ -13,50 +13,38 @@ dependencies:
   rxdart: 0.26.0  # Stuck on this version for now : https://github.com/ReactiveX/rxdart/issues/603
 
   # Data management
-  shared_preferences: ^2.2.0
+  shared_preferences: ^2.2.2
 
   # Widgets / UI
-  flash: ^3.0.5+1
+  flash: ^3.1.0
   flutter_spinkit: ^5.2.0
   shimmer: ^3.0.0
-  fading_edge_scrollview: ^3.0.0
+  fading_edge_scrollview: ^4.0.0
   photo_view: ^0.14.0
-  chewie: ^1.5.0
+  chewie: ^1.7.5
 
   # Web
-  http: ^0.13.6  # Next version requires flutter_cache_manager > 3.3.0
-  connectivity_plus: ^3.0.6  # Next version requires minSdkVersion >= 19
+  http: ^1.2.0
+  connectivity_plus: ^5.0.2
   flutter_cache_manager: ^3.3.1
-  cached_network_image: ^3.2.3
-  amplitude_flutter: ^3.16.0
+  cached_network_image: ^3.3.1
+  amplitude_flutter: ^3.16.2
 
   # Device
-  device_info_plus: ^8.2.2  # Next version requires minSdkVersion >= 19
-  sentry_flutter: 7.5.2    # Next version requires minSdkVersion >= 19
-  url_launcher: ^6.1.11
-  share_plus: ^6.3.4  # Next version requires minSdkVersion >= 19
-  geolocator: ^9.0.2
-  add_2_calendar: ^2.2.4
+  device_info_plus: ^9.1.2
+  sentry_flutter: ^7.16.0
+  url_launcher: ^6.2.4
+  share_plus: ^7.2.2
+  geolocator: ^10.1.0
+  add_2_calendar: ^3.0.1
 
   # Internationalization
   intl: ^0.18.1
-  timeago: ^3.5.0
-  diacritic: ^0.1.4
-
-  # Other
-  file: ^6.1.4  # TEMP Not used directly, but needed to force dependencies to use updated version
+  timeago: ^3.6.1
+  diacritic: ^0.1.5
 
 dev_dependencies:
-  flutter_lints: ^2.0.2
-
-dependency_overrides:
-  # TEMP fix
-  # See https://github.com/creativecreatorormaybenot/wakelock/issues/202#issuecomment-1545880072
-  wakelock:
-    git:
-      url: https://github.com/miguelmato/wakelock
-      ref: main
-      path: wakelock
+  flutter_lints: ^3.0.1
 
 # The following section is specific to Flutter.
 flutter:
