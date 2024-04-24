@@ -197,9 +197,3 @@ String convertBasicHtmlTags(String htmlText) {
 
   return htmlText.replaceAll(exp, '');
 }
-
-String generateRandomString(int length){
-  final random = Random();
-  const allChars='AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789';
-  return List.generate(length, (index) => allChars[random.nextInt(allChars.length)]).join();
-}
