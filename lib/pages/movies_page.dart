@@ -197,7 +197,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 }
 
 class _SortButton extends StatelessWidget {
-  static const _typesStrings = {
+  static const _typesStrings = {    // OPTI use Dart enum field
     MovieSortType.rating: 'Note',
     MovieSortType.releaseDate: 'Date de sortie',
     MovieSortType.duration: 'Durée',
