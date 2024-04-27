@@ -513,6 +513,13 @@ class ApiClient {
     await StorageService.deleteAuthToken();
   }
 
+  /// Regex to detect invalid token error, so we can clear it and get a new one.
+  /// Error message may vary, and case also.
+  /// Exemples :
+  /// - {"error":"Invalid token."}
+  /// - {"error":"Missing Token"}
+  static final _tokenErrorRegex = RegExp(r'(Invalid Token)|(Missing Token)', caseSensitive: false);
+
   /// Send a graphQL request
   /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)
   Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = useCache, bool enableAutoRetryOnUnauthorized = true }) async {
@@ -534,7 +541,7 @@ class ApiClient {
       return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
     } catch(e) {
       // Unauthorized
-      if (e is HttpResponseException && e.statusCode == 400 && (e.body.contains('InvalidToken') || e.body.contains('MissingToken'))) {
+      if (e is HttpResponseException && e.statusCode == 400 && _tokenErrorRegex.hasMatch(e.body)) {
         // Clear tokens (to get new ones next time)
         await clearAuthToken();
 
@@ -711,11 +718,11 @@ class ApiClient {
       statusCode = r.statusCode != 200 ? '(${r.statusCode}) ' : '';
       if (includeBody) {
         if (responseHandler.isBodyJson) {
-          body = responseHandler.bodyString.removeAllWhitespaces();
+          body = responseHandler.bodyString.removeAllNewLines();
         } else {
           final sizeInKo = ((r.contentLength ?? 0) / 1024).round();
           if (sizeInKo <= 10) {
-            body = responseHandler.bodyString.removeAllWhitespaces();
+            body = responseHandler.bodyString.removeAllNewLines();
           } else {
             body = '$sizeInKo ko';
           }
