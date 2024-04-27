@@ -1,6 +1,6 @@
 name: cinetime
 description: CinéTime
-version: 2.8.2+72
+version: 2.8.4+74
 
 environment:
   sdk: '>=3.1.4 <4.0.0'
@@ -13,38 +13,38 @@ dependencies:
   rxdart: 0.26.0  # Stuck on this version for now : https://github.com/ReactiveX/rxdart/issues/603
 
   # Data management
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.2.3
 
   # Widgets / UI
   flash: ^3.1.0
-  flutter_spinkit: ^5.2.0
+  flutter_spinkit: ^5.2.1
   shimmer: ^3.0.0
-  fading_edge_scrollview: ^4.0.0
-  photo_view: ^0.14.0
-  chewie: ^1.7.5
+  fading_edge_scrollview: ^4.1.1
+  photo_view: ^0.15.0
+  chewie: ^1.8.1
 
   # Web
-  http: ^1.2.0
-  connectivity_plus: ^5.0.2
-  flutter_cache_manager: ^3.3.1
+  http: ^1.2.1
+  connectivity_plus: ^6.0.3
+  flutter_cache_manager: 3.3.1    # Next version requires rxdart > 0.26.0
   cached_network_image: ^3.3.1
   amplitude_flutter: ^3.16.2
 
   # Device
-  device_info_plus: ^9.1.2
-  sentry_flutter: ^7.16.0
-  url_launcher: ^6.2.4
-  share_plus: ^7.2.2
-  geolocator: ^10.1.0
+  device_info_plus: ^10.1.0
+  sentry_flutter: ^7.20.0
+  url_launcher: ^6.2.6
+  share_plus: ^9.0.0
+  geolocator: ^11.0.0
   add_2_calendar: ^3.0.1
 
   # Internationalization
-  intl: ^0.18.1
+  intl: ^0.19.0
   timeago: ^3.6.1
   diacritic: ^0.1.5
 
 dev_dependencies:
-  flutter_lints: ^3.0.1
+  flutter_lints: ^3.0.2
 
 # The following section is specific to Flutter.
 flutter:

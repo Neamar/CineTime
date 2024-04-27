@@ -1,6 +1,9 @@
+// ignore_for_file: prefer_interpolation_to_compose_strings
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';
@@ -29,6 +32,9 @@ class ApiClient {
   //#region Vars
   /// Whether to use mocks or not
   static const useMocks = !kReleaseMode;
+
+  /// Whether to use cache or not
+  static const useCache = true;
 
   /// Mocked [DateTime.now()], to be consistent with mocked data
   static DateTime get mockedNow => useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
@@ -127,7 +133,7 @@ class ApiClient {
     }).toList(growable: false);
   }
 
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = true }) async {
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = useCache }) async {
     // Prepare period
     final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
     final to = from.add(const Duration(days: 8));     // Fetch next 7 days (seventh included)
@@ -446,28 +452,52 @@ class ApiClient {
 
       // Ask for a auth token
       if (authToken == null) {
+        // --- Get Firebase auth token ---
         // Build request
-        const headers = {
-          HttpHeaders.authorizationHeader: 'Ai' + 'dLogin 397273683' + '5735734666:8224063640' + '337276342',
+        const androidPackage = 'com.all' + 'ocine.androidapp';
+        const headers1 = {
+          HttpHeaders.userAgentHeader: 'Dalvik/2.1.0',
+          'X-Android-Cert': 'B708782E3014076A' + '78BDD85B60F77FA797F7A021',
+          'X-Android-Package': androidPackage,
+          'x-firebase-client': 'H4sIAAAAAAAAAKtWykhNLCpJSk0sKV' + 'ayio7VUSpLLSrOzM9TslIyUqoFAFyivEQfAAAA',
+          'x-goog-api-key': 'AIzaSyCqJ4WUpKj-XHx' + 'p2sJakwJN304fpWjq8r8',
+        };
+
+        final appId = _RandomFidGenerator.createRandomFid();
+        const firebaseAppId = '1:84854' + '8993493:android:cadcaabc' + '242a1fc0';
+        final body1 = {
+          "fid": appId,
+          "appId": firebaseAppId,
+          "authVersion": "FIS_v2",
+          "sdkVersion": "a:17.2.0"
+        };
+
+        // Send request
+        final response1 = await _send<JsonObject>(_httpMethodPost, 'https://firebaseinstallations.googleapis.com/v1/projects/al' + 'locine-160' + '815/installations', headers: headers1, bodyJson: body1, useCache: false);
+        final firebaseAuth = response1['authToken']['token'] as String;
+
+        // --- Register device ---
+        // Build request
+        const headers2 = {
+          HttpHeaders.authorizationHeader: 'Ai' + 'dLogin 4024960225' + '512858735:8027018111' + '184442980',
           HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded',
-          HttpHeaders.userAgentHeader: 'com.google.android.gms/225014047',
+          HttpHeaders.userAgentHeader: 'Android-GCM/1.5',
         };
 
         const projectNumber = '84854' + '8993493';
-        final appId = generateRandomString(11);
-        final body = 'X-subtype=$projectNumber&X-X-subscription=$projectNumber&sender=$projectNumber&X-X-subtype=$projectNumber&X-app_ver=435&X-osv=31&X-cliv=iid-12451000&X-gmsv=225014047&X-appid=$appId&X-scope=GRAPH&X-subscription=$projectNumber&X-app_ver_name=9.0.2&app=com.all' + 'ocine.androidapp&device=39727368' + '35735734666&app_ver=435&info=o2hWMhjDAzwYQKri5' + '41rkWWFnLJYgRg&gcm_ver=225014047&plat=0&cert=b708782e3014076a7' + '8bdd85b60f77fa797f7a021&target_ver=33';
+        const appVer = '478';
+        const firebaseHash = 'R1dAH9Ui7M-ynozn' + 'wBdw01tLxhI';
+        final body2 = 'X-subtype=$projectNumber&sender=$projectNumber&X-app_ver=$appVer&X-osv=31&X-cliv=fcm-23.3.1&X-gmsv=225014047&X-appid=$appId&X-scope=*&X-Goog-Firebase-Installations-Auth=$firebaseAuth&X-gmp_app_id=$firebaseAppId&X-firebase-app-name-hash=$firebaseHash&X-app_ver_name=9.4.8&app=$androidPackage&device=40249602' + '25512858735&app_ver=$appVer&info=8z1YwDoyTHcWQKr' + 'i541rkWV1gDFLpRg&gcm_ver=225014047&plat=0&cert=b708782e3014076a7' + '8bdd85b60f77fa797f7a021&target_ver=33';
 
         // Send request
-        try {
-          final response = await _send<String>(_httpMethodPost, 'https://android.apis.google.com/c2dm/regi' + 'ster3', headers: headers, stringBody: body, useCache: false);
-          AnalyticsService.trackEvent('New auth token fetched');
+        final response2 = await _send<String>(_httpMethodPost, 'https://android.apis.google.com/c2dm/regi' + 'ster3', headers: headers2, stringBody: body2, useCache: false);
 
-          // Parse value
-          authToken = response.substring(6); // Remove var name
-        } catch(e) {
-          // Just use an empty token value
-          authToken = '';
-        }
+        // Check for errors (status code is always 200)
+        if (response2.startsWith('Error=')) throw HttpException('Error while registering device: $response2');
+        AnalyticsService.trackEvent('New auth token fetched');
+
+        // Parse value
+        authToken = response2.substring(6); // Remove var name
 
         // Save value
         unawaited(StorageService.saveAuthToken(authToken));
@@ -483,9 +513,16 @@ class ApiClient {
     await StorageService.deleteAuthToken();
   }
 
+  /// Regex to detect invalid token error, so we can clear it and get a new one.
+  /// Error message may vary, and case also.
+  /// Exemples :
+  /// - {"error":"Invalid token."}
+  /// - {"error":"Missing Token"}
+  static final _tokenErrorRegex = RegExp(r'(Invalid Token)|(Missing Token)', caseSensitive: false);
+
   /// Send a graphQL request
   /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)
-  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = true, bool enableAutoRetryOnUnauthorized = true }) async {
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = useCache, bool enableAutoRetryOnUnauthorized = true }) async {
     // Headers
     final headers = {
       'a' + 'c-auth-token': await _getAuthToken(),
@@ -504,7 +541,7 @@ class ApiClient {
       return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
     } catch(e) {
       // Unauthorized
-      if (e is HttpResponseException && e.statusCode == 400 && e.body.contains('Invalid token')) {
+      if (e is HttpResponseException && e.statusCode == 400 && _tokenErrorRegex.hasMatch(e.body)) {
         // Clear tokens (to get new ones next time)
         await clearAuthToken();
 
@@ -525,7 +562,7 @@ class ApiClient {
   }
 
   /// Send a classic request
-  Future<T> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = true}) async {
+  Future<T> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = useCache}) async {
     // Create request
     final request = http.Request(method, Uri.parse(url));
 
@@ -549,7 +586,7 @@ class ApiClient {
   }
 
   /// Send a generic request
-  Future<T> _sendRequest<T>(http.Request request, {bool useCache = true}) async {
+  Future<T> _sendRequest<T>(http.Request request, {bool useCache = useCache}) async {
     // Log
     _log(request: request);
 
@@ -681,11 +718,11 @@ class ApiClient {
       statusCode = r.statusCode != 200 ? '(${r.statusCode}) ' : '';
       if (includeBody) {
         if (responseHandler.isBodyJson) {
-          body = responseHandler.bodyString.removeAllWhitespaces();
+          body = responseHandler.bodyString.removeAllNewLines();
         } else {
           final sizeInKo = ((r.contentLength ?? 0) / 1024).round();
           if (sizeInKo <= 10) {
-            body = responseHandler.bodyString.removeAllWhitespaces();
+            body = responseHandler.bodyString.removeAllNewLines();
           } else {
             body = '$sizeInKo ko';
           }
@@ -765,4 +802,28 @@ class _ResponseHandler {
     }
     return null;
   }
+}
+
+class _RandomFidGenerator {
+  static const int fidLength = 22;
+  static const int fid4BitPrefix = 0x70; // Byte.parseByte("01110000", 2);
+  static const int removePrefixMask = 0x0F; // Byte.parseByte("00001111", 2);
+
+  static String createRandomFid() {
+    final uuid = Random().nextInt(1 << 32);   // If we need a real UUID, we might want to use a package like uuid.
+    final bytesFromUUID = getBytesFromUUID(uuid);
+    final b2 = bytesFromUUID[0];
+    bytesFromUUID[16] = b2;
+    bytesFromUUID[0] = (b2 & removePrefixMask) | fid4BitPrefix;
+    return encodeFidBase64UrlSafe(bytesFromUUID);
+  }
+
+  static List<int> getBytesFromUUID(int uuid) {
+    final buffer = ByteData(17);
+    buffer.setUint64(0, uuid);
+    buffer.setUint64(8, uuid);
+    return buffer.buffer.asUint8List();
+  }
+
+  static String encodeFidBase64UrlSafe(List<int> bytes) => base64Url.encode(bytes).substring(0, fidLength);
 }

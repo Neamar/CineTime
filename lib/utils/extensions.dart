@@ -31,8 +31,11 @@ extension ExtendedString on String {
     return replaceFirst(from, to, startIndex != -1 ? startIndex : 0);
   }
 
-  /// Remove all whitespaces
+  /// Remove all whitespaces characters
   String removeAllWhitespaces() => replaceAll(RegExp(r'\s+'), '');
+
+  /// Remove all new lines characters
+  String removeAllNewLines() => replaceAll(RegExp(r'\n+'), '');
 }
 
 extension ExtendedNum on num {
