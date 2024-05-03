@@ -515,10 +515,12 @@ class ApiClient {
 
   /// Regex to detect invalid token error, so we can clear it and get a new one.
   /// Error message may vary, and case also.
-  /// Exemples :
+  /// Seen examples :
   /// - {"error":"Invalid token."}
   /// - {"error":"Missing Token"}
-  static final _tokenErrorRegex = RegExp(r'(Invalid Token)|(Missing Token)', caseSensitive: false);
+  /// - {"error":"InvalidToken"}
+  /// - {"error":"MissingToken"}
+  static final _tokenErrorRegex = RegExp(r'((Invalid)|(Missing)) ?Token', caseSensitive: false);
 
   /// Send a graphQL request
   /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)
