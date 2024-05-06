@@ -520,7 +520,8 @@ class ApiClient {
   /// - {"error":"Missing Token"}
   /// - {"error":"InvalidToken"}
   /// - {"error":"MissingToken"}
-  static final _tokenErrorRegex = RegExp(r'((Invalid)|(Missing)) ?Token', caseSensitive: false);
+  /// - {"error":"The registration is not found."}
+  static final _tokenErrorRegex = RegExp(r'(((Invalid)|(Missing)) ?Token)|(The registration is not found)', caseSensitive: false);
 
   /// Send a graphQL request
   /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)

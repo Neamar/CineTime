@@ -91,6 +91,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
         final child = () {
           if (snapshot.hasError) {
             return _ErrorWidget(
+              error: snapshot.error as FetchException,
               onRetry: (snapshot.error as FetchException).retry,
               isDense: widget.isDense,
             );
@@ -173,8 +174,9 @@ class _DataWrapper<T> {
 }
 
 class _ErrorWidget extends StatelessWidget {
-  const _ErrorWidget({Key? key, required this.onRetry, this.isDense = false}) : super(key: key);
+  const _ErrorWidget({required this.error, required this.onRetry, this.isDense = false});
 
+  final FetchException error;
   final bool isDense;
   final VoidCallback onRetry;
 
@@ -188,10 +190,14 @@ class _ErrorWidget extends StatelessWidget {
           direction: isDense ? Axis.horizontal : Axis.vertical,
           children: [
             // Icon
-            Icon(
-              Icons.error_outline,
-              color: AppResources.colorRed,
-              size: isDense ? null : 40,
+            Tooltip(
+              triggerMode: TooltipTriggerMode.longPress,
+              message: error.innerException.toString().replaceAll('all' + 'ocine', '***'),
+              child: Icon(
+                Icons.error_outline,
+                color: AppResources.colorRed,
+                size: isDense ? null : 40,
+              ),
             ),
 
             // Caption
