@@ -37,15 +37,13 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
         return true;
       },
       child: ClearFocusBackground(
-        child: Scaffold(    // Needed for background color
-          resizeToAvoidBottomInset: false,
+        child: Scaffold(    // Needed for themed background color & for FetchBuilder error widget display
           body: FetchBuilder.basic<MoviesShowTimes>(
             controller: bloc.fetchController,
             fetchAtInit: false,
             task: bloc.fetch,
             builder: (context, moviesShowtimesData) {
               return Scaffold(
-                resizeToAvoidBottomInset: false,
                 appBar: PreferredSize(
                   preferredSize: const Size.fromHeight(kToolbarHeight),
                   child: BehaviorSubjectBuilder<bool>(
@@ -64,11 +62,11 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   // Theater info
-                                  () {
+                                      () {
                                     final theaters = moviesShowtimesData.theaters;
                                     final theatersCount = theaters.length;
                                     return Text(
-                                      () {
+                                          () {
                                         if (theatersCount == 0) return 'Aucun cinéma sélectionné';
                                         if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
                                         return 'Films dans $theatersCount cinémas';
@@ -172,7 +170,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                       _GhostShowtimesCard(moviesShowtimesData.ghostShowTimes),
 
                   ],
-                )
+                ),
               );
             },
           ),
