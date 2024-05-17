@@ -1,6 +1,7 @@
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
+import 'package:cinetime/widgets/update_app_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rxdart/rxdart.dart';
@@ -193,6 +194,7 @@ class _ErrorWidget extends StatelessWidget {
             // Icon
             Tooltip(
               triggerMode: TooltipTriggerMode.longPress,
+              preferBelow: false,
               message: error.innerException.toString().replaceAll('all' + 'ocine', '***'),
               child: Icon(
                 Icons.error_outline,
@@ -215,6 +217,12 @@ class _ErrorWidget extends StatelessWidget {
                 onPressed: onRetry,
                 child: const Text('Re-essayer'),
               ),
+
+            // Update app
+            if (!isDense)...[
+              AppResources.spacerMedium,
+              const UpdateAppWidget(),
+            ],
           ],
         ),
       ),
