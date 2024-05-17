@@ -11,6 +11,7 @@ dependencies:
 
   # Framework Tools
   rxdart: 0.26.0  # Stuck on this version for now : https://github.com/ReactiveX/rxdart/issues/603
+  collection: ^1.18.0
 
   # Data management
   shared_preferences: ^2.2.3

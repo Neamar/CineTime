@@ -160,10 +160,12 @@ class _TheaterCardState extends State<TheaterCard> {
       await AppService.instance.selectTheater(widget.theater, clearFirst: true);
 
       // Update UI
-      if (context.canPop)
-        Navigator.of(context).pop(!widget.multiSelectionMode);
-      else
-        navigateTo(context, (_) => const MoviesPage(), clearHistory: true);
+      if (mounted) {
+        if (context.canPop)
+          Navigator.of(context).pop(!widget.multiSelectionMode);
+        else
+          navigateTo(context, (_) => const MoviesPage(), clearHistory: true);
+      }
     }
   }
 

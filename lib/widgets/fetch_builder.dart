@@ -70,7 +70,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
   final bool fade;
 
   @override
-  _FetchBuilderState createState() => _FetchBuilderState<T, R>();
+  State<FetchBuilder<T, R>> createState() => _FetchBuilderState<T, R>();
 }
 
 class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
@@ -150,7 +150,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
       // Update UI
       if (isTaskValid()) {
         data.addError(FetchException(e, () => _fetch(param: param)));
-        showError(context, e);
+        if (mounted) showError(context, e);
       }
     }
     return null;

@@ -12,7 +12,7 @@ class TheatersPage extends StatefulWidget {
   const TheatersPage();
 
   @override
-  _TheatersPageState createState() => _TheatersPageState();
+  State<TheatersPage> createState() => _TheatersPageState();
 }
 
 class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersPage, TheatersPageBloc>, MultiSelectionMode<TheatersPage> {
@@ -61,7 +61,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
   Future<void> _goToSearchPage() async {
     final singleSelectionMode = await navigateTo<bool>(context, (_) => const TheaterSearchPage());
     if (singleSelectionMode == true) {
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
     } else {
       autoUpdateSelectionMode();
       bloc.refresh();

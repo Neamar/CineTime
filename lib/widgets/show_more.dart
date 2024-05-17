@@ -12,7 +12,7 @@ class ShowMoreText extends StatefulWidget {
   final double collapsedHeight;
 
   @override
-  _ShowMoreTextState createState() => _ShowMoreTextState();
+  State<ShowMoreText> createState() => _ShowMoreTextState();
 }
 
 class _ShowMoreTextState extends State<ShowMoreText> {

@@ -12,7 +12,7 @@ class TheaterSearchPage extends StatefulWidget {
   const TheaterSearchPage();
 
   @override
-  _TheaterSearchPageState createState() => _TheaterSearchPageState();
+  State<TheaterSearchPage> createState() => _TheaterSearchPageState();
 }
 
 class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider<TheaterSearchPage, TheaterSearchPageBloc>, MultiSelectionMode<TheaterSearchPage> {

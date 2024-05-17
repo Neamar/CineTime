@@ -758,16 +758,15 @@ class ApiClient {
   }
 
   static Future<void> throwIfNoInternet() async {
-    if (!(await isConnectedToInternet())) {
+    if (await isOffline()) {
       debugPrint('API (✕) NO INTERNET');
       throw const ConnectivityException(ConnectivityExceptionType.noInternet);
     }
   }
 
-  static Future<bool> isConnectedToInternet() async {
-    final connectivityResult = await (Connectivity().checkConnectivity());
-    return connectivityResult != ConnectivityResult.none;
-  }
+  static Future<bool> isOffline() async => (await Connectivity().checkConnectivity()).contains(ConnectivityResult.none);
+
+  static Future<bool> isOnline() async => !(await isOffline());
 
   static bool isHttpSuccessCode (int httpStatusCode) => httpStatusCode >= 200 && httpStatusCode < 300;
   //#endregion

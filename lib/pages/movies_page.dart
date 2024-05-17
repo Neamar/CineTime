@@ -9,7 +9,6 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -463,7 +462,7 @@ class MoviesPageBloc with Disposable {
       AnalyticsService.trackEvent('Sort order', {
         'theatersId': _theaters.toIdListString(),
         'theaterCount': _theaters.length,
-        'sortType': describeEnum(value),
+        'sortType': value.name,
       });
     });
 
