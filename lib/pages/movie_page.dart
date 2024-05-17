@@ -383,7 +383,7 @@ class HeroPoster extends StatelessWidget {
 }
 
 class SynopsisWidget extends StatelessWidget {
-  static const collapsedHeight = 48.0;
+  static const collapsedHeight = 80.0;
 
   const SynopsisWidget({super.key, required this.movieId});
 
