@@ -74,9 +74,9 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                   ),
                   TextButton(
                     onPressed: _openMovieDataSheetWebPage,
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
+                      children: <Widget>[
                         Icon(
                           CineTimeIcons.link_ext,
                           color: Colors.white,
@@ -132,7 +132,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                               children: <Widget>[
                                 Text(
                                   widget.movieShowTimes.movie.title,
-                                  style: context.textTheme.headline6,
+                                  style: context.textTheme.titleLarge,
                                 ),
                                 if (widget.movieShowTimes.movie.directors != null)
                                   TextWithLabel(
@@ -212,7 +212,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                 // Title
                                 Text(
                                   'Séances',
-                                  style: context.textTheme.headline6,
+                                  style: context.textTheme.titleLarge,
                                 ),
 
                                 // Filters
@@ -276,7 +276,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                 ),
                               ),
                             );
-                          }).toList(growable: false),
+                          }),
                           AppResources.spacerMedium,
 
                         ],
@@ -339,7 +339,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 }
 
 class HeroPoster extends StatelessWidget {
-  const HeroPoster({Key? key, this.posterPath, required this.borderRadius}) : super(key: key);
+  const HeroPoster({super.key, this.posterPath, required this.borderRadius});
 
   final String? posterPath;
   final BorderRadius borderRadius;
@@ -385,7 +385,7 @@ class HeroPoster extends StatelessWidget {
 class SynopsisWidget extends StatelessWidget {
   static const collapsedHeight = 48.0;
 
-  const SynopsisWidget({Key? key, required this.movieId}) : super(key: key);
+  const SynopsisWidget({super.key, required this.movieId});
 
   final ApiId movieId;
 
@@ -427,7 +427,7 @@ class SynopsisWidget extends StatelessWidget {
 }
 
 class _TagFilterSelector extends StatelessWidget {
-  const _TagFilterSelector({Key? key, required this.options, required this.selected, this.onChanged}) : super(key: key);
+  const _TagFilterSelector({required this.options, required this.selected, this.onChanged});
 
   final List<ShowTimeSpec> options;
   final ShowTimeSpec selected;
@@ -455,12 +455,12 @@ class _TagFilterSelector extends StatelessWidget {
 
 class TheaterShowTimesWidget extends StatelessWidget {
   const TheaterShowTimesWidget({
-    Key? key,
+    super.key,
     required this.theaterName,
     required this.showTimes,
     required this.filterName,
     this.onShowtimePressed,
-  }) : super(key: key);
+  });
 
   final String theaterName;
   final List<DayShowTimes> showTimes;
@@ -476,7 +476,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
         // Theater name
         Text(
           theaterName,
-          style: context.textTheme.headline6,
+          style: context.textTheme.titleLarge,
         ),
 
         // Showtimes
@@ -505,12 +505,11 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
 class _DayShowTimes extends StatelessWidget {
   const _DayShowTimes({
-    Key? key,
     required this.day,
     required this.showtimes,
     this.backgroundColor,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final Date day;
   final List<ShowTime?> showtimes;
@@ -530,14 +529,14 @@ class _DayShowTimes extends StatelessWidget {
           // Week day
           Text(
             AppResources.weekdayNames[day.weekday]!,
-            style: context.textTheme.subtitle1,
+            style: context.textTheme.titleMedium,
           ),
 
           // Day
           AppResources.spacerTiny,
           Text(
             day.day.toString(),
-            style: context.textTheme.headline6,
+            style: context.textTheme.titleLarge,
           ),
 
           // Times

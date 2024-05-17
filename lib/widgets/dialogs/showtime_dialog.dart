@@ -8,12 +8,12 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class ShowtimeDialog extends StatelessWidget {
   ShowtimeDialog({
-    Key? key,
+    super.key,
     this.movie,
     required this.theater,
     required this.showtime,
   }) :  movieTitle = movie?.title ?? 'Titre inconnu',
-        dateDisplay = AppResources.formatterFullDateTime.format(showtime.dateTime), super(key: key);
+        dateDisplay = AppResources.formatterFullDateTime.format(showtime.dateTime);
 
   final Movie? movie;
   final String movieTitle;
@@ -46,25 +46,25 @@ class ShowtimeDialog extends StatelessWidget {
         children: [
           Text(
             movieTitle,
-            style: context.textTheme.headline4,
+            style: context.textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
           AppResources.spacerLarge,
           Text(
             theater.name,
-            style: context.textTheme.headline6,
+            style: context.textTheme.titleLarge,
             textAlign: TextAlign.center,
           ),
           AppResources.spacerSmall,
           Text(
             dateDisplay,
-            style: context.textTheme.subtitle1,
+            style: context.textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
           AppResources.spacerSmall,
           Text(
             showtime.spec.toString(),
-            style: context.textTheme.headline6,
+            style: context.textTheme.titleLarge,
           ),
           AppResources.spacerLarge,
           Row(
@@ -112,8 +112,8 @@ $dateDisplay'''
 
   Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
     title: 'Cinema : $movieTitle',    // Adding 'Cinema' to the title makes Google Calendar show a nice picture automatically, make it easier to find in the calendar
-    description: 'Séance de cinéma pour $movieTitle en ${showtime.spec}' + (showtime.ticketingUrl != null ? '\n\nRéservation:\n${showtime.ticketingUrl}' : ''),
-    location: theater.name + '\n' + theater.fullAddress,
+    description: 'Séance de cinéma pour $movieTitle en ${showtime.spec}${showtime.ticketingUrl != null ? '\n\nRéservation:\n${showtime.ticketingUrl}' : ''}',
+    location: '${theater.name}\n${theater.fullAddress}',
     startDate: showtime.dateTime,
     endDate: showtime.dateTime.add(movie?.duration ?? const Duration(hours: 2)),
   ));

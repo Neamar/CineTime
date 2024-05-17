@@ -32,7 +32,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
 
   /// A [FetchBuilder] where [controller.refresh()] takes a parameter that will be passed to [task].
   const FetchBuilder.withParam({
-    Key? key,
+    super.key,
     this.controller,
     required this.task,
     this.fetchAtInit = true,
@@ -41,7 +41,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
     this.onSuccess,
     this.isDense = false,
     this.fade = true,
-  }) : super(key: key);
+  });
 
   /// Task that fetch and return the data, with optional parameter
   /// If task throws, it will be properly handled (message displayed + report error)
@@ -153,6 +153,7 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
         showError(context, e);
       }
     }
+    return null;
   }
 
   Future<R?> refresh([T? param]) => _fetch(param: param, clearDataFirst: true);
@@ -211,8 +212,8 @@ class _ErrorWidget extends StatelessWidget {
             ]
             else
               TextButton(
-                child: const Text('Re-essayer'),
                 onPressed: onRetry,
+                child: const Text('Re-essayer'),
               ),
           ],
         ),

@@ -11,12 +11,12 @@ class EmptySearchResultMessage extends StatelessWidget {
     imageAssetPath: 'assets/empty.png',
   );
 
-  const EmptySearchResultMessage({Key? key,
+  const EmptySearchResultMessage({super.key,
     required this.icon,
     required this.message,
     required this.backgroundColor,
     required this.imageAssetPath,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String message;
@@ -46,7 +46,7 @@ class EmptySearchResultMessage extends StatelessWidget {
                   Text(
                     lines[i],
                     textAlign: TextAlign.center,
-                    style: (i.isOdd ? textTheme.headline5 : textTheme.headline6)?.copyWith(color: AppResources.colorLightGrey),
+                    style: (i.isOdd ? textTheme.headlineSmall : textTheme.titleLarge)?.copyWith(color: AppResources.colorLightGrey),
                   ),
               ],
             ),

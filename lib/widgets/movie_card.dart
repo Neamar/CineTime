@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import '_widgets.dart';
 
 class MovieCard extends StatelessWidget {
-  const MovieCard({Key? key, required this.movieShowTimes, this.showTheaterName = true}) : super(key: key);
+  const MovieCard({super.key, required this.movieShowTimes, this.showTheaterName = true});
 
   final MovieShowTimes movieShowTimes;
   final bool showTheaterName;
@@ -64,7 +64,7 @@ class MovieCard extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       movieShowTimes.movie.title,
-                                      style: context.textTheme.headline6,
+                                      style: context.textTheme.titleLarge,
                                       overflow: TextOverflow.fade,
                                       softWrap: false,
                                     ),
@@ -117,7 +117,7 @@ class MovieCard extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       showTheaterName ? theaterShowTimes.theater.name : '',
-                                      style: context.textTheme.caption,
+                                      style: context.textTheme.bodySmall,
                                       softWrap: false,
                                       overflow: TextOverflow.fade,
                                     ),
@@ -127,7 +127,7 @@ class MovieCard extends StatelessWidget {
                                   AppResources.spacerMedium,
                                   Text(
                                     theaterShowTimes.showTimesSummary!,
-                                    style: context.textTheme.caption,
+                                    style: context.textTheme.bodySmall,
                                   ),
 
                                 ],

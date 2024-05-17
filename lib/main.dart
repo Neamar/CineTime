@@ -66,7 +66,7 @@ class App extends StatelessWidget {
   /// Global key for the App's main navigator
   static final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
-  const App({Key? key}) : super(key: key);
+  const App({super.key});
 
   /// The [BuildContext] of the main navigator.
   /// We may use this on showMessage, showError, openDialog, etc.

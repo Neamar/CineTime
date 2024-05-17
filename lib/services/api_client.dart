@@ -466,10 +466,10 @@ class ApiClient {
         final appId = _RandomFidGenerator.createRandomFid();
         const firebaseAppId = '1:84854' + '8993493:android:cadcaabc' + '242a1fc0';
         final body1 = {
-          "fid": appId,
-          "appId": firebaseAppId,
-          "authVersion": "FIS_v2",
-          "sdkVersion": "a:17.2.0"
+          'fid': appId,
+          'appId': firebaseAppId,
+          'authVersion': 'FIS_v2',
+          'sdkVersion': 'a:17.2.0'
         };
 
         // Send request

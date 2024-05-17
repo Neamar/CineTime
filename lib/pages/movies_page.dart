@@ -74,7 +74,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                         if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
                                         return 'Films dans $theatersCount cinémas';
                                       }(),
-                                      style: context.textTheme.bodyText2?.copyWith(color: Colors.white),
+                                      style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                     );
@@ -84,7 +84,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                   AppResources.spacerTiny,
                                   Text(
                                     dayFilter != null ? 'Le ${dayFilter.toDayString()}' : moviesShowtimesData.periodDisplay,
-                                    style: context.textTheme.caption?.copyWith(color: AppResources.colorGrey),
+                                    style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
                                   ),
                                 ],
                               ),
@@ -135,7 +135,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                               ),
                             ),
                             autofocus: true,
-                            style: context.textTheme.subtitle1?.copyWith(color: Colors.white),
+                            style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
                             textInputAction: TextInputAction.search,
                           ),
                         );
@@ -204,7 +204,6 @@ class _SortButton extends StatelessWidget {
   };
 
   const _SortButton({
-    Key? key,
     required this.sortValue,
     required this.onSortChanged,
     required this.dayFilterValue,
@@ -212,7 +211,7 @@ class _SortButton extends StatelessWidget {
     required this.dayFilterTo,
     required this.daysWithShow,
     required this.onDayFilterChanged,
-  }) : super(key: key);
+  });
 
   /// Current sort value
   final MovieSortType sortValue;
@@ -253,7 +252,7 @@ class _SortButton extends StatelessWidget {
         }
       },
       itemBuilder: (context) {
-        final textStyle = context.textTheme.subtitle1;
+        final textStyle = context.textTheme.titleMedium;
         TextStyle? buildTextStyle(bool isSelected, {Color? color}) {
           return textStyle?.copyWith(color: isSelected ? Theme.of(context).primaryColor : color);
         }
@@ -296,11 +295,11 @@ class _SortButton extends StatelessWidget {
 
 class _FilteredMovieListView extends StatefulWidget {
   const _FilteredMovieListView({
-    Key? key,
+    super.key,
     required this.moviesShowTimes,
     required this.showTheaterName,
     required this.filterSort,
-  }) : super(key: key);
+  });
 
   final List<MovieShowTimes> moviesShowTimes;
   final bool showTheaterName;
@@ -383,13 +382,13 @@ class _FilterSortData {
 }
 
 class _GhostShowtimesCard extends StatelessWidget {
-  const _GhostShowtimesCard(this.ghostShowTimes, {Key? key}) : super(key: key);
+  const _GhostShowtimesCard(this.ghostShowTimes);
 
   final List<TheaterShowTimes> ghostShowTimes;
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = context.textTheme.caption;
+    final textStyle = context.textTheme.bodySmall;
     return Padding(
       padding: const EdgeInsets.all(5),
       child: Column(

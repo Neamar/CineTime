@@ -17,13 +17,13 @@ class CtProgressIndicator extends StatelessWidget {
 
 class CtCachedImage extends StatelessWidget {
   const CtCachedImage({
-    Key? key,
+    super.key,
     this.path,
     this.isThumbnail = false,
     this.applyDarken = false,
     this.placeHolderBackground = false,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final String? path;
   final bool isThumbnail;
@@ -61,7 +61,7 @@ class CtCachedImage extends StatelessWidget {
 }
 
 class CtAnimatedSwitcher extends StatelessWidget {
-  const CtAnimatedSwitcher({Key? key, this.child, this.sizeAnimation = false}) : super(key: key);
+  const CtAnimatedSwitcher({super.key, this.child, this.sizeAnimation = false});
 
   /// The current child widget to display
   final Widget? child;
@@ -75,7 +75,7 @@ class CtAnimatedSwitcher extends StatelessWidget {
     return AnimatedSwitcher(
       duration: AppResources.durationAnimationMedium,
       transitionBuilder: sizeAnimation == true
-        ? (child, animation) => FadeTransition(child: SizeTransition(child: child, sizeFactor: animation, axisAlignment: -1), opacity: animation)
+        ? (child, animation) => FadeTransition(opacity: animation, child: SizeTransition(sizeFactor: animation, axisAlignment: -1, child: child))
         : AnimatedSwitcher.defaultTransitionBuilder,
       layoutBuilder: _animatedSwitcherLayoutBuilder,
       child: child,
@@ -85,11 +85,11 @@ class CtAnimatedSwitcher extends StatelessWidget {
   /// Copied from AnimatedSwitcher.defaultLayoutBuilder
   static Widget _animatedSwitcherLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
+      alignment: Alignment.topLeft,
       children: <Widget>[
         ...previousChildren,
         if (currentChild != null) currentChild,
       ],
-      alignment: Alignment.topLeft,
     );
   }
 }

@@ -13,7 +13,7 @@ extension ExtendedString on String {
   String decodeBase64() => utf8.decode(base64.decode(this));
   String toBase64() => base64.encode(utf8.encode(this));
 
-  String plural(int count) => '$count ${this}${count > 1 ? 's' : ''}';
+  String plural(int count) => '$count $this${count > 1 ? 's' : ''}';
 
   /// Return the string with first character converted to capital (uppercase) letter
   String get capitalized {
@@ -209,12 +209,12 @@ extension ExtendedDateTime on DateTime {
     if (!withDay && !withMonth)
       return formattedDate;
 
-    formattedDate += ' ' + day.toTwoDigitsString();
+    formattedDate += ' ${day.toTwoDigitsString()}';
 
     if (!withMonth)
       return formattedDate;
 
-    return formattedDate + ' ' + AppResources.formatterMonth.format(this);
+    return '$formattedDate ${AppResources.formatterMonth.format(this)}';
   }
 }
 

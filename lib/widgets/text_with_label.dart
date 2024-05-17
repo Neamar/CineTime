@@ -6,7 +6,7 @@ class TextWithLabel extends StatelessWidget {
   final String label;
   final String text;
 
-  const TextWithLabel({Key? key, required this.label, required this.text}) : super(key: key);
+  const TextWithLabel({super.key, required this.label, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class TextWithLabel extends StatelessWidget {
       children: <Widget>[
         Text(
           label,
-          style: context.textTheme.caption,
+          style: context.textTheme.bodySmall,
         ),
         AppResources.spacerTiny,
         Flexible(

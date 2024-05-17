@@ -54,7 +54,7 @@ ThemeData appTheme({bool darkMode = false}) {
       displayColor: foregroundColor,
     ),
     inputDecorationTheme: InputDecorationTheme(
-      hintStyle: theme.textTheme.bodyText2?.copyWith(color: AppResources.colorDarkRed),
+      hintStyle: theme.textTheme.bodyMedium?.copyWith(color: AppResources.colorDarkRed),
       prefixIconColor: inputDecorationIconColor,
       suffixIconColor: inputDecorationIconColor,
       enabledBorder: const OutlineInputBorder(

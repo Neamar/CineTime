@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'themed_widgets.dart';
 
 class ShowMoreText extends StatefulWidget {
-  const ShowMoreText({Key? key, this.header, required this.text, required this.collapsedHeight}) : super(key: key);
+  const ShowMoreText({super.key, this.header, required this.text, required this.collapsedHeight});
 
   final String? header;
   final String text;
@@ -26,10 +26,10 @@ class _ShowMoreTextState extends State<ShowMoreText> {
         child: () {
           final text = RichText(
             text: TextSpan(
-              style: context.textTheme.bodyText2,
+              style: context.textTheme.bodyMedium,
               children: [
                 if (widget.header != null)...[
-                  TextSpan(text: widget.header! + '\n', style: const TextStyle(color: AppResources.colorDarkRed, fontWeight: FontWeight.w500)),
+                  TextSpan(text: '${widget.header!}\n', style: const TextStyle(color: AppResources.colorDarkRed, fontWeight: FontWeight.w500)),
                   WidgetSpan(child: SizedBox(height: AppResources.spacerTiny.height, width: double.infinity)),
                 ],
                 TextSpan(text: widget.text),
