@@ -33,22 +33,25 @@ class EmptySearchResultMessage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  color: AppResources.colorLightGrey,
-                  size: 50,
-                ),
-                AppResources.spacerLarge,
-                for(int i = 0; i < lines.length; i++)
-                  Text(
-                    lines[i],
-                    textAlign: TextAlign.center,
-                    style: (i.isOdd ? textTheme.headlineSmall : textTheme.titleLarge)?.copyWith(color: AppResources.colorLightGrey),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: AppResources.colorLightGrey,
+                    size: 50,
                   ),
-              ],
+                  AppResources.spacerLarge,
+                  for(int i = 0; i < lines.length; i++)
+                    Text(
+                      lines[i],
+                      textAlign: TextAlign.center,
+                      style: (i.isOdd ? textTheme.headlineSmall : textTheme.titleLarge)?.copyWith(color: AppResources.colorLightGrey),
+                    ),
+                ],
+              ),
             ),
           ),
 
