@@ -38,7 +38,7 @@ class TrailerPage extends StatelessWidget {
 }
 
 class _VideoPlayerWidget extends StatefulWidget {
-  const _VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
+  const _VideoPlayerWidget({required this.videoUrl});
 
   final String videoUrl;
 

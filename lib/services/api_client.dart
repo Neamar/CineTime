@@ -466,10 +466,10 @@ class ApiClient {
         final appId = _RandomFidGenerator.createRandomFid();
         const firebaseAppId = '1:84854' + '8993493:android:cadcaabc' + '242a1fc0';
         final body1 = {
-          "fid": appId,
-          "appId": firebaseAppId,
-          "authVersion": "FIS_v2",
-          "sdkVersion": "a:17.2.0"
+          'fid': appId,
+          'appId': firebaseAppId,
+          'authVersion': 'FIS_v2',
+          'sdkVersion': 'a:17.2.0'
         };
 
         // Send request
@@ -758,16 +758,15 @@ class ApiClient {
   }
 
   static Future<void> throwIfNoInternet() async {
-    if (!(await isConnectedToInternet())) {
+    if (await isOffline()) {
       debugPrint('API (✕) NO INTERNET');
       throw const ConnectivityException(ConnectivityExceptionType.noInternet);
     }
   }
 
-  static Future<bool> isConnectedToInternet() async {
-    final connectivityResult = await (Connectivity().checkConnectivity());
-    return connectivityResult != ConnectivityResult.none;
-  }
+  static Future<bool> isOffline() async => (await Connectivity().checkConnectivity()).contains(ConnectivityResult.none);
+
+  static Future<bool> isOnline() async => !(await isOffline());
 
   static bool isHttpSuccessCode (int httpStatusCode) => httpStatusCode >= 200 && httpStatusCode < 300;
   //#endregion

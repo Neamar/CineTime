@@ -1,7 +1,7 @@
 import 'displayable_exception.dart';
 
 class DetailedException extends DisplayableException {
-  const DetailedException(String message, { this.details }) : super(message);
+  const DetailedException(super.message, { this.details });
 
   final Object? details;
 

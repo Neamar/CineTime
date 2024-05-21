@@ -1,6 +1,7 @@
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
+import 'package:cinetime/widgets/update_app_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rxdart/rxdart.dart';
@@ -32,7 +33,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
 
   /// A [FetchBuilder] where [controller.refresh()] takes a parameter that will be passed to [task].
   const FetchBuilder.withParam({
-    Key? key,
+    super.key,
     this.controller,
     required this.task,
     this.fetchAtInit = true,
@@ -41,7 +42,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
     this.onSuccess,
     this.isDense = false,
     this.fade = true,
-  }) : super(key: key);
+  });
 
   /// Task that fetch and return the data, with optional parameter
   /// If task throws, it will be properly handled (message displayed + report error)
@@ -70,7 +71,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
   final bool fade;
 
   @override
-  _FetchBuilderState createState() => _FetchBuilderState<T, R>();
+  State<FetchBuilder<T, R>> createState() => _FetchBuilderState<T, R>();
 }
 
 class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
@@ -150,9 +151,10 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
       // Update UI
       if (isTaskValid()) {
         data.addError(FetchException(e, () => _fetch(param: param)));
-        showError(context, e);
+        if (mounted) showError(context, e);
       }
     }
+    return null;
   }
 
   Future<R?> refresh([T? param]) => _fetch(param: param, clearDataFirst: true);
@@ -192,6 +194,7 @@ class _ErrorWidget extends StatelessWidget {
             // Icon
             Tooltip(
               triggerMode: TooltipTriggerMode.longPress,
+              preferBelow: false,
               message: error.innerException.toString().replaceAll('all' + 'ocine', '***'),
               child: Icon(
                 Icons.error_outline,
@@ -211,9 +214,15 @@ class _ErrorWidget extends StatelessWidget {
             ]
             else
               TextButton(
-                child: const Text('Re-essayer'),
                 onPressed: onRetry,
+                child: const Text('Re-essayer'),
               ),
+
+            // Update app
+            if (!isDense)...[
+              AppResources.spacerMedium,
+              const UpdateAppWidget(),
+            ],
           ],
         ),
       ),

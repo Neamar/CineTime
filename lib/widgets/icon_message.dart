@@ -12,7 +12,7 @@ class IconMessage extends StatelessWidget {
   final bool redIcon;
   final Color? textColor;
 
-  const IconMessage({Key? key, required this.icon, required this.message, this.tooltip, this.inline = false, this.redIcon = false, this.textColor}) : super(key: key);
+  const IconMessage({super.key, required this.icon, required this.message, this.tooltip, this.inline = false, this.redIcon = false, this.textColor});
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +24,8 @@ class IconMessage extends StatelessWidget {
 
     if (tooltip != null)
       text = Tooltip(
-        child: text,
         message: tooltip!,
+        child: text,
       );
 
     return Flex(

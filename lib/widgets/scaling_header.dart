@@ -84,7 +84,7 @@ class ScalingHeader extends StatefulWidget {
   final double overlapContentRadius;
 
   @override
-  _ScalingHeaderState createState() => _ScalingHeaderState();
+  State<ScalingHeader> createState() => _ScalingHeaderState();
 }
 
 class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProviderStateMixin {

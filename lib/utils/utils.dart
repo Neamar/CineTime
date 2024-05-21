@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:cinetime/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -185,8 +184,9 @@ String convertBasicHtmlTags(String htmlText) {
   // Replace all remaining line break
   htmlText = htmlText.replaceAll('<br>', '\n');
 
-  // Replace all html spaces by space
+  // Replace basic html chars
   htmlText = htmlText.replaceAll('&nbsp;', ' ');
+  htmlText = htmlText.replaceAll('&#039;', "'");
 
   // Remove other tags
   RegExp exp = RegExp(

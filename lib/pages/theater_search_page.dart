@@ -12,7 +12,7 @@ class TheaterSearchPage extends StatefulWidget {
   const TheaterSearchPage();
 
   @override
-  _TheaterSearchPageState createState() => _TheaterSearchPageState();
+  State<TheaterSearchPage> createState() => _TheaterSearchPageState();
 }
 
 class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider<TheaterSearchPage, TheaterSearchPageBloc>, MultiSelectionMode<TheaterSearchPage> {
@@ -29,7 +29,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             decoration: const InputDecoration(
               hintText: 'Nom ou adresse',
             ),
-            style: context.textTheme.subtitle1?.copyWith(color: Colors.white),
+            style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
             textInputAction: TextInputAction.search,
             onSubmitted: bloc.startQuerySearch,
           ),

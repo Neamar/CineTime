@@ -12,7 +12,7 @@ class TheatersPage extends StatefulWidget {
   const TheatersPage();
 
   @override
-  _TheatersPageState createState() => _TheatersPageState();
+  State<TheatersPage> createState() => _TheatersPageState();
 }
 
 class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersPage, TheatersPageBloc>, MultiSelectionMode<TheatersPage> {
@@ -61,7 +61,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
   Future<void> _goToSearchPage() async {
     final singleSelectionMode = await navigateTo<bool>(context, (_) => const TheaterSearchPage());
     if (singleSelectionMode == true) {
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
     } else {
       autoUpdateSelectionMode();
       bloc.refresh();
@@ -70,7 +70,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
 }
 
 class MultiSelectionModeButton extends StatelessWidget {
-  const MultiSelectionModeButton({Key? key, this.onPressed}) : super(key: key);
+  const MultiSelectionModeButton({super.key, this.onPressed});
 
   final VoidCallback? onPressed;
 
@@ -108,7 +108,7 @@ mixin MultiSelectionMode<T extends StatefulWidget> on State<T> {
     });
 
     // Display a message
-    showMessage(context, 'Sélection multiple de cinéma '  + (multiSelectionMode ? 'activée' : 'désactivée'));
+    showMessage(context, 'Sélection multiple de cinéma ${multiSelectionMode ? 'activée' : 'désactivée'}');
   }
 }
 

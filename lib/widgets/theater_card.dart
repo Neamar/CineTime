@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 class TheaterCard extends StatefulWidget {
   static const height = 85.0;     // Allow 3 lines addresses to fit
 
-  const TheaterCard({Key? key, required this.theater, this.multiSelectionMode = false, this.onLongPress}) : super(key: key);
+  const TheaterCard({super.key, required this.theater, this.multiSelectionMode = false, this.onLongPress});
 
   /// Theater
   final Theater theater;
@@ -80,7 +80,7 @@ class _TheaterCardState extends State<TheaterCard> {
                             Flexible(
                               child: Text(
                                 widget.theater.name,
-                                style: context.textTheme.subtitle1,
+                                style: context.textTheme.titleMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -90,7 +90,7 @@ class _TheaterCardState extends State<TheaterCard> {
                             if (widget.theater.distanceDisplay != null)
                               Text(
                                 ' à ${widget.theater.distanceDisplay!}',
-                                style: context.textTheme.bodyText2?.copyWith(color: context.textTheme.bodyText2?.color?.withOpacity(0.5)),
+                                style: context.textTheme.bodyMedium?.copyWith(color: context.textTheme.bodyMedium?.color?.withOpacity(0.5)),
                               ),
 
                             // Spacer for favorite button
@@ -100,7 +100,7 @@ class _TheaterCardState extends State<TheaterCard> {
                         const Spacer(),
                         Text(
                           widget.theater.fullAddress,
-                          style: context.textTheme.caption,
+                          style: context.textTheme.bodySmall,
                         ),
                       ],
                     ),
@@ -122,6 +122,7 @@ class _TheaterCardState extends State<TheaterCard> {
               child: SizedBox.fromSize(
                 size: const Size.square(50),
                 child: InkWell(
+                  onTap: _onFavoriteTap,
                   child: const Align(
                     alignment: Alignment.topRight,
                     child: Padding(
@@ -133,7 +134,6 @@ class _TheaterCardState extends State<TheaterCard> {
                       ),
                     ),
                   ),
-                  onTap: _onFavoriteTap,
                 ),
               ),
             ),
@@ -160,10 +160,12 @@ class _TheaterCardState extends State<TheaterCard> {
       await AppService.instance.selectTheater(widget.theater, clearFirst: true);
 
       // Update UI
-      if (context.canPop)
-        Navigator.of(context).pop(!widget.multiSelectionMode);
-      else
-        navigateTo(context, (_) => const MoviesPage(), clearHistory: true);
+      if (mounted) {
+        if (context.canPop)
+          Navigator.of(context).pop(!widget.multiSelectionMode);
+        else
+          navigateTo(context, (_) => const MoviesPage(), clearHistory: true);
+      }
     }
   }
 
