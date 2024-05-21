@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';

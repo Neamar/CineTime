@@ -3,3 +3,4 @@ export 'utils.dart';
 export 'message.dart';
 export 'abstracts/bloc_provider.dart';
 export 'abstracts/disposable.dart';
+export 'package:collection/collection.dart';

@@ -102,38 +102,11 @@ extension ExtendedBehaviorSubject<T> on BehaviorSubject<T> {
 }
 
 extension ExtendedIterable<T> on Iterable<T> {
-  T? elementAtOrDefault(int? index, [T? defaultReturn]) {
-    if (index == null || index < 0 || index >= length) return defaultReturn;
+  /// Get element at [index], and return null if not in range.
+  /// [index] can be negative (whereas the collection package's one throws).
+  T? elementAtOrNull(int? index) {
+    if (index == null || index < 0 || index >= length) return null;
     return elementAt(index);
-  }
-
-  /// The first element satisfying test, or null if there are none.
-  /// Copied from Flutter.collection package
-  /// https://api.flutter.dev/flutter/package-collection_collection/IterableExtension/firstWhereOrNull.html
-  T? firstWhereOrNull(bool Function(T element) test) {
-    for (var element in this) {
-      if (test(element)) return element;
-    }
-    return null;
-  }
-
-  T? elementAtOrNull(int index) {
-    if (index < 0 || index >= length)
-      return null;
-    return elementAt(index);
-  }
-
-  T? get firstOrNull {
-    if (isEmpty) return null;
-    return first;
-  }
-
-  Iterable<E> mapIndexed<E>(E Function(int index, T item) f) sync* {
-    var index = 0;
-    for (final item in this) {
-      yield f(index, item);
-      index++;
-    }
   }
 }
 
@@ -149,12 +122,6 @@ extension ExtendedList<T> on List<T> {
     if (length > 1) {
       for (var i = length - 1; i > 0; i--) insert(i, item);
     }
-  }
-
-  T? elementAtOrNull(int index) {
-    if (index < 0 || index >= length)
-      return null;
-    return elementAt(index);
   }
 
   /// Return true if this list's content is equals to [other]'s.
