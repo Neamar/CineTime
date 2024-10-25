@@ -49,7 +49,7 @@ android {
     defaultConfig {
         applicationId "fr.neamar.cinetime"
         minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
