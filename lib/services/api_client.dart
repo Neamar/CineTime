@@ -445,6 +445,9 @@ class ApiClient {
   /// Get an auth token for GraphQL request.
   /// Usually one per device.
   Future<String> _getAuthToken() async {
+    // TEMP logic has completely changed, this is a temporary fix using a hardcoded value
+    return 'fyLro_zsTKG8gP8m365k7r:APA91bH4aPzBejBUFIrPJSFH_iXa3P0xD6WkrM1oFbx_mSPuG1-R1A-fSRIKotgppimARubThI2R-0AoR78aGg5RkzsYSUuPMSNck-wpzR2zAI4oXZzykcTl6DpCcjF2rU2WOv8v1umK';
+
     // Is value cached ?
     if (_authToken == null) {
       // Read from local storage
