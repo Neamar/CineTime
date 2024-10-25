@@ -22,14 +22,14 @@ dependencies:
   shimmer: ^3.0.0
   fading_edge_scrollview: ^4.1.1
   photo_view: ^0.15.0
-  chewie: ^1.8.1
+  chewie: ^1.8.5
 
   # Web
   http: ^1.2.1
   connectivity_plus: ^6.0.3
   flutter_cache_manager: 3.3.1    # Next version requires rxdart > 0.26.0
   cached_network_image: ^3.3.1
-  amplitude_flutter: ^3.16.2
+  amplitude_flutter: ^3.16.4
 
   # Device
   device_info_plus: ^10.1.0
@@ -47,6 +47,9 @@ dependencies:
 
 dev_dependencies:
   flutter_lints: ^4.0.0
+
+dependency_overrides:
+  win32: ^5.5.5       # TEMP Some libs uses older version than prevent compilation since Flutter 3.24. "Error: Type 'UnmodifiableUint8ListView' not found."
 
 # The following section is specific to Flutter.
 flutter:
