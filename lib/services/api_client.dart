@@ -442,7 +442,7 @@ class ApiClient {
   /// Usually one per device.
   Future<String> _getAuthToken() async {
     // Using hardcoded token works for now, but it may be revoked at any time.
-    return 'fyLro_zsTKG8gP8m365k7r:APA91bH4aPzBejBUFIrPJSFH_iXa3P0xD6WkrM1oFbx_mSPuG1-R1A-fSRIKotgppimARubThI2R-0AoR78aGg5RkzsYSUuPMSNck-wpzR2zAI4oXZzykcTl6DpCcjF2rU2WOv8v1umK';
+    return 'f2Sl1PQsSgyNCZHnvFbxE8:APA91bGNAmwQyhiYbCm1WTAZUsp_rmqx5mIinQiJAjDyCcA2S3jooxd_K6t7IbvlJbSuQNUeQZ984HtHnuGDok3NJN16u2ROCQFH5YJyCmbPtQYfLHuh_zA';
   }
 
   /// Delete all locally saved auth tokens
