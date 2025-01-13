@@ -193,12 +193,6 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 }
 
 class _SortButton extends StatelessWidget {
-  static const _typesStrings = {    // OPTI use Dart enum field
-    MovieSortType.rating: 'Note',
-    MovieSortType.releaseDate: 'Date de sortie',
-    MovieSortType.duration: 'Durée',
-  };
-
   const _SortButton({
     required this.sortValue,
     required this.onSortChanged,
@@ -259,7 +253,7 @@ class _SortButton extends StatelessWidget {
             return PopupMenuItem<MovieSortType>(
               value: value,
               textStyle: buildTextStyle(value == sortValue),
-              child: Text(_typesStrings[value]!),
+              child: Text(value.label),
             );
           }),
 
@@ -346,6 +340,7 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
           key: ObjectKey(movieShowTimes),
           movieShowTimes: movieShowTimes,
           showTheaterName: widget.showTheaterName,
+          preferredRatingType: widget.filterSort.sortType.preferredRatingType,
         );
       },
     );
@@ -480,7 +475,7 @@ class MoviesPageBloc with Disposable {
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
   final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
 
-  final sortType = BehaviorSubject.seeded(StorageService.readMovieSorting() ?? MovieSortType.rating);
+  final sortType = BehaviorSubject.seeded(StorageService.readMovieSorting() ?? MovieSortType.usersRating);
   final dayFilter = BehaviorSubject<Date?>();
   final isSearchVisible = BehaviorSubject.seeded(false);
   final searchController = TextEditingController();

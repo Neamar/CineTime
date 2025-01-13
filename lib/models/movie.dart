@@ -2,8 +2,6 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 
-enum MovieSortType { rating, releaseDate, duration }
-
 class Movie extends Identifiable {
   Movie({
     required ApiId id,
@@ -17,7 +15,7 @@ class Movie extends Identifiable {
     this.synopsis,
     String? durationApi,
     this.pressRating,
-    this.userRating,
+    this.usersRating,
   }) :
     genres = _buildGenresFromApi(genresApi),
     durationDisplay = _buildDurationFromApi(durationApi),
@@ -49,8 +47,11 @@ class Movie extends Identifiable {
   }
 
   final double? pressRating;
-  final double? userRating;
-  double? get rating => userRating ?? pressRating;
+  final double? usersRating;
+  double? getRating({MovieRatingType? preferredType}) => switch(preferredType) {
+    MovieRatingType.press => pressRating ?? usersRating,
+    MovieRatingType.users || null => usersRating ?? pressRating,
+  };
 
   /// Return true if this movie match the [search] query
   bool matchSearch(String search) {
@@ -63,8 +64,12 @@ class Movie extends Identifiable {
 
   int compareTo(Movie other, MovieSortType type) {
     switch(type) {
-      case MovieSortType.rating:
-        if (userRating != null && other.userRating != null) return other.userRating!.compareTo(userRating!);
+      case MovieSortType.pressRating:
+        if (pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(pressRating!);
+        if (usersRating != null && other.usersRating != null) return other.usersRating!.compareTo(usersRating!);
+        return title.compareTo(other.title);
+      case MovieSortType.usersRating:
+        if (usersRating != null && other.usersRating != null) return other.usersRating!.compareTo(usersRating!);
         if (pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(pressRating!);
         return title.compareTo(other.title);
       case MovieSortType.releaseDate:
@@ -120,6 +125,20 @@ class MovieVideo {
     size: json['size'],
   );
 }
+
+enum MovieSortType {
+  pressRating('Note presse', preferredRatingType: MovieRatingType.press),
+  usersRating('Note spectateurs', preferredRatingType: MovieRatingType.users),
+  releaseDate('Date de sortie'),
+  duration('Durée');
+
+  const MovieSortType(this.label, {this.preferredRatingType});
+
+  final String label;
+  final MovieRatingType? preferredRatingType;
+}
+
+enum MovieRatingType { press, users }
 
 const _genresMap = {
   'ACTION': 'Action',

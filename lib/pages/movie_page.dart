@@ -177,8 +177,8 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                         children: <Widget>[
                           if (widget.movieShowTimes.movie.pressRating != null)
                             _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
-                          if (widget.movieShowTimes.movie.userRating != null)
-                            _buildRatingWidget('Spectateur', widget.movieShowTimes.movie.userRating!),
+                          if (widget.movieShowTimes.movie.usersRating != null)
+                            _buildRatingWidget('Spectateurs', widget.movieShowTimes.movie.usersRating!),
                         ],
                       ),
 

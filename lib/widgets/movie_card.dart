@@ -10,10 +10,11 @@ import 'package:flutter/material.dart';
 import '_widgets.dart';
 
 class MovieCard extends StatelessWidget {
-  const MovieCard({super.key, required this.movieShowTimes, this.showTheaterName = true});
+  const MovieCard({super.key, required this.movieShowTimes, this.showTheaterName = true, this.preferredRatingType});
 
   final MovieShowTimes movieShowTimes;
   final bool showTheaterName;
+  final MovieRatingType? preferredRatingType;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,10 @@ class MovieCard extends StatelessWidget {
     if (releaseDate != null && AppService.now.difference(releaseDate) > const Duration(days: 6 * 30))
       releaseYear = releaseDate.year;
 
+    // Rating
+    final rating = movieShowTimes.movie.getRating(preferredType: preferredRatingType);
+
+    // Build widget
     return Card(
       child: InkWell(
         child: LayoutBuilder(
@@ -78,9 +83,9 @@ class MovieCard extends StatelessWidget {
                             ),
 
                             // Rating
-                            if (movieShowTimes.movie.rating != null && movieShowTimes.movie.rating! > 0)...[
+                            if (rating != null && rating > 0)...[
                               AppResources.spacerLarge,
-                              StarRating(movieShowTimes.movie.rating!),
+                              StarRating(rating),
                             ],
                           ],
                         ),
