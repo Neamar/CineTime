@@ -482,7 +482,9 @@ class TheaterShowTimesWidget extends StatelessWidget {
 
         // Showtimes
         AppResources.spacerSmall,
-        if (showTimes.isNotEmpty)
+        if (showTimes.every((dst) => dst.showTimes.isEmpty))
+          Text('Aucune séance en $filterName', style: const TextStyle(color: AppResources.colorGrey))
+        else
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,   // Ensure uniform height, some items may be empty
@@ -495,9 +497,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
                 );
               }).toList()..insertBetween(AppResources.spacerTiny),
             ),
-          )
-        else
-          Text('Aucune séance en $filterName'),
+          ),
         AppResources.spacerLarge,
       ],
     );
