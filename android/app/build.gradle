@@ -68,6 +68,8 @@ android {
         release {
             // signingConfig signingConfigs.release
             signingConfig signingConfigs.debug       // Use this line instead to test a release locally
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
