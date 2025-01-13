@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
@@ -88,17 +90,26 @@ class TheaterShowTimes {
   final List<ShowTime> showTimes;
 
 
+  /// Simple cache for [filteredShowTimes]
+  final _filteredShowTimes = <ShowTimeSpec, List<ShowTime>>{};
+
+  /// Return showtimes filtered by [spec]
+  List<ShowTime> getFilteredShowTimes(ShowTimeSpec spec) => _filteredShowTimes.putIfAbsent(spec, () => showTimes.where((st) => st.spec == spec).toList(growable: false));
+
+
   /// Simple cache for [daysWithShow]
-  List<Date>? _daysWithShow;
+  SplayTreeSet<Date>? _daysWithShow;
 
   /// All dates with at least a show, without duplicates, sorted.
-  List<Date> get daysWithShow {
-    return _daysWithShow ??= showTimes
-        .map((s) => s.dateTime.toDate)
-        .toSet()
-        .toList(growable: false)
-      ..sort();
-  }
+  SplayTreeSet<Date> get daysWithShow => _daysWithShow ??= showTimes.daysWithShow;
+
+
+  /// Simple cache for [filteredDayWithShow]
+  final _filteredDayWithShow = <ShowTimeSpec, SplayTreeSet<Date>>{};
+
+  /// All dates with at least a show, filtered by [spec], without duplicates, sorted.
+  SplayTreeSet<Date> getFilteredDayWithShow(ShowTimeSpec spec) => _filteredDayWithShow.putIfAbsent(spec, () => getFilteredShowTimes(spec).daysWithShow);
+
 
   /// Simple cache for [showTimesSummary]
   String? _showTimesSummary;
@@ -141,6 +152,11 @@ class TheaterShowTimes {
   );
 }
 
+extension ExtendedShowTimeList on List<ShowTime> {
+  /// All dates with at least a show, without duplicates, sorted.
+  SplayTreeSet<Date> get daysWithShow => SplayTreeSet.of(map((s) => s.dateTime.toDate));
+}
+
 class DayShowTimes {
   const DayShowTimes(this.date, this.showTimes);
 
@@ -152,28 +168,27 @@ class DayShowTimes {
   final List<ShowTime?> showTimes;
 }
 
-enum ShowVersion { original, dubbed, local }
-extension ExtendedShowVersion on ShowVersion {
-  static const _versionMap = {
-    ShowVersion.original: 'VO',
-    ShowVersion.dubbed: 'VF',
-    ShowVersion.local: 'VF',
-  };
+enum ShowVersion {
+  original('VO'),
+  dubbed('VF'),
+  local('VF');
 
-  String toDisplayString() => _versionMap[this]!;
+  const ShowVersion(this.label);
+
+  final String label;
 }
 
-// ignore: constant_identifier_names
-enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
-extension ExtendedShowFormat on ShowFormat {
-  static const _formatMap = {
-    ShowFormat.f2D: '',
-    ShowFormat.f3D: '3D',
-    ShowFormat.IMAX: 'IMAX',
-    ShowFormat.IMAX_3D: 'IMAX 3D',
-  };
+enum ShowFormat {
+  f2D(''),
+  f3D('3D'),
+  // ignore: constant_identifier_names
+  IMAX('IMAX'),
+  // ignore: constant_identifier_names
+  IMAX_3D('IMAX 3D');
 
-  String toDisplayString() => _formatMap[this]!;
+  const ShowFormat(this.label);
+
+  final String label;
 }
 
 class ShowTime {
@@ -199,7 +214,7 @@ class ShowTimeSpec {
   final ShowFormat format;
 
   @override
-  String toString() => version.toDisplayString() + (format != ShowFormat.f2D ? ' ${format.toDisplayString()}' : '');
+  String toString() => version.label + (format != ShowFormat.f2D ? ' ${format.label}' : '');
 
   @override
   bool operator ==(Object other) =>

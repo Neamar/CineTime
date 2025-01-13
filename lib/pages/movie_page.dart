@@ -483,18 +483,18 @@ class TheaterShowTimesWidget extends StatelessWidget {
         // Showtimes
         AppResources.spacerSmall,
         if (showTimes.isNotEmpty)
-          Row(
-            children: showTimes.mapIndexed<Widget>((index, dayShowTimes) {
-              return _DayShowTimes(
-                day: dayShowTimes.date,
-                showtimes: dayShowTimes.showTimes,
-                backgroundColor: () {
-                  if (dayShowTimes.date == AppService.now.toDate) return AppResources.colorLightRed;
-                  if (index.isEven) return Theme.of(context).scaffoldBackgroundColor;
-                } (),
-                onPressed: onShowtimePressed,
-              );
-            }).toList()..insertBetween(AppResources.spacerTiny),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,   // Ensure uniform height, some items may be empty
+              children: showTimes.mapIndexed<Widget>((index, dayShowTimes) {
+                return _DayShowTimes(
+                  day: dayShowTimes.date,
+                  showtimes: dayShowTimes.showTimes,
+                  isEven: index.isEven,
+                  onPressed: onShowtimePressed,
+                );
+              }).toList()..insertBetween(AppResources.spacerTiny),
+            ),
           )
         else
           Text('Aucune séance en $filterName'),
@@ -508,53 +508,71 @@ class _DayShowTimes extends StatelessWidget {
   const _DayShowTimes({
     required this.day,
     required this.showtimes,
-    this.backgroundColor,
+    required this.isEven,
     this.onPressed,
   });
 
   final Date day;
   final List<ShowTime?> showtimes;
-  final Color? backgroundColor;
+  final bool isEven;
   final ValueChanged<ShowTime>? onPressed;
 
   @override
   Widget build(BuildContext context) {
+    // Compute width of a time text to be sure it's uniform, even if it's empty or smaller than the others
+    final textPainter = TextPainter(
+      text: const TextSpan(text: '22:22'),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    final textWidth = textPainter.size.width;
+
+    // Theme
+    final headerForegroundColor = showtimes.isEmpty ? AppResources.colorGrey : null;
+
+    // Build widget
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: () {
+          if (day == AppService.now.toDate) return AppResources.colorLightRed;
+          if (isEven) return Theme.of(context).scaffoldBackgroundColor;
+        } (),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(6),
-      child: Column(
-        children: [
-          // Week day
-          Text(
-            AppResources.weekdayNames[day.weekday]!,
-            style: context.textTheme.titleMedium,
-          ),
+      child: SizedBox(
+        width: textWidth,   // Ensure uniform width (may be empty or smaller than others)
+        child: Column(
+          children: [
+            // Week day
+            Text(
+              AppResources.weekdayNames[day.weekday]!,
+              style: context.textTheme.titleMedium?.copyWith(color: headerForegroundColor),
+            ),
 
-          // Day
-          AppResources.spacerTiny,
-          Text(
-            day.day.toString(),
-            style: context.textTheme.titleLarge,
-          ),
+            // Day
+            AppResources.spacerTiny,
+            Text(
+              day.day.toString(),
+              style: context.textTheme.titleLarge?.copyWith(color: headerForegroundColor),
+            ),
 
-          // Times
-          AppResources.spacerSmall,
-          ...showtimes.map<Widget>((showtime) {
-            final formattedShowtime = showtime?.dateTime.toTime.toString();
-            final text = Text(
-              formattedShowtime ?? '-',
-            );
-            if (formattedShowtime == null) return text;
-            return InkWell(
-              onTap: onPressed != null ? () => onPressed!(showtime!) : null,
-              child: text,
-            );
-          }).toList()..insertBetween(AppResources.spacerExtraTiny),
+            // Times
+            AppResources.spacerSmall,
+            ...showtimes.map<Widget>((showtime) {
+              final formattedShowtime = showtime?.dateTime.toTime.toString();
+              final text = Text(
+                formattedShowtime ?? '-',
+              );
+              if (formattedShowtime == null) return text;
+              return InkWell(
+                onTap: onPressed != null ? () => onPressed!(showtime!) : null,
+                child: text,
+              );
+            }).toList()..insertBetween(AppResources.spacerExtraTiny),
 
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -583,9 +601,15 @@ class MoviePageBloc with Disposable {
   /// With simple caching system.
   List<FormattedTheaterShowTimes> getFormattedShowTimes(ShowTimeSpec filter) {
     return _formattedShowTimes.putIfAbsent(filter, () {
+      // Compute days with show
+      final daysWithShow = SplayTreeSet<Date>();
+      for (final theaterShowTimes in movieShowTimes.theatersShowTimes) {
+        daysWithShow.addAll(theaterShowTimes.getFilteredDayWithShow(filter));
+      }
+
+      // Build list of FormattedTheaterShowTimes
       return movieShowTimes.theatersShowTimes.map((tst) {
-        final filteredShowTimes = tst.showTimes.where((showTime) => showTime.spec == filter).toList(growable: false);
-        return FormattedTheaterShowTimes(tst.theater, filteredShowTimes);
+        return FormattedTheaterShowTimes(tst.theater, tst.getFilteredShowTimes(filter), daysWithShow);
       }).toList(growable: false);
     });
   }
@@ -598,36 +622,40 @@ class MoviePageBloc with Disposable {
 }
 
 class FormattedTheaterShowTimes {
-  FormattedTheaterShowTimes(this.theater, this._showTimes);
+  FormattedTheaterShowTimes(this.theater, List<ShowTime> showTimes, Set<Date> datesWithShow) {
+    formattedShowTimes = () {
+      // List all different times
+      final timesRef = SplayTreeSet.of(showTimes.map((st) => st.dateTime.toTime));
+
+      // Build a map of <time reference, index>
+      final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
+
+      // Organise showtimes per day
+      final showTimesMap = SplayTreeMap<Date, DayShowTimes>();
+      for (final showTime in showTimes) {
+        final date = showTime.dateTime.toDate;
+        final time = showTime.dateTime.toTime;
+
+        // Get day list or create it
+        final dayShowTimes = showTimesMap.putIfAbsent(date, () => DayShowTimes(date, List.filled(timesRef.length, null, growable: false)));
+
+        // Set showTime at right index
+        dayShowTimes.showTimes[timesRefMap[time]!] = showTime;
+      }
+
+      // Add remaining empty dates (without show), so that all theaters have the same dates for visual alignment
+      for (final date in datesWithShow) {
+        showTimesMap.putIfAbsent(date, () => DayShowTimes(date, List.empty()));
+      }
+
+      // Return value
+      return showTimesMap.values.toList(growable: false);
+    } ();
+  }
 
   /// Theater data
   final Theater theater;
 
-  /// Raw list of showtimes, sorted by date
-  final List<ShowTime> _showTimes;
-
   /// Formatted list of [DayShowTimes].
-  late final List<DayShowTimes> formattedShowTimes = () {
-    // List all different times
-    final timesRef = _showTimes.map((st) => st.dateTime.toTime).toSet().toList(growable: false)..sort();
-
-    // Build a map of <time reference, index>
-    final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
-
-    // Organise showtimes per day
-    final showTimesMap = SplayTreeMap<Date, DayShowTimes>();
-    for (final showTime in _showTimes) {
-      final date = showTime.dateTime.toDate;
-      final time = showTime.dateTime.toTime;
-
-      // Get day list or create it
-      final showTimes = showTimesMap.putIfAbsent(date, () => DayShowTimes(date, List.filled(timesRef.length, null, growable: false)));
-
-      // Set showTime at right index
-      showTimes.showTimes[timesRefMap[time]!] = showTime;
-    }
-
-    // Return value
-    return showTimesMap.values.toList(growable: false);
-  } ();
+  late final List<DayShowTimes> formattedShowTimes;
 }
