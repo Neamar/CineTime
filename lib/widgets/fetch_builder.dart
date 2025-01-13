@@ -4,7 +4,7 @@ import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/update_app_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:value_stream/value_stream.dart';
 
 class FetchBuilder<T, R> extends StatefulWidget {
   /// Basic [FetchBuilder] constructor.
@@ -75,7 +75,7 @@ class FetchBuilder<T, R> extends StatefulWidget {
 }
 
 class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
-  final data = BehaviorSubject<_DataWrapper<R>?>();
+  final data = EventStream<_DataWrapper<R>?>();
 
   @override
   void initState() {
@@ -86,8 +86,8 @@ class _FetchBuilderState<T, R> extends State<FetchBuilder<T, R>> {
 
   @override
   Widget build(BuildContext context) {
-    return BehaviorSubjectBuilder<_DataWrapper<R>?>(
-      subject: data,
+    return EventStreamBuilder<_DataWrapper<R>?>(
+      stream: data,
       builder: (context, snapshot) {
         final child = () {
           if (snapshot.hasError) {

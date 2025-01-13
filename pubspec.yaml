@@ -1,6 +1,6 @@
 name: cinetime
 description: CinéTime
-version: 2.9.1+79
+version: 2.10.0+80
 
 environment:
   sdk: '>=3.1.4 <4.0.0'
@@ -10,7 +10,7 @@ dependencies:
     sdk: flutter
 
   # Framework Tools
-  rxdart: 0.26.0  # Stuck on this version for now : https://github.com/ReactiveX/rxdart/issues/603
+  value_stream: ^0.2.0
   collection: 1.18.0  # Next update requires higher Flutter version
 
   # Data management

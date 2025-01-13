@@ -508,7 +508,7 @@ packages:
     source: hosted
     version: "6.1.2"
   rxdart:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: rxdart
       sha256: "2ef8b4e91cb3b55d155e0e34eeae0ac7107974e451495c955ac04ddee8cc21fd"
@@ -792,6 +792,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.5.1"
+  value_stream:
+    dependency: "direct main"
+    description:
+      name: value_stream
+      sha256: "1be77b889054a3a6a2f33ed5215baaab724e7b9cb302cd1a4af9ae53eab0c2fd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   vector_math:
     dependency: transitive
     description:

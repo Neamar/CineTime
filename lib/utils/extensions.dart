@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:cinetime/models/date_time.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
 import 'package:diacritic/diacritic.dart';
 
@@ -74,30 +73,6 @@ extension ExtendedBuildContext on BuildContext {
       form.save();
       onSuccess?.call();
     }
-  }
-}
-
-extension ExtendedBehaviorSubject<T> on BehaviorSubject<T> {
-  void tryAdd(T value) {
-    if (!isClosed) {
-      add(value);
-    }
-  }
-
-  void addNotNull(T? value) {
-    if (value != null) {
-      add(value);
-    }
-  }
-
-  /// Add [value] to subject only if it's different from the current value.
-  /// Return true if [value] was added.
-  bool addDistinct(T value) {
-    if (value != this.value) {
-      add(value);
-      return true;
-    }
-    return false;
   }
 }
 
