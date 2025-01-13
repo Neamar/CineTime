@@ -175,10 +175,10 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
-                          if (widget.movieShowTimes.movie.pressRating != null)
-                            _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
                           if (widget.movieShowTimes.movie.usersRating != null)
                             _buildRatingWidget('Spectateurs', widget.movieShowTimes.movie.usersRating!),
+                          if (widget.movieShowTimes.movie.pressRating != null)
+                            _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
                         ],
                       ),
 

@@ -14,8 +14,8 @@ class Movie extends Identifiable {
     JsonList? genresApi,
     this.synopsis,
     String? durationApi,
-    this.pressRating,
     this.usersRating,
+    this.pressRating,
   }) :
     genres = _buildGenresFromApi(genresApi),
     durationDisplay = _buildDurationFromApi(durationApi),
@@ -46,11 +46,11 @@ class Movie extends Identifiable {
     );
   }
 
-  final double? pressRating;
   final double? usersRating;
+  final double? pressRating;
   double? getRating({MovieRatingType? preferredType}) => switch(preferredType) {
-    MovieRatingType.press => pressRating ?? usersRating,
     MovieRatingType.users || null => usersRating ?? pressRating,
+    MovieRatingType.press => pressRating ?? usersRating,
   };
 
   /// Return true if this movie match the [search] query
@@ -64,13 +64,13 @@ class Movie extends Identifiable {
 
   int compareTo(Movie other, MovieSortType type) {
     switch(type) {
-      case MovieSortType.pressRating:
-        if (pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(pressRating!);
-        if (usersRating != null && other.usersRating != null) return other.usersRating!.compareTo(usersRating!);
-        return title.compareTo(other.title);
       case MovieSortType.usersRating:
         if (usersRating != null && other.usersRating != null) return other.usersRating!.compareTo(usersRating!);
         if (pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(pressRating!);
+        return title.compareTo(other.title);
+      case MovieSortType.pressRating:
+        if (pressRating != null && other.pressRating != null) return other.pressRating!.compareTo(pressRating!);
+        if (usersRating != null && other.usersRating != null) return other.usersRating!.compareTo(usersRating!);
         return title.compareTo(other.title);
       case MovieSortType.releaseDate:
         final date1 = releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -127,8 +127,8 @@ class MovieVideo {
 }
 
 enum MovieSortType {
-  pressRating('Note presse', preferredRatingType: MovieRatingType.press),
   usersRating('Note spectateurs', preferredRatingType: MovieRatingType.users),
+  pressRating('Note presse', preferredRatingType: MovieRatingType.press),
   releaseDate('Date de sortie'),
   duration('Durée');
 
@@ -138,7 +138,7 @@ enum MovieSortType {
   final MovieRatingType? preferredRatingType;
 }
 
-enum MovieRatingType { press, users }
+enum MovieRatingType { users, press }
 
 const _genresMap = {
   'ACTION': 'Action',

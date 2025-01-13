@@ -310,8 +310,8 @@ class ApiClient {
             genresApi: genresJson,
             poster: _getPathFromUrl(posterUrl),
             trailerId: isStringNullOrEmpty(trailerId) ? null : ApiId.fromEncoded(trailerId!),
-            pressRating: (statisticsJson['pressReview']?['score'] as num?)?.toDouble(),
             usersRating: (statisticsJson['userRating']?['score'] as num?)?.toDouble(),
+            pressRating: (statisticsJson['pressReview']?['score'] as num?)?.toDouble(),
           );
         }
 
