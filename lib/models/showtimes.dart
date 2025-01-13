@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
@@ -135,50 +133,6 @@ class TheaterShowTimes {
     } ();
 
     return _showTimesSummary;
-  }
-
-  /// Simple cache for [getFormattedShowTimes]
-  final _formattedShowTimes = <ShowTimeSpec, List<DayShowTimes>>{};
-
-  /// Sorted list of [DayShowTimes] for this [filter].
-  /// With simple caching system.
-  List<DayShowTimes> getFormattedShowTimes(ShowTimeSpec filter) {
-    // Check cache
-    var showTimesList = _formattedShowTimes[filter];
-
-    // Compute value if needed
-    if (showTimesList == null) {
-      final filteredShowTimes = showTimes.where((showTime) => showTime.spec == filter).toList(growable: false);
-
-      // List all different times
-      final timesRef = filteredShowTimes
-          .map((st) => st.dateTime.toTime)
-          .toSet()
-          .toList(growable: false)
-        ..sort();
-
-      // Build a map of <time reference, index>
-      final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
-
-      // Organise showtimes per day
-      final showTimesMap = SplayTreeMap<Date, DayShowTimes>();
-      for (final showTime in filteredShowTimes) {
-        final date = showTime.dateTime.toDate;
-        final time = showTime.dateTime.toTime;
-
-        // Get day list or create it
-        final showTimes = showTimesMap.putIfAbsent(date, () => DayShowTimes(date, List.filled(timesRef.length, null, growable: false)));
-
-        // Set showTime at right index
-        showTimes.showTimes[timesRefMap[time]!] = showTime;
-      }
-
-      // Save value to cache
-      _formattedShowTimes[filter] = showTimesList = showTimesMap.values.toList(growable: false);
-    }
-
-    // Return value
-    return showTimesList;
   }
 
   TheaterShowTimes copyWith({List<ShowTime>? showTimes}) => TheaterShowTimes(

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/resources/_resources.dart';
@@ -250,7 +252,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
                           // Content
                           AppResources.spacerLarge,
-                          ...widget.movieShowTimes.theatersShowTimes.map((theaterShowTimes) {
+                          ...bloc.getFormattedShowTimes(filter).map((theaterShowTimes) {
                             return FadingEdgeScrollView.fromSingleChildScrollView(
                               gradientFractionOnEnd: 0.2,
                               child: SingleChildScrollView(
@@ -262,7 +264,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                                     padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
                                     child: TheaterShowTimesWidget(
                                       theaterName: theaterShowTimes.theater.name,
-                                      showTimes: theaterShowTimes.getFormattedShowTimes(filter),
+                                      showTimes: theaterShowTimes.formattedShowTimes,
                                       filterName: filter.toString(),
                                       onShowtimePressed: (showtime) => ShowtimeDialog.open(
                                         context: context,
@@ -560,7 +562,7 @@ class _DayShowTimes extends StatelessWidget {
 
 
 class MoviePageBloc with Disposable {
-  MoviePageBloc(MovieShowTimes movieShowTimes) :
+  MoviePageBloc(this.movieShowTimes) :
     selectedSpec = DataStream(movieShowTimes.showTimesSpecOptions.first) {
     AnalyticsService.trackEvent('Movie displayed', {
       'movieTitle': movieShowTimes.movie.title,
@@ -570,11 +572,62 @@ class MoviePageBloc with Disposable {
     });
   }
 
+  final MovieShowTimes movieShowTimes;
+
   final DataStream<ShowTimeSpec> selectedSpec;
+
+  /// Simple cache for [getFormattedShowTimes]
+  final _formattedShowTimes = <ShowTimeSpec, List<FormattedTheaterShowTimes>>{};
+
+  /// List of [FormattedTheaterShowTimes] for this [filter].
+  /// With simple caching system.
+  List<FormattedTheaterShowTimes> getFormattedShowTimes(ShowTimeSpec filter) {
+    return _formattedShowTimes.putIfAbsent(filter, () {
+      return movieShowTimes.theatersShowTimes.map((tst) {
+        final filteredShowTimes = tst.showTimes.where((showTime) => showTime.spec == filter).toList(growable: false);
+        return FormattedTheaterShowTimes(tst.theater, filteredShowTimes);
+      }).toList(growable: false);
+    });
+  }
 
   @override
   void dispose() {
     selectedSpec.close();
     super.dispose();
   }
+}
+
+class FormattedTheaterShowTimes {
+  FormattedTheaterShowTimes(this.theater, this._showTimes);
+
+  /// Theater data
+  final Theater theater;
+
+  /// Raw list of showtimes, sorted by date
+  final List<ShowTime> _showTimes;
+
+  /// Formatted list of [DayShowTimes].
+  late final List<DayShowTimes> formattedShowTimes = () {
+    // List all different times
+    final timesRef = _showTimes.map((st) => st.dateTime.toTime).toSet().toList(growable: false)..sort();
+
+    // Build a map of <time reference, index>
+    final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
+
+    // Organise showtimes per day
+    final showTimesMap = SplayTreeMap<Date, DayShowTimes>();
+    for (final showTime in _showTimes) {
+      final date = showTime.dateTime.toDate;
+      final time = showTime.dateTime.toTime;
+
+      // Get day list or create it
+      final showTimes = showTimesMap.putIfAbsent(date, () => DayShowTimes(date, List.filled(timesRef.length, null, growable: false)));
+
+      // Set showTime at right index
+      showTimes.showTimes[timesRefMap[time]!] = showTime;
+    }
+
+    // Return value
+    return showTimesMap.values.toList(growable: false);
+  } ();
 }
