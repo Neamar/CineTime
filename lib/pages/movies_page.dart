@@ -10,7 +10,7 @@ import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:value_stream/value_stream.dart';
 
 import '_pages.dart';
 
@@ -45,17 +45,14 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
               return Scaffold(
                 appBar: PreferredSize(
                   preferredSize: const Size.fromHeight(kToolbarHeight),
-                  child: BehaviorSubjectBuilder<bool>(
-                    subject: bloc.isSearchVisible,
-                    builder: (context, snapshot) {
-                      final isSearchVisible = snapshot.data!;
-
+                  child: DataStreamBuilder<bool>(
+                    stream: bloc.isSearchVisible,
+                    builder: (context, isSearchVisible) {
                       // Normal AppBar
                       if (!isSearchVisible) {
-                        return BehaviorSubjectBuilder<Date?>(
-                          subject: bloc.dayFilter,
-                          builder: (context, snapshot) {
-                            final dayFilter = snapshot.data;
+                        return DataStreamBuilder<Date?>(
+                          stream: bloc.dayFilter,
+                          builder: (context, dayFilter) {
                             return AppBar(
                               title: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,18 +90,17 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                   icon: const Icon(CineTimeIcons.search),
                                   onPressed: () => bloc.isSearchVisible.add(true),
                                 ),
-                                BehaviorSubjectBuilder<MovieSortType>(
-                                  subject: bloc.sortType,
-                                  builder: (context, snapshot) {
-                                    final sortType = snapshot.data!;
+                                DataStreamBuilder<MovieSortType>(
+                                  stream: bloc.sortType,
+                                  builder: (context, sortType) {
                                     return _SortButton(
                                       sortValue: sortType,
-                                      onSortChanged: bloc.sortType.addDistinct,
+                                      onSortChanged: (value) => bloc.sortType.add(value, skipSame: true),
                                       dayFilterValue: dayFilter,
                                       dayFilterFrom: moviesShowtimesData.fetchedFrom.toDate,
                                       dayFilterTo: moviesShowtimesData.fetchedTo.toDate,
                                       daysWithShow: moviesShowtimesData.daysWithShow,
-                                      onDayFilterChanged: bloc.dayFilter.addDistinct,
+                                      onDayFilterChanged: (value) => bloc.dayFilter.add(value, skipSame: true),
                                     );
                                   },
                                 ),
@@ -150,14 +146,14 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                             message: 'Aucune séance',
                           );
 
-                        return BehaviorSubjectBuilder<_FilterSortData>(
-                          subject: bloc.filterSortData,
-                          builder: (context, snapshot) {
+                        return DataStreamBuilder<_FilterSortData>(
+                          stream: bloc.filterSortData,
+                          builder: (context, filterSortData) {
                             return _FilteredMovieListView(
                               key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
                               moviesShowTimes: moviesShowtimesData.moviesShowTimes,
                               showTheaterName: moviesShowtimesData.theaters.length > 1,
-                              filterSort: snapshot.data!,
+                              filterSort: filterSortData,
                             );
                           },
                         );
@@ -193,12 +189,6 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
 }
 
 class _SortButton extends StatelessWidget {
-  static const _typesStrings = {    // OPTI use Dart enum field
-    MovieSortType.rating: 'Note',
-    MovieSortType.releaseDate: 'Date de sortie',
-    MovieSortType.duration: 'Durée',
-  };
-
   const _SortButton({
     required this.sortValue,
     required this.onSortChanged,
@@ -259,7 +249,7 @@ class _SortButton extends StatelessWidget {
             return PopupMenuItem<MovieSortType>(
               value: value,
               textStyle: buildTextStyle(value == sortValue),
-              child: Text(_typesStrings[value]!),
+              child: Text(value.label),
             );
           }),
 
@@ -346,6 +336,7 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
           key: ObjectKey(movieShowTimes),
           movieShowTimes: movieShowTimes,
           showTheaterName: widget.showTheaterName,
+          preferredRatingType: widget.filterSort.sortType.preferredRatingType,
         );
       },
     );
@@ -449,12 +440,9 @@ class MoviesPageBloc with Disposable {
     // Initial fetch, after widget is initialised
     WidgetsBinding.instance.addPostFrameCallback((_) => refresh());
 
-    // Init filter
-    filterSortData.add(_FilterSortData(sortType: sortType.value!));
-
     // Refresh on sort change
-    sortType.skip(1).listen((value) {
-      filterSortData.add(filterSortData.value!.copyWith(sortType: value));
+    sortType.listen((value) {
+      filterSortData.add(filterSortData.value.copyWith(sortType: value));
       StorageService.saveMovieSorting(value);   // No need to await
       AnalyticsService.trackEvent('Sort order', {
         'theatersId': _theaters.toIdListString(),
@@ -464,10 +452,10 @@ class MoviesPageBloc with Disposable {
     });
 
     // Refresh on day filter change
-    dayFilter.listen((value) => filterSortData.add(filterSortData.value!.copyWith(dayFilter: () => value)));
+    dayFilter.listen((value) => filterSortData.add(filterSortData.value.copyWith(dayFilter: () => value)));
 
     // Listen for search changes
-    searchController.addListener(() => filterSortData.add(filterSortData.value!.copyWith(textFilter: searchController.text)));
+    searchController.addListener(() => filterSortData.add(filterSortData.value.copyWith(textFilter: searchController.text)));
 
     // Analytics
     isSearchVisible.listen((value) {
@@ -480,11 +468,11 @@ class MoviesPageBloc with Disposable {
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
   final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
 
-  final sortType = BehaviorSubject.seeded(StorageService.readMovieSorting() ?? MovieSortType.rating);
-  final dayFilter = BehaviorSubject<Date?>();
-  final isSearchVisible = BehaviorSubject.seeded(false);
+  final sortType = DataStream(StorageService.readMovieSorting() ?? MovieSortType.usersRating);
+  final dayFilter = DataStream<Date?>(null);
+  final isSearchVisible = DataStream(false);
   final searchController = TextEditingController();
-  final filterSortData = BehaviorSubject<_FilterSortData>();
+  late final filterSortData = DataStream<_FilterSortData>(_FilterSortData(sortType: sortType.value));
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data

@@ -6,7 +6,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cinetime/models/_models.dart';
-import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/data_error.dart';
@@ -311,8 +310,8 @@ class ApiClient {
             genresApi: genresJson,
             poster: _getPathFromUrl(posterUrl),
             trailerId: isStringNullOrEmpty(trailerId) ? null : ApiId.fromEncoded(trailerId!),
+            usersRating: (statisticsJson['userRating']?['score'] as num?)?.toDouble(),
             pressRating: (statisticsJson['pressReview']?['score'] as num?)?.toDouble(),
-            userRating: (statisticsJson['userRating']?['score'] as num?)?.toDouble(),
           );
         }
 
@@ -439,80 +438,15 @@ class ApiClient {
     }
   }
 
-  /// Basic authToken cached value
-  String? _authToken;
-
   /// Get an auth token for GraphQL request.
   /// Usually one per device.
   Future<String> _getAuthToken() async {
-    // TEMP logic has completely changed, this is a temporary fix using a hardcoded value
-    return 'fyLro_zsTKG8gP8m365k7r:APA91bH4aPzBejBUFIrPJSFH_iXa3P0xD6WkrM1oFbx_mSPuG1-R1A-fSRIKotgppimARubThI2R-0AoR78aGg5RkzsYSUuPMSNck-wpzR2zAI4oXZzykcTl6DpCcjF2rU2WOv8v1umK';
-
-    // Is value cached ?
-    if (_authToken == null) {
-      // Read from local storage
-      var authToken = StorageService.readAuthToken();
-
-      // Ask for a auth token
-      if (authToken == null) {
-        // --- Get Firebase auth token ---
-        // Build request
-        const androidPackage = 'com.all' + 'ocine.androidapp';
-        const headers1 = {
-          HttpHeaders.userAgentHeader: 'Dalvik/2.1.0',
-          'X-Android-Cert': 'B708782E3014076A' + '78BDD85B60F77FA797F7A021',
-          'X-Android-Package': androidPackage,
-          'x-firebase-client': 'H4sIAAAAAAAAAKtWykhNLCpJSk0sKV' + 'ayio7VUSpLLSrOzM9TslIyUqoFAFyivEQfAAAA',
-          'x-goog-api-key': 'AIzaSyCqJ4WUpKj-XHx' + 'p2sJakwJN304fpWjq8r8',
-        };
-
-        final appId = _RandomFidGenerator.createRandomFid();
-        const firebaseAppId = '1:84854' + '8993493:android:cadcaabc' + '242a1fc0';
-        final body1 = {
-          'fid': appId,
-          'appId': firebaseAppId,
-          'authVersion': 'FIS_v2',
-          'sdkVersion': 'a:17.2.0'
-        };
-
-        // Send request
-        final response1 = await _send<JsonObject>(_httpMethodPost, 'https://firebaseinstallations.googleapis.com/v1/projects/al' + 'locine-160' + '815/installations', headers: headers1, bodyJson: body1, useCache: false);
-        final firebaseAuth = response1['authToken']['token'] as String;
-
-        // --- Register device ---
-        // Build request
-        const headers2 = {
-          HttpHeaders.authorizationHeader: 'Ai' + 'dLogin 4024960225' + '512858735:8027018111' + '184442980',
-          HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded',
-          HttpHeaders.userAgentHeader: 'Android-GCM/1.5',
-        };
-
-        const projectNumber = '84854' + '8993493';
-        const appVer = '478';
-        const firebaseHash = 'R1dAH9Ui7M-ynozn' + 'wBdw01tLxhI';
-        final body2 = 'X-subtype=$projectNumber&sender=$projectNumber&X-app_ver=$appVer&X-osv=31&X-cliv=fcm-23.3.1&X-gmsv=225014047&X-appid=$appId&X-scope=*&X-Goog-Firebase-Installations-Auth=$firebaseAuth&X-gmp_app_id=$firebaseAppId&X-firebase-app-name-hash=$firebaseHash&X-app_ver_name=9.4.8&app=$androidPackage&device=40249602' + '25512858735&app_ver=$appVer&info=8z1YwDoyTHcWQKr' + 'i541rkWV1gDFLpRg&gcm_ver=225014047&plat=0&cert=b708782e3014076a7' + '8bdd85b60f77fa797f7a021&target_ver=33';
-
-        // Send request
-        final response2 = await _send<String>(_httpMethodPost, 'https://android.apis.google.com/c2dm/regi' + 'ster3', headers: headers2, stringBody: body2, useCache: false);
-
-        // Check for errors (status code is always 200)
-        if (response2.startsWith('Error=')) throw HttpException('Error while registering device: $response2');
-        AnalyticsService.trackEvent('New auth token fetched');
-
-        // Parse value
-        authToken = response2.substring(6); // Remove var name
-
-        // Save value
-        unawaited(StorageService.saveAuthToken(authToken));
-      }
-      _authToken = authToken;
-    }
-    return _authToken!;
+    // Using hardcoded token works for now, but it may be revoked at any time.
+    return 'f2Sl1PQsSgyNCZHnvFbxE8:APA91bGNAmwQyhiYbCm1WTAZUsp_rmqx5mIinQiJAjDyCcA2S3jooxd_K6t7IbvlJbSuQNUeQZ984HtHnuGDok3NJN16u2ROCQFH5YJyCmbPtQYfLHuh_zA';
   }
 
   /// Delete all locally saved auth tokens
   Future<void> clearAuthToken() async {
-    _authToken = null;
     await StorageService.deleteAuthToken();
   }
 

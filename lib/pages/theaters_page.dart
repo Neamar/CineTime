@@ -4,7 +4,7 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:value_stream/value_stream.dart';
 
 import 'theater_search_page.dart';
 
@@ -36,10 +36,9 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
         onPressed: _goToSearchPage,
         child: const Icon(CineTimeIcons.plus),
       ),
-      body: BehaviorSubjectBuilder<List<Theater>>(
-        subject: bloc.theaters,
-        builder: (context, snapshot) {
-          final theaters = snapshot.data!;
+      body: DataStreamBuilder<List<Theater>>(
+        stream: bloc.theaters,
+        builder: (context, theaters) {
           return ListView.builder(
             itemExtent: TheaterCard.height,
             itemCount: theaters.length,
@@ -122,7 +121,7 @@ class TheatersPageBloc with Disposable {
   int refreshID = 0;
 
   /// List of theaters
-  final theaters = BehaviorSubject<List<Theater>>();
+  final theaters = DataStream(<Theater>[]);
 
   refresh() {
     refreshID++;

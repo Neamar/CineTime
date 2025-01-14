@@ -9,7 +9,7 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:value_stream/value_stream.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -175,10 +175,10 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
+                          if (widget.movieShowTimes.movie.usersRating != null)
+                            _buildRatingWidget('Spectateurs', widget.movieShowTimes.movie.usersRating!),
                           if (widget.movieShowTimes.movie.pressRating != null)
                             _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
-                          if (widget.movieShowTimes.movie.userRating != null)
-                            _buildRatingWidget('Spectateur', widget.movieShowTimes.movie.userRating!),
                         ],
                       ),
 
@@ -194,10 +194,9 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
                 // Show times
                 AppResources.spacerMedium,
-                BehaviorSubjectBuilder<ShowTimeSpec>(
-                  subject: bloc.selectedSpec,
-                  builder: (context, snapshot) {
-                    final filter = snapshot.data!;
+                DataStreamBuilder<ShowTimeSpec>(
+                  stream: bloc.selectedSpec,
+                  builder: (context, filter) {
                     return Material(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -562,7 +561,7 @@ class _DayShowTimes extends StatelessWidget {
 
 class MoviePageBloc with Disposable {
   MoviePageBloc(MovieShowTimes movieShowTimes) :
-    selectedSpec = BehaviorSubject.seeded(movieShowTimes.showTimesSpecOptions.first) {
+    selectedSpec = DataStream(movieShowTimes.showTimesSpecOptions.first) {
     AnalyticsService.trackEvent('Movie displayed', {
       'movieTitle': movieShowTimes.movie.title,
       'theaterCount': movieShowTimes.theatersShowTimes.length,
@@ -571,7 +570,7 @@ class MoviePageBloc with Disposable {
     });
   }
 
-  final BehaviorSubject<ShowTimeSpec> selectedSpec;
+  final DataStream<ShowTimeSpec> selectedSpec;
 
   @override
   void dispose() {
