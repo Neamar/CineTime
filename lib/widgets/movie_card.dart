@@ -10,14 +10,17 @@ import 'package:flutter/material.dart';
 import '_widgets.dart';
 
 class MovieCard extends StatelessWidget {
-  const MovieCard({super.key, required this.movieShowTimes, this.showTheaterName = true, this.preferredRatingType});
+  const MovieCard({super.key, required this.moviesShowTimes, required this.movieIndex, this.showTheaterName = true, this.preferredRatingType});
 
-  final MovieShowTimes movieShowTimes;
+  final List<MovieShowTimes> moviesShowTimes;
+  final int movieIndex;
   final bool showTheaterName;
   final MovieRatingType? preferredRatingType;
 
   @override
   Widget build(BuildContext context) {
+    final movieShowTimes = moviesShowTimes[movieIndex];
+
     // Display release year if movie is more than 6 month old
     final releaseDate = movieShowTimes.movie.releaseDate;
     int? releaseYear;
@@ -30,6 +33,7 @@ class MovieCard extends StatelessWidget {
     // Build widget
     return Card(
       child: InkWell(
+        onTap: () => navigateTo(context, (_) => MoviePage(moviesShowTimes, movieIndex)),
         child: LayoutBuilder(
           builder: (context, box) {
             return Row(
@@ -147,7 +151,6 @@ class MovieCard extends StatelessWidget {
             );
           }
         ),
-        onTap: () => navigateTo(context, (_) => MoviePage(movieShowTimes)),
       ),
     );
   }
