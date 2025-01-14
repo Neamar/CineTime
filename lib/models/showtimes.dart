@@ -90,17 +90,26 @@ class TheaterShowTimes {
   final List<ShowTime> showTimes;
 
 
+  /// Simple cache for [filteredShowTimes]
+  final _filteredShowTimes = <ShowTimeSpec, List<ShowTime>>{};
+
+  /// Return showtimes filtered by [spec]
+  List<ShowTime> getFilteredShowTimes(ShowTimeSpec spec) => _filteredShowTimes.putIfAbsent(spec, () => showTimes.where((st) => st.spec == spec).toList(growable: false));
+
+
   /// Simple cache for [daysWithShow]
-  List<Date>? _daysWithShow;
+  SplayTreeSet<Date>? _daysWithShow;
 
   /// All dates with at least a show, without duplicates, sorted.
-  List<Date> get daysWithShow {
-    return _daysWithShow ??= showTimes
-        .map((s) => s.dateTime.toDate)
-        .toSet()
-        .toList(growable: false)
-      ..sort();
-  }
+  SplayTreeSet<Date> get daysWithShow => _daysWithShow ??= showTimes.daysWithShow;
+
+
+  /// Simple cache for [filteredDayWithShow]
+  final _filteredDayWithShow = <ShowTimeSpec, SplayTreeSet<Date>>{};
+
+  /// All dates with at least a show, filtered by [spec], without duplicates, sorted.
+  SplayTreeSet<Date> getFilteredDayWithShow(ShowTimeSpec spec) => _filteredDayWithShow.putIfAbsent(spec, () => getFilteredShowTimes(spec).daysWithShow);
+
 
   /// Simple cache for [showTimesSummary]
   String? _showTimesSummary;
@@ -137,54 +146,15 @@ class TheaterShowTimes {
     return _showTimesSummary;
   }
 
-  /// Simple cache for [getFormattedShowTimes]
-  final _formattedShowTimes = <ShowTimeSpec, List<DayShowTimes>>{};
-
-  /// Sorted list of [DayShowTimes] for this [filter].
-  /// With simple caching system.
-  List<DayShowTimes> getFormattedShowTimes(ShowTimeSpec filter) {
-    // Check cache
-    var showTimesList = _formattedShowTimes[filter];
-
-    // Compute value if needed
-    if (showTimesList == null) {
-      final filteredShowTimes = showTimes.where((showTime) => showTime.spec == filter).toList(growable: false);
-
-      // List all different times
-      final timesRef = filteredShowTimes
-          .map((st) => st.dateTime.toTime)
-          .toSet()
-          .toList(growable: false)
-        ..sort();
-
-      // Build a map of <time reference, index>
-      final timesRefMap = Map.fromIterables(timesRef, List.generate(timesRef.length, (index) => index));
-
-      // Organise showtimes per day
-      final showTimesMap = SplayTreeMap<Date, DayShowTimes>();
-      for (final showTime in filteredShowTimes) {
-        final date = showTime.dateTime.toDate;
-        final time = showTime.dateTime.toTime;
-
-        // Get day list or create it
-        final showTimes = showTimesMap.putIfAbsent(date, () => DayShowTimes(date, List.filled(timesRef.length, null, growable: false)));
-
-        // Set showTime at right index
-        showTimes.showTimes[timesRefMap[time]!] = showTime;
-      }
-
-      // Save value to cache
-      _formattedShowTimes[filter] = showTimesList = showTimesMap.values.toList(growable: false);
-    }
-
-    // Return value
-    return showTimesList;
-  }
-
   TheaterShowTimes copyWith({List<ShowTime>? showTimes}) => TheaterShowTimes(
     theater,
     showTimes: showTimes ?? this.showTimes,
   );
+}
+
+extension ExtendedShowTimeList on List<ShowTime> {
+  /// All dates with at least a show, without duplicates, sorted.
+  SplayTreeSet<Date> get daysWithShow => SplayTreeSet.of(map((s) => s.dateTime.toDate));
 }
 
 class DayShowTimes {
@@ -198,28 +168,27 @@ class DayShowTimes {
   final List<ShowTime?> showTimes;
 }
 
-enum ShowVersion { original, dubbed, local }
-extension ExtendedShowVersion on ShowVersion {
-  static const _versionMap = {
-    ShowVersion.original: 'VO',
-    ShowVersion.dubbed: 'VF',
-    ShowVersion.local: 'VF',
-  };
+enum ShowVersion {
+  original('VO'),
+  dubbed('VF'),
+  local('VF');
 
-  String toDisplayString() => _versionMap[this]!;
+  const ShowVersion(this.label);
+
+  final String label;
 }
 
-// ignore: constant_identifier_names
-enum ShowFormat { f2D, f3D, IMAX, IMAX_3D }
-extension ExtendedShowFormat on ShowFormat {
-  static const _formatMap = {
-    ShowFormat.f2D: '',
-    ShowFormat.f3D: '3D',
-    ShowFormat.IMAX: 'IMAX',
-    ShowFormat.IMAX_3D: 'IMAX 3D',
-  };
+enum ShowFormat {
+  f2D(''),
+  f3D('3D'),
+  // ignore: constant_identifier_names
+  IMAX('IMAX'),
+  // ignore: constant_identifier_names
+  IMAX_3D('IMAX 3D');
 
-  String toDisplayString() => _formatMap[this]!;
+  const ShowFormat(this.label);
+
+  final String label;
 }
 
 class ShowTime {
@@ -245,7 +214,7 @@ class ShowTimeSpec {
   final ShowFormat format;
 
   @override
-  String toString() => version.toDisplayString() + (format != ShowFormat.f2D ? ' ${format.toDisplayString()}' : '');
+  String toString() => version.label + (format != ShowFormat.f2D ? ' ${format.label}' : '');
 
   @override
   bool operator ==(Object other) =>
