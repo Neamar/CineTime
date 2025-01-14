@@ -11,9 +11,12 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
+import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:value_stream/value_stream.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
+const _contentPadding = 16.0;
 
 class MoviePage extends StatefulWidget {
   const MoviePage(this.movieShowTimes);
@@ -30,7 +33,6 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
   @override
   Widget build(BuildContext context) {
-    const double contentPadding = 16;
     const double overlapContentHeight = 50;
 
     final hasTrailer = widget.movieShowTimes.movie.trailerId != null;
@@ -102,7 +104,7 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
                 // Movie info
                 Padding(
-                  padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
+                  padding: const EdgeInsets.all(_contentPadding).copyWith(bottom: 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
@@ -206,14 +208,14 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
 
                           // Header
                           Padding(
-                            padding: const EdgeInsets.all(contentPadding).copyWith(bottom: 0),
+                            padding: const EdgeInsets.all(_contentPadding).copyWith(bottom: 0),
                             child: Row(
                               children: <Widget>[
 
                                 // Title
                                 Text(
                                   'Séances',
-                                  style: context.textTheme.titleLarge,
+                                  style: context.textTheme.headlineSmall,
                                 ),
 
                                 // Filters
@@ -249,32 +251,19 @@ class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, Movi
                             ),
                           ),
 
-
                           // Content
-                          AppResources.spacerLarge,
+                          AppResources.spacerSmall,
                           ...bloc.getFormattedShowTimes(filter).map((theaterShowTimes) {
-                            return FadingEdgeScrollView.fromSingleChildScrollView(
-                              gradientFractionOnEnd: 0.2,
-                              child: SingleChildScrollView(
-                                controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
-                                scrollDirection: Axis.horizontal,
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal:  contentPadding),
-                                    child: TheaterShowTimesWidget(
-                                      theaterName: theaterShowTimes.theater.name,
-                                      showTimes: theaterShowTimes.formattedShowTimes,
-                                      filterName: filter.toString(),
-                                      onShowtimePressed: (showtime) => ShowtimeDialog.open(
-                                        context: context,
-                                        movie: widget.movieShowTimes.movie,
-                                        theater: theaterShowTimes.theater,
-                                        showtime: showtime,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                            return TheaterShowTimesWidget(
+                              theaterName: theaterShowTimes.theater.name,
+                              showTimes: theaterShowTimes.formattedShowTimes,
+                              filterName: filter.toString(),
+                              scrollController: bloc.theaterShowTimesScrollControllers[theaterShowTimes.theater]!,
+                              onShowtimePressed: (showtime) => ShowtimeDialog.open(
+                                context: context,
+                                movie: widget.movieShowTimes.movie,
+                                theater: theaterShowTimes.theater,
+                                showtime: showtime,
                               ),
                             );
                           }),
@@ -460,45 +449,63 @@ class TheaterShowTimesWidget extends StatelessWidget {
     required this.theaterName,
     required this.showTimes,
     required this.filterName,
+    required this.scrollController,
     this.onShowtimePressed,
   });
 
   final String theaterName;
   final List<DayShowTimes> showTimes;
   final String filterName;
+  final ScrollController scrollController;
   final ValueChanged<ShowTime>? onShowtimePressed;
 
   @override
   Widget build(BuildContext context) {
+    const horizontalPadding = EdgeInsets.symmetric(horizontal: _contentPadding);
+    final padding = horizontalPadding + const EdgeInsets.symmetric(vertical: 10);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
 
         // Theater name
-        Text(
-          theaterName,
-          style: context.textTheme.titleLarge,
+        Padding(
+          padding: horizontalPadding,
+          child: Text(
+            theaterName,
+            style: context.textTheme.titleLarge,
+          ),
         ),
 
         // Showtimes
-        AppResources.spacerSmall,
         if (showTimes.every((dst) => dst.showTimes.isEmpty))
-          Text('Aucune séance en $filterName', style: const TextStyle(color: AppResources.colorGrey))
+          Padding(
+            padding: padding,
+            child: Text('Aucune séance en $filterName', style: const TextStyle(color: AppResources.colorGrey)),
+          )
         else
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,   // Ensure uniform height, some items may be empty
-              children: showTimes.mapIndexed<Widget>((index, dayShowTimes) {
-                return _DayShowTimes(
-                  day: dayShowTimes.date,
-                  showtimes: dayShowTimes.showTimes,
-                  isEven: index.isEven,
-                  onPressed: onShowtimePressed,
-                );
-              }).toList()..insertBetween(AppResources.spacerTiny),
+          FadingEdgeScrollView.fromSingleChildScrollView(
+            gradientFractionOnEnd: 0.2,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: scrollController,
+              padding: padding,
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,   // Ensure uniform height, some items may be empty
+                  children: showTimes.mapIndexed<Widget>((index, dayShowTimes) {
+                    return _DayShowTimes(
+                      day: dayShowTimes.date,
+                      showtimes: dayShowTimes.showTimes,
+                      isEven: index.isEven,
+                      onPressed: onShowtimePressed,
+                    );
+                  }).toList()..insertBetween(AppResources.spacerTiny),
+                ),
+              ),
             ),
           ),
-        AppResources.spacerLarge,
+        AppResources.spacerSmall,
       ],
     );
   }
@@ -614,9 +621,19 @@ class MoviePageBloc with Disposable {
     });
   }
 
+  final theaterShowTimesScrollControllerMaster = LinkedScrollControllerGroup();
+  late final theaterShowTimesScrollControllers = () {
+    final controllers = <Theater, ScrollController>{};
+    for (final theaterShowTimes in movieShowTimes.theatersShowTimes) {
+      controllers[theaterShowTimes.theater] = theaterShowTimesScrollControllerMaster.addAndGet();
+    }
+    return controllers;
+  } ();
+
   @override
   void dispose() {
     selectedSpec.close();
+    theaterShowTimesScrollControllers.values.forEach((c) => c.dispose());
     super.dispose();
   }
 }

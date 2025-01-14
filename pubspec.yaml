@@ -20,6 +20,7 @@ dependencies:
   flash: ^3.1.1
   flutter_spinkit: ^5.2.1
   shimmer: ^3.0.0
+  linked_scroll_controller: ^0.2.0
   fading_edge_scrollview: ^4.1.1
   photo_view: ^0.15.0
   chewie: 1.8.5  # Next update requires Flutter >= 3.27
