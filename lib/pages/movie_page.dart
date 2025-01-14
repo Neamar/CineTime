@@ -538,16 +538,14 @@ class _DayShowTimes extends StatelessWidget {
     final headerForegroundColor = showtimes.isEmpty ? AppResources.colorGrey : null;
 
     // Build widget
-    return Container(
-      decoration: BoxDecoration(
-        color: () {
-          if (day == AppService.now.toDate) return AppResources.colorLightRed;
-          if (isEven) return Theme.of(context).scaffoldBackgroundColor;
-        } (),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: const EdgeInsets.all(6),
-      child: SizedBox(
+    return Material(
+      color: () {
+        if (day == AppService.now.toDate) return AppResources.colorLightRed;
+        if (isEven) return Theme.of(context).scaffoldBackgroundColor;
+      } (),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        margin: const EdgeInsets.all(6),
         width: textWidth,   // Ensure uniform width (may be empty or smaller than others)
         child: Column(
           children: [
