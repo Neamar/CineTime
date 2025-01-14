@@ -27,6 +27,7 @@ linter:
     prefer_single_quotes: true
     prefer_adjacent_string_concatenation: false
     prefer_void_to_null: false
+    sort_constructors_first: true
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

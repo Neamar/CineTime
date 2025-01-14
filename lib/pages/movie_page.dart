@@ -18,16 +18,34 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 const _contentPadding = 16.0;
 
-class MoviePage extends StatefulWidget {
-  const MoviePage(this.movieShowTimes);
+class MoviePage extends StatelessWidget {
+  MoviePage(this.moviesShowTimes, this.initialIndex);
+
+  final List<MovieShowTimes> moviesShowTimes;
+  final int initialIndex;
+
+  late final _pageController = PageController(initialPage: initialIndex);
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      controller: _pageController,
+      itemCount: moviesShowTimes.length,
+      itemBuilder: (context, index) => _MoviePageContent(moviesShowTimes[index]),
+    );
+  }
+}
+
+class _MoviePageContent extends StatefulWidget {
+  const _MoviePageContent(this.movieShowTimes);
 
   final MovieShowTimes movieShowTimes;
 
   @override
-  State<MoviePage> createState() => _MoviePageState();
+  State<_MoviePageContent> createState() => _MoviePageContentState();
 }
 
-class _MoviePageState extends State<MoviePage> with BlocProvider<MoviePage, MoviePageBloc> {
+class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<_MoviePageContent, MoviePageBloc> {
   @override
   initBloc() => MoviePageBloc(widget.movieShowTimes);
 

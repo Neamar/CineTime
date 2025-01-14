@@ -331,10 +331,10 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
       itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
       padding: EdgeInsets.zero,
       itemBuilder: (context, index) {
-        final movieShowTimes = filteredMoviesShowTimes[index];
         return MovieCard(
-          key: ObjectKey(movieShowTimes),
-          movieShowTimes: movieShowTimes,
+          key: ValueKey(index),
+          moviesShowTimes: filteredMoviesShowTimes,
+          movieIndex: index,
           showTheaterName: widget.showTheaterName,
           preferredRatingType: widget.filterSort.sortType.preferredRatingType,
         );
