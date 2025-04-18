@@ -17,10 +17,10 @@ class TrailerPage extends StatelessWidget {
         title: const Text('Trailer'),
       ),
       backgroundColor: Colors.black,
-      body: FetchBuilder.basic<String?>(
-        task: () => AppService.api.getVideoUrl(trailerId),
-        builder: (context, trailerUrl) {
-          if (trailerUrl == null) {
+      body: FetchBuilder.basic<Uri?>(
+        task: () => AppService.api.getVideoUri(trailerId),
+        builder: (context, trailerUri) {
+          if (trailerUri == null) {
             return const IconMessage(
               icon: IconMessage.iconError,
               message: 'Aucune bande annonce trouvée',
@@ -29,7 +29,7 @@ class TrailerPage extends StatelessWidget {
             );
           }
           return _VideoPlayerWidget(
-            videoUrl: trailerUrl,
+            videoUri: trailerUri,
           );
         },
       ),
@@ -38,9 +38,9 @@ class TrailerPage extends StatelessWidget {
 }
 
 class _VideoPlayerWidget extends StatefulWidget {
-  const _VideoPlayerWidget({required this.videoUrl});
+  const _VideoPlayerWidget({required this.videoUri});
 
-  final String videoUrl;
+  final Uri videoUri;
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -50,17 +50,32 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
   late VideoPlayerController _videoPlayerController;
   late ChewieController _chewieController;
 
+  bool isInit = true;
+
   @override
   void initState() {
     super.initState();
-    _videoPlayerController = VideoPlayerController.network(widget.videoUrl);
+    _videoPlayerController = VideoPlayerController.networkUrl(widget.videoUri);
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
       showOptions: false,
       autoInitialize: true,
       autoPlay: true,
+      fullScreenByDefault: true,    // We force fullscreen mode because otherwise video has a invalid aspect ratio
       errorBuilder: (_, error) => _buildError(error),
     );
+
+    // Hack to properly handle full screen mode & back navigation
+    // See https://github.com/fluttercommunity/chewie/issues/647
+    _chewieController.addListener(() {
+      var isFullScreen = _chewieController.isFullScreen;
+      if (isFullScreen && isInit) {
+        _chewieController.exitFullScreen();
+        setState(() {
+          isInit = false;
+        });
+      }
+    });
   }
 
   @override
