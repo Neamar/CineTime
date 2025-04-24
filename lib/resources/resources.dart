@@ -34,8 +34,10 @@ class AppResources {
   static final formatterFullDateTime = DateFormat('EEEE dd MMMM à HH:mm');
   static final formatterDateTime = DateFormat('EEEE dd à HH:mm');
   static final formatterDate = DateFormat('dd MMMM yyyy');
+  static final formatterParsableDate = DateFormat('yyyy-MM-dd');
   static final _formatterDay = DateFormat('EEEE dd');
   static final formatterMonth = DateFormat('MMM');
+  static final formatterTime = DateFormat('HH:mm');
 
   // Translation
   static const weekdayNamesShort = {

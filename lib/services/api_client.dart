@@ -373,7 +373,7 @@ class ApiClient {
     );
   }
 
-  Future<String?> getVideoUrl(ApiId videoId) async {
+  Future<Uri?> getVideoUri(ApiId videoId) async {
     // Send request
     JsonObject? responseJson;
     if (useMocks) {
@@ -395,14 +395,14 @@ class ApiClient {
       reportError(DataError('Video query result contains no files (title: ${responseJson?['title']} | videoId: ${videoId.id})'), StackTrace.current);
       return null;
     }
-    if (videosJson.length == 1) return MovieVideo.fromJson(videosJson.first).url;
+    if (videosJson.length == 1) return MovieVideo.fromJson(videosJson.first).uri;
 
     // Find highest quality video, but not greater than 720p
     final videos = videosJson.map((json) => MovieVideo.fromJson(json)).toList();
     videos.sort((v1, v2) => v1.height.compareTo(v2.height));
     var bestVideo = videos.firstWhereOrNull((video) => video.height > 700);
     bestVideo ??= videos.last;
-    return bestVideo.url;
+    return bestVideo.uri;
   }
 
   /// Get the full url or an image from [path].
@@ -414,6 +414,34 @@ class ApiClient {
 
   /// Return the external url of the movie
   static String getMovieUrl(ApiId movieId) => 'https://www.all' + 'ocine.fr/film/fichefilm_gen_cfilm=${movieId.id}.html';
+  //#endregion
+
+  //#region Other
+  static Future<String?> getShowEndTime(Uri ticketingUri) async {
+    // UGC case
+    if (ticketingUri.authority.contains('ugc.fr')) {
+      final response = await http.get(ticketingUri);
+      if (isHttpSuccessCode(response.statusCode)) {
+        final htmlContent = response.body;
+
+        // Regular expression to extract the content
+        final regex = RegExp(r'<div class="showing-endtime.*?">.*?(\d{2}:\d{2}).*?</div>', dotAll: true, caseSensitive: false);
+
+        // Match the content
+        final match = regex.firstMatch(htmlContent);
+
+        // Extract the captured group containing the time
+        return match?.group(1)?.trim();
+      }
+    }
+
+    // Pathé case
+    else if (ticketingUri.authority.contains('pathe.fr')) {
+      // TODO
+    }
+
+    return null;
+  }
   //#endregion
 
   //#region Generics
