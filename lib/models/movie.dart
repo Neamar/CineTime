@@ -118,6 +118,8 @@ class MovieVideo {
   final String url;
   final int size;
 
+  Uri? get uri => Uri.tryParse(url);
+
   factory MovieVideo.fromJson(Map<String, dynamic> json) => MovieVideo(
     quality: json['quality'],
     height: json['height'],

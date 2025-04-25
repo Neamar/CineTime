@@ -1,5 +1,4 @@
 import 'package:cinetime/models/theater.dart';
-import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
@@ -34,7 +33,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _goToSearchPage,
-        child: const Icon(CineTimeIcons.plus),
+        child: const Icon(Icons.add, size: 32),
       ),
       body: DataStreamBuilder<List<Theater>>(
         stream: bloc.theaters,
@@ -78,7 +77,7 @@ class MultiSelectionModeButton extends StatelessWidget {
     return Tooltip(
       message: 'Sélection multiple',
       child: IconButton(
-        icon: const Icon(CineTimeIcons.list),
+        icon: const Icon(Icons.library_add_check_outlined),
         onPressed: onPressed,
       ),
     );

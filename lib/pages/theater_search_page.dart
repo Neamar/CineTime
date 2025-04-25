@@ -35,7 +35,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
           ),
           actions: <Widget>[
             IconButton(
-              icon: const Icon(CineTimeIcons.location),
+              icon: const Icon(Icons.location_on_outlined),
               onPressed: bloc.startGeoSearch,
             ),
             if (context.canPop)   // Hide when page is shown at app start
@@ -51,7 +51,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             // No data
             if (searchResult.theaters == null)
               return const EmptySearchResultMessage(
-                icon: CineTimeIcons.search,
+                icon: Icons.search,
                 message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
                 backgroundColor: AppResources.colorDarkRed,
                 imageAssetPath: 'assets/welcome.png',

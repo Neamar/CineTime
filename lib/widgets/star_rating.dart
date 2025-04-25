@@ -1,6 +1,4 @@
-import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
-import 'package:cinetime/utils/_utils.dart';
 
 class StarRating extends StatelessWidget {
   const StarRating(this.rating, {super.key}) :
@@ -19,17 +17,15 @@ class StarRating extends StatelessWidget {
           _buildPartialStar(rating % 1),
         for (var i = rating.ceil(); i < 5; i ++)
           _buildStar(false),
-      ]..insertBetween(
-        const SizedBox(width: 2, height: 2),
-      ),
+      ],
     );
   }
 
   Widget _buildStar(bool solid) {
     return Icon(
-      solid ? CineTimeIcons.star : CineTimeIcons.star_empty,
+      solid ? Icons.star : Icons.star_border,
       color: Colors.orange,
-      size: 15,
+      size: 18,
     );
   }
 

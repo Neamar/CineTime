@@ -62,7 +62,7 @@ class _TheaterCardState extends State<TheaterCard> {
                         ),
                       )
                     : const Icon(
-                        CineTimeIcons.videocam,
+                        Icons.theaters_outlined,
                         color: AppResources.colorDarkRed,
                       ),
                 ),
