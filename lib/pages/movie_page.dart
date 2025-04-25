@@ -11,6 +11,7 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:value_stream/value_stream.dart';
 import 'package:shimmer/shimmer.dart';
@@ -198,9 +199,9 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           if (widget.movieShowTimes.movie.usersRating != null)
-                            _buildRatingWidget('Spectateurs', widget.movieShowTimes.movie.usersRating!),
+                            _buildRatingWidget(FontAwesomeIcons.users, 'Spectateurs', widget.movieShowTimes.movie.usersRating!, -3),
                           if (widget.movieShowTimes.movie.pressRating != null)
-                            _buildRatingWidget('Presse', widget.movieShowTimes.movie.pressRating!),
+                            _buildRatingWidget(FontAwesomeIcons.newspaper, 'Presse', widget.movieShowTimes.movie.pressRating!),
                         ],
                       ),
 
@@ -300,30 +301,22 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
     );
   }
 
-  Widget _buildRatingWidget(String title, double rating) {
-    // TODO test with in-row icons instead of title
-    // https://fontawesome.com/icons/newspaper?style=regular
-    // https://fontawesome.com/icons/users?style=solid
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: <Widget>[
-            Text(
-              title,
-            ),
-            AppResources.spacerSmall,
-            Row(
-              children: <Widget>[
-                StarRating(rating),
-                AppResources.spacerSmall,
-                Text(
-                  rating.toStringAsFixed(1),
-                ),
-              ],
-            )
-          ],
+  Widget _buildRatingWidget(IconData icon, String tooltip, double rating, [double? iconSizeDelta = 0]) {
+    return Tooltip(
+      message: tooltip,
+      triggerMode: TooltipTriggerMode.tap,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: <Widget>[
+              Icon(icon, size: 20 + (iconSizeDelta ?? 0)),
+              AppResources.spacerSmall,
+              StarRating(rating),
+              AppResources.spacerSmall,
+              Text(rating.toStringAsFixed(1)),
+            ],
+          ),
         ),
       ),
     );
