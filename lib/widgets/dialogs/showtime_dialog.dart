@@ -51,14 +51,14 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
     final ticketingUri = Uri.tryParse(widget.showtime.ticketingUrl ?? '-');
     if (ticketingUri != null) {
       try {
-        final endTime = await ApiClient.getShowEndTime(ticketingUri).timeout(const Duration(seconds: 15));
-        final endTimeDate = DateTime.tryParse('${AppResources.formatterParsableDate.format(widget.showtime.dateTime)} $endTime');
+        final endTimeDate = await ApiClient.getShowEndTime(widget.showtime.dateTime, widget.movie?.duration, ticketingUri).timeout(const Duration(seconds: 15));
         if (endTimeDate != null) {
           endDate = endTimeDate;
           isEndDateApprox = false;
         }
-      } catch (e) {
+      } catch (e, s) {
         // Ignore error, use default end time
+        reportError(e, s);
       }
     }
   }

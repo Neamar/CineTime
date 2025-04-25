@@ -417,27 +417,69 @@ class ApiClient {
   //#endregion
 
   //#region Other
-  static Future<String?> getShowEndTime(Uri ticketingUri) async {
+  /// Get the show end time from ticketing url
+  static Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // UGC case
     if (ticketingUri.authority.contains('ugc.fr')) {
       final response = await http.get(ticketingUri);
-      if (isHttpSuccessCode(response.statusCode)) {
-        final htmlContent = response.body;
+      throwIfHttpError(response);
+      final htmlContent = response.body;
 
-        // Regular expression to extract the content
-        final regex = RegExp(r'<div class="showing-endtime.*?">.*?(\d{2}:\d{2}).*?</div>', dotAll: true, caseSensitive: false);
+      // Regular expression to extract the content
+      final regex = RegExp(r'<div class="showing-endtime.*?">.*?(\d{2}:\d{2}).*?</div>', dotAll: true, caseSensitive: false);
 
-        // Match the content
-        final match = regex.firstMatch(htmlContent);
+      // Match the content
+      final match = regex.firstMatch(htmlContent);
 
-        // Extract the captured group containing the time
-        return match?.group(1)?.trim();
+      // Extract the captured group containing the time
+      final endTime = match?.group(1)?.trim();
+      if (endTime == null) throw const DataError('Could not find end time in UGC page');
+
+      // Parse the time and build end date
+      final timeParts = endTime.split(':');
+      var endDate = startAt.copyWith(
+        hour: int.parse(timeParts[0]),
+        minute: int.parse(timeParts[1]),
+      );
+
+      // If the end time is before the start time, it means it's on the next day
+      if (endDate.isBefore(startAt)) {
+        endDate = endDate.copyWith(day: endDate.day + 1);
       }
+      return endDate;
     }
 
     // Pathé case
-    else if (ticketingUri.authority.contains('pathe.fr')) {
-      // TODO
+    else if (ticketingUri.authority.contains('pa' + 'the.fr')) {
+      // Pathé ticketing page is more complex:
+      // - Requires javascript to load
+      // - Displayed end time is actually just based on start time, movie duration and ads duration
+      // So we just fetch the ads duration (actually independent of the movie) and add it to the start time.
+
+      // Ignore if movieDuration is null
+      if (movieDuration == null) return null;
+
+      // First, get a auth token
+      final authResponse = await http.post(Uri.parse('https://s.pa' + 'the.fr/oauth/api/jwt/token'), body: json.encode({
+        'grant_type': 'client_credentials',
+        'client_id': 'API_CLI'
+      }));
+      throwIfHttpError(authResponse);
+      final authToken = json.decode(authResponse.body)['access_token'];
+      final headers = {
+        'Authorization': 'Bearer $authToken',
+      };
+
+      // Then, get the ads duration
+      final adsResponse = await http.get(Uri.parse('https://s.pa' + 'the.fr/api/setting/fr-FR/booking/display'), headers: headers);
+      throwIfHttpError(adsResponse);
+      final adsDuration = json.decode(adsResponse.body)['adsDuration'] as int;
+
+      // Compute total show duration
+      final showDuration = movieDuration + Duration(minutes: adsDuration);
+
+      // Return end time
+      return startAt.add(showDuration);
     }
 
     return null;
@@ -733,7 +775,12 @@ class ApiClient {
 
   static Future<bool> isOnline() async => !(await isOffline());
 
-  static bool isHttpSuccessCode (int httpStatusCode) => httpStatusCode >= 200 && httpStatusCode < 300;
+  static bool isHttpSuccessCode(int httpStatusCode) => httpStatusCode >= 200 && httpStatusCode < 300;
+  static void throwIfHttpError(http.Response response) {
+    if (!isHttpSuccessCode(response.statusCode)) {
+      throw HttpResponseException(response);
+    }
+  }
   //#endregion
 }
 
