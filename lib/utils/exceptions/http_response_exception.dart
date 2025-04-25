@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class HttpResponseException extends DetailedException {
   HttpResponseException(this.response) : super(
-    'Erreur serveur',
+    'Erreur serveur ${response.statusCode}',
     details: '[${response.request?.method}] ${response.request?.url}\n${response.body}',
   );
 
