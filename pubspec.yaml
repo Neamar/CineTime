@@ -18,6 +18,7 @@ dependencies:
 
   # Widgets / UI
   flash: ^3.1.1
+  font_awesome_flutter: ^10.8.0
   flutter_spinkit: ^5.2.1
   shimmer: ^3.0.0
   linked_scroll_controller: ^0.2.0
@@ -59,8 +60,3 @@ flutter:
 
   assets:
     - assets/
-
-  fonts:
-    - family: CineTimeIcons
-      fonts:
-        - asset: assets/CineTimeIcons.ttf

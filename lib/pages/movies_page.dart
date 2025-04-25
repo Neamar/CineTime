@@ -83,11 +83,11 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                               ),
                               actions: [
                                 IconButton(
-                                  icon: const Icon(CineTimeIcons.pencil),
+                                  icon: const Icon(Icons.edit),
                                   onPressed: _goToTheatersPage,
                                 ),
                                 IconButton(
-                                  icon: const Icon(CineTimeIcons.search),
+                                  icon: const Icon(Icons.search),
                                   onPressed: () => bloc.isSearchVisible.add(true),
                                 ),
                                 DataStreamBuilder<MovieSortType>(

@@ -100,7 +100,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Icon(
-                          CineTimeIcons.link_ext,
+                          Icons.open_in_new,
                           color: Colors.white,
                         ),
                         SizedBox(width: 8.0),

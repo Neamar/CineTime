@@ -173,7 +173,7 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
               Tooltip(
                 message: 'Ajouter au calendrier',
                 child: IconButton(
-                  icon: const Icon(CineTimeIcons.calendar),
+                  icon: const Icon(Icons.calendar_month, size: 28),
                   onPressed: _addToCalendar,
                 ),
               ),
