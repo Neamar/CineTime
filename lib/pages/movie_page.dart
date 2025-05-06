@@ -63,6 +63,9 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
           ScalingHeader(
             backgroundColor: Theme.of(context).primaryColor,
             title: Text(widget.movieShowTimes.movie.title),
+            actions: [
+              _MovieVisibilityToggleButton(widget.movieShowTimes.movie),
+            ],
             flexibleSpace: CtCachedImage(
               path: poster,
               placeHolderBackground: true,
@@ -380,6 +383,36 @@ class HeroPoster extends StatelessWidget {
       );
 
     return staticContent;
+  }
+}
+
+class _MovieVisibilityToggleButton extends StatefulWidget {
+  const _MovieVisibilityToggleButton(this.movie);
+
+  final Movie movie;
+
+  @override
+  State<_MovieVisibilityToggleButton> createState() => _MovieVisibilityToggleButtonState();
+}
+
+class _MovieVisibilityToggleButtonState extends State<_MovieVisibilityToggleButton> {
+  @override
+  Widget build(BuildContext context) {
+    final isHidden = AppService.instance.isMovieHidden(widget.movie);
+    return IconButton(
+      icon: Icon(
+        isHidden ? Icons.visibility_off : Icons.visibility,
+      ),
+      tooltip: isHidden ? 'Afficher le film' : 'Masquer le film',
+      onPressed: () => setState(() {
+        // It's better a boolean value than a toggle, to avoid issues if users click too fast
+        if (isHidden) {
+          AppService.instance.unHideMovie(widget.movie);
+        } else {
+          AppService.instance.hideMovie(widget.movie);
+        }
+      }),
+    );
   }
 }
 

@@ -108,10 +108,7 @@ extension ExtendedList<T> on List<T> {
 
 extension ExtendedSet<T> on Set<T> {
   /// Return true if this set's content is equals to [other]'s.
-  bool isEqualTo(Set<T>? other) {
-    const comparator = SetEquality();
-    return comparator.equals(this, other);
-  }
+  bool isEqualTo(Set<T>? other) => const SetEquality().equals(this, other);
 }
 
 extension ExtendedObjectIterable<Object> on Iterable<Object> {

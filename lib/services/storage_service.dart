@@ -11,7 +11,7 @@ class StorageService {
   static Future<void> init() async => _storage = await SharedPreferences.getInstance();
   //#endregion
 
-  //#region Last movie sorting
+  //#region Auth
   static const _authTokenKey = 'authToken';
 
   static Future<void> saveAuthToken(String value) => _storage.setString(_authTokenKey, value);
@@ -19,7 +19,7 @@ class StorageService {
   static Future<void> deleteAuthToken() => _storage.remove(_authTokenKey);
   //#endregion
 
-  //#region Last movie sorting
+  //#region Sorting
   static const _movieSortingKey = 'movieSorting';
 
   static Future<void> saveMovieSorting(MovieSortType value) => _storage.setString(_movieSortingKey, value.name);
@@ -85,5 +85,11 @@ class StorageService {
       return null;
     }
   }
+  //#endregion
+
+  //#region Hidden movies
+  static const _hiddenMoviesIdsKey = 'hiddenMoviesIds';
+  static saveHiddenMoviesIds(Iterable<String> moviesIds) => _storage.setString(_hiddenMoviesIdsKey, moviesIds.join(_listSeparator));
+  static List<String> readHiddenMoviesIds() => _storage.getString(_hiddenMoviesIdsKey)?.split(_listSeparator) ?? [];
   //#endregion
 }

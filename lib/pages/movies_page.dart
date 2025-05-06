@@ -42,31 +42,32 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
             fetchAtInit: false,
             task: bloc.fetch,
             builder: (context, moviesShowtimesData) {
-              return Scaffold(
-                appBar: PreferredSize(
-                  preferredSize: const Size.fromHeight(kToolbarHeight),
-                  child: DataStreamBuilder<bool>(
-                    stream: bloc.isSearchVisible,
-                    builder: (context, isSearchVisible) {
-                      // Normal AppBar
-                      if (!isSearchVisible) {
-                        return DataStreamBuilder<Date?>(
-                          stream: bloc.dayFilter,
-                          builder: (context, dayFilter) {
+              return DataStreamBuilder<_FilterSortData>(
+                stream: bloc.filterSortData,
+                builder: (context, filterSortData) {
+                  final dayFilter = filterSortData.dayFilter;
+                  return Scaffold(
+                    appBar: PreferredSize(
+                      preferredSize: const Size.fromHeight(kToolbarHeight),
+                      child: DataStreamBuilder<bool>(
+                        stream: bloc.isSearchVisible,
+                        builder: (context, isSearchVisible) {
+                          // Normal AppBar
+                          if (!isSearchVisible) {
                             return AppBar(
                               title: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   // Theater info
-                                      () {
+                                  () {
                                     final theaters = moviesShowtimesData.theaters;
                                     final theatersCount = theaters.length;
                                     return Text(
-                                          () {
-                                        if (theatersCount == 0) return 'Aucun cinéma sélectionné';
-                                        if (theatersCount == 1) return 'Films pour ${theaters.first.name}';
-                                        return 'Films dans $theatersCount cinémas';
-                                      }(),
+                                      switch(theatersCount) {
+                                        0 => 'Aucun cinéma sélectionné',
+                                        1 => 'Films pour ${theaters.first.name}',
+                                        _ => 'Films dans $theatersCount cinémas',
+                                      },
                                       style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
@@ -90,82 +91,80 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                   icon: const Icon(Icons.search),
                                   onPressed: () => bloc.isSearchVisible.add(true),
                                 ),
-                                DataStreamBuilder<MovieSortType>(
-                                  stream: bloc.sortType,
-                                  builder: (context, sortType) {
-                                    return _SortButton(
-                                      sortValue: sortType,
-                                      onSortChanged: (value) => bloc.sortType.add(value, skipSame: true),
-                                      dayFilterValue: dayFilter,
-                                      dayFilterFrom: moviesShowtimesData.fetchedFrom.toDate,
-                                      dayFilterTo: moviesShowtimesData.fetchedTo.toDate,
-                                      daysWithShow: moviesShowtimesData.daysWithShow,
-                                      onDayFilterChanged: (value) => bloc.dayFilter.add(value, skipSame: true),
-                                    );
-                                  },
+                                _SortButton(
+                                  sortValue: filterSortData.sortType,
+                                  onSortChanged: bloc.onSortChanged,
+                                  dayFilterValue: dayFilter,
+                                  dayFilterFrom: moviesShowtimesData.fetchedFrom.toDate,
+                                  dayFilterTo: moviesShowtimesData.fetchedTo.toDate,
+                                  daysWithShow: moviesShowtimesData.daysWithShow,
+                                  onDayFilterChanged: bloc.onDayFilterChanged,
+                                  showHiddenMovies: filterSortData.showHiddenMovies,
+                                  onShowHiddenMoviesChanged: bloc.onShowHiddenMoviesChanged,
                                 ),
                               ],
                             );
-                          },
-                        );
-                      }
+                          }
 
-                      // Search bar
-                      else {
-                        return AppBar(
-                          title: TextField(
-                            controller: bloc.searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Filtrer par titre, acteurs, ...',
-                              prefixIcon: IconButton(
-                                icon: const Icon(Icons.arrow_back),
-                                onPressed: _cancelSearch,
+                          // Search bar
+                          else {
+                            return AppBar(
+                              title: TextField(
+                                controller: bloc.searchController,
+                                decoration: InputDecoration(
+                                  hintText: 'Filtrer par titre, acteurs, ...',
+                                  prefixIcon: IconButton(
+                                    icon: const Icon(Icons.arrow_back),
+                                    onPressed: _cancelSearch,
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: bloc.searchController.clear,
+                                  ),
+                                ),
+                                autofocus: true,
+                                style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+                                textInputAction: TextInputAction.search,
                               ),
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: bloc.searchController.clear,
-                              ),
-                            ),
-                            autofocus: true,
-                            style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
-                            textInputAction: TextInputAction.search,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ),
-                body: Column(
-                  children: [
-                    // Content
-                    Expanded(
-                      child: () {
-                        if (moviesShowtimesData.moviesShowTimes.isEmpty)
-                          return const IconMessage(
-                            icon: Icons.theaters,
-                            message: 'Aucune séance',
-                          );
-
-                        return DataStreamBuilder<_FilterSortData>(
-                          stream: bloc.filterSortData,
-                          builder: (context, filterSortData) {
-                            return _FilteredMovieListView(
-                              key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
-                              moviesShowTimes: moviesShowtimesData.moviesShowTimes,
-                              showTheaterName: moviesShowtimesData.theaters.length > 1,
-                              filterSort: filterSortData,
                             );
-                          },
-                        );
-                      } (),
+                          }
+                        },
+                      ),
                     ),
+                    body: Column(
+                      children: [
+                        // Content
+                        Expanded(
+                          child: () {
+                            if (moviesShowtimesData.moviesShowTimes.isEmpty)
+                              return const IconMessage(
+                                icon: Icons.theaters,
+                                message: 'Aucune séance',
+                              );
 
-                    // Bottom data
-                    if (moviesShowtimesData.ghostShowTimes.isNotEmpty)
-                      _GhostShowtimesCard(moviesShowtimesData.ghostShowTimes),
+                            return DataStreamBuilder<UnmodifiableSetView<String>>(
+                              stream: AppService.instance.hiddenMoviesIds,
+                              builder: (context, hiddenMoviesIds) {
+                                return _FilteredMovieListView(
+                                  //key: ValueKey(moviesShowtimesData.hashCode ^ AppService.instance.hiddenMoviesIds.hashCode),   // TODO needed ? revert ?
+                                  moviesShowTimes: moviesShowtimesData.moviesShowTimes,
+                                  showTheaterName: moviesShowtimesData.theaters.length > 1,
+                                  filterSort: filterSortData,
+                                  hiddenMoviesIds: hiddenMoviesIds,
+                                );
+                              },
+                            );
+                          } (),
+                        ),
 
-                  ],
-                ),
+                        // Bottom data
+                        if (moviesShowtimesData.ghostShowTimes.isNotEmpty)
+                          _GhostShowtimesCard(moviesShowtimesData.ghostShowTimes),
+
+                      ],
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -197,6 +196,8 @@ class _SortButton extends StatelessWidget {
     required this.dayFilterTo,
     required this.daysWithShow,
     required this.onDayFilterChanged,
+    required this.showHiddenMovies,
+    required this.onShowHiddenMoviesChanged,
   });
 
   /// Current sort value
@@ -222,6 +223,10 @@ class _SortButton extends StatelessWidget {
   /// Pass a null value when tap on the current selection (for unselect behavior)
   final ValueChanged<Date?> onDayFilterChanged;
 
+
+  final bool showHiddenMovies;
+  final ValueChanged<bool> onShowHiddenMoviesChanged;
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<Object>(
@@ -233,6 +238,8 @@ class _SortButton extends StatelessWidget {
         } else if (value is Date) {
           // Unselected date if selected value is tapped
           onDayFilterChanged(value == dayFilterValue ? null : value);
+        } else if (value is bool) {
+          onShowHiddenMoviesChanged(!value);
         } else {
           throw UnimplementedError('Unhandled type');
         }
@@ -273,6 +280,16 @@ class _SortButton extends StatelessWidget {
               );
             });
           } (),
+
+          // Divider
+          const PopupMenuDivider(),
+
+          // Movie visibility
+          PopupMenuItem<bool>(
+            value: showHiddenMovies,
+            textStyle: buildTextStyle(showHiddenMovies),
+            child: const Text('Incl. films cachés'),
+          ),
         ];
       },
     );
@@ -285,11 +302,13 @@ class _FilteredMovieListView extends StatefulWidget {
     required this.moviesShowTimes,
     required this.showTheaterName,
     required this.filterSort,
+    required this.hiddenMoviesIds,
   });
 
   final List<MovieShowTimes> moviesShowTimes;
   final bool showTheaterName;
   final _FilterSortData filterSort;
+  final UnmodifiableSetView<String> hiddenMoviesIds;
 
   @override
   _FilteredMovieListViewState createState() => _FilteredMovieListViewState();
@@ -313,10 +332,12 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
     filteredMoviesShowTimes = () {
       final textFilter = widget.filterSort.textFilter;
       final dayFilter = widget.filterSort.dayFilter;
-      if (textFilter.isEmpty && dayFilter == null) return widget.moviesShowTimes;
+      final showHiddenMovies = widget.filterSort.showHiddenMovies;
+      if (textFilter.isEmpty && dayFilter == null && (showHiddenMovies || widget.hiddenMoviesIds.isEmpty)) return widget.moviesShowTimes;
       return widget.moviesShowTimes.where((mst) {
         return (textFilter.isEmpty || mst.movie.matchSearch(textFilter))
-            && (dayFilter == null || mst.theatersShowTimes.any((tst) => tst.daysWithShow.contains(dayFilter)));
+            && (dayFilter == null || mst.theatersShowTimes.any((tst) => tst.daysWithShow.contains(dayFilter)))
+            && (showHiddenMovies || !widget.hiddenMoviesIds.contains(mst.movie.id.id));
       }).toList(growable: false);
     } ();
   }
@@ -332,7 +353,7 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
       padding: EdgeInsets.zero,
       itemBuilder: (context, index) {
         return MovieCard(
-          key: ValueKey(index),
+          key: ObjectKey(filteredMoviesShowTimes[index]),
           moviesShowTimes: filteredMoviesShowTimes,
           movieIndex: index,
           showTheaterName: widget.showTheaterName,
@@ -345,27 +366,17 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
   @override
   void didUpdateWidget(covariant _FilteredMovieListView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.filterSort.dayFilter != oldWidget.filterSort.dayFilter || widget.filterSort.textFilter != oldWidget.filterSort.textFilter) {
+    if (widget.filterSort.dayFilter != oldWidget.filterSort.dayFilter ||
+        widget.filterSort.textFilter != oldWidget.filterSort.textFilter ||
+        widget.filterSort.showHiddenMovies != oldWidget.filterSort.showHiddenMovies ||
+        (!widget.filterSort.showHiddenMovies && widget.hiddenMoviesIds != oldWidget.hiddenMoviesIds)) {
       applyFilter();
+      applySort();
     }
     if (widget.filterSort.sortType != oldWidget.filterSort.sortType) {
       applySort();
     }
   }
-}
-
-class _FilterSortData {
-  const _FilterSortData({required this.sortType, this.dayFilter, this.textFilter = ''});
-
-  final MovieSortType sortType;
-  final Date? dayFilter;
-  final String textFilter;
-
-  _FilterSortData copyWith({MovieSortType? sortType, ValueGetter<Date?>? dayFilter, String? textFilter}) => _FilterSortData(
-    sortType: sortType ?? this.sortType,
-    dayFilter: dayFilter != null ? dayFilter() : this.dayFilter,      // ValueGetter needed to properly handle null values
-    textFilter: textFilter ?? this.textFilter,
-  );
 }
 
 class _GhostShowtimesCard extends StatelessWidget {
@@ -440,20 +451,6 @@ class MoviesPageBloc with Disposable {
     // Initial fetch, after widget is initialised
     WidgetsBinding.instance.addPostFrameCallback((_) => refresh());
 
-    // Refresh on sort change
-    sortType.listen((value) {
-      filterSortData.add(filterSortData.value.copyWith(sortType: value));
-      StorageService.saveMovieSorting(value);   // No need to await
-      AnalyticsService.trackEvent('Sort order', {
-        'theatersId': _theaters.toIdListString(),
-        'theaterCount': _theaters.length,
-        'sortType': value.name,
-      });
-    });
-
-    // Refresh on day filter change
-    dayFilter.listen((value) => filterSortData.add(filterSortData.value.copyWith(dayFilter: () => value)));
-
     // Listen for search changes
     searchController.addListener(() => filterSortData.add(filterSortData.value.copyWith(textFilter: searchController.text)));
 
@@ -467,12 +464,9 @@ class MoviesPageBloc with Disposable {
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
   final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
-
-  final sortType = DataStream(StorageService.readMovieSorting() ?? MovieSortType.usersRating);
-  final dayFilter = DataStream<Date?>(null);
   final isSearchVisible = DataStream(false);
   final searchController = TextEditingController();
-  late final filterSortData = DataStream<_FilterSortData>(_FilterSortData(sortType: sortType.value));
+  late final filterSortData = DataStream<_FilterSortData>(_FilterSortData(sortType: StorageService.readMovieSorting() ?? MovieSortType.usersRating));
 
   Future<MoviesShowTimes> fetch() async {
     // Fetch data
@@ -500,20 +494,55 @@ class MoviesPageBloc with Disposable {
         'count': AppService.instance.selectedTheaters.length - _theaters.length,
       });
 
-    // Copy selected theater to a local list
+    // Copy selected theater to a local list (to allow deep comparison with the previous one, to avoid unnecessary refresh)
+    // TODO we could edit AppService so each time Set is modified, it creates a new instance for easier and quicker comparison (like for hiddenMoviesIds).
+    // TODO Or we could use a Stream to avoid manual refresh calling (with a stream, it should refresh automatically when data changes. Check it only rebuild page when pop, and not when on upper page)
     _theaters = UnmodifiableSetView(Set.from(AppService.instance.selectedTheaters));
 
     // Refresh data
     fetchController.refresh();
   }
 
+  void onSortChanged(MovieSortType value) {
+    filterSortData.add(filterSortData.value.copyWith(sortType: value));
+    StorageService.saveMovieSorting(value);   // No need to await
+    AnalyticsService.trackEvent('Sort order', {
+      'theatersId': _theaters.toIdListString(),
+      'theaterCount': _theaters.length,
+      'sortType': value.name,
+    });
+  }
+
+  void onDayFilterChanged(Date? value) => filterSortData.add(filterSortData.value.copyWith(dayFilter: () => value));
+
+  void onShowHiddenMoviesChanged(bool value) => filterSortData.add(filterSortData.value.copyWith(showHiddenMovies: value));
+
   @override
   void dispose() {
-    sortType.close();
-    dayFilter.close();
     isSearchVisible.close();
     searchController.dispose();
     filterSortData.close();
     super.dispose();
   }
+}
+
+class _FilterSortData {
+  const _FilterSortData({required this.sortType, this.dayFilter, this.textFilter = '', this.showHiddenMovies = false});
+
+  final MovieSortType sortType;
+  final Date? dayFilter;
+  final String textFilter;
+  final bool showHiddenMovies;
+
+  _FilterSortData copyWith({
+    MovieSortType? sortType,
+    ValueGetter<Date?>? dayFilter,
+    String? textFilter,
+    bool? showHiddenMovies,
+  }) => _FilterSortData(
+    sortType: sortType ?? this.sortType,
+    dayFilter: dayFilter != null ? dayFilter() : this.dayFilter,      // ValueGetter needed to properly handle null values
+    textFilter: textFilter ?? this.textFilter,
+    showHiddenMovies: showHiddenMovies ?? this.showHiddenMovies,
+  );
 }

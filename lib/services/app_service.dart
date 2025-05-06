@@ -3,6 +3,7 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
+import 'package:value_stream/value_stream.dart';
 
 import 'api_client.dart';
 
@@ -15,15 +16,11 @@ class AppService {
 
   /// Mockable [DateTime.now()], to be consistent with mocked data
   static DateTime get now => ApiClient.useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
-
-  AppService()
-      : _selectedTheaters = StorageService.readSelectedTheaters().toSet(),
-        _favoriteTheaters = StorageService.readFavoriteTheaters().toSet();
   //#endregion
 
   //#region Selected theaters
   static const _maxSelected = 5;
-  final Set<Theater> _selectedTheaters;
+  final Set<Theater> _selectedTheaters = StorageService.readSelectedTheaters().toSet();
   UnmodifiableSetView<Theater> get selectedTheaters => UnmodifiableSetView(_selectedTheaters);
 
   bool isSelected(Theater theater) => _selectedTheaters.contains(theater);
@@ -57,7 +54,7 @@ class AppService {
   //#endregion
 
   //#region Favorite theaters
-  final Set<Theater> _favoriteTheaters;
+  final Set<Theater> _favoriteTheaters = StorageService.readFavoriteTheaters().toSet();
   UnmodifiableSetView<Theater> get favoriteTheaters => UnmodifiableSetView(_favoriteTheaters);
 
   bool isFavorite(Theater theater) => _favoriteTheaters.contains(theater);
@@ -70,5 +67,22 @@ class AppService {
     });   // Do not await
   }
   Future<void> removeFromFavorites(Theater theater) => StorageService.saveFavoriteTheaters(_favoriteTheaters..remove(theater));
+  //#endregion
+
+  //#region Hidden movies
+  /// Stream of hidden movies ids.
+  /// We use UnmodifiableSetView to ensure that every change to the set uses a new Set instance, to ensure that the UI is properly refreshed.
+  final hiddenMoviesIds = DataStream<UnmodifiableSetView<String>>(UnmodifiableSetView(StorageService.readHiddenMoviesIds().toSet()));
+
+  bool isMovieHidden(Movie movie) => hiddenMoviesIds.value.contains(movie.id.id);
+
+  Future<void> hideMovie(Movie movie) async {
+    hiddenMoviesIds.add(UnmodifiableSetView({...hiddenMoviesIds.value, movie.id.id}));
+    await StorageService.saveHiddenMoviesIds(hiddenMoviesIds.value);
+  }
+  Future<void> unHideMovie(Movie movie) async {
+    hiddenMoviesIds.add(UnmodifiableSetView({...hiddenMoviesIds.value}..remove(movie.id.id)));
+    await StorageService.saveHiddenMoviesIds(hiddenMoviesIds.value);
+  }
   //#endregion
 }
