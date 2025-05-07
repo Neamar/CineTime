@@ -146,7 +146,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                               stream: AppService.instance.hiddenMoviesIds,
                               builder: (context, hiddenMoviesIds) {
                                 return _FilteredMovieListView(
-                                  //key: ValueKey(moviesShowtimesData.hashCode ^ AppService.instance.hiddenMoviesIds.hashCode),   // TODO needed ? revert ?
+                                  key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
                                   moviesShowTimes: moviesShowtimesData.moviesShowTimes,
                                   showTheaterName: moviesShowtimesData.theaters.length > 1,
                                   filterSort: filterSortData,
@@ -260,10 +260,8 @@ class _SortButton extends StatelessWidget {
             );
           }),
 
-          // Divider
-          const PopupMenuDivider(),
-
           // Day filter
+          const PopupMenuDivider(),
           ...() {
             final days = <Date>[];
             var day = dayFilterFrom;
@@ -281,15 +279,16 @@ class _SortButton extends StatelessWidget {
             });
           } (),
 
-          // Divider
-          const PopupMenuDivider(),
+          // Hidden movies
+          if (AppService.instance.hiddenMoviesIds.value.isNotEmpty)...[
+            const PopupMenuDivider(),
+            PopupMenuItem<bool>(
+              value: showHiddenMovies,
+              textStyle: buildTextStyle(showHiddenMovies),
+              child: const Text('Incl. films cachés'),
+            ),
 
-          // Movie visibility
-          PopupMenuItem<bool>(
-            value: showHiddenMovies,
-            textStyle: buildTextStyle(showHiddenMovies),
-            child: const Text('Incl. films cachés'),
-          ),
+          ]
         ];
       },
     );
