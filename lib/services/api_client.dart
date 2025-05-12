@@ -419,16 +419,14 @@ class ApiClient {
   //#region Other
   /// Get the show end time from ticketing url
   static Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
-    // UGC case
-    if (ticketingUri.authority.contains('ugc.fr')) {
+    // UGC
+    if (ticketingUri.host.contains('ugc.fr')) {
       final response = await http.get(ticketingUri);
       throwIfHttpError(response);
       final htmlContent = response.body;
 
-      // Regular expression to extract the content
+      // Extract raw value
       final regex = RegExp(r'<div class="showing-endtime.*?">.*?(\d{2}:\d{2}).*?</div>', dotAll: true, caseSensitive: false);
-
-      // Match the content
       final match = regex.firstMatch(htmlContent);
 
       // Extract the captured group containing the time
@@ -449,8 +447,8 @@ class ApiClient {
       return endDate;
     }
 
-    // Pathé case
-    else if (ticketingUri.authority.contains('pa' + 'the.fr')) {
+    // Pathé
+    else if (ticketingUri.host.contains('pa' + 'the.fr')) {
       // Pathé ticketing page is more complex:
       // - Requires javascript to load
       // - Displayed end time is actually just based on start time, movie duration and ads duration
@@ -480,6 +478,29 @@ class ApiClient {
 
       // Return end time
       return startAt.add(showDuration);
+    }
+
+    // Ciné Boutique
+    if (ticketingUri.host.contains('cine.bo' + 'utique')) {
+      // Get API token
+      final response = await http.get(ticketingUri);
+      throwIfHttpError(response);
+      final htmlContent = response.body;
+
+      // Extract API token
+      final apiToken = RegExp(r'<meta.+api_token.+content="(.+)">', caseSensitive: false).firstMatch(htmlContent)?.group(1);
+      if (apiToken == null) throw const DataError('Could not find APi Token in Ciné Boutique page');
+
+      // Get showtime data
+      final showTimeId = ticketingUri.queryParameters['showId'];
+      final subDomain = ticketingUri.host.split('.').first;
+      final showTimeResponse = await http.get(Uri.parse('https://$subDomain.cineo' + 'ffice.fr/vad/shows/$showTimeId?api_token=$apiToken'));
+      throwIfHttpError(showTimeResponse);
+
+      // Extract showtime data
+      final showTimeData = json.decode(showTimeResponse.body);
+      final endTime = showTimeData['showend'] as String;
+      return DateTime.parse(endTime).toLocal();
     }
 
     return null;
