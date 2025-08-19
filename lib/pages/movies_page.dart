@@ -10,7 +10,7 @@ import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:value_stream_flutter/value_stream_flutter.dart';
+import 'package:fetcher/fetcher_bloc.dart';
 
 import '_pages.dart';
 
@@ -37,7 +37,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
       },
       child: ClearFocusBackground(
         child: Scaffold(    // Needed for themed background color & for FetchBuilder error widget display
-          body: FetchBuilder.basic<MoviesShowTimes>(
+          body: FetchBuilder<MoviesShowTimes>(
             controller: bloc.fetchController,
             fetchAtInit: false,
             task: bloc.fetch,
@@ -462,7 +462,7 @@ class MoviesPageBloc with Disposable {
   }
 
   UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
-  final fetchController = FetchBuilderController<Never, MoviesShowTimes>();
+  final fetchController = FetchBuilderController<MoviesShowTimes>();
   final isSearchVisible = DataStream(false);
   final searchController = TextEditingController();
   late final filterSortData = DataStream<_FilterSortData>(_FilterSortData(sortType: StorageService.readMovieSorting() ?? MovieSortType.usersRating));
@@ -499,7 +499,7 @@ class MoviesPageBloc with Disposable {
     _theaters = UnmodifiableSetView(Set.from(AppService.instance.selectedTheaters));
 
     // Refresh data
-    fetchController.refresh();
+    fetchController.refresh(clearDataFirst: true);
   }
 
   void onSortChanged(MovieSortType value) {

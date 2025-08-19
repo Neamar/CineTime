@@ -10,10 +10,10 @@ import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
+import 'package:fetcher/fetcher_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
-import 'package:value_stream_flutter/value_stream_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -425,30 +425,32 @@ class SynopsisWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FetchBuilder.basic<MovieInfo>(
+    return FetchBuilder<MovieInfo>(
       task: () => AppService.api.getMovieInfo(movieId),
-      isDense: true,
-      fetchingBuilder: (context) {
-        return SizedBox(
-          height: collapsedHeight,
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: List.generate(3, (index) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3),
-                  child: Container(
-                    color: Colors.white,
+      config: FetcherConfig(
+        isDense: true,
+        fetchingBuilder: (context) {
+          return SizedBox(
+            height: collapsedHeight,
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: List.generate(3, (index) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Container(
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              )),
+                )),
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
       builder: (context, info) {
         return ShowMoreText(
           header: info.certificate,

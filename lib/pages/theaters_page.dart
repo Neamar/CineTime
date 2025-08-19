@@ -3,7 +3,7 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:value_stream_flutter/value_stream_flutter.dart';
+import 'package:fetcher/fetcher_bloc.dart';
 
 import 'theater_search_page.dart';
 

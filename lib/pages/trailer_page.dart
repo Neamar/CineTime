@@ -4,6 +4,7 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:fetcher/fetcher_bloc.dart';
 
 class TrailerPage extends StatelessWidget {
   const TrailerPage(this.trailerId);
@@ -17,7 +18,7 @@ class TrailerPage extends StatelessWidget {
         title: const Text('Trailer'),
       ),
       backgroundColor: Colors.black,
-      body: FetchBuilder.basic<Uri?>(
+      body: FetchBuilder<Uri?>(
         task: () => AppService.api.getVideoUri(trailerId),
         builder: (context, trailerUri) {
           if (trailerUri == null) {

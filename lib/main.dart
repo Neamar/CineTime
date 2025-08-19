@@ -1,10 +1,14 @@
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
+import 'package:cinetime/utils/utils.dart';
+import 'package:cinetime/widgets/error_widget.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:fetcher/fetcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -78,36 +82,47 @@ class App extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'CinéTime',
-      theme: appTheme(),
-      darkTheme: appTheme(darkMode: true),
-      navigatorKey: _navigatorKey,
-      home: AppService.instance.selectedTheaters.isEmpty
-        ? const TheaterSearchPage()
-        : const MoviesPage(),
-      builder: (context, child) {
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          // Set system status & navigation bars colors.
-          // Using [AnnotatedRegion] is better than calling [SystemChrome.setSystemUIOverlayStyle] because it allows some pages to override colors and automatically restore default theme when page is disposed.
-          value: MediaQuery.of(context).platformBrightness == Brightness.light
-            ? const SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarBrightness: Brightness.light,
-                statusBarIconBrightness: Brightness.light,
-                systemNavigationBarColor: Colors.white,
-                systemNavigationBarIconBrightness: Brightness.dark,
-              )
-            : const SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarBrightness: Brightness.dark,
-                statusBarIconBrightness: Brightness.dark,
-                systemNavigationBarColor: Colors.black,
-                systemNavigationBarIconBrightness: Brightness.light,
-              ),
-          child: child!,
-        );
-      },
+    return DefaultFetcherConfig(
+      config: FetcherConfig(
+        onError: reportError,
+        onDisplayError: showError,
+        fetchingBuilder: (context) => SpinKitFadingCube(
+          color: Theme.of(context).primaryColor,
+          size: 25.0,
+        ),
+        fetchErrorBuilder: (context, errorData) => CtErrorWidget(error: errorData.error, onRetry: errorData.retry, isDense: errorData.isDense),
+      ),
+      child: MaterialApp(
+        title: 'CinéTime',
+        theme: appTheme(),
+        darkTheme: appTheme(darkMode: true),
+        navigatorKey: _navigatorKey,
+        home: AppService.instance.selectedTheaters.isEmpty
+          ? const TheaterSearchPage()
+          : const MoviesPage(),
+        builder: (context, child) {
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            // Set system status & navigation bars colors.
+            // Using [AnnotatedRegion] is better than calling [SystemChrome.setSystemUIOverlayStyle] because it allows some pages to override colors and automatically restore default theme when page is disposed.
+            value: MediaQuery.of(context).platformBrightness == Brightness.light
+              ? const SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarBrightness: Brightness.light,
+                  statusBarIconBrightness: Brightness.light,
+                  systemNavigationBarColor: Colors.white,
+                  systemNavigationBarIconBrightness: Brightness.dark,
+                )
+              : const SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarBrightness: Brightness.dark,
+                  statusBarIconBrightness: Brightness.dark,
+                  systemNavigationBarColor: Colors.black,
+                  systemNavigationBarIconBrightness: Brightness.light,
+                ),
+            child: child!,
+          );
+        },
+      ),
     );
   }
 }

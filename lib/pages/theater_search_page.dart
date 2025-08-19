@@ -5,6 +5,7 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:fetcher/fetcher_bloc.dart';
 
 import 'theaters_page.dart';
 
@@ -15,9 +16,9 @@ class TheaterSearchPage extends StatefulWidget {
   State<TheaterSearchPage> createState() => _TheaterSearchPageState();
 }
 
-class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider<TheaterSearchPage, TheaterSearchPageBloc>, MultiSelectionMode<TheaterSearchPage> {
+class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider<TheaterSearchPage, _TheaterSearchPageBloc>, MultiSelectionMode<TheaterSearchPage> {
   @override
-  initBloc() => TheaterSearchPageBloc();
+  initBloc() => _TheaterSearchPageBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
               ),
           ],
         ),
-        body: FetchBuilder<_SearchParams, _SearchResult>.withParam(
+        body: FetchBuilderWithParameter<_SearchParams, _SearchResult>(
           controller: bloc.fetchBuilderController,
           task: bloc.fetchTheaters,
           builder: (context, searchResult) {
@@ -85,12 +86,12 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
 }
 
 
-class TheaterSearchPageBloc with Disposable {
-  final fetchBuilderController = FetchBuilderController<_SearchParams, _SearchResult>();
+class _TheaterSearchPageBloc with Disposable {
+  final fetchBuilderController = FetchBuilderWithParameterController<_SearchParams, _SearchResult>();
 
-  void startGeoSearch() => fetchBuilderController.refresh(const _SearchParams(isGeo: true));
+  void startGeoSearch() => fetchBuilderController.refresh(param: const _SearchParams(isGeo: true), clearDataFirst: true);
 
-  void startQuerySearch(String query) => fetchBuilderController.refresh(_SearchParams(query: query));
+  void startQuerySearch(String query) => fetchBuilderController.refresh(param: _SearchParams(query: query), clearDataFirst: true);
 
   Future<_SearchResult> fetchTheaters(_SearchParams? searchParams) async {
     // If search hasn't started yet
