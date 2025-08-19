@@ -40,8 +40,8 @@ class _ShowMoreTextState extends State<ShowMoreText> {
           textDirection: TextDirection.ltr,
           textAlign: TextAlign.justify,
           maxLines: 100,
-        );
-        textPainter.layout(maxWidth: constraints.maxWidth);
+          textScaler: MediaQuery.textScalerOf(context),   // Adapt to OS text scale
+        )..layout(maxWidth: constraints.maxWidth);
         final height = textPainter.size.height;
 
         // Build the text widget
