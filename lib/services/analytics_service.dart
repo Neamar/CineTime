@@ -26,6 +26,6 @@ class AnalyticsService {
     await _instance.isBuilt;
   }
 
-  static Future<void> trackEvent(String eventName, [Map<String, dynamic>? properties]) async =>
-      await _instance.track(BaseEvent(eventName, eventProperties: properties));
+  static Future<void> trackEvent(String eventName, [Map<String, dynamic>? properties]) =>
+      _instance.track(BaseEvent(eventName, eventProperties: properties));
 }

@@ -19,7 +19,7 @@ ThemeData appTheme({bool darkMode = false}) {
       selectionColor: AppResources.colorLightRed,
       selectionHandleColor: Colors.white,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: backgroundLightColor,
       shape: const RoundedRectangleBorder(
         borderRadius: AppResources.borderRadiusTiny,
@@ -43,7 +43,7 @@ ThemeData appTheme({bool darkMode = false}) {
       selectedBorderColor: AppResources.colorGrey,
       color: foregroundColor,
     ),
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: backgroundLightColor,
     ),
   );

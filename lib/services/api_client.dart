@@ -30,7 +30,7 @@ const _httpMethodPost = 'POST';
 class ApiClient {
   //#region Vars
   /// Whether to use mocks or not
-  static const useMocks = !kReleaseMode;
+  static const useMocks = false;
 
   /// Whether to use cache or not
   static const useCache = true;
@@ -533,7 +533,7 @@ class ApiClient {
   /// Usually one per device.
   Future<String> _getAuthToken() async {
     // Using hardcoded token works for now, but it may be revoked at any time.
-    return 'eCDM7vrIQ02KcApYJ7bEDY:APA91bE4hKCJzhlK8uWsY7EUZtkgNVGniD4djVa3s2KefoJ3ytTNjFoa9eq61BXyKor6yRyrlMpsUg1jfK98WUOgSGzXlMJT3R9Wtim5K6ukDGS5uTzAk4o';    // samA3 hoIP 9.8
+    return 'fCDfVgziRW2y5IkCYmdV4S:APA91bFBjwvfdaxpxalhxE9FWSB62qSpp9kkY_TUQ4JxQjh3YOA_udC5zrGte-u2HwEld_4H1z3cm8g_SuLJTNhpoRqS4v0maESjXBj3jEgLbUINmVVMQRM';    // S4m windIP 9.7.8
   }
 
   /// Delete all locally saved auth tokens
