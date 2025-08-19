@@ -530,27 +530,44 @@ class TheaterShowTimesWidget extends StatelessWidget {
             child: Text('Aucune séance en $filterName', style: const TextStyle(color: AppResources.colorGrey)),
           )
         else
-          FadingEdgeScrollView.fromSingleChildScrollView(
-            gradientFractionOnEnd: 0.2,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              controller: scrollController,
-              padding: padding,
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,   // Ensure uniform height, some items may be empty
-                  children: showTimes.mapIndexed<Widget>((index, dayShowTimes) {
-                    return _DayShowTimes(
-                      day: dayShowTimes.date,
-                      showtimes: dayShowTimes.showTimes,
-                      isEven: index.isEven,
-                      onPressed: onShowtimePressed,
-                    );
-                  }).toList()..insertBetween(AppResources.spacerTiny),
+          () {
+            // Compute width of a time text to be sure it's uniform, even if it's empty or smaller than the others
+            final timeStyle = context.textTheme.bodyMedium;
+            final textPainter = TextPainter(
+              text: TextSpan(
+                text: '22:22',
+                style: timeStyle,
+              ),
+              textDirection: TextDirection.ltr,
+              textScaler: MediaQuery.textScalerOf(context),   // Adapt to OS text scale
+            )..layout();
+            final textWidth = textPainter.size.width;
+
+            // Build widget
+            return FadingEdgeScrollView.fromSingleChildScrollView(
+              gradientFractionOnEnd: 0.2,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: scrollController,
+                padding: padding,
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,   // Ensure uniform height, some items may be empty
+                    children: showTimes.mapIndexed<Widget>((index, dayShowTimes) {
+                      return _DayShowTimes(
+                        day: dayShowTimes.date,
+                        showtimes: dayShowTimes.showTimes,
+                        isEven: index.isEven,
+                        width: textWidth,
+                        timeStyle: timeStyle,
+                        onPressed: onShowtimePressed,
+                      );
+                    }).toList()..insertBetween(AppResources.spacerTiny),
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          } (),
         AppResources.spacerSmall,
       ],
     );
@@ -562,24 +579,20 @@ class _DayShowTimes extends StatelessWidget {
     required this.day,
     required this.showtimes,
     required this.isEven,
+    required this.width,
+    this.timeStyle,
     this.onPressed,
   });
 
   final Date day;
   final List<ShowTime?> showtimes;
   final bool isEven;
+  final double width;
+  final TextStyle? timeStyle;
   final ValueChanged<ShowTime>? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    // Compute width of a time text to be sure it's uniform, even if it's empty or smaller than the others
-    final textPainter = TextPainter(
-      text: const TextSpan(text: '22:22'),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-    final textWidth = textPainter.size.width;
-
     // Theme
     final headerForegroundColor = showtimes.isEmpty ? AppResources.colorGrey : null;
 
@@ -592,7 +605,7 @@ class _DayShowTimes extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         margin: const EdgeInsets.all(6),
-        width: textWidth,   // Ensure uniform width (may be empty or smaller than others)
+        width: width,   // Ensure uniform width (may be empty or smaller than others)
         child: Column(
           children: [
             // Week day
@@ -614,6 +627,7 @@ class _DayShowTimes extends StatelessWidget {
               final formattedShowtime = showtime?.dateTime.toTime.toString();
               final text = Text(
                 formattedShowtime ?? '-',
+                style: timeStyle,
               );
               if (formattedShowtime == null) return text;
               return InkWell(
