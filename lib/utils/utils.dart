@@ -177,15 +177,25 @@ DateTime? dateFromString(String? dateString) => DateTime.tryParse(dateString ?? 
 String? dateToString(DateTime? date) => date?.toIso8601String();
 
 String convertBasicHtmlTags(String htmlText) {
-  // Replace all double line break with single line break
-  htmlText = htmlText.replaceAll('<br><br>', '\n');
+  const replacements = {
+    // Replace all double line break with single line break
+    '<br><br>': '\n',
+    // Replace all remaining line break
+    '<br>': '\n',
+    // Replace basic html chars
+    '&quot;': '"',
+    '&apos;': "'",
+    '&#039;': "'",
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&nbsp;': ' ',
+  };
 
-  // Replace all remaining line break
-  htmlText = htmlText.replaceAll('<br>', '\n');
-
-  // Replace basic html chars
-  htmlText = htmlText.replaceAll('&nbsp;', ' ');
-  htmlText = htmlText.replaceAll('&#039;', "'");
+  // Replace all HTML entities with their corresponding characters
+  for (final MapEntry(:key, :value) in replacements.entries) {
+    htmlText = htmlText.replaceAll(key, value);
+  }
 
   // Remove other tags
   RegExp exp = RegExp(
@@ -193,6 +203,5 @@ String convertBasicHtmlTags(String htmlText) {
     multiLine: true,
     caseSensitive: true,
   );
-
   return htmlText.replaceAll(exp, '');
 }

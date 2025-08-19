@@ -404,7 +404,9 @@ class ApiClient {
     bestVideo ??= videos.last;
     return bestVideo.uri;
   }
+  //#endregion
 
+  //#region Tools
   /// Get the full url or an image from [path].
   /// if [isThumbnail] is true, image will be small. Otherwise it will return full size.
   static String? getImageUrl(String? path, {bool isThumbnail = false}) {
