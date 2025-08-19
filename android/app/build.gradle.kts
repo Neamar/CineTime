@@ -31,8 +31,6 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")  // We first sign build with any debug key, real prod signing is done afterwards
-
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
 }
