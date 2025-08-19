@@ -36,7 +36,7 @@ dependencies:
   # Device
   device_info_plus: ^11.5.0
   in_app_update: ^4.2.3
-  sentry_flutter: ^8.14.2
+  sentry_flutter: ^9.6.0
   url_launcher: ^6.3.2
   share_plus: ^11.1.0
   geolocator: ^14.0.2
