@@ -10,7 +10,7 @@ import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:value_stream/value_stream.dart';
+import 'package:value_stream_flutter/value_stream_flutter.dart';
 
 import '_pages.dart';
 

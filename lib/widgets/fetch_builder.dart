@@ -4,9 +4,9 @@ import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/update_app_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:value_stream/value_stream.dart';
+import 'package:value_stream_flutter/value_stream_flutter.dart';
 
-class FetchBuilder<T, R> extends StatefulWidget {
+class FetchBuilder<T, R> extends StatefulWidget {   // TODO use fetcher package ?
   /// Basic [FetchBuilder] constructor.
   /// Because constructor or factory must be of type <T, R>, we must use a static method instead.
   static FetchBuilder<Never, R> basic<R>({

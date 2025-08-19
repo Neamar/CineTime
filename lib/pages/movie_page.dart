@@ -13,7 +13,7 @@ import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
-import 'package:value_stream/value_stream.dart';
+import 'package:value_stream_flutter/value_stream_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
