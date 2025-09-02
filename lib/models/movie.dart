@@ -53,6 +53,9 @@ class Movie extends Identifiable {
     MovieRatingType.press => pressRating ?? usersRating,
   };
 
+  static const String _movieBaseUrl = 'https://www.all' + 'ocine.fr/film/fich' + 'efilm';
+  String get movieUrl => '${_movieBaseUrl}_gen_cfilm=$id.html';
+
   /// Return true if this movie match the [search] query
   bool matchSearch(String search) {
     search = search.normalized;

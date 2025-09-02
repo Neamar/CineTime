@@ -413,9 +413,6 @@ class ApiClient {
     if (path?.isNotEmpty != true) return null;
     return 'https://images.all' + 'ocine.fr/' + (isThumbnail ? 'r_200_200' : '') + path!;
   }
-
-  /// Return the external url of the movie
-  static String getMovieUrl(ApiId movieId) => 'https://www.all' + 'ocine.fr/film/fichefilm_gen_cfilm=${movieId.id}.html';
   //#endregion
 
   //#region Other

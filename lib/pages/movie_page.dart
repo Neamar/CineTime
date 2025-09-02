@@ -4,7 +4,6 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/analytics_service.dart';
-import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/utils/_utils.dart';
@@ -81,40 +80,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  TextButton(
+                  _TextIconButton(
+                    icon: Icons.ondemand_video_outlined,
+                    label:'Bande annonce',
                     onPressed: hasTrailer ? _openTrailer : null,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.ondemand_video_outlined,
-                          color: hasTrailer ? Colors.white : AppResources.colorGrey,
-                        ),
-                        const SizedBox(width: 8.0),
-                        Text(
-                          'Bande annonce',
-                          style: TextStyle(color: hasTrailer ? Colors.white : AppResources.colorGrey),
-                        )
-                      ],
-                    ),
                   ),
-                  TextButton(
+                  _TextIconButton(
+                    icon: Icons.open_in_new,
+                    label: 'Fiche',
                     onPressed: _openMovieDataSheetWebPage,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.open_in_new,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 8.0),
-                        Text(
-                          'Fiche',
-                          style: TextStyle(color: Colors.white),
-                        )
-                      ],
-                    ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -335,10 +310,46 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
   }
 
   void _openMovieDataSheetWebPage() {
-    launchUrlString(ApiClient.getMovieUrl(widget.movieShowTimes.movie.id));
+    launchUrlString(widget.movieShowTimes.movie.movieUrl);
     AnalyticsService.trackEvent('Movie datasheet webpage displayed', {
       'movieTitle': widget.movieShowTimes.movie.title,
     });
+  }
+}
+
+class _TextIconButton extends StatelessWidget {
+  const _TextIconButton({
+    required this.icon,
+    required this.label,
+    this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      style: ButtonStyle(
+        overlayColor: WidgetStateProperty.all(Colors.white24),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            icon,
+            color: Colors.white,
+          ),
+          SizedBox(width: 8.0),
+          Text(
+            label,
+            style: TextStyle(color: Colors.white),
+          )
+        ],
+      ),
+    );
   }
 }
 
