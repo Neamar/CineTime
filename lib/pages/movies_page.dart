@@ -349,7 +349,6 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
     return ListView.builder(
       itemCount: filteredMoviesShowTimes.length,
       itemExtent: 100 * max(MediaQuery.of(context).textScaleFactor, 1.0),
-      padding: EdgeInsets.zero,
       itemBuilder: (context, index) {
         return MovieCard(
           key: ObjectKey(filteredMoviesShowTimes[index]),

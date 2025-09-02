@@ -94,195 +94,197 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
+          SliverSafeArea(
+            top: false,
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
 
-                // Movie info
-                Padding(
-                  padding: const EdgeInsets.all(_contentPadding).copyWith(bottom: 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
+                  // Movie info
+                  Padding(
+                    padding: const EdgeInsets.all(_contentPadding).copyWith(bottom: 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
 
-                      // Movie info
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
+                        // Movie info
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
 
-                          // Poster
-                          if (poster != null)...[
-                            SizedBox(
-                              height: 100,
-                              child: GestureDetector(
-                                onTap: _openPoster,
-                                child: HeroPoster(
-                                  posterPath: poster,
-                                  borderRadius: AppResources.borderRadiusTiny,
+                            // Poster
+                            if (poster != null)...[
+                              SizedBox(
+                                height: 100,
+                                child: GestureDetector(
+                                  onTap: _openPoster,
+                                  child: HeroPoster(
+                                    posterPath: poster,
+                                    borderRadius: AppResources.borderRadiusTiny,
+                                  ),
                                 ),
                               ),
+                              AppResources.spacerMedium,
+                            ],
+
+                            // Info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  Text(
+                                    widget.movieShowTimes.movie.title,
+                                    style: context.textTheme.titleLarge,
+                                  ),
+                                  if (widget.movieShowTimes.movie.directors != null)
+                                    TextWithLabel(
+                                      label: 'De',
+                                      text: widget.movieShowTimes.movie.directors!,
+                                    ),
+                                  if (widget.movieShowTimes.movie.actors != null)
+                                    TextWithLabel(
+                                      label: 'Avec',
+                                      text: widget.movieShowTimes.movie.actors!,
+                                    ),
+                                  if (widget.movieShowTimes.movie.genres != null)
+                                    TextWithLabel(
+                                      label: 'Genre',
+                                      text: widget.movieShowTimes.movie.genres!,
+                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      if (widget.movieShowTimes.movie.releaseDate != null)
+                                        TextWithLabel(
+                                          label: 'Sortie',
+                                          text: widget.movieShowTimes.movie.releaseDateDisplay!,
+                                        ),
+                                      if (widget.movieShowTimes.movie.durationDisplay != null)
+                                        TextWithLabel(
+                                          label: 'Durée',
+                                          text: widget.movieShowTimes.movie.durationDisplay!,
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            AppResources.spacerMedium,
                           ],
+                        ),
 
-                          // Info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                Text(
-                                  widget.movieShowTimes.movie.title,
-                                  style: context.textTheme.titleLarge,
-                                ),
-                                if (widget.movieShowTimes.movie.directors != null)
-                                  TextWithLabel(
-                                    label: 'De',
-                                    text: widget.movieShowTimes.movie.directors!,
-                                  ),
-                                if (widget.movieShowTimes.movie.actors != null)
-                                  TextWithLabel(
-                                    label: 'Avec',
-                                    text: widget.movieShowTimes.movie.actors!,
-                                  ),
-                                if (widget.movieShowTimes.movie.genres != null)
-                                  TextWithLabel(
-                                    label: 'Genre',
-                                    text: widget.movieShowTimes.movie.genres!,
-                                  ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    if (widget.movieShowTimes.movie.releaseDate != null)
-                                      TextWithLabel(
-                                        label: 'Sortie',
-                                        text: widget.movieShowTimes.movie.releaseDateDisplay!,
-                                      ),
-                                    if (widget.movieShowTimes.movie.durationDisplay != null)
-                                      TextWithLabel(
-                                        label: 'Durée',
-                                        text: widget.movieShowTimes.movie.durationDisplay!,
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        // Rating
+                        AppResources.spacerMedium,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            if (widget.movieShowTimes.movie.usersRating != null)
+                              _RatingWidget(
+                                icon: FontAwesomeIcons.users,
+                                rating: widget.movieShowTimes.movie.usersRating!,
+                                tooltip: 'Spectateurs',
+                                iconSizeDelta: -3,
+                                onPressed: () => launchUrlString(widget.movieShowTimes.movie.usersRatingUrl),
+                              ),
+                            if (widget.movieShowTimes.movie.pressRating != null)
+                              _RatingWidget(
+                                icon: FontAwesomeIcons.newspaper,
+                                rating: widget.movieShowTimes.movie.pressRating!,
+                                tooltip: 'Presse',
+                                onPressed: () => launchUrlString(widget.movieShowTimes.movie.pressRatingUrl),
+                              ),
+                          ],
+                        ),
 
-                      // Rating
-                      AppResources.spacerMedium,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          if (widget.movieShowTimes.movie.usersRating != null)
-                            _RatingWidget(
-                              icon: FontAwesomeIcons.users,
-                              rating: widget.movieShowTimes.movie.usersRating!,
-                              tooltip: 'Spectateurs',
-                              iconSizeDelta: -3,
-                              onPressed: () => launchUrlString(widget.movieShowTimes.movie.usersRatingUrl),
-                            ),
-                          if (widget.movieShowTimes.movie.pressRating != null)
-                            _RatingWidget(
-                              icon: FontAwesomeIcons.newspaper,
-                              rating: widget.movieShowTimes.movie.pressRating!,
-                              tooltip: 'Presse',
-                              onPressed: () => launchUrlString(widget.movieShowTimes.movie.pressRatingUrl),
-                            ),
-                        ],
-                      ),
+                        // Synopsis
+                        AppResources.spacerMedium,
+                        SynopsisWidget(
+                          movieId: widget.movieShowTimes.movie.id,
+                        ),
 
-                      // Synopsis
-                      AppResources.spacerMedium,
-                      SynopsisWidget(
-                        movieId: widget.movieShowTimes.movie.id,
-                      ),
-
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-                // Show times
-                AppResources.spacerMedium,
-                DataStreamBuilder<ShowTimeSpec>(
-                  stream: bloc.selectedSpec,
-                  builder: (context, filter) {
-                    return Material(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
+                  // Show times
+                  AppResources.spacerMedium,
+                  DataStreamBuilder<ShowTimeSpec>(
+                    stream: bloc.selectedSpec,
+                    builder: (context, filter) {
+                      return Material(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
 
-                          // Header
-                          Padding(
-                            padding: const EdgeInsets.all(_contentPadding).copyWith(bottom: 0),
-                            child: Row(
-                              children: <Widget>[
+                            // Header
+                            Padding(
+                              padding: const EdgeInsets.all(_contentPadding).copyWith(bottom: 0),
+                              child: Row(
+                                children: <Widget>[
 
-                                // Title
-                                Text(
-                                  'Séances',
-                                  style: context.textTheme.headlineSmall,
-                                ),
+                                  // Title
+                                  Text(
+                                    'Séances',
+                                    style: context.textTheme.headlineSmall,
+                                  ),
 
-                                // Filters
-                                AppResources.spacerSmall,
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: IntrinsicWidth(
-                                      child: FadingEdgeScrollView.fromSingleChildScrollView(
-                                        // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
-                                        gradientFractionOnEnd: 0.5,
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
-                                          child: _TagFilterSelector(
-                                            options: widget.movieShowTimes.showTimesSpecOptions,
-                                            selected: filter,
-                                            onChanged: (value) {
-                                              bloc.selectedSpec.add(value);
-                                              AnalyticsService.trackEvent('Movie spec changed', {
-                                                'value': value.toString(),
-                                                'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
-                                              });
-                                            },
+                                  // Filters
+                                  AppResources.spacerSmall,
+                                  Expanded(
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: IntrinsicWidth(
+                                        child: FadingEdgeScrollView.fromSingleChildScrollView(
+                                          // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
+                                          gradientFractionOnEnd: 0.5,
+                                          child: SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+                                            child: _TagFilterSelector(
+                                              options: widget.movieShowTimes.showTimesSpecOptions,
+                                              selected: filter,
+                                              onChanged: (value) {
+                                                bloc.selectedSpec.add(value);
+                                                AnalyticsService.trackEvent('Movie spec changed', {
+                                                  'value': value.toString(),
+                                                  'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+                                                });
+                                              },
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
 
-                              ],
-                            ),
-                          ),
-
-                          // Content
-                          AppResources.spacerSmall,
-                          ...bloc.getFormattedShowTimes(filter).map((theaterShowTimes) {
-                            return TheaterShowTimesWidget(
-                              theaterName: theaterShowTimes.theater.name,
-                              showTimes: theaterShowTimes.formattedShowTimes,
-                              filterName: filter.toString(),
-                              scrollController: bloc.theaterShowTimesScrollControllers[theaterShowTimes.theater]!,
-                              onShowtimePressed: (showtime) => ShowtimeDialog.open(
-                                context: context,
-                                movie: widget.movieShowTimes.movie,
-                                theater: theaterShowTimes.theater,
-                                showtime: showtime,
+                                ],
                               ),
-                            );
-                          }),
-                          AppResources.spacerMedium,
+                            ),
 
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
+                            // Content
+                            AppResources.spacerSmall,
+                            ...bloc.getFormattedShowTimes(filter).map((theaterShowTimes) {
+                              return TheaterShowTimesWidget(
+                                theaterName: theaterShowTimes.theater.name,
+                                showTimes: theaterShowTimes.formattedShowTimes,
+                                filterName: filter.toString(),
+                                scrollController: bloc.theaterShowTimesScrollControllers[theaterShowTimes.theater]!,
+                                onShowtimePressed: (showtime) => ShowtimeDialog.open(
+                                  context: context,
+                                  movie: widget.movieShowTimes.movie,
+                                  theater: theaterShowTimes.theater,
+                                  showtime: showtime,
+                                ),
+                              );
+                            }),
+
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -18,21 +18,24 @@ class TrailerPage extends StatelessWidget {
         title: const Text('Trailer'),
       ),
       backgroundColor: Colors.black,
-      body: FetchBuilder<Uri?>(
-        task: () => AppService.api.getVideoUri(trailerId),
-        builder: (context, trailerUri) {
-          if (trailerUri == null) {
-            return const IconMessage(
-              icon: IconMessage.iconError,
-              message: 'Aucune bande annonce trouvée',
-              redIcon: true,
-              textColor: Colors.white,
+      body: SafeArea(
+        top: false,
+        child: FetchBuilder<Uri?>(
+          task: () => AppService.api.getVideoUri(trailerId),
+          builder: (context, trailerUri) {
+            if (trailerUri == null) {
+              return const IconMessage(
+                icon: IconMessage.iconError,
+                message: 'Aucune bande annonce trouvée',
+                redIcon: true,
+                textColor: Colors.white,
+              );
+            }
+            return _VideoPlayerWidget(
+              videoUri: trailerUri,
             );
-          }
-          return _VideoPlayerWidget(
-            videoUri: trailerUri,
-          );
-        },
+          },
+        ),
       ),
     );
   }
