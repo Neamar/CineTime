@@ -182,12 +182,14 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                               rating: widget.movieShowTimes.movie.usersRating!,
                               tooltip: 'Spectateurs',
                               iconSizeDelta: -3,
+                              onPressed: () => launchUrlString(widget.movieShowTimes.movie.usersRatingUrl),
                             ),
                           if (widget.movieShowTimes.movie.pressRating != null)
                             _RatingWidget(
                               icon: FontAwesomeIcons.newspaper,
                               rating: widget.movieShowTimes.movie.pressRating!,
                               tooltip: 'Presse',
+                              onPressed: () => launchUrlString(widget.movieShowTimes.movie.pressRatingUrl),
                             ),
                         ],
                       ),
@@ -347,29 +349,34 @@ class _RatingWidget extends StatelessWidget {
     required this.rating,
     required this.tooltip,
     this.iconSizeDelta,
+    this.onPressed,
   });
 
   final IconData icon;
   final double rating;
   final String tooltip;
   final double? iconSizeDelta;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: tooltip,
-      triggerMode: TooltipTriggerMode.tap,
       child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: 20 + (iconSizeDelta ?? 0)),
-              AppResources.spacerSmall,
-              StarRating(rating),
-              AppResources.spacerSmall,
-              Text(rating.toStringAsFixed(1)),
-            ],
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              children: <Widget>[
+                Icon(icon, size: 20 + (iconSizeDelta ?? 0)),
+                AppResources.spacerSmall,
+                StarRating(rating),
+                AppResources.spacerSmall,
+                Text(rating.toStringAsFixed(1)),
+              ],
+            ),
           ),
         ),
       ),

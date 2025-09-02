@@ -20,6 +20,9 @@ class ApiId {
   }
 
   @override
+  String toString() => id;
+
+  @override
   bool operator ==(Object other) =>
       identical(this, other) ||
           other is ApiId &&
