@@ -177,9 +177,18 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           if (widget.movieShowTimes.movie.usersRating != null)
-                            _buildRatingWidget(FontAwesomeIcons.users, 'Spectateurs', widget.movieShowTimes.movie.usersRating!, -3),
+                            _RatingWidget(
+                              icon: FontAwesomeIcons.users,
+                              rating: widget.movieShowTimes.movie.usersRating!,
+                              tooltip: 'Spectateurs',
+                              iconSizeDelta: -3,
+                            ),
                           if (widget.movieShowTimes.movie.pressRating != null)
-                            _buildRatingWidget(FontAwesomeIcons.newspaper, 'Presse', widget.movieShowTimes.movie.pressRating!),
+                            _RatingWidget(
+                              icon: FontAwesomeIcons.newspaper,
+                              rating: widget.movieShowTimes.movie.pressRating!,
+                              tooltip: 'Presse',
+                            ),
                         ],
                       ),
 
@@ -279,27 +288,6 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
     );
   }
 
-  Widget _buildRatingWidget(IconData icon, String tooltip, double rating, [double? iconSizeDelta = 0]) {
-    return Tooltip(
-      message: tooltip,
-      triggerMode: TooltipTriggerMode.tap,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: 20 + (iconSizeDelta ?? 0)),
-              AppResources.spacerSmall,
-              StarRating(rating),
-              AppResources.spacerSmall,
-              Text(rating.toStringAsFixed(1)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster!));
 
   void _openTrailer() {
@@ -348,6 +336,42 @@ class _TextIconButton extends StatelessWidget {
             style: TextStyle(color: Colors.white),
           )
         ],
+      ),
+    );
+  }
+}
+
+class _RatingWidget extends StatelessWidget {
+  const _RatingWidget({
+    required this.icon,
+    required this.rating,
+    required this.tooltip,
+    this.iconSizeDelta,
+  });
+
+  final IconData icon;
+  final double rating;
+  final String tooltip;
+  final double? iconSizeDelta;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      triggerMode: TooltipTriggerMode.tap,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: <Widget>[
+              Icon(icon, size: 20 + (iconSizeDelta ?? 0)),
+              AppResources.spacerSmall,
+              StarRating(rating),
+              AppResources.spacerSmall,
+              Text(rating.toStringAsFixed(1)),
+            ],
+          ),
+        ),
       ),
     );
   }
