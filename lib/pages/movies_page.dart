@@ -46,6 +46,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                 stream: bloc.filterSortData,
                 builder: (context, filterSortData) {
                   final dayFilter = filterSortData.dayFilter;
+                  final fromTime = filterSortData.fromTime;
                   return Scaffold(
                     appBar: PreferredSize(
                       preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -77,7 +78,11 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                   // Period
                                   AppResources.spacerTiny,
                                   Text(
-                                    dayFilter != null ? 'Le ${dayFilter.toDayString()}' : moviesShowtimesData.periodDisplay,
+                                    () {
+                                      final dayPart = dayFilter != null ? 'Le ${dayFilter.toDayString()}' : moviesShowtimesData.periodDisplay;
+                                      final timePart = fromTime != null ? ' à partir de ${fromTime.toHourMinuteString()}' : '';
+                                      return '$dayPart$timePart';
+                                    } (),
                                     style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
                                   ),
                                 ],
@@ -99,6 +104,15 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                   dayFilterTo: moviesShowtimesData.fetchedTo.toDate,
                                   daysWithShow: moviesShowtimesData.daysWithShow,
                                   onDayFilterChanged: bloc.onDayFilterChanged,
+                                  fromTime: fromTime,
+                                  onFromTimePressed: () async {
+                                    final value = await showTimePicker(
+                                      context: context,
+                                      initialTime: fromTime ?? TimeOfDay.now(),
+                                    );
+                                    if (value == null) return;
+                                    bloc.onFromTimeChanged(value);
+                                  },
                                   showHiddenMovies: filterSortData.showHiddenMovies,
                                   onShowHiddenMoviesChanged: bloc.onShowHiddenMoviesChanged,
                                 ),
@@ -196,6 +210,8 @@ class _SortButton extends StatelessWidget {
     required this.dayFilterTo,
     required this.daysWithShow,
     required this.onDayFilterChanged,
+    required this.fromTime,
+    required this.onFromTimePressed,
     required this.showHiddenMovies,
     required this.onShowHiddenMoviesChanged,
   });
@@ -223,6 +239,8 @@ class _SortButton extends StatelessWidget {
   /// Pass a null value when tap on the current selection (for unselect behavior)
   final ValueChanged<Date?> onDayFilterChanged;
 
+  final TimeOfDay? fromTime;
+  final VoidCallback onFromTimePressed;
 
   final bool showHiddenMovies;
   final ValueChanged<bool> onShowHiddenMoviesChanged;
@@ -238,7 +256,9 @@ class _SortButton extends StatelessWidget {
         } else if (value is Date) {
           // Unselected date if selected value is tapped
           onDayFilterChanged(value == dayFilterValue ? null : value);
-        } else if (value is bool) {
+        } else if (value is TimeOfDay) {
+          onFromTimePressed();
+        }else if (value is bool) {
           onShowHiddenMoviesChanged(!value);
         } else {
           throw UnimplementedError('Unhandled type');
@@ -278,6 +298,14 @@ class _SortButton extends StatelessWidget {
               );
             });
           } (),
+
+          // Hour filter
+          const PopupMenuDivider(),
+          PopupMenuItem<TimeOfDay>(
+            value: TimeOfDay(hour: 0, minute: 0),   // Dummy time, just to have a value of correct type for action handling
+            textStyle: buildTextStyle(fromTime != null),
+            child: Text('À partir de ${fromTime != null ? fromTime!.toHourMinuteString() : '...'}'),
+          ),
 
           // Hidden movies
           if (AppService.instance.hiddenMoviesIds.value.isNotEmpty)...[
@@ -329,16 +357,43 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
 
   void applyFilter() {
     filteredMoviesShowTimes = () {
+      // Get filter values
       final textFilter = widget.filterSort.textFilter;
       final dayFilter = widget.filterSort.dayFilter;
+      final fromTime = widget.filterSort.fromTime;
       final showHiddenMovies = widget.filterSort.showHiddenMovies;
-      if (textFilter.isEmpty && dayFilter == null && (showHiddenMovies || widget.hiddenMoviesIds.isEmpty)) return widget.moviesShowTimes;
+
+      // Skip filtering if no filter is applied
+      if (textFilter.isEmpty && dayFilter == null && fromTime == null && (showHiddenMovies || widget.hiddenMoviesIds.isEmpty)) return widget.moviesShowTimes;
+
+      // Apply filter
       return widget.moviesShowTimes.where((mst) {
         return (textFilter.isEmpty || mst.movie.matchSearch(textFilter))
-            && (dayFilter == null || mst.theatersShowTimes.any((tst) => tst.daysWithShow.contains(dayFilter)))
+            && ((fromTime == null && dayFilter == null) || mst.theatersShowTimes.any((tst) => tst.showTimes.any((st) {
+              final showDate = st.dateTime;
+              final matchesDay = dayFilter == null || showDate.isAtSameDayAs(dayFilter);
+              final matchesTime = fromTime == null || TimeOfDay.fromDateTime(showDate).isAfter(fromTime);
+              return matchesDay && matchesTime;
+            })))
             && (showHiddenMovies || !widget.hiddenMoviesIds.contains(mst.movie.id.id));
       }).toList(growable: false);
     } ();
+  }
+
+  @override
+  void didUpdateWidget(covariant _FilteredMovieListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.filterSort.dayFilter != oldWidget.filterSort.dayFilter ||
+        widget.filterSort.textFilter != oldWidget.filterSort.textFilter ||
+        widget.filterSort.fromTime != oldWidget.filterSort.fromTime ||
+        widget.filterSort.showHiddenMovies != oldWidget.filterSort.showHiddenMovies ||
+        (!widget.filterSort.showHiddenMovies && widget.hiddenMoviesIds != oldWidget.hiddenMoviesIds)) {
+      applyFilter();
+      applySort();
+    }
+    if (widget.filterSort.sortType != oldWidget.filterSort.sortType) {
+      applySort();
+    }
   }
 
   @override
@@ -359,21 +414,6 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
         );
       },
     );
-  }
-
-  @override
-  void didUpdateWidget(covariant _FilteredMovieListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.filterSort.dayFilter != oldWidget.filterSort.dayFilter ||
-        widget.filterSort.textFilter != oldWidget.filterSort.textFilter ||
-        widget.filterSort.showHiddenMovies != oldWidget.filterSort.showHiddenMovies ||
-        (!widget.filterSort.showHiddenMovies && widget.hiddenMoviesIds != oldWidget.hiddenMoviesIds)) {
-      applyFilter();
-      applySort();
-    }
-    if (widget.filterSort.sortType != oldWidget.filterSort.sortType) {
-      applySort();
-    }
   }
 }
 
@@ -513,6 +553,8 @@ class MoviesPageBloc with Disposable {
 
   void onDayFilterChanged(Date? value) => filterSortData.add(filterSortData.value.copyWith(dayFilter: () => value));
 
+  void onFromTimeChanged(TimeOfDay? value) => filterSortData.add(filterSortData.value.copyWith(fromTime: value));
+
   void onShowHiddenMoviesChanged(bool value) => filterSortData.add(filterSortData.value.copyWith(showHiddenMovies: value));
 
   @override
@@ -525,22 +567,31 @@ class MoviesPageBloc with Disposable {
 }
 
 class _FilterSortData {
-  const _FilterSortData({required this.sortType, this.dayFilter, this.textFilter = '', this.showHiddenMovies = false});
+  const _FilterSortData({
+    required this.sortType,
+    this.dayFilter,
+    this.textFilter = '',
+    this.fromTime,
+    this.showHiddenMovies = false,
+  });
 
   final MovieSortType sortType;
   final Date? dayFilter;
   final String textFilter;
+  final TimeOfDay? fromTime;
   final bool showHiddenMovies;
 
   _FilterSortData copyWith({
     MovieSortType? sortType,
     ValueGetter<Date?>? dayFilter,
     String? textFilter,
+    TimeOfDay? fromTime,
     bool? showHiddenMovies,
   }) => _FilterSortData(
     sortType: sortType ?? this.sortType,
     dayFilter: dayFilter != null ? dayFilter() : this.dayFilter,      // ValueGetter needed to properly handle null values
     textFilter: textFilter ?? this.textFilter,
+    fromTime: fromTime ?? this.fromTime,
     showHiddenMovies: showHiddenMovies ?? this.showHiddenMovies,
   );
 }

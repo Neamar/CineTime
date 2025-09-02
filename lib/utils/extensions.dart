@@ -121,6 +121,10 @@ extension ExtendedObjectIterable<Object> on Iterable<Object> {
   String toLines() => joinNotEmpty('\n');
 }
 
+extension ExtendedTimeOfDay on TimeOfDay {
+  String toHourMinuteString() => '$hour:${minute.toTwoDigitsString()}';
+}
+
 extension ExtendedDateTime on DateTime {
   Date getNextWeekdayDate(int weekday) {
     var current = this;
@@ -141,6 +145,8 @@ extension ExtendedDateTime on DateTime {
   Time get toTime => Time(hour, minute);
 
   bool isAfterOrSame(DateTime other) => this == other || isAfter(other);
+
+  bool isAtSameDayAs(DateTime other) => year == other.year && month == other.month && day == other.day;
 
   String toWeekdayString({bool withDay = false, bool withMonth = false}) {
     var formattedDate = AppResources.weekdayNamesShort[weekday]!;
