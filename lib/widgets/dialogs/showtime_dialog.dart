@@ -138,7 +138,7 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
           // Language
           AppResources.spacerSmall,
           Text(
-            widget.showtime.spec.toString(),
+            widget.showtime.spec.toDisplayString(widget.movie?.isFrench == true),
             style: context.textTheme.titleLarge,
           ),
 

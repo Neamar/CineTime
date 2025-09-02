@@ -8,6 +8,7 @@ class Movie extends Identifiable {
     required this.title,
     this.poster,
     this.releaseDate,
+    this.languages = const [],
     this.trailerId,
     this.directors,
     this.actors,
@@ -26,6 +27,9 @@ class Movie extends Identifiable {
 
   final DateTime? releaseDate;
   String? get releaseDateDisplay => releaseDate != null ? AppResources.formatterDate.format(releaseDate!) : null;
+
+  final List<String> languages;
+  bool get isFrench => languages.singleOrNull == 'FRENCH';
 
   final ApiId? trailerId;
   final String? directors;

@@ -53,15 +53,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
   Widget build(BuildContext context) {
     const double overlapContentHeight = 50;
 
-    final hasTrailer = widget.movieShowTimes.movie.trailerId != null;
-    final poster = widget.movieShowTimes.movie.poster;
+    final movie = widget.movieShowTimes.movie;
+    final hasTrailer = movie.trailerId != null;
+    final poster = movie.poster;
 
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           ScalingHeader(
             backgroundColor: Theme.of(context).primaryColor,
-            title: Text(widget.movieShowTimes.movie.title),
+            title: Text(movie.title),
             actions: [
               _MovieVisibilityToggleButton(widget.movieShowTimes.movie),
             ],
@@ -134,36 +135,36 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: <Widget>[
                                   Text(
-                                    widget.movieShowTimes.movie.title,
+                                    movie.title,
                                     style: context.textTheme.titleLarge,
                                   ),
-                                  if (widget.movieShowTimes.movie.directors != null)
+                                  if (movie.directors != null)
                                     TextWithLabel(
                                       label: 'De',
-                                      text: widget.movieShowTimes.movie.directors!,
+                                      text: movie.directors!,
                                     ),
-                                  if (widget.movieShowTimes.movie.actors != null)
+                                  if (movie.actors != null)
                                     TextWithLabel(
                                       label: 'Avec',
-                                      text: widget.movieShowTimes.movie.actors!,
+                                      text: movie.actors!,
                                     ),
-                                  if (widget.movieShowTimes.movie.genres != null)
+                                  if (movie.genres != null)
                                     TextWithLabel(
                                       label: 'Genre',
-                                      text: widget.movieShowTimes.movie.genres!,
+                                      text: movie.genres!,
                                     ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      if (widget.movieShowTimes.movie.releaseDate != null)
+                                      if (movie.releaseDate != null)
                                         TextWithLabel(
                                           label: 'Sortie',
-                                          text: widget.movieShowTimes.movie.releaseDateDisplay!,
+                                          text: movie.releaseDateDisplay!,
                                         ),
-                                      if (widget.movieShowTimes.movie.durationDisplay != null)
+                                      if (movie.durationDisplay != null)
                                         TextWithLabel(
                                           label: 'Durée',
-                                          text: widget.movieShowTimes.movie.durationDisplay!,
+                                          text: movie.durationDisplay!,
                                         ),
                                     ],
                                   ),
@@ -178,20 +179,20 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            if (widget.movieShowTimes.movie.usersRating != null)
+                            if (movie.usersRating != null)
                               _RatingWidget(
                                 icon: FontAwesomeIcons.users,
-                                rating: widget.movieShowTimes.movie.usersRating!,
+                                rating: movie.usersRating!,
                                 tooltip: 'Spectateurs',
                                 iconSizeDelta: -3,
-                                onPressed: () => launchUrlString(widget.movieShowTimes.movie.usersRatingUrl),
+                                onPressed: () => launchUrlString(movie.usersRatingUrl),
                               ),
-                            if (widget.movieShowTimes.movie.pressRating != null)
+                            if (movie.pressRating != null)
                               _RatingWidget(
                                 icon: FontAwesomeIcons.newspaper,
-                                rating: widget.movieShowTimes.movie.pressRating!,
+                                rating: movie.pressRating!,
                                 tooltip: 'Presse',
-                                onPressed: () => launchUrlString(widget.movieShowTimes.movie.pressRatingUrl),
+                                onPressed: () => launchUrlString(movie.pressRatingUrl),
                               ),
                           ],
                         ),
@@ -199,7 +200,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                         // Synopsis
                         AppResources.spacerMedium,
                         SynopsisWidget(
-                          movieId: widget.movieShowTimes.movie.id,
+                          movieId: movie.id,
                         ),
 
                       ],
@@ -241,6 +242,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                             scrollDirection: Axis.horizontal,
                                             controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
                                             child: _TagFilterSelector(
+                                              movie: movie,
                                               options: widget.movieShowTimes.showTimesSpecOptions,
                                               selected: filter,
                                               onChanged: (value) {
@@ -507,8 +509,9 @@ class SynopsisWidget extends StatelessWidget {
 }
 
 class _TagFilterSelector extends StatelessWidget {
-  const _TagFilterSelector({required this.options, required this.selected, this.onChanged});
+  const _TagFilterSelector({required this.movie, required this.options, required this.selected, this.onChanged});
 
+  final Movie movie;
   final List<ShowTimeSpec> options;
   final ShowTimeSpec selected;
   final ValueChanged<ShowTimeSpec>? onChanged;
@@ -526,7 +529,7 @@ class _TagFilterSelector extends StatelessWidget {
       children: options.map((option) {
         return Padding(
           padding: const EdgeInsets.all(5),
-          child: Text(option.toString()),
+          child: Text(option.toDisplayString(movie.isFrench)),
         );
       }).toList(growable: false),
     );

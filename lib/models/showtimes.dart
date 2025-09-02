@@ -169,9 +169,9 @@ class DayShowTimes {
 }
 
 enum ShowVersion {
-  original('VO'),
-  dubbed('VF'),
-  local('VF');
+  original('VOST'),   // Version originale (pas français) sous-titrée français
+  dubbed('VF'),       // Version voix française (sous-titrée français si la langue du film est en français)
+  local('VF');        // Version française sans sous-titre
 
   const ShowVersion(this.label);
 
@@ -213,8 +213,12 @@ class ShowTimeSpec {
   final ShowVersion version;
   final ShowFormat format;
 
-  @override
-  String toString() => version.label + (format != ShowFormat.f2D ? ' ${format.label}' : '');
+  String toDisplayString(bool isFrench) {
+    String label = version.label;
+    if (version == ShowVersion.dubbed && isFrench) label += 'ST';
+    if (format != ShowFormat.f2D) label += ' ${format.label}';
+    return label;
+  }
 
   @override
   bool operator ==(Object other) =>
