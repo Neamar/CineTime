@@ -29,14 +29,8 @@ const _httpMethodPost = 'POST';
 
 class ApiClient {
   //#region Vars
-  /// Whether to use mocks or not
-  static const useMocks = false;
-
   /// Whether to use cache or not
   static const useCache = true;
-
-  /// Mocked [DateTime.now()], to be consistent with mocked data
-  static DateTime get mockedNow => useMocks ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
 
   /// API url
   static const _graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
@@ -71,13 +65,8 @@ class ApiClient {
   /// Get theaters that match [query] (free text query)
   Future<List<Theater>> searchTheaters(String query) async {
     // Send request
-    JsonObject? responseJson;
-    if (useMocks) {
-      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/be59b0f453dcc6c4efbb8bb659a7d96b/raw/4074465c4602086d45fd5d5a42b0238152f15a56/theaters-search.json');
-    } else {
-      query = Uri.encodeQueryComponent(query);   // Encode query, so char like '?' are correctly encoded
-      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://www.all' + 'ocine.fr/_/autocomplete/mobile/theater/$query');
-    }
+    query = Uri.encodeQueryComponent(query);   // Encode query, so char like '?' are correctly encoded
+    JsonObject? responseJson = await _send<JsonObject>(_httpMethodGet, 'https://www.all' + 'ocine.fr/_/autocomplete/mobile/theater/$query');
 
     // Process result
     final JsonList theatersJson = responseJson['results']!;
@@ -97,23 +86,18 @@ class ApiClient {
   /// Get theaters around geo-position
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) async {
     // Send request
-    JsonObject? responseJson;
-    if (useMocks) {
-      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/c09a01a9f62c8bc922549220415d4400/raw/3927fc7bf5e3b252baeba42f5c45a774f7f677a6/theaters-gps.json');
-    } else {
-      responseJson = await _sendGraphQL<JsonObject>(
-        query: r'query TheatersList($after: String, $location: CoordinateType, $radius: Float, $card: [LoyaltyCard], $country: CountryCode) { theaterList(location: $location, radius: $radius, after: $after, loyaltyCard:$card, countries: [$country], order: [CLOSEST]) { __typename pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename ...TheaterFragment } } } } fragment TheaterFragment on Theater { __typename id internalId experience flags { __typename hasPreview hasBooking } poster { __typename id url } name coordinates { __typename distance(from: $location, ' + 'unit: "km") latitude longitude } theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename activity company { __typename id internalId name } } location { __typename address zip city country region } tags { __typename list } }',
-        variables: {
-          'location': {
-            'lat': latitude,
-            'lon': longitude,
-          },
-          'radius': 20000,
-          'card': [],
-          'country': 'FRANCE'
+    JsonObject? responseJson = await _sendGraphQL<JsonObject>(
+      query: r'query TheatersList($after: String, $location: CoordinateType, $radius: Float, $card: [LoyaltyCard], $country: CountryCode) { theaterList(location: $location, radius: $radius, after: $after, loyaltyCard:$card, countries: [$country], order: [CLOSEST]) { __typename pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename ...TheaterFragment } } } } fragment TheaterFragment on Theater { __typename id internalId experience flags { __typename hasPreview hasBooking } poster { __typename id url } name coordinates { __typename distance(from: $location, ' + 'unit: "km") latitude longitude } theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename activity company { __typename id internalId name } } location { __typename address zip city country region } tags { __typename list } }',
+      variables: {
+        'location': {
+          'lat': latitude,
+          'lon': longitude,
         },
-      );
-    }
+        'radius': 20000,
+        'card': [],
+        'country': 'FRANCE'
+      },
+    );
 
     // Process result
     final JsonList theatersJson = responseJson['data']!['theaterList']!['edges']!;
@@ -146,62 +130,46 @@ class ApiClient {
     // For each theater
     for (final theater in theaters) {
       // Send request
-      JsonObject? responseJson;
-      if (useMocks) {
-        const urls = [
-          'https://gist.githubusercontent.com/Nico04/68c748a39f00e0180558673789cd5c40/raw/a7a548dd4e96060eaecefea892304b53ff0bacc0/showTimes1.json',
-          'https://gist.githubusercontent.com/Nico04/81aa12b3c7078df19cbd32bb9b5b47cf/raw/7f08ed7153f685dd76c41fa0868f28ad28a0d522/showTimes2.json',
-          'https://gist.githubusercontent.com/Nico04/d6886737ebe58291cd849bcf8119b73f/raw/60d0a79060c4a5f7f90a1ddc573e7440b43394e6/showTimes3.json',
-          'https://gist.githubusercontent.com/Nico04/d25fed26e00ba90704c5cd97b8d0fd2a/raw/ebd2633c46d70b3be37acec1fdc3f16ccaf91edb/showTimes4.json',
-        ];
-
-        responseJson = await _send<JsonObject>(
-          _httpMethodGet,
-          urls.elementAt(theaters.toList(growable: false).indexOf(theater) % urls.length),
-          useCache: useCache,
-        );
-      } else {
-        responseJson = await _sendGraphQL<JsonObject>(
-          /*** Notes
-           * Each request can have a maximum complexity of 12000 points.
-           * The [count] variable linearly increase the total request complexity point count.
-           *
-           * -- 1. Original query --
-           * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }'
-           *
-           * Complexity: 21 + 203 * count
-           * Example: for count = 100 : 20321 points
-           *
-           * -- 2. Lighter query (minimal fields, but all types kept) --
-           * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename startsAt projection diffusionVersion } movie { __typename id title credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename firstName lastName } voiceActor { __typename firstName lastName } originalVoiceActor { __typename firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } poster { __typename url } } } } } }'
-           *
-           * Complexity: 152 * count
-           * Example: for count = 100 : 15200 points
-           *
-           * -- 3. Minimalist query --
-           * 'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion } movie { id title credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }'
-           *
-           * Complexity: 97 * count
-           * Example: for count = 200 : 19400 points
-           *
-           */
-          query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
-          variables: {
-            'id': theater.id.encodedId,
-            'from': _dateToString(from),
-            'to': _dateToString(to),
-            'count': 100,
-            'hasPreview': false,
-            'order': [
-              'PREVIEW',
-              'REVERSE_RELEASE_DATE',
-              'WEEKLY_POPULARITY'
-            ],
-            'country': 'FRANCE'
-          },
-          useCache: useCache,
-        );
-      }
+      JsonObject? responseJson = await _sendGraphQL<JsonObject>(
+        /*** Notes
+         * Each request can have a maximum complexity of 12000 points.
+         * The [count] variable linearly increase the total request complexity point count.
+         *
+         * -- 1. Original query --
+         * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }'
+         *
+         * Complexity: 21 + 203 * count
+         * Example: for count = 100 : 20321 points
+         *
+         * -- 2. Lighter query (minimal fields, but all types kept) --
+         * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename startsAt projection diffusionVersion } movie { __typename id title credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename firstName lastName } voiceActor { __typename firstName lastName } originalVoiceActor { __typename firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } poster { __typename url } } } } } }'
+         *
+         * Complexity: 152 * count
+         * Example: for count = 100 : 15200 points
+         *
+         * -- 3. Minimalist query --
+         * 'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion } movie { id title credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }'
+         *
+         * Complexity: 97 * count
+         * Example: for count = 200 : 19400 points
+         *
+         */
+        query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
+        variables: {
+          'id': theater.id.encodedId,
+          'from': _dateToString(from),
+          'to': _dateToString(to),
+          'count': 100,
+          'hasPreview': false,
+          'order': [
+            'PREVIEW',
+            'REVERSE_RELEASE_DATE',
+            'WEEKLY_POPULARITY'
+          ],
+          'country': 'FRANCE'
+        },
+        useCache: useCache,
+      );
 
       // Process response
       responseJson = responseJson['data']!;
@@ -343,18 +311,13 @@ class ApiClient {
   /// Return synopsis and certificate
   Future<MovieInfo> getMovieInfo(ApiId movieId) async {
     // Send request
-    JsonObject? responseJson;
-    if (useMocks) {
-      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/d31cd58a64f9d9fc17d6f9384d2d1d78/raw/ebc120d74a768572685b04d2945692de5f994b47/movie.json');
-    } else {
-      responseJson = await _sendGraphQL<JsonObject>(
-        query: r'query MovieMoreInfoQuery($id: String, $country: CountryCode) { movie(id: $id) { __typename id internalId title originalTitle genres type poster { __typename id internalId url } synopsis(long: true) mainRelease { __typename type } movieOperation: operation { __typename target { __typename main { __typename code } data } } countries { __typename id name localizedName } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } certificate { __typename label } } dvdReleases: releases(type: [DVD_RELEASE], country: $country) { __typename releaseDate { __typename date } } blueRayReleases: releases(type: [BLU_RAY_RELEASE], country: $country) { __typename releaseDate { __typename date } } VODReleases: releases(type: [VOD_RELEASE], country: $country) { __typename releaseDate { __typename date } } releaseFlags { __typename ...ReleaseUpcomingFragment } data { __typename productionYear budget } format { __typename color audio } languages boxOfficeFR: boxOffice(type: ENTRY, country: FRANCE, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } boxOfficeUS: boxOffice(type: PROFIT, country: USA, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } relatedTags { __typename internalId name } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } }',
-        variables: {
-          'id': movieId.encodedId,
-          'country': 'FRANCE'
-        },
-      );
-    }
+    JsonObject? responseJson = await _sendGraphQL<JsonObject>(
+      query: r'query MovieMoreInfoQuery($id: String, $country: CountryCode) { movie(id: $id) { __typename id internalId title originalTitle genres type poster { __typename id internalId url } synopsis(long: true) mainRelease { __typename type } movieOperation: operation { __typename target { __typename main { __typename code } data } } countries { __typename id name localizedName } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } certificate { __typename label } } dvdReleases: releases(type: [DVD_RELEASE], country: $country) { __typename releaseDate { __typename date } } blueRayReleases: releases(type: [BLU_RAY_RELEASE], country: $country) { __typename releaseDate { __typename date } } VODReleases: releases(type: [VOD_RELEASE], country: $country) { __typename releaseDate { __typename date } } releaseFlags { __typename ...ReleaseUpcomingFragment } data { __typename productionYear budget } format { __typename color audio } languages boxOfficeFR: boxOffice(type: ENTRY, country: FRANCE, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } boxOfficeUS: boxOffice(type: PROFIT, country: USA, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } relatedTags { __typename internalId name } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } }',
+      variables: {
+        'id': movieId.encodedId,
+        'country': 'FRANCE'
+      },
+    );
 
     // Process data
     final JsonObject? movieJson = responseJson['data']?['movie'];
@@ -376,18 +339,13 @@ class ApiClient {
 
   Future<Uri?> getVideoUri(ApiId videoId) async {
     // Send request
-    JsonObject? responseJson;
-    if (useMocks) {
-      responseJson = await _send<JsonObject>(_httpMethodGet, 'https://gist.githubusercontent.com/Nico04/799b8f245708ff679f6b9f3236919737/raw/c860d3b779feae230d333d0217f4900705a6559d/video.json');
-    } else {
-      responseJson = await _sendGraphQL<JsonObject>(
-        query: r'query Video($id: String!, $country: CountryCode) { video(id: $id) { __typename id internalId title type duration language publication { __typename startsAt } relatedEntities { __typename ... on Movie { id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename internalId id countries { __typename id } } } } } releases(type: [RELEASED, SVOD_RELEASE], country: $country) { __typename releaseDate { __typename date } certificate { __typename label } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id internalId name } } } releaseFlags { __typename ...ReleaseUpcomingFragment } credits(department: DIRECTION, first: 5) { __typename edges { __typename node { __typename person { __typename id firstName lastName countries { __typename id } } position { __typename name } } } } data { __typename productionYear } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } relatedTags { __typename id internalId name scope } } ... on Series { ...VideoSeries } ... on Season { internalId series { __typename ...VideoSeries } } ... on Episode { internalId season { __typename series { __typename ...VideoSeries } } } } files { __typename quality height url size } snapshot { __typename id url } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } } fragment VideoSeries on Series { __typename id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId countries { __typename id } } } } } direction: credits(department: DIRECTION) { __typename edges { __typename node { __typename position { __typename name } person { __typename id firstName lastName countries { __typename id } } } } } releaseFlags { __typename ...ReleaseUpcomingFragment } releases(country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } relatedTags { __typename id internalId scope } }',
-        variables: {
-          'id': videoId.encodedId,
-          'country': 'FRANCE'
-        },
-      );
-    }
+    JsonObject? responseJson = await _sendGraphQL<JsonObject>(
+      query: r'query Video($id: String!, $country: CountryCode) { video(id: $id) { __typename id internalId title type duration language publication { __typename startsAt } relatedEntities { __typename ... on Movie { id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename internalId id countries { __typename id } } } } } releases(type: [RELEASED, SVOD_RELEASE], country: $country) { __typename releaseDate { __typename date } certificate { __typename label } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id internalId name } } } releaseFlags { __typename ...ReleaseUpcomingFragment } credits(department: DIRECTION, first: 5) { __typename edges { __typename node { __typename person { __typename id firstName lastName countries { __typename id } } position { __typename name } } } } data { __typename productionYear } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } relatedTags { __typename id internalId name scope } } ... on Series { ...VideoSeries } ... on Season { internalId series { __typename ...VideoSeries } } ... on Episode { internalId season { __typename series { __typename ...VideoSeries } } } } files { __typename quality height url size } snapshot { __typename id url } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } } fragment VideoSeries on Series { __typename id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId countries { __typename id } } } } } direction: credits(department: DIRECTION) { __typename edges { __typename node { __typename position { __typename name } person { __typename id firstName lastName countries { __typename id } } } } } releaseFlags { __typename ...ReleaseUpcomingFragment } releases(country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } relatedTags { __typename id internalId scope } }',
+      variables: {
+        'id': videoId.encodedId,
+        'country': 'FRANCE'
+      },
+    );
 
     // Process result
     responseJson = responseJson['data']?['video'];
