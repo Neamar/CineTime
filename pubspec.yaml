@@ -15,6 +15,7 @@ dependencies:
 
   # Data management
   shared_preferences: ^2.5.3
+  sleek_storage: ^2.0.0
 
   # Widgets / UI
   flash: ^3.1.1
