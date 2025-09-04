@@ -29,9 +29,6 @@ const _httpMethodPost = 'POST';
 
 class ApiClient {
   //#region Vars
-  /// Whether to use cache or not
-  static const useCache = true;
-
   /// API url
   static const _graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
 
@@ -116,7 +113,7 @@ class ApiClient {
     }).toList(growable: false);
   }
 
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = useCache }) async {
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {
     // Prepare period
     final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
     final to = from.add(const Duration(days: 8));     // Fetch next 7 days (seventh included)
@@ -168,7 +165,6 @@ class ApiClient {
           ],
           'country': 'FRANCE'
         },
-        useCache: useCache,
       );
 
       // Process response
@@ -474,19 +470,6 @@ class ApiClient {
   /// Return the path part of an url
   static String? _getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
 
-  /// Build a unique key based on the request, used for cache.
-  static String _getCacheKeyFromRequest(http.Request request) {
-    // If it's a GraphQL request
-    if (request.url.toString() == _graphUrl) {
-      return request.body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
-    }
-
-    // If it's a classic request
-    else {
-      return request.url.toString();
-    }
-  }
-
   /// Get an auth token for GraphQL request.
   /// Usually one per device.
   Future<String> _getAuthToken() async {
@@ -511,7 +494,7 @@ class ApiClient {
 
   /// Send a graphQL request
   /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)
-  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = useCache, bool enableAutoRetryOnUnauthorized = true }) async {
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool enableAutoRetryOnUnauthorized = true }) async {
     // Headers
     final headers = {
       'a' + 'c-auth-token': await _getAuthToken(),
@@ -527,7 +510,7 @@ class ApiClient {
 
     // Send request
     try {
-      return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
+      return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body);
     } catch(e) {
       // Unauthorized
       if (e is HttpResponseException && e.statusCode == 400 && _tokenErrorRegex.hasMatch(e.body)) {
@@ -536,7 +519,7 @@ class ApiClient {
 
         // If allowed, retry
         if (enableAutoRetryOnUnauthorized) {
-          return await _sendGraphQL(query: query, variables: variables, useCache: useCache, enableAutoRetryOnUnauthorized: false);
+          return await _sendGraphQL(query: query, variables: variables, enableAutoRetryOnUnauthorized: false);
         }
 
         // If not allowed to retry, juts throw
@@ -551,7 +534,7 @@ class ApiClient {
   }
 
   /// Send a classic request
-  Future<T> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = useCache}) async {
+  Future<T> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody}) async {
     // Create request
     final request = http.Request(method, Uri.parse(url));
 
@@ -571,38 +554,16 @@ class ApiClient {
       request.body = stringBody;
 
     // Send request
-    return await _sendRequest<T>(request, useCache: useCache);
+    return await _sendRequest<T>(request);
   }
 
   /// Send a generic request
-  Future<T> _sendRequest<T>(http.Request request, {bool useCache = useCache}) async {
+  Future<T> _sendRequest<T>(http.Request request) async {
     // Log
     _log(request: request);
 
-    // Prepare cache key
-    final cacheKey = _getCacheKeyFromRequest(request);
-
     // Get response
     final response = await () async {
-      // If we can use cache
-      if (useCache) {
-        // Check cache
-        final cachedResponseFile = await _cacheManager.getFileFromCache(cacheKey);
-
-        // If cache is available
-        if (cachedResponseFile != null) {
-          // Read response from cached file
-          final cachedResponse = await cachedResponseFile.file.readAsString();
-          useCache = false;
-
-          // Process response
-          return http.Response(cachedResponse, 200,
-            headers: {HttpHeaders.contentTypeHeader: contentTypeJson}, // Needed so content is decoded using utf-8
-            request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
-          );
-        }
-      }
-
       // Check internet
       await throwIfNoInternet();
 
@@ -621,13 +582,13 @@ class ApiClient {
     } ();
 
     // Process response
-    return _processResponse<T>(response, useCache ? cacheKey : null);
+    return _processResponse<T>(response);
   }
 
   /// Process server's [response].
   /// Returns processed result as Json or String.
   /// Cache body if [cacheKey] is provided.
-  T _processResponse<T>(http.Response response, String? cacheKey) {
+  T _processResponse<T>(http.Response response) {
     // Wrap response in a ResponseHandler to facilitate treatment
     final responseHandler = _ResponseHandler(response);
 
@@ -643,16 +604,6 @@ class ApiClient {
         final errors = processedResponse?['errors'];
         if (errors != null) {
           throw HttpResponseException(response);
-        }
-      }
-
-      // Store in cache
-      if (cacheKey != null) {
-        try {
-          _cacheManager.putFile(cacheKey, response.bodyBytes);
-          debugPrint('API (˅) [CACHED $cacheKey]');
-        } catch (e, s) {
-          reportError(e, s);
         }
       }
 

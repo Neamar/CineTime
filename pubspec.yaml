@@ -30,7 +30,6 @@ dependencies:
   # Web
   http: ^1.5.0
   connectivity_plus: ^6.1.5
-  flutter_cache_manager: ^3.4.1
   cached_network_image: ^3.4.1
   amplitude_flutter: ^4.3.7
 

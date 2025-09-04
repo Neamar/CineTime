@@ -18,6 +18,7 @@ dynamic _defaultToJson<T>(T object) => object;
 /// - Stale: the data is old but can still be used (while a new fetch is performed in the background, or if fetch fails).
 /// - Expired: the data is too old and should not be used.
 ///
+/// TODO Add clearAllCache() & clearCache(key) methods
 /// TODO clear expired cache entries automatically when app starts
 class SleekCache {
   SleekCache._(this._storage, this.config);
