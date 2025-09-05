@@ -19,7 +19,9 @@ class Theater extends Identifiable implements Comparable<Theater> {
   final String? zipCode;
   final String? city;
 
+  @IgnoreField()
   final double? distance;  // Distance to user's position when searching, in km
+
   String? get distanceDisplay {
     if (distance == null)
       return null;
@@ -50,21 +52,6 @@ class Theater extends Identifiable implements Comparable<Theater> {
 
   @override
   int compareTo(Theater other) => name.compareTo(other.name);
-
-  factory Theater.fromJson(Map<String, dynamic> json) => Theater(   // TODO remove use dogs
-    id: ApiId.fromEncoded(json['id']),
-    name: json['name'],
-    street: json['street'],
-    zipCode: json['zipCode'],
-    city: json['city'],
-  );
-  Map<String, dynamic> toJson() => {   // TODO remove use dogs
-    'id': id.encodedId,
-    'name': name,
-    'street': street,
-    'zipCode': zipCode,
-    'city': city,
-  };
 }
 
 extension ExtendedTheaterIterable on Iterable<Theater> {

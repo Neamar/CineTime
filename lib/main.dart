@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import 'dogs.g.dart';
 import 'resources/app_theme.dart';
 import 'services/storage_service.dart';
 
@@ -34,6 +35,9 @@ Future<void> main() async {
 
   // Set default TimeAgo package locale
   timeago.setLocaleMessages('en', timeago.FrShortMessages()); // Set default timeAgo local to fr
+
+  // Init Dogs
+  await initialiseDogs();
 
   // Init shared pref
   await StorageService.init();

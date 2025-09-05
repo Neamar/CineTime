@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cinetime/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:dogs_core/dogs_core.dart';
 
 import '_utils.dart';
 import 'exceptions/connectivity_exception.dart';
@@ -170,7 +171,7 @@ bool typesEqual<T1, T2>() => T1 == T2;
 bool isTypeUndefined<T>() => typesEqual<T, Object?>() || typesEqual<T, Null>() || typesEqual<T, void>() || typesEqual<T, dynamic>();
 
 /// Returns true if T is nullable.
-/// Like [isTypeUndefined] but will also return true for nullable types like <bool?> or <Object?>.
+/// Like [isTypeUndefined] but will also return true for nullable types like `bool?` or `Object?`.
 bool isTypeNullable<T>() => null is T;
 
 DateTime? dateFromString(String? dateString) => DateTime.tryParse(dateString ?? '');
@@ -204,4 +205,11 @@ String convertBasicHtmlTags(String htmlText) {
     caseSensitive: true,
   );
   return htmlText.replaceAll(exp, '');
+}
+
+class IgnoreField extends SerializationHook with FieldSerializationHook {
+  const IgnoreField();
+
+  @override
+  void postFieldSerialization(key, map, structure, engine) => map.remove(key);
 }

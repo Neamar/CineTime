@@ -8,13 +8,14 @@ import 'package:dogs_core/dogs_core.dart' as gen;
 import 'package:lyell/lyell.dart' as gen;
 import 'package:cinetime/models/api_id.dart' as gen0;
 import 'dart:core' as gen1;
-import 'package:cinetime/models/theater.dart' as gen2;
+import 'package:cinetime/utils/utils.dart' as gen2;
+import 'package:cinetime/models/theater.dart' as gen3;
 import 'package:cinetime/models/theater.dart';
 
-class TheaterConverter extends gen.DefaultStructureConverter<gen2.Theater> {
+class TheaterConverter extends gen.DefaultStructureConverter<gen3.Theater> {
   TheaterConverter()
       : super(
-            struct: const gen.DogStructure<gen2.Theater>(
+            struct: const gen.DogStructure<gen3.Theater>(
                 'Theater',
                 gen.StructureConformity.basic,
                 [
@@ -23,32 +24,32 @@ class TheaterConverter extends gen.DefaultStructureConverter<gen2.Theater> {
                   gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'street', true, false, []),
                   gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'zipCode', true, false, []),
                   gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'city', true, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.double>(), gen.TypeToken<gen1.double>(), null, gen.IterableKind.none, 'distance', true, false, [])
+                  gen.DogStructureField(gen.QualifiedTerminal<gen1.double>(), gen.TypeToken<gen1.double>(), null, gen.IterableKind.none, 'distance', true, false, [gen2.IgnoreField()])
                 ],
                 [],
-                gen.ObjectFactoryStructureProxy<gen2.Theater>(_activator, [_$id, _$name, _$street, _$zipCode, _$city, _$distance], _values)));
+                gen.ObjectFactoryStructureProxy<gen3.Theater>(_activator, [_$id, _$name, _$street, _$zipCode, _$city, _$distance], _values)));
 
-  static dynamic _$id(gen2.Theater obj) => obj.id;
+  static dynamic _$id(gen3.Theater obj) => obj.id;
 
-  static dynamic _$name(gen2.Theater obj) => obj.name;
+  static dynamic _$name(gen3.Theater obj) => obj.name;
 
-  static dynamic _$street(gen2.Theater obj) => obj.street;
+  static dynamic _$street(gen3.Theater obj) => obj.street;
 
-  static dynamic _$zipCode(gen2.Theater obj) => obj.zipCode;
+  static dynamic _$zipCode(gen3.Theater obj) => obj.zipCode;
 
-  static dynamic _$city(gen2.Theater obj) => obj.city;
+  static dynamic _$city(gen3.Theater obj) => obj.city;
 
-  static dynamic _$distance(gen2.Theater obj) => obj.distance;
+  static dynamic _$distance(gen3.Theater obj) => obj.distance;
 
-  static List<dynamic> _values(gen2.Theater obj) => [obj.id, obj.name, obj.street, obj.zipCode, obj.city, obj.distance];
+  static List<dynamic> _values(gen3.Theater obj) => [obj.id, obj.name, obj.street, obj.zipCode, obj.city, obj.distance];
 
-  static gen2.Theater _activator(List list) {
-    return gen2.Theater(id: list[0], name: list[1], street: list[2], zipCode: list[3], city: list[4], distance: list[5]);
+  static gen3.Theater _activator(List list) {
+    return gen3.Theater(id: list[0], name: list[1], street: list[2], zipCode: list[3], city: list[4], distance: list[5]);
   }
 }
 
 class TheaterBuilder {
-  TheaterBuilder([gen2.Theater? $src]) {
+  TheaterBuilder([gen3.Theater? $src]) {
     if ($src == null) {
       $values = List.filled(6, null);
     } else {
@@ -59,7 +60,7 @@ class TheaterBuilder {
 
   late List<dynamic> $values;
 
-  gen2.Theater? $src;
+  gen3.Theater? $src;
 
   set id(gen0.ApiId value) {
     $values[0] = value;
@@ -97,15 +98,15 @@ class TheaterBuilder {
 
   gen1.double? get distance => $values[5];
 
-  gen2.Theater build() {
+  gen3.Theater build() {
     var instance = TheaterConverter._activator($values);
 
     return instance;
   }
 }
 
-extension TheaterDogsExtension on gen2.Theater {
-  gen2.Theater rebuild(Function(TheaterBuilder b) f) {
+extension TheaterDogsExtension on gen3.Theater {
+  gen3.Theater rebuild(Function(TheaterBuilder b) f) {
     var builder = TheaterBuilder(this);
     f(builder);
     return builder.build();
@@ -116,6 +117,6 @@ extension TheaterDogsExtension on gen2.Theater {
   }
 
   Map<String, dynamic> toNative() {
-    return gen.dogs.convertObjectToNative(this, gen2.Theater);
+    return gen.dogs.convertObjectToNative(this, gen3.Theater);
   }
 }

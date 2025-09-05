@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/utils/_utils.dart';
+import 'package:dogs_core/dogs_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
@@ -67,7 +66,7 @@ class StorageService {
     for (final theater in theaters) {
       final key = _theatersKey(theater.id.id);
       if (!_storage.containsKey(key)) {
-        await _storage.setString(key, json.encode(theater.toJson()));
+        await _storage.setString(key, dogs.toJson(theater));
       }
     }
   }
@@ -79,7 +78,7 @@ class StorageService {
 
     // Decode
     try {
-      return Theater.fromJson(json.decode(theaterString!));
+      return dogs.fromJson<Theater>(theaterString!);
     } catch(e, s) {
       reportError(e, s);
       return null;
