@@ -1,4 +1,6 @@
 import 'package:cinetime/utils/_utils.dart';
+import 'package:dogs_core/dogs_core.dart';
+
 class ApiId {
   static const typeTheater = 'Theater';
 
@@ -47,4 +49,16 @@ abstract class Identifiable {
 
   @override
   int get hashCode => id.hashCode;
+}
+
+
+@linkSerializer
+class ApiIdConverter extends SimpleDogConverter<ApiId> {
+  ApiIdConverter(): super(serialName: 'ApiId');
+
+  @override
+  serialize(ApiId apiId, DogEngine engine) => apiId.encodedId;
+
+  @override
+  ApiId deserialize(json, DogEngine engine) => ApiId.fromEncoded(json);
 }

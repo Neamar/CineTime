@@ -1,5 +1,9 @@
+import 'package:cinetime/utils/utils.dart';
+import 'package:dogs_core/dogs_core.dart';
+
 import '_models.dart';
 
+@serializable
 class Theater extends Identifiable implements Comparable<Theater> {
   const Theater({
     required ApiId id,
@@ -47,14 +51,14 @@ class Theater extends Identifiable implements Comparable<Theater> {
   @override
   int compareTo(Theater other) => name.compareTo(other.name);
 
-  factory Theater.fromJson(Map<String, dynamic> json) => Theater(
+  factory Theater.fromJson(Map<String, dynamic> json) => Theater(   // TODO remove use dogs
     id: ApiId.fromEncoded(json['id']),
     name: json['name'],
     street: json['street'],
     zipCode: json['zipCode'],
     city: json['city'],
   );
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {   // TODO remove use dogs
     'id': id.encodedId,
     'name': name,
     'street': street,

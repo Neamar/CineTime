@@ -2,8 +2,10 @@ import 'dart:collection';
 
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
+import 'package:dogs_core/dogs_core.dart';
 import '_models.dart';
 
+@serializable
 class MoviesShowTimes {
   const MoviesShowTimes({required this.theaters, required this.moviesShowTimes, required this.ghostShowTimes, required this.fetchedFrom, required this.fetchedTo});
 
@@ -40,6 +42,7 @@ class MoviesShowTimes {
   }
 }
 
+@serializable
 class MovieShowTimes {
   MovieShowTimes(this.movie, {List<TheaterShowTimes>? theatersShowTimes}) :
     theatersShowTimes = theatersShowTimes ?? [];
@@ -79,6 +82,7 @@ class MovieShowTimes {
   int compareTo(MovieShowTimes other, MovieSortType type) => movie.compareTo(other.movie, type);
 }
 
+@serializable
 class TheaterShowTimes {
   TheaterShowTimes(this.theater, { List<ShowTime>? showTimes }) :
     showTimes = showTimes ?? <ShowTime>[];
@@ -204,6 +208,7 @@ class ShowTime {
   final String? ticketingUrl;
 }
 
+@serializable
 class ShowTimeSpec {
   const ShowTimeSpec({
     this.version = ShowVersion.original,
