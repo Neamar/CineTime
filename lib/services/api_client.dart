@@ -533,7 +533,7 @@ class ApiClient {
   /// Usually one per device.
   Future<String> _getAuthToken() async {
     // Using hardcoded token works for now, but it may be revoked at any time.
-    return 'fCDfVgziRW2y5IkCYmdV4S:APA91bFBjwvfdaxpxalhxE9FWSB62qSpp9kkY_TUQ4JxQjh3YOA_udC5zrGte-u2HwEld_4H1z3cm8g_SuLJTNhpoRqS4v0maESjXBj3jEgLbUINmVVMQRM';    // S4m windIP 9.7.8
+    return 'e_FbiDmBRnWNrqmee72cAO:APA91bEK0uXz5Bv2QKzq2lwDx7vJ8pqhGrIUOYOXRBGmnM1hj46B2czylVnFY-5vZuRD0U4vr4VhsyecJ88BJC6CfoBURwGrzp6f2d8LXUGxlBbJlVzY7ZM';    // samA3 windIP 9.7.8
   }
 
   /// Delete all locally saved auth tokens
