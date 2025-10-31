@@ -184,11 +184,11 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
     );
   }
 
-  Future<void> _share() => Share.share(
-'''$movieTitle [${widget.showtime.spec}]
+  Future<void> _share() => SharePlus.instance.share(ShareParams(
+    text: '''$movieTitle [${widget.showtime.spec.toDisplayString(widget.movie?.isFrench == true)}]
 ${widget.theater.name}
-$dateDisplay'''
-  );
+$dateDisplay''',
+  ));
 
   Future<void> _openBookingUrl() => launchUrlString(widget.showtime.ticketingUrl!, mode: LaunchMode.externalApplication);
 
