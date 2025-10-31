@@ -51,27 +51,14 @@ class MovieShowTimes {
   List<ShowTimeSpec> get showTimesSpecOptions {
     if (_showTimesSpecOptions == null) {
       // Build options set
-      final options = <ShowTimeSpec>{};
+      final options = SplayTreeSet<ShowTimeSpec>((s1, s2) => s1.compareTo(s2, movie.isFrench));
       for (final theaterShowTimes in theatersShowTimes) {
         for (final showTime in theaterShowTimes.showTimes) {
           options.add(showTime.spec);
         }
       }
 
-      // Sort list
-      final optionList = options.toList(growable: false);
-      optionList.sort((o1, o2) {
-        final s1 = o1.toString();
-        final s2 = o2.toString();
-
-        // Compare length first
-        final lengthComparison = s1.length.compareTo(s2.length);
-        if (lengthComparison != 0) return lengthComparison;
-
-        // Compare alpha
-        return s2.compareTo(s1);
-      });
-      _showTimesSpecOptions = optionList;
+      _showTimesSpecOptions = options.toList(growable: false);
     }
     return _showTimesSpecOptions!;
   }
@@ -169,9 +156,9 @@ class DayShowTimes {
 }
 
 enum ShowVersion {
+  local('VF'),        // Version originale française sans sous-titre
   original('VOST'),   // Version originale (pas français) sous-titrée français
-  dubbed('VF'),       // Version voix française (sous-titrée français si la langue du film est en français)
-  local('VF');        // Version française sans sous-titre
+  dubbed('VF');      // Version voix française (sous-titrée français si la langue du film est en français)
 
   const ShowVersion(this.label);
 
@@ -218,6 +205,15 @@ class ShowTimeSpec {
     if (version == ShowVersion.dubbed && isMovieFrench) label += 'ST';
     if (format != ShowFormat.f2D) label += ' ${format.label}';
     return label;
+  }
+
+  int compareTo(ShowTimeSpec other, bool isMovieFrench) {
+    // Compare version
+    final versionComparison = Enum.compareByIndex(version, other.version);
+    if (versionComparison != 0) return versionComparison;
+
+    // Compare format
+    return Enum.compareByIndex(format, other.format);
   }
 
   @override
