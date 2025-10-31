@@ -153,6 +153,11 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                       label: 'Genre',
                                       text: movie.genres!,
                                     ),
+                                  if (movie.languages != null)
+                                    TextWithLabel(
+                                      label: 'Langues',
+                                      text: movie.languages!,
+                                    ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[

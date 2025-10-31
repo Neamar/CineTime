@@ -8,7 +8,7 @@ class Movie extends Identifiable {
     required this.title,
     this.poster,
     this.releaseDate,
-    this.languages = const [],
+    this.languages,
     this.trailerId,
     this.directors,
     this.actors,
@@ -18,6 +18,7 @@ class Movie extends Identifiable {
     this.usersRating,
     this.pressRating,
   }) : super(id);
+  static const frenchLanguage = 'Français';
 
   final String title;
   final String? poster;    //Path to the image (not full url)
@@ -25,8 +26,10 @@ class Movie extends Identifiable {
   final DateTime? releaseDate;
   String? get releaseDateDisplay => releaseDate != null ? AppResources.formatterDate.format(releaseDate!) : null;
 
-  final List<String> languages;
-  bool get isFrench => languages.singleOrNull == 'FRENCH';
+  /// Formated, displayable list of language, in french
+  final String? languages;
+  /// True if the movie is fully in french (no other languages)
+  bool get isFrench => languages == frenchLanguage;
 
   final ApiId? trailerId;
   final String? directors;
