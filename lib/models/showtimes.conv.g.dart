@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, unused_field, unused_import, public_member_api_docs, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+// ignore_for_file: unused_element, unused_field, unused_import, unnecessary_import, public_member_api_docs, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 import 'dart:core';
 import 'package:dogs_core/dogs_core.dart' as gen;
@@ -9,27 +9,34 @@ import 'package:lyell/lyell.dart' as gen;
 import 'dart:core' as gen0;
 import 'package:cinetime/models/theater.dart' as gen1;
 import 'package:cinetime/models/showtimes.dart' as gen2;
-import 'package:cinetime/models/movie.dart' as gen3;
+import 'package:dogs_core/src/annotations.dart' as gen3;
+import 'package:cinetime/models/movie.dart' as gen4;
 import 'package:cinetime/models/showtimes.dart';
 
 class MoviesShowTimesConverter extends gen.DefaultStructureConverter<gen2.MoviesShowTimes> {
   MoviesShowTimesConverter()
-      : super(
-            struct: const gen.DogStructure<gen2.MoviesShowTimes>(
-                'MoviesShowTimes',
-                gen.StructureConformity.basic,
-                [
-                  gen.DogStructureField(gen.QualifiedTypeTreeN<gen0.List<gen1.Theater>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen1.Theater>()]), gen.TypeToken<gen1.Theater>(), null,
-                      gen.IterableKind.list, 'theaters', false, true, []),
-                  gen.DogStructureField(gen.QualifiedTypeTreeN<gen0.List<gen2.MovieShowTimes>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen2.MovieShowTimes>()]),
-                      gen.TypeToken<gen2.MovieShowTimes>(), null, gen.IterableKind.list, 'moviesShowTimes', false, true, []),
-                  gen.DogStructureField(gen.QualifiedTypeTreeN<gen0.List<gen2.TheaterShowTimes>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen2.TheaterShowTimes>()]),
-                      gen.TypeToken<gen2.TheaterShowTimes>(), null, gen.IterableKind.list, 'ghostShowTimes', false, true, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen0.DateTime>(), gen.TypeToken<gen0.DateTime>(), null, gen.IterableKind.none, 'fetchedFrom', false, true, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen0.DateTime>(), gen.TypeToken<gen0.DateTime>(), null, gen.IterableKind.none, 'fetchedTo', false, true, [])
-                ],
-                [],
-                gen.ObjectFactoryStructureProxy<gen2.MoviesShowTimes>(_activator, [_$theaters, _$moviesShowTimes, _$ghostShowTimes, _$fetchedFrom, _$fetchedTo], _values)));
+    : super(
+        struct: const gen.DogStructure<gen2.MoviesShowTimes>(
+          'MoviesShowTimes',
+          gen.StructureConformity.basic,
+          [
+            gen.DogStructureField(gen.QualifiedTypeTreeN<gen0.List<gen1.Theater>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen1.Theater>()]), null, 'theaters', false, true, []),
+            gen.DogStructureField(gen.QualifiedTypeTreeN<gen0.List<gen2.MovieShowTimes>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen2.MovieShowTimes>()]), null, 'moviesShowTimes', false, true, []),
+            gen.DogStructureField(
+              gen.QualifiedTypeTreeN<gen0.List<gen2.TheaterShowTimes>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen2.TheaterShowTimes>()]),
+              null,
+              'ghostShowTimes',
+              false,
+              true,
+              [],
+            ),
+            gen.DogStructureField(gen.QualifiedTerminal<gen0.DateTime>(), null, 'fetchedFrom', false, true, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen0.DateTime>(), null, 'fetchedTo', false, true, []),
+          ],
+          [gen3.serializable],
+          gen.ObjectFactoryStructureProxy<gen2.MoviesShowTimes>(_activator, [_$theaters, _$moviesShowTimes, _$ghostShowTimes, _$fetchedFrom, _$fetchedTo], _values),
+        ),
+      );
 
   static dynamic _$theaters(gen2.MoviesShowTimes obj) => obj.theaters;
 
@@ -44,12 +51,21 @@ class MoviesShowTimesConverter extends gen.DefaultStructureConverter<gen2.Movies
   static List<dynamic> _values(gen2.MoviesShowTimes obj) => [obj.theaters, obj.moviesShowTimes, obj.ghostShowTimes, obj.fetchedFrom, obj.fetchedTo];
 
   static gen2.MoviesShowTimes _activator(List list) {
-    return gen2.MoviesShowTimes(
-        theaters: list[0].cast<gen1.Theater>(), moviesShowTimes: list[1].cast<gen2.MovieShowTimes>(), ghostShowTimes: list[2].cast<gen2.TheaterShowTimes>(), fetchedFrom: list[3], fetchedTo: list[4]);
+    return gen2.MoviesShowTimes(theaters: list[0], moviesShowTimes: list[1], ghostShowTimes: list[2], fetchedFrom: list[3], fetchedTo: list[4]);
   }
 }
 
-class MoviesShowTimesBuilder {
+abstract class MoviesShowTimes$Copy {
+  gen2.MoviesShowTimes call({
+    gen0.List<gen1.Theater>? theaters,
+    gen0.List<gen2.MovieShowTimes>? moviesShowTimes,
+    gen0.List<gen2.TheaterShowTimes>? ghostShowTimes,
+    gen0.DateTime? fetchedFrom,
+    gen0.DateTime? fetchedTo,
+  });
+}
+
+class MoviesShowTimesBuilder implements MoviesShowTimes$Copy {
   MoviesShowTimesBuilder([gen2.MoviesShowTimes? $src]) {
     if ($src == null) {
       $values = List.filled(5, null);
@@ -93,6 +109,26 @@ class MoviesShowTimesBuilder {
 
   gen0.DateTime get fetchedTo => $values[4];
 
+  @override
+  gen2.MoviesShowTimes call({Object? theaters = #sentinel, Object? moviesShowTimes = #sentinel, Object? ghostShowTimes = #sentinel, Object? fetchedFrom = #sentinel, Object? fetchedTo = #sentinel}) {
+    if (theaters != #sentinel) {
+      this.theaters = theaters as gen0.List<gen1.Theater>;
+    }
+    if (moviesShowTimes != #sentinel) {
+      this.moviesShowTimes = moviesShowTimes as gen0.List<gen2.MovieShowTimes>;
+    }
+    if (ghostShowTimes != #sentinel) {
+      this.ghostShowTimes = ghostShowTimes as gen0.List<gen2.TheaterShowTimes>;
+    }
+    if (fetchedFrom != #sentinel) {
+      this.fetchedFrom = fetchedFrom as gen0.DateTime;
+    }
+    if (fetchedTo != #sentinel) {
+      this.fetchedTo = fetchedTo as gen0.DateTime;
+    }
+    return build();
+  }
+
   gen2.MoviesShowTimes build() {
     var instance = MoviesShowTimesConverter._activator($values);
 
@@ -107,6 +143,7 @@ extension MoviesShowTimesDogsExtension on gen2.MoviesShowTimes {
     return builder.build();
   }
 
+  MoviesShowTimes$Copy get copy => toBuilder();
   MoviesShowTimesBuilder toBuilder() {
     return MoviesShowTimesBuilder(this);
   }
@@ -118,17 +155,25 @@ extension MoviesShowTimesDogsExtension on gen2.MoviesShowTimes {
 
 class MovieShowTimesConverter extends gen.DefaultStructureConverter<gen2.MovieShowTimes> {
   MovieShowTimesConverter()
-      : super(
-            struct: const gen.DogStructure<gen2.MovieShowTimes>(
-                'MovieShowTimes',
-                gen.StructureConformity.basic,
-                [
-                  gen.DogStructureField(gen.QualifiedTerminal<gen3.Movie>(), gen.TypeToken<gen3.Movie>(), null, gen.IterableKind.none, 'movie', false, true, []),
-                  gen.DogStructureField(gen.QualifiedTypeTreeN<gen0.List<gen2.TheaterShowTimes>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen2.TheaterShowTimes>()]),
-                      gen.TypeToken<gen2.TheaterShowTimes>(), null, gen.IterableKind.list, 'theatersShowTimes', true, true, [])
-                ],
-                [],
-                gen.ObjectFactoryStructureProxy<gen2.MovieShowTimes>(_activator, [_$movie, _$theatersShowTimes], _values)));
+    : super(
+        struct: const gen.DogStructure<gen2.MovieShowTimes>(
+          'MovieShowTimes',
+          gen.StructureConformity.basic,
+          [
+            gen.DogStructureField(gen.QualifiedTerminal<gen4.Movie>(), null, 'movie', false, true, []),
+            gen.DogStructureField(
+              gen.QualifiedTypeTreeN<gen0.List<gen2.TheaterShowTimes>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen2.TheaterShowTimes>()]),
+              null,
+              'theatersShowTimes',
+              true,
+              true,
+              [],
+            ),
+          ],
+          [gen3.serializable],
+          gen.ObjectFactoryStructureProxy<gen2.MovieShowTimes>(_activator, [_$movie, _$theatersShowTimes], _values),
+        ),
+      );
 
   static dynamic _$movie(gen2.MovieShowTimes obj) => obj.movie;
 
@@ -137,11 +182,15 @@ class MovieShowTimesConverter extends gen.DefaultStructureConverter<gen2.MovieSh
   static List<dynamic> _values(gen2.MovieShowTimes obj) => [obj.movie, obj.theatersShowTimes];
 
   static gen2.MovieShowTimes _activator(List list) {
-    return gen2.MovieShowTimes(list[0], theatersShowTimes: list[1]?.cast<gen2.TheaterShowTimes>());
+    return gen2.MovieShowTimes(list[0], theatersShowTimes: list[1]);
   }
 }
 
-class MovieShowTimesBuilder {
+abstract class MovieShowTimes$Copy {
+  gen2.MovieShowTimes call({gen4.Movie? movie, gen0.List<gen2.TheaterShowTimes>? theatersShowTimes});
+}
+
+class MovieShowTimesBuilder implements MovieShowTimes$Copy {
   MovieShowTimesBuilder([gen2.MovieShowTimes? $src]) {
     if ($src == null) {
       $values = List.filled(2, null);
@@ -155,17 +204,28 @@ class MovieShowTimesBuilder {
 
   gen2.MovieShowTimes? $src;
 
-  set movie(gen3.Movie value) {
+  set movie(gen4.Movie value) {
     $values[0] = value;
   }
 
-  gen3.Movie get movie => $values[0];
+  gen4.Movie get movie => $values[0];
 
   set theatersShowTimes(gen0.List<gen2.TheaterShowTimes>? value) {
     $values[1] = value;
   }
 
   gen0.List<gen2.TheaterShowTimes>? get theatersShowTimes => $values[1];
+
+  @override
+  gen2.MovieShowTimes call({Object? movie = #sentinel, Object? theatersShowTimes = #sentinel}) {
+    if (movie != #sentinel) {
+      this.movie = movie as gen4.Movie;
+    }
+    if (theatersShowTimes != #sentinel) {
+      this.theatersShowTimes = theatersShowTimes as gen0.List<gen2.TheaterShowTimes>?;
+    }
+    return build();
+  }
 
   gen2.MovieShowTimes build() {
     var instance = MovieShowTimesConverter._activator($values);
@@ -181,6 +241,7 @@ extension MovieShowTimesDogsExtension on gen2.MovieShowTimes {
     return builder.build();
   }
 
+  MovieShowTimes$Copy get copy => toBuilder();
   MovieShowTimesBuilder toBuilder() {
     return MovieShowTimesBuilder(this);
   }
@@ -192,17 +253,18 @@ extension MovieShowTimesDogsExtension on gen2.MovieShowTimes {
 
 class TheaterShowTimesConverter extends gen.DefaultStructureConverter<gen2.TheaterShowTimes> {
   TheaterShowTimesConverter()
-      : super(
-            struct: const gen.DogStructure<gen2.TheaterShowTimes>(
-                'TheaterShowTimes',
-                gen.StructureConformity.basic,
-                [
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.Theater>(), gen.TypeToken<gen1.Theater>(), null, gen.IterableKind.none, 'theater', false, true, []),
-                  gen.DogStructureField(gen.QualifiedTypeTreeN<gen0.List<gen2.ShowTime>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen2.ShowTime>()]), gen.TypeToken<gen2.ShowTime>(), null,
-                      gen.IterableKind.list, 'showTimes', true, true, [])
-                ],
-                [],
-                gen.ObjectFactoryStructureProxy<gen2.TheaterShowTimes>(_activator, [_$theater, _$showTimes], _values)));
+    : super(
+        struct: const gen.DogStructure<gen2.TheaterShowTimes>(
+          'TheaterShowTimes',
+          gen.StructureConformity.basic,
+          [
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.Theater>(), null, 'theater', false, true, []),
+            gen.DogStructureField(gen.QualifiedTypeTreeN<gen0.List<gen2.ShowTime>, gen0.List<dynamic>>([gen.QualifiedTerminal<gen2.ShowTime>()]), null, 'showTimes', true, true, []),
+          ],
+          [gen3.serializable],
+          gen.ObjectFactoryStructureProxy<gen2.TheaterShowTimes>(_activator, [_$theater, _$showTimes], _values),
+        ),
+      );
 
   static dynamic _$theater(gen2.TheaterShowTimes obj) => obj.theater;
 
@@ -211,11 +273,15 @@ class TheaterShowTimesConverter extends gen.DefaultStructureConverter<gen2.Theat
   static List<dynamic> _values(gen2.TheaterShowTimes obj) => [obj.theater, obj.showTimes];
 
   static gen2.TheaterShowTimes _activator(List list) {
-    return gen2.TheaterShowTimes(list[0], showTimes: list[1]?.cast<gen2.ShowTime>());
+    return gen2.TheaterShowTimes(list[0], showTimes: list[1]);
   }
 }
 
-class TheaterShowTimesBuilder {
+abstract class TheaterShowTimes$Copy {
+  gen2.TheaterShowTimes call({gen1.Theater? theater, gen0.List<gen2.ShowTime>? showTimes});
+}
+
+class TheaterShowTimesBuilder implements TheaterShowTimes$Copy {
   TheaterShowTimesBuilder([gen2.TheaterShowTimes? $src]) {
     if ($src == null) {
       $values = List.filled(2, null);
@@ -241,6 +307,17 @@ class TheaterShowTimesBuilder {
 
   gen0.List<gen2.ShowTime>? get showTimes => $values[1];
 
+  @override
+  gen2.TheaterShowTimes call({Object? theater = #sentinel, Object? showTimes = #sentinel}) {
+    if (theater != #sentinel) {
+      this.theater = theater as gen1.Theater;
+    }
+    if (showTimes != #sentinel) {
+      this.showTimes = showTimes as gen0.List<gen2.ShowTime>?;
+    }
+    return build();
+  }
+
   gen2.TheaterShowTimes build() {
     var instance = TheaterShowTimesConverter._activator($values);
 
@@ -255,6 +332,7 @@ extension TheaterShowTimesDogsExtension on gen2.TheaterShowTimes {
     return builder.build();
   }
 
+  TheaterShowTimes$Copy get copy => toBuilder();
   TheaterShowTimesBuilder toBuilder() {
     return TheaterShowTimesBuilder(this);
   }
@@ -266,16 +344,18 @@ extension TheaterShowTimesDogsExtension on gen2.TheaterShowTimes {
 
 class ShowTimeSpecConverter extends gen.DefaultStructureConverter<gen2.ShowTimeSpec> {
   ShowTimeSpecConverter()
-      : super(
-            struct: const gen.DogStructure<gen2.ShowTimeSpec>(
-                'ShowTimeSpec',
-                gen.StructureConformity.basic,
-                [
-                  gen.DogStructureField(gen.QualifiedTerminal<gen2.ShowVersion>(), gen.TypeToken<gen2.ShowVersion>(), null, gen.IterableKind.none, 'version', false, true, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen2.ShowFormat>(), gen.TypeToken<gen2.ShowFormat>(), null, gen.IterableKind.none, 'format', false, true, [])
-                ],
-                [],
-                gen.ObjectFactoryStructureProxy<gen2.ShowTimeSpec>(_activator, [_$version, _$format], _values)));
+    : super(
+        struct: const gen.DogStructure<gen2.ShowTimeSpec>(
+          'ShowTimeSpec',
+          gen.StructureConformity.basic,
+          [
+            gen.DogStructureField(gen.QualifiedTerminal<gen2.ShowVersion>(), null, 'version', false, true, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen2.ShowFormat>(), null, 'format', false, true, []),
+          ],
+          [gen3.serializable],
+          gen.ObjectFactoryStructureProxy<gen2.ShowTimeSpec>(_activator, [_$version, _$format], _values),
+        ),
+      );
 
   static dynamic _$version(gen2.ShowTimeSpec obj) => obj.version;
 
@@ -288,7 +368,11 @@ class ShowTimeSpecConverter extends gen.DefaultStructureConverter<gen2.ShowTimeS
   }
 }
 
-class ShowTimeSpecBuilder {
+abstract class ShowTimeSpec$Copy {
+  gen2.ShowTimeSpec call({gen2.ShowVersion? version, gen2.ShowFormat? format});
+}
+
+class ShowTimeSpecBuilder implements ShowTimeSpec$Copy {
   ShowTimeSpecBuilder([gen2.ShowTimeSpec? $src]) {
     if ($src == null) {
       $values = List.filled(2, null);
@@ -314,6 +398,17 @@ class ShowTimeSpecBuilder {
 
   gen2.ShowFormat get format => $values[1];
 
+  @override
+  gen2.ShowTimeSpec call({Object? version = #sentinel, Object? format = #sentinel}) {
+    if (version != #sentinel) {
+      this.version = version as gen2.ShowVersion;
+    }
+    if (format != #sentinel) {
+      this.format = format as gen2.ShowFormat;
+    }
+    return build();
+  }
+
   gen2.ShowTimeSpec build() {
     var instance = ShowTimeSpecConverter._activator($values);
 
@@ -328,6 +423,7 @@ extension ShowTimeSpecDogsExtension on gen2.ShowTimeSpec {
     return builder.build();
   }
 
+  ShowTimeSpec$Copy get copy => toBuilder();
   ShowTimeSpecBuilder toBuilder() {
     return ShowTimeSpecBuilder(this);
   }

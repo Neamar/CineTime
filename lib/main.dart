@@ -4,6 +4,7 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/utils.dart';
 import 'package:cinetime/widgets/error_widget.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dogs_core/dogs_core.dart';
 import 'package:fetcher/fetcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,7 @@ Future<void> main() async {
   timeago.setLocaleMessages('en', timeago.FrShortMessages()); // Set default timeAgo local to fr
 
   // Init Dogs
-  await initialiseDogs();
+  configureDogs(plugins: [ GeneratedModelsPlugin() ]);
 
   // Init shared pref
   await StorageService.init();

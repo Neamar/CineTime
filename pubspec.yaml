@@ -14,7 +14,7 @@ dependencies:
   collection: ^1.19.1
 
   # Data management
-  dogs_core: ^9.4.1
+  dogs_core: ^10.1.1
   shared_preferences: ^2.5.3  # TODO migrate to sleek_storage
   sleek_storage: ^2.0.0
 
@@ -53,7 +53,7 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.5.4
-  dogs_generator: ^6.0.4
+  dogs_generator: ^7.1.0
 
 # The following section is specific to Flutter.
 flutter:

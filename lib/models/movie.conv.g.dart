@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, unused_field, unused_import, public_member_api_docs, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+// ignore_for_file: unused_element, unused_field, unused_import, unnecessary_import, public_member_api_docs, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 import 'dart:core';
 import 'package:dogs_core/dogs_core.dart' as gen;
@@ -9,33 +9,48 @@ import 'package:lyell/lyell.dart' as gen;
 import 'package:cinetime/models/api_id.dart' as gen0;
 import 'dart:core' as gen1;
 import 'package:cinetime/models/movie.dart' as gen2;
+import 'package:dogs_core/src/annotations.dart' as gen3;
 import 'package:cinetime/models/movie.dart';
 
 class MovieConverter extends gen.DefaultStructureConverter<gen2.Movie> {
   MovieConverter()
-      : super(
-            struct: const gen.DogStructure<gen2.Movie>(
-                'Movie',
-                gen.StructureConformity.basic,
-                [
-                  gen.DogStructureField(gen.QualifiedTerminal<gen0.ApiId>(), gen.TypeToken<gen0.ApiId>(), null, gen.IterableKind.none, 'id', false, true, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'title', false, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'poster', true, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.DateTime>(), gen.TypeToken<gen1.DateTime>(), null, gen.IterableKind.none, 'releaseDate', true, true, []),
-                  gen.DogStructureField(gen.QualifiedTypeTreeN<gen1.List<gen1.String>, gen1.List<dynamic>>([gen.QualifiedTerminal<gen1.String>()]), gen.TypeToken<gen1.String>(), null,
-                      gen.IterableKind.list, 'languages', false, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen0.ApiId>(), gen.TypeToken<gen0.ApiId>(), null, gen.IterableKind.none, 'trailerId', true, true, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'directors', true, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'actors', true, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'genres', true, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'synopsis', true, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), gen.TypeToken<gen1.String>(), null, gen.IterableKind.none, 'durationDisplay', true, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.double>(), gen.TypeToken<gen1.double>(), null, gen.IterableKind.none, 'usersRating', true, false, []),
-                  gen.DogStructureField(gen.QualifiedTerminal<gen1.double>(), gen.TypeToken<gen1.double>(), null, gen.IterableKind.none, 'pressRating', true, false, [])
-                ],
-                [],
-                gen.ObjectFactoryStructureProxy<gen2.Movie>(_activator,
-                    [_$id, _$title, _$poster, _$releaseDate, _$languages, _$trailerId, _$directors, _$actors, _$genres, _$synopsis, _$durationDisplay, _$usersRating, _$pressRating], _values)));
+    : super(
+        struct: const gen.DogStructure<gen2.Movie>(
+          'Movie',
+          gen.StructureConformity.basic,
+          [
+            gen.DogStructureField(gen.QualifiedTerminal<gen0.ApiId>(), null, 'id', false, true, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), null, 'title', false, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), null, 'poster', true, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.DateTime>(), null, 'releaseDate', true, true, []),
+            gen.DogStructureField(gen.QualifiedTypeTreeN<gen1.List<gen1.String>, gen1.List<dynamic>>([gen.QualifiedTerminal<gen1.String>()]), null, 'languages', false, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen0.ApiId>(), null, 'trailerId', true, true, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), null, 'directors', true, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), null, 'actors', true, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), null, 'genres', true, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), null, 'synopsis', true, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.String>(), null, 'durationDisplay', true, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.double>(), null, 'usersRating', true, false, []),
+            gen.DogStructureField(gen.QualifiedTerminal<gen1.double>(), null, 'pressRating', true, false, []),
+          ],
+          [gen3.serializable],
+          gen.ObjectFactoryStructureProxy<gen2.Movie>(_activator, [
+            _$id,
+            _$title,
+            _$poster,
+            _$releaseDate,
+            _$languages,
+            _$trailerId,
+            _$directors,
+            _$actors,
+            _$genres,
+            _$synopsis,
+            _$durationDisplay,
+            _$usersRating,
+            _$pressRating,
+          ], _values),
+        ),
+      );
 
   static dynamic _$id(gen2.Movie obj) => obj.id;
 
@@ -63,28 +78,60 @@ class MovieConverter extends gen.DefaultStructureConverter<gen2.Movie> {
 
   static dynamic _$pressRating(gen2.Movie obj) => obj.pressRating;
 
-  static List<dynamic> _values(gen2.Movie obj) =>
-      [obj.id, obj.title, obj.poster, obj.releaseDate, obj.languages, obj.trailerId, obj.directors, obj.actors, obj.genres, obj.synopsis, obj.durationDisplay, obj.usersRating, obj.pressRating];
+  static List<dynamic> _values(gen2.Movie obj) => [
+    obj.id,
+    obj.title,
+    obj.poster,
+    obj.releaseDate,
+    obj.languages,
+    obj.trailerId,
+    obj.directors,
+    obj.actors,
+    obj.genres,
+    obj.synopsis,
+    obj.durationDisplay,
+    obj.usersRating,
+    obj.pressRating,
+  ];
 
   static gen2.Movie _activator(List list) {
     return gen2.Movie(
-        id: list[0],
-        title: list[1],
-        poster: list[2],
-        releaseDate: list[3],
-        languages: list[4].cast<gen1.String>(),
-        trailerId: list[5],
-        directors: list[6],
-        actors: list[7],
-        genres: list[8],
-        synopsis: list[9],
-        durationDisplay: list[10],
-        usersRating: list[11],
-        pressRating: list[12]);
+      id: list[0],
+      title: list[1],
+      poster: list[2],
+      releaseDate: list[3],
+      languages: list[4],
+      trailerId: list[5],
+      directors: list[6],
+      actors: list[7],
+      genres: list[8],
+      synopsis: list[9],
+      durationDisplay: list[10],
+      usersRating: list[11],
+      pressRating: list[12],
+    );
   }
 }
 
-class MovieBuilder {
+abstract class Movie$Copy {
+  gen2.Movie call({
+    gen0.ApiId? id,
+    gen1.String? title,
+    gen1.String? poster,
+    gen1.DateTime? releaseDate,
+    gen1.List<gen1.String>? languages,
+    gen0.ApiId? trailerId,
+    gen1.String? directors,
+    gen1.String? actors,
+    gen1.String? genres,
+    gen1.String? synopsis,
+    gen1.String? durationDisplay,
+    gen1.double? usersRating,
+    gen1.double? pressRating,
+  });
+}
+
+class MovieBuilder implements Movie$Copy {
   MovieBuilder([gen2.Movie? $src]) {
     if ($src == null) {
       $values = List.filled(13, null);
@@ -176,6 +223,64 @@ class MovieBuilder {
 
   gen1.double? get pressRating => $values[12];
 
+  @override
+  gen2.Movie call({
+    Object? id = #sentinel,
+    Object? title = #sentinel,
+    Object? poster = #sentinel,
+    Object? releaseDate = #sentinel,
+    Object? languages = #sentinel,
+    Object? trailerId = #sentinel,
+    Object? directors = #sentinel,
+    Object? actors = #sentinel,
+    Object? genres = #sentinel,
+    Object? synopsis = #sentinel,
+    Object? durationDisplay = #sentinel,
+    Object? usersRating = #sentinel,
+    Object? pressRating = #sentinel,
+  }) {
+    if (id != #sentinel) {
+      this.id = id as gen0.ApiId;
+    }
+    if (title != #sentinel) {
+      this.title = title as gen1.String;
+    }
+    if (poster != #sentinel) {
+      this.poster = poster as gen1.String?;
+    }
+    if (releaseDate != #sentinel) {
+      this.releaseDate = releaseDate as gen1.DateTime?;
+    }
+    if (languages != #sentinel) {
+      this.languages = languages as gen1.List<gen1.String>;
+    }
+    if (trailerId != #sentinel) {
+      this.trailerId = trailerId as gen0.ApiId?;
+    }
+    if (directors != #sentinel) {
+      this.directors = directors as gen1.String?;
+    }
+    if (actors != #sentinel) {
+      this.actors = actors as gen1.String?;
+    }
+    if (genres != #sentinel) {
+      this.genres = genres as gen1.String?;
+    }
+    if (synopsis != #sentinel) {
+      this.synopsis = synopsis as gen1.String?;
+    }
+    if (durationDisplay != #sentinel) {
+      this.durationDisplay = durationDisplay as gen1.String?;
+    }
+    if (usersRating != #sentinel) {
+      this.usersRating = usersRating as gen1.double?;
+    }
+    if (pressRating != #sentinel) {
+      this.pressRating = pressRating as gen1.double?;
+    }
+    return build();
+  }
+
   gen2.Movie build() {
     var instance = MovieConverter._activator($values);
 
@@ -190,6 +295,7 @@ extension MovieDogsExtension on gen2.Movie {
     return builder.build();
   }
 
+  Movie$Copy get copy => toBuilder();
   MovieBuilder toBuilder() {
     return MovieBuilder(this);
   }

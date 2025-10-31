@@ -207,9 +207,10 @@ String convertBasicHtmlTags(String htmlText) {
   return htmlText.replaceAll(exp, '');
 }
 
+/// Serialization hook to ignore a field during serialization
 class IgnoreField extends SerializationHook with FieldSerializationHook {
   const IgnoreField();
 
   @override
-  void postFieldSerialization(key, map, structure, engine) => map.remove(key);
+  void postFieldSerialization(context, fieldContext, map, engine) => map.remove(fieldContext.key);
 }
