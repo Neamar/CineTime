@@ -300,6 +300,21 @@ class ApiClient {
             }).joinNotEmpty(', ');
           }
 
+          String? buildDurationFromApi(String? durationApi) {
+            if (isStringNullOrEmpty(durationApi)) return null;
+
+            List<String> parts = durationApi!.split(':');
+            if (parts.length != 3) return null;
+
+            final hours = int.tryParse(parts[0]);
+            if (hours == null) return null;
+
+            final minutes = int.tryParse(parts[1]);
+            if (minutes == null) return null;
+
+            return '${hours}h${minutes.toTwoDigitsString()}';
+          }
+
           movie = Movie(
             id: ApiId.fromEncoded(movieId),
             title: movieJson['title'],
@@ -307,8 +322,8 @@ class ApiClient {
             directors: personsFromJson(movieJson['credits']?['edges']),
             actors: personsFromJson(movieJson['cast']?['edges']),
             releaseDate: dateFromString(releasesJson.firstOrNull?['releaseDate']?['date']),
-            durationApi: movieJson['runTime'],
-            genresApi: genresJson,
+            durationDisplay: buildDurationFromApi(movieJson['runTime']),
+            genres: genresJson.map((genreApi) => _movieGenresMap[genreApi]).joinNotEmpty(', '),
             poster: _getPathFromUrl(posterUrl),
             trailerId: isStringNullOrEmpty(trailerId) ? null : ApiId.fromEncoded(trailerId!),
             usersRating: (statisticsJson['userRating']?['score'] as num?)?.toDouble(),
@@ -862,3 +877,46 @@ class _RandomFidGenerator {
 
   static String encodeFidBase64UrlSafe(List<int> bytes) => base64Url.encode(bytes).substring(0, fidLength);
 }
+
+const _movieGenresMap = {
+  'ACTION': 'Action',
+  'ADVENTURE': 'Aventure',
+  'ANIMATION': 'Animation',
+  'BIOPIC': 'Biopic',
+  'BOLLYWOOD': 'Bollywood',
+  'CARTOON': 'Dessin animé',
+  'CLASSIC': 'Classique',
+  'COMEDY': 'Comédie',
+  'COMEDY_DRAMA': 'Comédie dramatique',
+  'CONCERT': 'Concert',
+  'DETECTIVE': 'Policier',
+  'DIVERS': 'Divers',
+  'DOCUMENTARY': 'Documentaire',
+  'DRAMA': 'Drame',
+  'EROTIC': 'Érotique',
+  'EXPERIMENTAL': 'Expérimental',
+  'FAMILY': 'Famille',
+  'FANTASY': 'Fantaisie',
+  'HISTORICAL': 'Historique',
+  'HISTORICAL_EPIC': 'Épique',
+  'HORROR': 'Horreur',
+  'JUDICIAL': 'Judiciaire',
+  'KOREAN_DRAMA': 'Drama',
+  'MARTIAL_ARTS': 'Arts Martiaux',
+  'MEDICAL': 'Médical',
+  'MOBISODE': 'Programme court',
+  'MOVIE_NIGHT': 'Nuit du cinéma',
+  'MUSIC': 'Musique',
+  'MUSICAL': 'Comédie musicale',
+  'OPERA': 'Opéra',
+  'ROMANCE': 'Romance',
+  'SCIENCE_FICTION': 'Science-fiction',
+  'PERFORMANCE': 'Performance',
+  'SOAP': 'Drame',
+  'SPORT_EVENT': 'Sport',
+  'SPY': 'Espion',
+  'THRILLER': 'Thriller',
+  'WARMOVIE': 'Film de guerre',
+  'WEB_SERIES': 'Série web',
+  'WESTERN': 'Western',
+};
