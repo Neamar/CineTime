@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/data_error.dart';
@@ -267,7 +268,11 @@ class ApiClient {
           // In that case, showTimes are still available (and ticketing links works), but movie info is empty.
           // On the official Android app, it is displayed as a "blank" movie session: we can add to calendar and book, but no movie info is displayed.
           // On the web site, session is just not displayed at all.
-          reportError(DataError('Movie data is empty on theater "${theater.name}" for ${showTimes.length} showTimes (first is at ${showTimes.first.dateTime.toIso8601String()})'), StackTrace.current);
+          AnalyticsService.trackEvent('Ghost showtimes', {
+            'theater': theater.name,
+            'showTimesCount': showTimes.length,
+            'firstShowTime': showTimes.first.dateTime.toIso8601String(),
+          });
 
           // In that case, collect ghost showtimes in a separate map
           ghostShowTimesMap.putIfAbsent(theater, () => []).addAll(showTimes);
@@ -412,7 +417,10 @@ class ApiClient {
     responseJson = responseJson['data']?['video'];
     final JsonList? videosJson = responseJson?['files'];
     if (videosJson == null) {
-      reportError(DataError('Video query result contains no files (title: ${responseJson?['title']} | videoId: ${videoId.id})'), StackTrace.current);
+      AnalyticsService.trackEvent('Empty video', {
+        'videoId': videoId.id,
+        'videoTitle': responseJson?['title'],
+      });
       return null;
     }
     if (videosJson.length == 1) return MovieVideo.fromJson(videosJson.first).uri;
