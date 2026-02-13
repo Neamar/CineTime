@@ -135,7 +135,7 @@ class ApiClient {
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = useCache }) async {
     // Prepare period
     final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
-    final to = from.add(const Duration(days: 8));     // Fetch next 7 days (seventh included)
+    final to = from.add(const Duration(days: 21));     // Fetch next 7 days (seventh included)
 
     // Build movieShowTimes list
     final moviesShowTimesMap = <Movie, MovieShowTimes>{};
@@ -549,7 +549,7 @@ class ApiClient {
   /// Usually one per device.
   Future<String> _getAuthToken() async {
     // Using hardcoded token works for now, but it may be revoked at any time.
-    return 'e_FbiDmBRnWNrqmee72cAO:APA91bEK0uXz5Bv2QKzq2lwDx7vJ8pqhGrIUOYOXRBGmnM1hj46B2czylVnFY-5vZuRD0U4vr4VhsyecJ88BJC6CfoBURwGrzp6f2d8LXUGxlBbJlVzY7ZM';    // samA3 windIP 9.7.8
+    return 'cjgBOHVXRrKkCYZvUEkkIe:APA91bGs9N8b4emKZXuSSBJkRp_UDzBOHLlGyjIL9ykztjyv4xtL-dP7gO5E05ucMh_LoZ5TCWCI7VjQNR__XOdXo_jiMiHXyRPFd52qtY0Jmfvyv2Ba35Y';    // S4m windIP 9.7.8
   }
 
   /// Delete all locally saved auth tokens

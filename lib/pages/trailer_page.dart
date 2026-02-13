@@ -72,7 +72,7 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
     // Hack to properly handle full screen mode & back navigation
     // See https://github.com/fluttercommunity/chewie/issues/647
     _chewieController.addListener(() {
-      var isFullScreen = _chewieController.isFullScreen;
+      final isFullScreen = _chewieController.isFullScreen;
       if (isFullScreen && isInit) {
         _chewieController.exitFullScreen();
         setState(() {

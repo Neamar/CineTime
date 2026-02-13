@@ -1,6 +1,6 @@
 name: cinetime
 description: CinéTime
-version: 2.15.0+86
+version: 2.15.1+87
 
 environment:
   sdk: '>=3.1.4 <4.0.0'
@@ -14,7 +14,7 @@ dependencies:
   collection: ^1.19.1
 
   # Data management
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.5.4
 
   # Widgets / UI
   flash: ^3.1.1
@@ -27,16 +27,16 @@ dependencies:
   chewie: ^1.12.1
 
   # Web
-  http: ^1.5.0
+  http: ^1.6.0
   connectivity_plus: ^6.1.5
   flutter_cache_manager: ^3.4.1
   cached_network_image: ^3.4.1
-  amplitude_flutter: ^4.3.9
+  amplitude_flutter: ^4.3.10
 
   # Device
-  device_info_plus: ^12.2.0
+  device_info_plus: ^12.3.0
   in_app_update: ^4.2.5
-  sentry_flutter: ^9.7.0
+  sentry_flutter: ^9.13.0
   url_launcher: ^6.3.2
   share_plus: ^12.0.1
   geolocator: ^14.0.2
