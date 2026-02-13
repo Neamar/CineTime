@@ -33,7 +33,7 @@ class AppResources {
   // Formatter
   static final formatterFullDateTime = DateFormat('EEEE dd MMMM à HH:mm');
   static final formatterDateTime = DateFormat('EEEE dd à HH:mm');
-  static final formatterDate = DateFormat('dd MMMM yyyy');
+  static final formatterDate = DateFormat('d MMMM yyyy');
   static final formatterParsableDate = DateFormat('yyyy-MM-dd');
   static final _formatterDay = DateFormat('EEEE d');
   static final formatterMonth = DateFormat('MMM');

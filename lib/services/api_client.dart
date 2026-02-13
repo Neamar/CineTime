@@ -316,13 +316,16 @@ class ApiClient {
             return '${hours}h${minutes.toTwoDigitsString()}';
           }
 
+          final releaseDates = releasesJson?.map((r) => dateFromString(r['releaseDate']?['date'])).nonNulls;
+          final releaseDate = (releaseDates == null || releaseDates.isEmpty) ? null : releaseDates.reduce((a, b) => a.isBefore(b) ? a : b);
+
           movie = Movie(
             id: ApiId.fromEncoded(movieId),
             title: movieJson['title'],
             languages: languagesJson?.map((languageCode) => _movieLanguageMap[languageCode]).joinNotEmpty(', '),
             directors: personsFromJson(movieJson['credits']?['edges']),
             actors: personsFromJson(movieJson['cast']?['edges']),
-            releaseDate: dateFromString(releasesJson?.firstOrNull?['releaseDate']?['date']),
+            releaseDate: releaseDate,
             durationDisplay: buildDurationFromApi(movieJson['runTime']),
             genres: genresJson?.map((genreApi) => _movieGenresMap[genreApi]).joinNotEmpty(', '),
             poster: _getPathFromUrl(posterUrl),

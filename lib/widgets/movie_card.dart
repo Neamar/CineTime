@@ -32,6 +32,7 @@ class MovieCard extends StatelessWidget {
 
     // Build widget
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => navigateTo(context, (_) => MoviePage(moviesShowTimes, movieIndex)),
         child: LayoutBuilder(
