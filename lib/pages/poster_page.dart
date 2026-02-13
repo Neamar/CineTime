@@ -12,10 +12,22 @@ class PosterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: PhotoView(
-        imageProvider: CachedNetworkImageProvider(ApiClient.getImageUrl(posterPath, isThumbnail: false)!),
-        minScale: PhotoViewComputedScale.contained,
-        maxScale: PhotoViewComputedScale.contained * 1.5,
+      body: Stack(
+        children: [
+          // Poster
+          PhotoView(
+            imageProvider: CachedNetworkImageProvider(ApiClient.getImageUrl(posterPath, isThumbnail: false)!),
+            minScale: PhotoViewComputedScale.contained,
+            maxScale: PhotoViewComputedScale.contained * 1.5,
+          ),
+
+          // Back button
+          Positioned(
+            child: SafeArea(
+              child: BackButton(),
+            ),
+          ),
+        ],
       ),
     );
   }
