@@ -200,7 +200,8 @@ class ShowTimeSpec {
   final ShowVersion version;
   final ShowFormat format;
 
-  String toDisplayString(bool isMovieFrench) {
+  String toDisplayString(bool? isMovieFrench) {
+    isMovieFrench ??= false;
     String label = version.label;
     if (version == ShowVersion.dubbed && isMovieFrench) label += 'ST';
     if (format != ShowFormat.f2D) label += ' ${format.label}';

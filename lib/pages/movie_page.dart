@@ -274,7 +274,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                               return TheaterShowTimesWidget(
                                 theaterName: theaterShowTimes.theater.name,
                                 showTimes: theaterShowTimes.formattedShowTimes,
-                                filterName: filter.toString(),
+                                filterName: filter.toDisplayString(movie.isFrench),
                                 scrollController: bloc.theaterShowTimesScrollControllers[theaterShowTimes.theater]!,
                                 onShowtimePressed: (showtime) => ShowtimeDialog.open(
                                   context: context,
