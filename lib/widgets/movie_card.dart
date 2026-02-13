@@ -101,7 +101,7 @@ class MovieCard extends StatelessWidget {
                           children: <Widget>[
                             Expanded(
                               child: Text(
-                                movieShowTimes.movie.genres!,
+                                movieShowTimes.movie.genres ?? '',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),

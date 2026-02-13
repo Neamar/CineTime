@@ -37,6 +37,12 @@ extension ExtendedString on String {
   String removeAllNewLines() => replaceAll(RegExp(r'\n+'), '');
 }
 
+extension ExtendedNullableString on String? {
+  bool get isNotNullOrEmpty => this != null && this!.isNotEmpty;
+
+  bool get isNullOrEmpty => this == null || this!.isEmpty;
+}
+
 extension ExtendedNum on num {
   bool isBetween(num min, num max) => this >= min && this <= max;
 

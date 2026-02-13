@@ -148,7 +148,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                       label: 'Avec',
                                       text: movie.actors!,
                                     ),
-                                  if (movie.genres != null)
+                                  if (movie.genres.isNotNullOrEmpty)
                                     TextWithLabel(
                                       label: 'Genre',
                                       text: movie.genres!,
