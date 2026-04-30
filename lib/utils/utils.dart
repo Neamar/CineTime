@@ -112,12 +112,12 @@ Future<void> showError(BuildContext context, Object error) async {
   }
 }
 
-/// Report error to Crashlytics
+/// Report error to Sentry
 Future<void> reportError(Object exception, StackTrace stack, {dynamic reason}) async {
   final logMessage = '$exception\n$stack';
   if (shouldReportException(exception)) {
     if (App.enableBugReport) {
-      // Report to Sentry;
+      // Report to Sentry
       Sentry.captureException(exception, stackTrace: stack, hint: reason);
     } else {
       // Just log
