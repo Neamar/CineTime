@@ -58,8 +58,11 @@ class Movie extends Identifiable {
   };
 
   static const String _movieBaseUrl = 'https://www.all' + 'ocine.fr/film/fich' + 'efilm';
+  @Deprecated('Use AppService.api.activeProvider.getMoviePageUrl(movie.id) instead')
   String get movieUrl => '${_movieBaseUrl}_gen_cfilm=$id.html';
+  @Deprecated('Use AppService.api.activeProvider.getMovieUsersRatingUrl(movie.id) instead')
   String get usersRatingUrl => '$_movieBaseUrl-$id/critiques/spectateurs/';
+  @Deprecated('Use AppService.api.activeProvider.getMoviePressRatingUrl(movie.id) instead')
   String get pressRatingUrl => '$_movieBaseUrl-$id/critiques/presse/';
 
   /// Return true if this movie match the [search] query
