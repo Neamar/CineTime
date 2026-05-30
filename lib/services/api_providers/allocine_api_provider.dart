@@ -100,7 +100,7 @@ class AllocineApiProvider implements ApiProvider {
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = true }) async {
     // Prepare period
     final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
-    final to = from.add(const Duration(days: 21));     // Fetch next 7 days (seventh included)
+    final to = from.add(const Duration(days: 21));     // Fetch next 21 days
 
     // Build movieShowTimes list
     final moviesShowTimesMap = <Movie, MovieShowTimes>{};
