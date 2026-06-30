@@ -713,7 +713,7 @@ class ApiClient {
   /// Log a request or a response
   /// Only provide either one, not both
   static void _log({http.BaseRequest? request, _ResponseHandler? responseHandler}) {
-    if (kReleaseMode || request == null && responseHandler == null) return;
+    if (request == null && responseHandler == null) return;
     const includeBody = true;
 
     // Common properties

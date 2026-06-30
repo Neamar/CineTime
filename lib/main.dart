@@ -21,6 +21,12 @@ Future<void> main() async {
   // Init Flutter
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Override default debugPrint
+  debugPrint = (message, {wrapWidth}) {
+    // Suppress console output in release mode
+    if (!kReleaseMode) debugPrintThrottled(message, wrapWidth: wrapWidth);
+  };
+
   // Get android version info
   try {
     App.androidSdkVersion = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
