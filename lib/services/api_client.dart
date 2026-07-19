@@ -9,6 +9,7 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/services/api_providers/api_provider.dart';
 import 'package:cinetime/services/api_providers/allocine_api_provider.dart';
+import 'package:cinetime/services/app_http_client.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/data_error.dart';
 import 'package:cinetime/utils/exceptions/unauthorized_exception.dart';
@@ -23,19 +24,13 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app_service.dart';
 
-typedef JsonObject = Map<String, dynamic>;
-typedef JsonList = Iterable<dynamic>;
-
-const httpMethodGet = 'GET';
-const httpMethodPost = 'POST';
-
-class ApiClient {
+class ApiClient implements AppHttpClient {
   //#region Vars
-  /// Whether to use cache or not
-  static const useCache = true;
+  /// Whether to use the default cache or not
+  static const defaultUseCache = true;
 
   /// API url
-  static const _graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
+  static const graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
 
   /// Request timeout duration
   static const _timeOutDuration = Duration(seconds: 30);
@@ -74,7 +69,7 @@ class ApiClient {
   /// Get theaters around geo-position
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) => _activeProvider.searchTheatersGeo(latitude, longitude);
 
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = useCache }) => _activeProvider.getMoviesList(theaters, useCache: useCache);
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = defaultUseCache }) => _activeProvider.getMoviesList(theaters, useCache: useCache);
 
   /// Get detailed movie info
   /// Return synopsis and certificate
@@ -194,7 +189,7 @@ class ApiClient {
   /// Build a unique key based on the request, used for cache.
   static String _getCacheKeyFromRequest(http.Request request) {
     // If it's a GraphQL request
-    if (request.url.toString() == _graphUrl) {
+    if (request.url.toString() == graphUrl) {
       return request.body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
     }
 
@@ -228,7 +223,7 @@ class ApiClient {
 
   /// Send a graphQL request
   /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)
-  Future<T> sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = useCache, bool enableAutoRetryOnUnauthorized = true }) async {
+  Future<T> sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = defaultUseCache, bool enableAutoRetryOnUnauthorized = true }) async {
     // Headers
     final headers = {
       'a' + 'c-auth-token': await _getAuthToken(),
@@ -244,7 +239,7 @@ class ApiClient {
 
     // Send request
     try {
-      return await send<T>(httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
+      return await send<T>(HttpMethod.post, graphUrl, headers: headers, bodyJson: body, useCache: useCache);
     } catch(e) {
       // Unauthorized
       if (e is HttpResponseException && e.statusCode == 400 && _tokenErrorRegex.hasMatch(e.body)) {
@@ -268,9 +263,10 @@ class ApiClient {
   }
 
   /// Send a classic request
-  Future<T> send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = useCache}) async {
+  @override
+  Future<T> send<T>(HttpMethod method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = defaultUseCache}) async {
     // Create request
-    final request = http.Request(method, Uri.parse(url));
+    final request = http.Request(method.name.toUpperCase(), Uri.parse(url));
 
     // Set headers
     request.headers.addAll({
@@ -292,7 +288,7 @@ class ApiClient {
   }
 
   /// Send a generic request
-  Future<T> _sendRequest<T>(http.Request request, {bool useCache = useCache}) async {
+  Future<T> _sendRequest<T>(http.Request request, {bool useCache = defaultUseCache}) async {
     // Log
     _log(request: request);
 

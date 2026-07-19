@@ -4,6 +4,7 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/api_providers/api_provider.dart';
+import 'package:cinetime/services/app_http_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 
@@ -46,7 +47,7 @@ class AllocineApiProvider implements ApiProvider {
   Future<List<Theater>> searchTheaters(String query) async {
     // Send request
     query = Uri.encodeQueryComponent(query);   // Encode query, so char like '?' are correctly encoded
-    final responseJson = await _client.send<JsonObject>(httpMethodGet, 'https://www.all' + 'ocine.fr/_/autocomplete/mobile/theater/$query');
+    final responseJson = await _client.send<JsonObject>(HttpMethod.get, 'https://www.all' + 'ocine.fr/_/autocomplete/mobile/theater/$query');
 
     // Process result
     final JsonList theatersJson = responseJson['results']!;
