@@ -24,7 +24,7 @@ class TrailerPage extends StatelessWidget {
           task: () => AppService.api.getVideoUri(trailerId),
           builder: (context, trailerUri) {
             if (trailerUri == null) {
-              return const IconMessage(
+              return IconMessage(
                 icon: IconMessage.iconError,
                 message: 'Aucune bande annonce trouvée',
                 redIcon: true,

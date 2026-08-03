@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'icon_message.dart';
 
 class EmptySearchResultMessage extends StatelessWidget {
-  static const noResult = EmptySearchResultMessage(
+  static final noResult = EmptySearchResultMessage(
     icon: IconMessage.iconSad,
     message: 'Aucun\nRÉSULTAT',
     backgroundColor: AppResources.colorDarkBlue,

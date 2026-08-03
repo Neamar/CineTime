@@ -186,7 +186,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                           children: <Widget>[
                             if (movie.usersRating != null)
                               _RatingWidget(
-                                icon: FontAwesomeIcons.users,
+                                icon: FontAwesomeIcons.users.data,
                                 rating: movie.usersRating!,
                                 tooltip: 'Spectateurs',
                                 iconSizeDelta: -3,
@@ -194,7 +194,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                               ),
                             if (movie.pressRating != null)
                               _RatingWidget(
-                                icon: FontAwesomeIcons.newspaper,
+                                icon: FontAwesomeIcons.newspaper.data,
                                 rating: movie.pressRating!,
                                 tooltip: 'Presse',
                                 onPressed: () => launchUrlString(movie.pressRatingUrl),

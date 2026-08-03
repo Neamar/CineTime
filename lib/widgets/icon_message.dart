@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class IconMessage extends StatelessWidget {
-  static const IconData iconSad = FontAwesomeIcons.solidFaceFrown;
-  static const IconData iconError = FontAwesomeIcons.solidFaceSadTear;
+  static final IconData iconSad = FontAwesomeIcons.solidFaceFrown.data;
+  static final IconData iconError = FontAwesomeIcons.solidFaceSadTear.data;
 
   final IconData icon;
   final String message;
