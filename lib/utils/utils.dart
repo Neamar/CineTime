@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:cinetime/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:sleek_http_client/sleek_http_client.dart' show ConnectivityException;
 
 import '_utils.dart';
-import 'exceptions/connectivity_exception.dart';
 import 'exceptions/displayable_exception.dart';
 import 'exceptions/operation_canceled_exception.dart';
 import 'exceptions/permission_exception.dart';
@@ -134,7 +134,8 @@ bool shouldReportException(Object? exception) =>
     exception != null &&
     exception is! UnreportedException &&
     exception is! SocketException &&
-    exception is! TimeoutException;
+    exception is! TimeoutException &&
+    exception is! ConnectivityException;
 
 /// Get current user location, with low precision.
 Future<geo.Position> getCurrentLocation() async {

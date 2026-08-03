@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -9,30 +8,24 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/data_error.dart';
-import 'package:cinetime/utils/exceptions/connectivity_exception.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonObject, JsonList;
 
 import 'app_service.dart';
-
-typedef JsonObject = Map<String, dynamic>;
-typedef JsonList = Iterable<dynamic>;
-
-const _httpMethodGet = 'GET';
-const _httpMethodPost = 'POST';
 
 class ApiClient {
   //#region Vars
   /// Whether to use cache or not
   static const useCache = true;
 
-  /// API url
-  static const _graphUrl = 'https://graph.all' + 'ocine.fr/v1/mobile/';
+  /// GraphQL API host and path
+  static const _graphAuthority = 'graph.all' + 'ocine.fr';
+  static const _graphPath = '/v1/mobile/';
 
   /// Shows started for more than this duration are filtered out.
   static const _maxStartedShowtimeDuration = Duration(hours: 1);
@@ -47,25 +40,38 @@ class ApiClient {
   /// Whether to log headers also or not.
   static const _logHeaders = false;
 
-  ApiClient() : _client = SentryHttpClient(
-    failedRequestStatusCodes: [
-      SentryStatusCode.range(400, 599),   // Report all errors
+  ApiClient() : _client = SleekHttpClient(
+    client: SentryHttpClient(
+      failedRequestStatusCodes: [
+        SentryStatusCode.range(400, 599),   // Report all errors
+      ],
+    ),
+    authorityGetter: () => _graphAuthority,
+    timeOutDuration: _timeOutDuration,
+    headersGetter: () => {
+      HttpHeaders.acceptHeader: contentTypeJson,
+      'user-agent': 'androidapp/0.0.1',
+    },
+    errorBuilder: HttpResponseException.new,
+    interceptors: [
+      if (useCache) _CacheInterceptor(CacheManager(Config(
+        'CtCache',
+        stalePeriod: const Duration(days: 1),
+      )), keyBuilder: _getCacheKeyFromRequest),
+      const _GraphQLErrorInterceptor(),
+      LoggingInterceptor(logger: debugPrint, logHeaders: _logHeaders),
     ],
   );
 
-  final http.Client _client;
-  final _cacheManager = CacheManager(Config(
-    'CtCache',
-    stalePeriod: const Duration(days: 1),
-  ));
+  final SleekHttpClient _client;
   //#endregion
 
   //#region Requests
   /// Get theaters that match [query] (free text query)
   Future<List<Theater>> searchTheaters(String query) async {
     // Send request
-    query = Uri.encodeQueryComponent(query);   // Encode query, so char like '?' are correctly encoded
-    final responseJson = await _send<JsonObject>(_httpMethodGet, 'https://www.all' + 'ocine.fr/_/autocomplete/mobile/theater/$query');
+    // Note: no need to pre-encode query, Uri.https (used internally by SleekHttpClient) already encodes the path.
+    final responseJson = await _client.send<JsonObject>(HttpMethod.get, '/_/autocomplete/mobile/theater/$query', authority: 'www.all' + 'ocine.fr');
 
     // Process result
     final JsonList theatersJson = responseJson['results']!;
@@ -400,6 +406,7 @@ class ApiClient {
 
   //#region Other
   /// Get the show end time from ticketing url
+  // TODO: study migrating this to sleek_http_client too (needs a second, generic client instance since target hosts vary per call).
   static Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // UGC
     if (ticketingUri.host.contains('ugc.fr')) {
@@ -499,10 +506,11 @@ class ApiClient {
   static String? _getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
 
   /// Build a unique key based on the request, used for cache.
-  static String _getCacheKeyFromRequest(http.Request request) {
+  static String _getCacheKeyFromRequest(http.BaseRequest request) {
     // If it's a GraphQL request
-    if (request.url.toString() == _graphUrl) {
-      return request.body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
+    if (request.url.path == _graphPath) {
+      final body = (request as http.Request).body;
+      return body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
     }
 
     // If it's a classic request
@@ -533,215 +541,9 @@ class ApiClient {
     };
 
     // Send request
-    return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body);
+    // Note: a GraphQL request may return a 200 HTTP status code with errors — handled by [_GraphQLErrorInterceptor].
+    return await _client.send<T>(HttpMethod.post, _graphPath, headers: headers, bodyJson: body);
   }
-
-  /// Send a classic request
-  Future<T> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody}) async {
-    // Create request
-    final request = http.Request(method, Uri.parse(url));
-
-    // Set headers
-    request.headers.addAll({
-      HttpHeaders.acceptHeader: contentTypeJson,
-      if (bodyJson != null) HttpHeaders.contentTypeHeader: contentTypeJson,
-      'user-agent': 'androidapp/0.0.1',
-    });
-    if (headers != null)
-      request.headers.addAll(headers);
-
-    // Set body
-    if (bodyJson != null)
-      request.body = json.encode(bodyJson);
-    else if (stringBody != null)
-      request.body = stringBody;
-
-    // Send request
-    return await _sendRequest<T>(request);
-  }
-
-  /// Send a generic request
-  Future<T> _sendRequest<T>(http.Request request) async {
-    // Log
-    _log(request: request);
-
-    // Prepare cache key
-    final cacheKey = _getCacheKeyFromRequest(request);
-
-    // Whether to use cache for this request (may be turned off below once a cache hit is consumed)
-    var useCache = ApiClient.useCache;
-
-    // Get response
-    final response = await () async {
-      // If we can use cache
-      if (useCache) {
-        // Check cache
-        final cachedResponseFile = await _cacheManager.getFileFromCache(cacheKey);
-
-        // If cache is available
-        if (cachedResponseFile != null) {
-          // Read response from cached file
-          final cachedResponse = await cachedResponseFile.file.readAsString();
-          useCache = false;
-
-          // Process response
-          return http.Response(cachedResponse, 200,
-            headers: {HttpHeaders.contentTypeHeader: contentTypeJson}, // Needed so content is decoded using utf-8
-            request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
-          );
-        }
-      }
-
-      // Check internet
-      await throwIfNoInternet();
-
-      // All in one Future to handle timeout
-      try {
-        return await(() async {
-          //Send request
-          final streamedResponse = await _client.send(request);
-
-          //Wait for the full response
-          return await http.Response.fromStream(streamedResponse);
-        }()).timeout(_timeOutDuration);
-      } on TimeoutException {
-        throw const ConnectivityException(ConnectivityExceptionType.timeout);
-      }
-    } ();
-
-    // Process response
-    return _processResponse<T>(response, useCache ? cacheKey : null);
-  }
-
-  /// Process server's [response].
-  /// Returns processed result as Json or String.
-  /// Cache body if [cacheKey] is provided.
-  T _processResponse<T>(http.Response response, String? cacheKey) {
-    // Wrap response in a ResponseHandler to facilitate treatment
-    final responseHandler = _ResponseHandler(response);
-
-    // Logging
-    _log(responseHandler: responseHandler);
-
-    // Process response - Success
-    if (responseHandler.isSuccess) {
-      // Check for errors
-      // A GraphQL request may return a 200 HTTP status code with errors
-      if (responseHandler.isBodyJson) {
-        final processedResponse = responseHandler.bodyJsonOrNull<JsonObject>();
-        final errors = processedResponse?['errors'];
-        if (errors != null) {
-          throw HttpResponseException(response);
-        }
-      }
-
-      // Store in cache
-      if (cacheKey != null) {
-        try {
-          _cacheManager.putFile(cacheKey, response.bodyBytes);
-          debugPrint('API (˅) [CACHED $cacheKey]');
-        } catch (e, s) {
-          reportError(e, s);
-        }
-      }
-
-      // If raw string is asked
-      if (T == String) {
-        return responseHandler.bodyString as T;
-      }
-
-      // Json
-      else if (T == JsonObject || T == JsonList) {
-        return responseHandler.bodyJson<T>();
-      }
-
-      // If body doesn't need to be processed
-      else if (isTypeUndefined<T>()) {
-        return null as T;
-      }
-
-      // Unhandled types
-      else {
-        throw UnimplementedError('$T is not a supported type');
-      }
-    }
-
-    // Process response - Error
-    else {
-      throw HttpResponseException(response);
-    }
-  }
-
-  /// Log a request or a response
-  /// Only provide either one, not both
-  static void _log({http.BaseRequest? request, _ResponseHandler? responseHandler}) {
-    if (request == null && responseHandler == null) return;
-    const includeBody = true;
-
-    // Common properties
-    request = request ?? responseHandler!.response.request;
-    final method = request?.method;
-    final url = request?.url.toString();
-
-    // Type specific
-    String typeSymbol = '';
-    String statusCode = '';
-    String body = '';
-    String? headers;
-
-    // It's a response
-    if (responseHandler != null) {
-      final r = responseHandler.response;
-      typeSymbol = '<';
-      statusCode = r.statusCode != 200 ? '(${r.statusCode}) ' : '';
-      if (includeBody) {
-        if (responseHandler.isBodyJson) {
-          body = responseHandler.bodyString.removeAllNewLines();
-        } else {
-          final sizeInKo = ((r.contentLength ?? 0) / 1024).round();
-          if (sizeInKo <= 10) {
-            body = responseHandler.bodyString.removeAllNewLines();
-          } else {
-            body = '$sizeInKo ko';
-          }
-        }
-      }
-      if (_logHeaders) {
-        headers = r.headers.toString();
-      }
-    }
-
-    // It's a request
-    else if (request != null) {
-      typeSymbol = '?';
-      if (includeBody) {
-        body = request is http.Request ? request.body : '';
-
-        // Crop string if it's a GraphQL request body
-        body = body.replaceAllMapped(RegExp(r'("query .+?\()(.+")(,.+?variables":)', dotAll: true), (match) => '${match.group(1)}...)${match.group(3)}');
-      }
-      if (_logHeaders) {
-        headers = request.headers.toString();
-      }
-    }
-
-    // Build log string
-    debugPrint('API ($typeSymbol) $statusCode[$method $url] $body');
-    if (headers != null) {
-      debugPrint('API (${typeSymbol}H) $headers');
-    }
-  }
-
-  static Future<void> throwIfNoInternet() async {
-    if (await isOffline()) {
-      debugPrint('API (✕) NO INTERNET');
-      throw const ConnectivityException(ConnectivityExceptionType.noInternet);
-    }
-  }
-
-  static Future<bool> isOffline() async => (await Connectivity().checkConnectivity()).contains(ConnectivityResult.none);
-
-  static Future<bool> isOnline() async => !(await isOffline());
 
   static bool isHttpSuccessCode(int httpStatusCode) => httpStatusCode >= 200 && httpStatusCode < 300;
   static void throwIfHttpError(http.Response response) {
@@ -752,37 +554,73 @@ class ApiClient {
   //#endregion
 }
 
-class _ResponseHandler {
-  _ResponseHandler(this.response) :
-    isSuccess = ApiClient.isHttpSuccessCode(response.statusCode),
-    isBodyJson = ContentType.parse(response.headers[HttpHeaders.contentTypeHeader] ?? '').mimeType == ApiClient.contentTypeJsonMimeType;
+/// Caches successful responses to disk, keyed by [keyBuilder].
+/// Placed outermost in the interceptor list, so a cache hit short-circuits everything after it (GraphQL error check, logging, the real network call).
+class _CacheInterceptor implements HttpInterceptor {
+  _CacheInterceptor(this._cacheManager, {required this.keyBuilder});
 
-  final http.Response response;
+  final BaseCacheManager _cacheManager;
+  final String Function(http.BaseRequest request) keyBuilder;
 
-  final bool isSuccess;
-  final bool isBodyJson;
+  @override
+  Future<http.Response> intercept(http.BaseRequest request, HttpInterceptorChain chain) async {
+    final cacheKey = keyBuilder(request);
 
-  String? _bodyString;
-  String get bodyString => _bodyString ?? (_bodyString = response.body);
+    // Check cache
+    final cachedResponseFile = await _cacheManager.getFileFromCache(cacheKey);
 
-  /// Decode body as JSON and cast as [T].
-  /// May throw if unexpected format.
-  T bodyJson<T>() {
-    // Decode json
-    final bodyJson = json.decode(bodyString);
+    // If cache is available
+    if (cachedResponseFile != null) {
+      // Read response from cached file
+      final cachedResponse = await cachedResponseFile.file.readAsString();
 
-    // cast
-    return bodyJson as T;
-  }
-
-  /// Same as [bodyJson], but will return null if operation fails.
-  T? bodyJsonOrNull<T>() {
-    try {
-      return bodyJson<T?>();
-    } catch(e) {
-      debugPrint('ResponseHandler.Error : Could not decode json : $e : $bodyString');
+      // Process response
+      return http.Response(cachedResponse, 200,
+        headers: {HttpHeaders.contentTypeHeader: ApiClient.contentTypeJson}, // Needed so content is decoded using utf-8
+        request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
+      );
     }
-    return null;
+
+    // Cache miss: proceed with the real request
+    final response = await chain.proceed(request);
+
+    // Store in cache
+    if (SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
+      try {
+        await _cacheManager.putFile(cacheKey, response.bodyBytes);
+        debugPrint('API (˅) [CACHED $cacheKey]');
+      } catch (e, s) {
+        reportError(e, s);
+      }
+    }
+
+    return response;
+  }
+}
+
+/// A GraphQL request may return a 200 HTTP status code with errors in the body.
+/// Detects this case and throws [HttpResponseException], since [SleekHttpClient] only treats non-2xx status codes as errors.
+class _GraphQLErrorInterceptor implements HttpInterceptor {
+  const _GraphQLErrorInterceptor();
+
+  @override
+  Future<http.Response> intercept(http.BaseRequest request, HttpInterceptorChain chain) async {
+    final response = await chain.proceed(request);
+
+    final isBodyJson = ContentType.parse(response.headers[HttpHeaders.contentTypeHeader] ?? '').mimeType == ApiClient.contentTypeJsonMimeType;
+    if (isBodyJson) {
+      JsonObject? parsed;
+      try {
+        parsed = json.decode(response.body) as JsonObject?;
+      } catch (e) {
+        debugPrint('ResponseHandler.Error : Could not decode json : $e : ${response.body}');
+      }
+      if (parsed?['errors'] != null) {
+        throw HttpResponseException(response, parsed);
+      }
+    }
+
+    return response;
   }
 }
 
