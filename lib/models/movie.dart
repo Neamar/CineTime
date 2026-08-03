@@ -24,12 +24,12 @@ class Movie extends Identifiable {
   final String? poster;    //Path to the image (not full url)
 
   final DateTime? releaseDate;
-  String? get releaseDateDisplay => releaseDate != null ? AppResources.formatterDate.format(releaseDate!) : null;
+  late final String? releaseDateDisplay = releaseDate != null ? AppResources.formatterDate.format(releaseDate!) : null;
 
   /// Formated, displayable list of language, in french
   final String? languages;
   /// True if the movie is fully in french (no other languages)
-  bool get isFrench => languages == frenchLanguage;
+  late final bool isFrench = languages == frenchLanguage;
 
   final ApiId? trailerId;
   final String? directors;
@@ -38,7 +38,7 @@ class Movie extends Identifiable {
   final String? synopsis;
 
   final String? durationDisplay;
-  Duration get duration {
+  late final Duration duration = () {
     if (durationDisplay == null) return Duration.zero;
 
     final parts = durationDisplay!.split('h');
@@ -48,7 +48,7 @@ class Movie extends Identifiable {
       hours: int.parse(parts[0]),
       minutes: int.parse(parts[1]),
     );
-  }
+  } ();
 
   final double? usersRating;
   final double? pressRating;

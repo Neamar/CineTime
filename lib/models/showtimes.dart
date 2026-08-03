@@ -5,7 +5,7 @@ import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
 class MoviesShowTimes {
-  const MoviesShowTimes({required this.theaters, required this.moviesShowTimes, required this.ghostShowTimes, required this.fetchedFrom, required this.fetchedTo});
+  MoviesShowTimes({required this.theaters, required this.moviesShowTimes, required this.ghostShowTimes, required this.fetchedFrom, required this.fetchedTo});
 
   /// List of all theaters
   final List<Theater> theaters;
@@ -22,14 +22,14 @@ class MoviesShowTimes {
   /// Date until which showtimes were fetched
   final DateTime fetchedTo;
 
-  String get periodDisplay {
+  late final String periodDisplay = () {
     var fetchedTo = this.fetchedTo;
     if(fetchedTo == fetchedTo.toDate) fetchedTo = fetchedTo.subtract(const Duration(minutes: 5));   // If [fetchedTo] is midnight, means it's excluded
     return 'Entre le ${fetchedFrom.day} et le ${fetchedTo.day}';
-  }
+  } ();
 
   /// All dates with at least a show, without duplicates.
-  Set<Date> get daysWithShow {
+  late final Set<Date> daysWithShow = () {
     final daysWithShow = <Date>{};
     for (final mst in moviesShowTimes) {
       for (final tst in mst.theatersShowTimes) {
@@ -37,7 +37,7 @@ class MoviesShowTimes {
       }
     }
     return daysWithShow;
-  }
+  } ();
 }
 
 class MovieShowTimes {
@@ -59,7 +59,7 @@ class MovieShowTimes {
   } ();
 
   /// The earliest upcoming showtime date across all theaters.
-  DateTime? get nextShowDate => theatersShowTimes
+  late final DateTime? nextShowDate = theatersShowTimes
     .map((tst) => tst.showTimes.firstOrNull?.dateTime)
     .nonNulls
     .minOrNull;
