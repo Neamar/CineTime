@@ -136,7 +136,7 @@ class MovieCard extends StatelessWidget {
                                   // Show time summary
                                   AppResources.spacerMedium,
                                   Text(
-                                    theaterShowTimes.showTimesSummary!,
+                                    theaterShowTimes.showTimesSummary,
                                     style: context.textTheme.bodySmall,
                                   ),
 

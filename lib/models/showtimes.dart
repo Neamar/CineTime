@@ -47,21 +47,16 @@ class MovieShowTimes {
   final Movie movie;
   final List<TheaterShowTimes> theatersShowTimes;
 
-  List<ShowTimeSpec>? _showTimesSpecOptions;
-  List<ShowTimeSpec> get showTimesSpecOptions {
-    if (_showTimesSpecOptions == null) {
-      // Build options set
-      final options = SplayTreeSet<ShowTimeSpec>((s1, s2) => s1.compareTo(s2, movie.isFrench));
-      for (final theaterShowTimes in theatersShowTimes) {
-        for (final showTime in theaterShowTimes.showTimes) {
-          options.add(showTime.spec);
-        }
+  /// Lazily computed & cached list of all showtimes specs, sorted.
+  late final List<ShowTimeSpec> showTimesSpecOptions = () {
+    final options = SplayTreeSet<ShowTimeSpec>((s1, s2) => s1.compareTo(s2, movie.isFrench));
+    for (final theaterShowTimes in theatersShowTimes) {
+      for (final showTime in theaterShowTimes.showTimes) {
+        options.add(showTime.spec);
       }
-
-      _showTimesSpecOptions = options.toList(growable: false);
     }
-    return _showTimesSpecOptions!;
-  }
+    return options.toList(growable: false);
+  } ();
 
   /// The earliest upcoming showtime date across all theaters.
   DateTime? get nextShowDate => theatersShowTimes
@@ -99,11 +94,8 @@ class TheaterShowTimes {
   List<ShowTime> getFilteredShowTimes(ShowTimeSpec spec) => _filteredShowTimes.putIfAbsent(spec, () => showTimes.where((st) => st.spec == spec).toList(growable: false));
 
 
-  /// Simple cache for [daysWithShow]
-  SplayTreeSet<Date>? _daysWithShow;
-
   /// All dates with at least a show, without duplicates, sorted.
-  SplayTreeSet<Date> get daysWithShow => _daysWithShow ??= showTimes.daysWithShow;
+  late final SplayTreeSet<Date> daysWithShow = showTimes.daysWithShow;
 
 
   /// Simple cache for [filteredDayWithShow]
@@ -113,40 +105,33 @@ class TheaterShowTimes {
   SplayTreeSet<Date> getFilteredDayWithShow(ShowTimeSpec spec) => _filteredDayWithShow.putIfAbsent(spec, () => getFilteredShowTimes(spec).daysWithShow);
 
 
-  /// Simple cache for [showTimesSummary]
-  String? _showTimesSummary;
-
   /// Return a short summary of the next showtimes
   /// Examples :
   /// - 'Tous les jours'
   /// - 'Me Je Ve Sa Di'
   /// - 'Prochaine séance le Me 25 mars'
-  String? get showTimesSummary {
-    // Compute & cache value
-    _showTimesSummary ??= () {
-      final today = AppService.now.toDate;
-      final nextWednesday = today.getNextWednesday();
+  late final String showTimesSummary = () {
+    final today = AppService.now.toDate;
+    final nextWednesday = today.getNextWednesday();
 
-      // If there are no date before next wednesday
-      if (daysWithShow.first.isAfterOrSame(nextWednesday))
-        return 'Prochaine séance le ${daysWithShow.first.toWeekdayString(withDay: true, withMonth: true)}';
+    // If there are no date before next wednesday
+    if (daysWithShow.first.isAfterOrSame(nextWednesday))
+      return 'Prochaine séance le ${daysWithShow.first.toWeekdayString(withDay: true, withMonth: true)}';
 
-      // Get all dates with a show before next wednesday
-      final currentWeekShowTimes = daysWithShow.where((date) => date.isBefore(nextWednesday));
+    // Get all dates with a show before next wednesday
+    final currentWeekShowTimes = daysWithShow.where((date) => date.isBefore(nextWednesday));
 
-      // If dates are each days until next tuesday
-      if (nextWednesday.difference(today).inDays == currentWeekShowTimes.length)
-        return 'Tous les jours';
+    // If dates are each days until next tuesday
+    if (nextWednesday.difference(today).inDays == currentWeekShowTimes.length)
+      return 'Tous les jours';
 
-      // Fill a list of formatted weekday string
-      final weekdaysString = currentWeekShowTimes.map((weekday) => weekday.toWeekdayString());
+    // Fill a list of formatted weekday string
+    final weekdaysString = currentWeekShowTimes.map((weekday) => weekday.toWeekdayString());
 
-      // Return formatted line
-      return weekdaysString.join(' ');
-    } ();
+    // Return formatted line
+    return weekdaysString.join(' ');
+  } ();
 
-    return _showTimesSummary;
-  }
 
   TheaterShowTimes copyWith({List<ShowTime>? showTimes}) => TheaterShowTimes(
     theater,
