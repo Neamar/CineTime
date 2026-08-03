@@ -1,5 +1,6 @@
 import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 ThemeData appTheme({bool darkMode = false}) {
   final backgroundColor = darkMode ? Colors.black : AppResources.colorLightGrey;
@@ -11,6 +12,12 @@ ThemeData appTheme({bool darkMode = false}) {
     primarySwatch: _createMaterialColor(AppResources.colorRed),
     scaffoldBackgroundColor: backgroundColor,
     canvasColor: backgroundLightColor,
+    appBarTheme: AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    ),
     iconTheme: IconThemeData(
       color: foregroundColor,
     ),

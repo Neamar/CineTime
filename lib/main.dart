@@ -108,23 +108,12 @@ class App extends StatelessWidget {
           : const MoviesPage(),
         builder: (context, child) {
           return AnnotatedRegion<SystemUiOverlayStyle>(
-            // Set system status & navigation bars colors.
+            // Set system navigation bars colors (only required for old Android version).
+            // Status bar color is handled by the AppBar theme.
             // Using [AnnotatedRegion] is better than calling [SystemChrome.setSystemUIOverlayStyle] because it allows some pages to override colors and automatically restore default theme when page is disposed.
             value: MediaQuery.of(context).platformBrightness == Brightness.light
-              ? const SystemUiOverlayStyle(
-                  statusBarColor: Colors.transparent,
-                  statusBarBrightness: Brightness.light,
-                  statusBarIconBrightness: Brightness.light,
-                  systemNavigationBarColor: Colors.white,
-                  systemNavigationBarIconBrightness: Brightness.dark,
-                )
-              : const SystemUiOverlayStyle(
-                  statusBarColor: Colors.transparent,
-                  statusBarBrightness: Brightness.dark,
-                  statusBarIconBrightness: Brightness.dark,
-                  systemNavigationBarColor: Colors.black,
-                  systemNavigationBarIconBrightness: Brightness.light,
-                ),
+              ? const SystemUiOverlayStyle(systemNavigationBarColor: Colors.white, systemNavigationBarIconBrightness: Brightness.dark)
+              : const SystemUiOverlayStyle(systemNavigationBarColor: Colors.black, systemNavigationBarIconBrightness: Brightness.light),
             child: child!,
           );
         },
