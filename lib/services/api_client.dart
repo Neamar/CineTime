@@ -571,6 +571,8 @@ class _CacheInterceptor implements HttpInterceptor {
 
     // If cache is available
     if (cachedResponseFile != null) {
+      debugPrint('[CacheInterceptor] ✅ HIT — reading from cache for $cacheKey');
+
       // Read response from cached file
       final cachedResponse = await cachedResponseFile.file.readAsString();
 
@@ -582,13 +584,14 @@ class _CacheInterceptor implements HttpInterceptor {
     }
 
     // Cache miss: proceed with the real request
+    debugPrint('[CacheInterceptor] ❌ MISS — fetching from network for $cacheKey');
     final response = await chain.proceed(request);
 
     // Store in cache
     if (SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
       try {
         await _cacheManager.putFile(cacheKey, response.bodyBytes);
-        debugPrint('API (˅) [CACHED $cacheKey]');
+        debugPrint('[CacheInterceptor] 💾 Writing response to cache for $cacheKey');
       } catch (e, s) {
         reportError(e, s);
       }
