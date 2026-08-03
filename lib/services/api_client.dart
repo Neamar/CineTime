@@ -7,10 +7,8 @@ import 'dart:math';
 
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';
-import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/data_error.dart';
-import 'package:cinetime/utils/exceptions/unauthorized_exception.dart';
 import 'package:cinetime/utils/exceptions/connectivity_exception.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -515,30 +513,13 @@ class ApiClient {
   }
 
   /// Get an auth token for GraphQL request.
-  /// Usually one per device.
   Future<String> _getAuthToken() async {
     // Using hardcoded token works for now, but it may be revoked at any time.
     return 'eUtg7EujStmMxN6gQ6-b1s:APA91bHtJ2l0ECSwjps5kQ3EcnIv9UNWW2wW5fN5HTdzYJrBlNROWLZGDUsa_wgzG4NuMHT-Hpqs1f1EUmCZByAlBV0InrbkOa6urf4IpX2fyYwt_3832po';    // samA3 windIP 9.10.18
   }
 
-  /// Delete all locally saved auth tokens
-  Future<void> clearAuthToken() async {
-    await StorageService.deleteAuthToken();
-  }
-
-  /// Regex to detect invalid token error, so we can clear it and get a new one.
-  /// Error message may vary, and case also.
-  /// Seen examples :
-  /// - {"error":"Invalid token."}
-  /// - {"error":"Missing Token"}
-  /// - {"error":"InvalidToken"}
-  /// - {"error":"MissingToken"}
-  /// - {"error":"The registration is not found."}
-  static final _tokenErrorRegex = RegExp(r'(((Invalid)|(Missing)) ?Token)|(The registration is not found)', caseSensitive: false);
-
   /// Send a graphQL request
-  /// If [enableAutoRetryOnUnauthorized] is true, it will auto retry if authToken is invalid (after getting a new one)
-  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = useCache, bool enableAutoRetryOnUnauthorized = true }) async {
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = useCache}) async {
     // Headers
     final headers = {
       'a' + 'c-auth-token': await _getAuthToken(),
@@ -553,28 +534,7 @@ class ApiClient {
     };
 
     // Send request
-    try {
-      return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
-    } catch(e) {
-      // Unauthorized
-      if (e is HttpResponseException && e.statusCode == 400 && _tokenErrorRegex.hasMatch(e.body)) {
-        // Clear tokens (to get new ones next time)
-        await clearAuthToken();
-
-        // If allowed, retry
-        if (enableAutoRetryOnUnauthorized) {
-          return await _sendGraphQL(query: query, variables: variables, useCache: useCache, enableAutoRetryOnUnauthorized: false);
-        }
-
-        // If not allowed to retry, juts throw
-        else {
-          throw UnauthorizedException(e.toString());
-        }
-      }
-
-      // In all other cases, just rethrow
-      rethrow;
-    }
+    return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
   }
 
   /// Send a classic request

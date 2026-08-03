@@ -11,14 +11,6 @@ class StorageService {
   static Future<void> init() async => _storage = await SharedPreferences.getInstance();
   //#endregion
 
-  //#region Auth
-  static const _authTokenKey = 'authToken';
-
-  static Future<void> saveAuthToken(String value) => _storage.setString(_authTokenKey, value);
-  static String? readAuthToken() => _storage.getString(_authTokenKey);
-  static Future<void> deleteAuthToken() => _storage.remove(_authTokenKey);
-  //#endregion
-
   //#region Sorting
   static const _movieSortingKey = 'movieSorting';
 
