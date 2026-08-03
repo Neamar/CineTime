@@ -545,9 +545,8 @@ class ApiClient {
     return await _client.send<T>(HttpMethod.post, _graphPath, headers: headers, bodyJson: body);
   }
 
-  static bool isHttpSuccessCode(int httpStatusCode) => httpStatusCode >= 200 && httpStatusCode < 300;
   static void throwIfHttpError(http.Response response) {
-    if (!isHttpSuccessCode(response.statusCode)) {
+    if (!SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
       throw HttpResponseException(response);
     }
   }
