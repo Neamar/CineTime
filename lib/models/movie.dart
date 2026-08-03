@@ -85,6 +85,8 @@ class Movie extends Identifiable {
         final date1 = releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
         final date2 = other.releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
         return date2.compareTo(date1);
+      case MovieSortType.nextShow:
+        return title.compareTo(other.title);  // Fallback: showtime data not available at Movie level
       case MovieSortType.duration:
         return duration.compareTo(other.duration);
     }
@@ -125,6 +127,7 @@ enum MovieSortType {
   usersRating('Note spectateurs', preferredRatingType: MovieRatingType.users),
   pressRating('Note presse', preferredRatingType: MovieRatingType.press),
   releaseDate('Date de sortie'),
+  nextShow('Prochaine séance'),
   duration('Durée');
 
   const MovieSortType(this.label, {this.preferredRatingType});

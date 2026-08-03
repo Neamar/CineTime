@@ -63,7 +63,22 @@ class MovieShowTimes {
     return _showTimesSpecOptions!;
   }
 
-  int compareTo(MovieShowTimes other, MovieSortType type) => movie.compareTo(other.movie, type);
+  /// The earliest upcoming showtime date across all theaters.
+  DateTime? get nextShowDate => theatersShowTimes
+    .map((tst) => tst.showTimes.firstOrNull?.dateTime)
+    .nonNulls
+    .minOrNull;
+
+  int compareTo(MovieShowTimes other, MovieSortType type) {
+    if (type == MovieSortType.nextShow) {
+      final d1 = nextShowDate;
+      final d2 = other.nextShowDate;
+      if (d1 != null && d2 != null) return d1.compareTo(d2);
+      if (d1 != null) return -1;  // this has a show, other doesn't → sort first
+      if (d2 != null) return 1;   // other has a show, this doesn't → sort last
+    }
+    return movie.compareTo(other.movie, type);
+  }
 }
 
 class TheaterShowTimes {

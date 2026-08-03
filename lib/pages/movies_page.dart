@@ -351,9 +351,7 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
     applySort();
   }
 
-  void applySort() {
-    filteredMoviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, widget.filterSort.sortType));
-  }
+  void applySort() => filteredMoviesShowTimes.sort((mst1, mst2) => mst1.compareTo(mst2, widget.filterSort.sortType));
 
   void applyFilter() {
     filteredMoviesShowTimes = () {
