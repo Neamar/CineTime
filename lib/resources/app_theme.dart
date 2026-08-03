@@ -53,6 +53,11 @@ ThemeData appTheme({bool darkMode = false}) {
     dialogTheme: DialogThemeData(
       backgroundColor: backgroundLightColor,
     ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),     // Default transition on Android introduce an annoying white flash
+      },
+    ),
   );
   final inputDecorationIconColor = MaterialStateColor.resolveWith((states) => states.contains(MaterialState.focused) ? Colors.white : AppResources.colorDarkRed);
   return theme.copyWith(
