@@ -176,7 +176,7 @@ class ApiClient {
       responseJson = responseJson['data']!;
 
       // Check data
-      final JsonObject moviesShowTimesDataJson = responseJson!['movieShowtimeList']!;
+      final JsonObject moviesShowTimesDataJson = responseJson['movieShowtimeList']!;
       if (moviesShowTimesDataJson['pageInfo']['hasNextPage'] == true) {
         final totalCount = moviesShowTimesDataJson['totalCount'];
         reportError(UnimplementedError('MovieShowtimes has more results to be fetched for "${theater.name}" (totalCount: $totalCount)'), StackTrace.current);
