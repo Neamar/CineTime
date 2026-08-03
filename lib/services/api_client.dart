@@ -610,14 +610,8 @@ class _GraphQLErrorInterceptor implements HttpInterceptor {
   Future<http.Response> intercept(http.BaseRequest request, HttpInterceptorChain chain) async {
     final response = await chain.proceed(request);
 
-    final isBodyJson = ContentType.parse(response.headers[HttpHeaders.contentTypeHeader] ?? '').mimeType == ApiClient.contentTypeJsonMimeType;
-    if (isBodyJson) {
-      JsonObject? parsed;
-      try {
-        parsed = json.decode(response.body) as JsonObject?;
-      } catch (e) {
-        debugPrint('ResponseHandler.Error : Could not decode json : $e : ${response.body}');
-      }
+    if (response.isJson) {
+      final parsed = response.tryDecodeJson<JsonObject>();
       if (parsed?['errors'] != null) {
         throw HttpResponseException(response, parsed);
       }
