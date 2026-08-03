@@ -786,30 +786,6 @@ class _ResponseHandler {
   }
 }
 
-class _RandomFidGenerator {
-  static const int fidLength = 22;
-  static const int fid4BitPrefix = 0x70; // Byte.parseByte("01110000", 2);
-  static const int removePrefixMask = 0x0F; // Byte.parseByte("00001111", 2);
-
-  static String createRandomFid() {
-    final uuid = Random().nextInt(1 << 32);   // If we need a real UUID, we might want to use a package like uuid.
-    final bytesFromUUID = getBytesFromUUID(uuid);
-    final b2 = bytesFromUUID[0];
-    bytesFromUUID[16] = b2;
-    bytesFromUUID[0] = (b2 & removePrefixMask) | fid4BitPrefix;
-    return encodeFidBase64UrlSafe(bytesFromUUID);
-  }
-
-  static List<int> getBytesFromUUID(int uuid) {
-    final buffer = ByteData(17);
-    buffer.setUint64(0, uuid);
-    buffer.setUint64(8, uuid);
-    return buffer.buffer.asUint8List();
-  }
-
-  static String encodeFidBase64UrlSafe(List<int> bytes) => base64Url.encode(bytes).substring(0, fidLength);
-}
-
 const _movieGenresMap = {
   'ACTION': 'Action',
   'ADVENTURE': 'Aventure',
