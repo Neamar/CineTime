@@ -115,7 +115,7 @@ class ApiClient {
     }).toList(growable: false);
   }
 
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, { bool useCache = useCache }) async {
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {
     // Prepare period
     final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
     final to = from.add(const Duration(days: 21));     // Fetch next 7 days (seventh included)
@@ -167,7 +167,6 @@ class ApiClient {
           ],
           'country': 'FRANCE'
         },
-        useCache: useCache,
       );
 
       // Process response
@@ -519,7 +518,7 @@ class ApiClient {
   }
 
   /// Send a graphQL request
-  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, bool useCache = useCache}) async {
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
     // Headers
     final headers = {
       'a' + 'c-auth-token': await _getAuthToken(),
@@ -534,11 +533,11 @@ class ApiClient {
     };
 
     // Send request
-    return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body, useCache: useCache);
+    return await _send<T>(_httpMethodPost, _graphUrl, headers: headers, bodyJson: body);
   }
 
   /// Send a classic request
-  Future<T> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody, bool useCache = useCache}) async {
+  Future<T> _send<T>(String method, String url, {Map<String, String>? headers, JsonObject? bodyJson, String? stringBody}) async {
     // Create request
     final request = http.Request(method, Uri.parse(url));
 
@@ -558,16 +557,19 @@ class ApiClient {
       request.body = stringBody;
 
     // Send request
-    return await _sendRequest<T>(request, useCache: useCache);
+    return await _sendRequest<T>(request);
   }
 
   /// Send a generic request
-  Future<T> _sendRequest<T>(http.Request request, {bool useCache = useCache}) async {
+  Future<T> _sendRequest<T>(http.Request request) async {
     // Log
     _log(request: request);
 
     // Prepare cache key
     final cacheKey = _getCacheKeyFromRequest(request);
+
+    // Whether to use cache for this request (may be turned off below once a cache hit is consumed)
+    var useCache = ApiClient.useCache;
 
     // Get response
     final response = await () async {
