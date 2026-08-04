@@ -5,7 +5,7 @@ import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:value_stream/value_stream.dart';
 
-import 'api_client.dart';
+import 'api_client_fr.dart';
 
 class AppService {
   //#region Init
