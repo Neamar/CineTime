@@ -11,7 +11,7 @@ class AppService {
   //#region Init
   static final AppService instance = AppService();
 
-  final ApiClient apiClient = ApiClient();
+  final ApiClient apiClient = FranceApiClient();
   static ApiClient get api => instance.apiClient;
 
   /// Mockable [DateTime.now()]

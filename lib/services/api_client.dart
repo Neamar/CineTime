@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';
@@ -18,7 +17,20 @@ import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseExcep
 
 import 'app_service.dart';
 
-class ApiClient {
+abstract class ApiClient {
+  Future<List<Theater>> searchTheaters(String query);
+  Future<List<Theater>> searchTheatersGeo(double latitude, double longitude);
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters);
+  Future<MovieInfo> getMovieInfo(ApiId movieId);
+  Future<Uri?> getVideoUri(ApiId videoId);
+  String? getImageUrl(String? path, {bool isThumbnail = false});
+  Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri);
+  String moviePageUrl(String movieId);
+  String movieUsersRatingUrl(String movieId);
+  String moviePressRatingUrl(String movieId);
+}
+
+class FranceApiClient extends ApiClient {
   //#region Vars
   /// Whether to use cache or not
   static const useCache = true;
@@ -40,7 +52,7 @@ class ApiClient {
   /// Whether to log headers also or not.
   static const _logHeaders = false;
 
-  ApiClient() : _client = SleekHttpClient(
+  FranceApiClient() : _client = SleekHttpClient(
     client: SentryHttpClient(
       failedRequestStatusCodes: [
         SentryStatusCode.range(400, 599),   // Report all errors
@@ -68,6 +80,7 @@ class ApiClient {
 
   //#region Requests
   /// Get theaters that match [query] (free text query)
+  @override
   Future<List<Theater>> searchTheaters(String query) async {
     // Send request
     // Note: no need to pre-encode query, Uri.https (used internally by SleekHttpClient) already encodes the path.
@@ -89,6 +102,7 @@ class ApiClient {
   }
 
   /// Get theaters around geo-position
+  @override
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) async {
     // Send request
     final responseJson = await _sendGraphQL<JsonObject>(
@@ -121,6 +135,7 @@ class ApiClient {
     }).toList(growable: false);
   }
 
+  @override
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {
     // Prepare period
     final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
@@ -336,6 +351,7 @@ class ApiClient {
 
   /// Get detailed movie info
   /// Return synopsis and certificate
+  @override
   Future<MovieInfo> getMovieInfo(ApiId movieId) async {
     // Send request
     final responseJson = await _sendGraphQL<JsonObject>(
@@ -364,6 +380,7 @@ class ApiClient {
     );
   }
 
+  @override
   Future<Uri?> getVideoUri(ApiId videoId) async {
     // Send request
     JsonObject? responseJson = await _sendGraphQL<JsonObject>(
@@ -396,9 +413,21 @@ class ApiClient {
   //#endregion
 
   //#region Tools
+  static const String _movieBaseUrl = 'https://www.all' + 'ocine.fr/film/fich' + 'efilm';
+
+  @override
+  String moviePageUrl(String movieId) => '${_movieBaseUrl}_gen_cfilm=$movieId.html';
+
+  @override
+  String movieUsersRatingUrl(String movieId) => '$_movieBaseUrl-$movieId/critiques/spectateurs/';
+
+  @override
+  String moviePressRatingUrl(String movieId) => '$_movieBaseUrl-$movieId/critiques/presse/';
+
   /// Get the full url or an image from [path].
   /// if [isThumbnail] is true, image will be small. Otherwise it will return full size.
-  static String? getImageUrl(String? path, {bool isThumbnail = false}) {
+  @override
+  String? getImageUrl(String? path, {bool isThumbnail = false}) {
     if (path?.isNotEmpty != true) return null;
     return 'https://images.all' + 'ocine.fr/' + (isThumbnail ? 'r_200_200' : '') + path!;
   }
@@ -407,7 +436,8 @@ class ApiClient {
   //#region Other
   /// Get the show end time from ticketing url
   // OPTI: study migrating this to sleek_http_client too (needs a second, generic client instance since target hosts vary per call). Not very important though (would be nice for logging).
-  static Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
+  @override
+  Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // UGC
     if (ticketingUri.host.contains('ugc.fr')) {
       final response = await http.get(ticketingUri);
@@ -577,7 +607,7 @@ class _CacheInterceptor implements HttpInterceptor {
 
       // Process response
       return http.Response(cachedResponse, 200,
-        headers: {HttpHeaders.contentTypeHeader: ApiClient.contentTypeJson}, // Needed so content is decoded using utf-8
+        headers: {HttpHeaders.contentTypeHeader: FranceApiClient.contentTypeJson}, // Needed so content is decoded using utf-8
         request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
       );
     }

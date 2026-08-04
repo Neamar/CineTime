@@ -1,5 +1,6 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 
 class Movie extends Identifiable {
@@ -57,10 +58,9 @@ class Movie extends Identifiable {
     MovieRatingType.press => pressRating ?? usersRating,
   };
 
-  static const String _movieBaseUrl = 'https://www.all' + 'ocine.fr/film/fich' + 'efilm';
-  String get movieUrl => '${_movieBaseUrl}_gen_cfilm=$id.html';
-  String get usersRatingUrl => '$_movieBaseUrl-$id/critiques/spectateurs/';
-  String get pressRatingUrl => '$_movieBaseUrl-$id/critiques/presse/';
+  String get movieUrl => AppService.api.moviePageUrl(id.id);
+  String get usersRatingUrl => AppService.api.movieUsersRatingUrl(id.id);
+  String get pressRatingUrl => AppService.api.moviePressRatingUrl(id.id);
 
   /// Return true if this movie match the [search] query
   bool matchSearch(String search) {
