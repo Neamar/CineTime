@@ -45,10 +45,6 @@ class FranceApiClient extends ApiClient {
   /// Request timeout duration
   static const _timeOutDuration = Duration(seconds: 30);
 
-  /// Json mime type
-  static const contentTypeJsonMimeType = 'application/json';
-  static const contentTypeJson = '$contentTypeJsonMimeType; charset=utf-8';
-
   /// Whether to log headers also or not.
   static const _logHeaders = false;
 
@@ -61,7 +57,7 @@ class FranceApiClient extends ApiClient {
     authorityGetter: () => _graphAuthority,
     timeOutDuration: _timeOutDuration,
     headersGetter: () => {
-      HttpHeaders.acceptHeader: contentTypeJson,
+      HttpHeaders.acceptHeader: SleekHttpClient.contentTypeJson,
       'user-agent': 'androidapp/0.0.1',
     },
     errorBuilder: HttpResponseException.new,
@@ -607,7 +603,7 @@ class _CacheInterceptor implements HttpInterceptor {
 
       // Process response
       return http.Response(cachedResponse, 200,
-        headers: {HttpHeaders.contentTypeHeader: FranceApiClient.contentTypeJson}, // Needed so content is decoded using utf-8
+        headers: {HttpHeaders.contentTypeHeader: SleekHttpClient.contentTypeJson}, // Needed so content is decoded using utf-8
         request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
       );
     }
