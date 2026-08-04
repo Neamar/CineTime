@@ -406,7 +406,7 @@ class ApiClient {
 
   //#region Other
   /// Get the show end time from ticketing url
-  // TODO: study migrating this to sleek_http_client too (needs a second, generic client instance since target hosts vary per call).
+  // OPTI: study migrating this to sleek_http_client too (needs a second, generic client instance since target hosts vary per call). Not very important though (would be nice for logging).
   static Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // UGC
     if (ticketingUri.host.contains('ugc.fr')) {
@@ -608,7 +608,6 @@ class _GraphQLErrorInterceptor implements HttpInterceptor {
   @override
   Future<http.Response> intercept(http.BaseRequest request, HttpInterceptorChain chain) async {
     final response = await chain.proceed(request);
-
     if (response.isJson) {
       final parsed = response.tryDecodeJson<JsonObject>();
       if (parsed?['errors'] != null) {

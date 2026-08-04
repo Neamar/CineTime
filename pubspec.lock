@@ -684,10 +684,10 @@ packages:
     dependency: "direct main"
     description:
       name: sleek_http_client
-      sha256: d366a09deb7fb637f67769d408d74e23892aefb554dc7021aa49c90d117be7b2
+      sha256: be6a8eabdb5132e301d2cf84653b86d1269a097d86e45820e9dd45c0b4a5fe4e
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.0"
   source_span:
     dependency: transitive
     description:

@@ -28,7 +28,7 @@ dependencies:
 
   # Web
   http: ^1.6.0
-  sleek_http_client: ^1.0.1
+  sleek_http_client: ^1.1.0
   flutter_cache_manager: ^3.4.2
   cached_network_image: ^3.4.1
   amplitude_flutter: ^4.6.2
