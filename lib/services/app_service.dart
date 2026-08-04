@@ -6,13 +6,14 @@ import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:value_stream/value_stream.dart';
 
+import 'api_client_be.dart';
 import 'api_client_fr.dart';
 
 class AppService {
   //#region Init
   static final AppService instance = AppService();
 
-  final ApiClient apiClient = FranceApiClient();
+  final ApiClient apiClient = BelgiumApiClient();   // TODO add selector
   static ApiClient get api => instance.apiClient;
 
   /// Mockable [DateTime.now()]
