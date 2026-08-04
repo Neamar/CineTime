@@ -15,20 +15,8 @@ import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonObject, JsonList;
 
+import 'api_client.dart';
 import 'app_service.dart';
-
-abstract class ApiClient {
-  Future<List<Theater>> searchTheaters(String query);
-  Future<List<Theater>> searchTheatersGeo(double latitude, double longitude);
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters);
-  Future<MovieInfo> getMovieInfo(ApiId movieId);
-  Future<Uri?> getVideoUri(ApiId videoId);
-  String? getImageUrl(String? path, {bool isThumbnail = false});
-  Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri);
-  String moviePageUrl(String movieId);
-  String movieUsersRatingUrl(String movieId);
-  String moviePressRatingUrl(String movieId);
-}
 
 class FranceApiClient extends ApiClient {
   //#region Vars

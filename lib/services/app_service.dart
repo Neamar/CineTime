@@ -1,6 +1,7 @@
 import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';
+import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:value_stream/value_stream.dart';
