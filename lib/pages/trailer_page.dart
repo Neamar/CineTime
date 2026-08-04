@@ -1,10 +1,11 @@
-import 'package:chewie/chewie.dart';
 import 'package:cinetime/models/api_id.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
-import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'package:fetcher/fetcher_bloc.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 class TrailerPage extends StatelessWidget {
   const TrailerPage(this.trailerId);
@@ -51,58 +52,34 @@ class _VideoPlayerWidget extends StatefulWidget {
 }
 
 class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
-  late VideoPlayerController _videoPlayerController;
-  late ChewieController _chewieController;
-
-  bool isInit = true;
+  late final Player _player = Player();
+  // Note: media_kit has two known limitations:
+  // 1. +15MB AAB size due to bundled FFmpeg native libs (unavoidable, inherent to media_kit)
+  // 2. Video rendering does not work on Android emulators (native texture surface not supported)
+  late final VideoController _controller = VideoController(_player, configuration: const VideoControllerConfiguration(
+    enableHardwareAcceleration: !kDebugMode,    // TODO this doesn't help
+  ));
+  final _videoKey = GlobalKey<VideoState>();
 
   @override
   void initState() {
     super.initState();
-    _videoPlayerController = VideoPlayerController.networkUrl(widget.videoUri);
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      showOptions: false,
-      autoInitialize: true,
-      autoPlay: true,
-      fullScreenByDefault: true,    // We force fullscreen mode because otherwise video has a invalid aspect ratio
-      errorBuilder: (_, error) => _buildError(error),
-    );
-
-    // Hack to properly handle full screen mode & back navigation
-    // See https://github.com/fluttercommunity/chewie/issues/647
-    _chewieController.addListener(() {
-      final isFullScreen = _chewieController.isFullScreen;
-      if (isFullScreen && isInit) {
-        _chewieController.exitFullScreen();
-        setState(() {
-          isInit = false;
-        });
-      }
-    });
+    MediaKit.ensureInitialized();
+    _player.open(Media(widget.videoUri.toString()));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _videoKey.currentState?.enterFullscreen());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Chewie(
-      controller: _chewieController,
-    );
-  }
-
-  Widget _buildError(String errorMessage) {
-    return IconMessage(
-      icon: IconMessage.iconError,
-      message: 'Impossible de récupérer la bande annonce',
-      tooltip: errorMessage,
-      redIcon: true,
-      textColor: Colors.white,
+    return Video(
+      key: _videoKey,
+      controller: _controller,
     );
   }
 
   @override
   void dispose() {
-    _videoPlayerController.dispose();
-    _chewieController.dispose();
+    _player.dispose();
     super.dispose();
   }
 }

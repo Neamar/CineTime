@@ -24,7 +24,9 @@ dependencies:
   linked_scroll_controller: ^0.2.0
   fading_edge_scrollview: ^4.1.1
   photo_view: ^0.15.0
-  chewie: ^1.14.1
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
+  media_kit_libs_video: ^1.0.7
 
   # Web
   http: ^1.6.0
