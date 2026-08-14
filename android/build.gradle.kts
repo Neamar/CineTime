@@ -8,6 +8,13 @@ allprojects {
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
+// -- TEMP amplitude fix --
+// Force subprojects/plugins (e.g. amplitude_flutter) to compile with compileSdk 36.
+// Must be applied before 'evaluationDependsOn(":app")' to avoid evaluation lifecycle errors.
+// See https://github.com/amplitude/Amplitude-Flutter/issues/306
+apply(from = "force-sdk.gradle")
+// -- END --
+
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)

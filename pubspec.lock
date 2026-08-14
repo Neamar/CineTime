@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: amplitude_flutter
-      sha256: a1e6a76593c345e578c28054fc3ac43456fcb328c8431b47ef68d62a73afcbd1
+      sha256: "1247371e95a47181b6b99f980f5fff257b8a4b97e8855266b49566e4b1abe08c"
       url: "https://pub.dev"
     source: hosted
-    version: "4.6.2"
+    version: "4.7.1"
   args:
     dependency: transitive
     description:
@@ -69,10 +69,10 @@ packages:
     dependency: "direct main"
     description:
       name: chewie
-      sha256: "5b8f00a9373252ddd2296d0d734b3b754380e6b4728ba848aff40e97fabad339"
+      sha256: "507f7dbcb2018f45ea6297fbbc0c47a3dc51432779d32495e97a06c4bc9f728c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.14.1"
+    version: "1.15.0"
   clock:
     dependency: transitive
     description:
@@ -583,18 +583,18 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: "330a341076e16b87aa8a4f97b0bd48c085737d087e81ef337aee2b4c3e8896f9"
+      sha256: c2ecd8abe82e63cdcb6947f71320612ced56e10ba94db7529d85cc02be47cb3b
       url: "https://pub.dev"
     source: hosted
-    version: "9.26.0"
+    version: "9.27.0"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
-      sha256: "163685070e173b9b28cd10e56eb76fdaca34067831bd7e3563f98a5bc5866165"
+      sha256: ec89cc6ba939ca19155ea83900d9740a36544f50b3b6baf265518e3348fb0f50
       url: "https://pub.dev"
     source: hosted
-    version: "9.26.0"
+    version: "9.27.0"
   share_plus:
     dependency: "direct main"
     description:

@@ -1,0 +1,11 @@
+subprojects {
+    afterEvaluate { project ->
+        // Si le sous-projet est un plugin Flutter (librairie Android)
+        if (project.plugins.hasPlugin('com.android.library')) {
+            project.android {
+                // On écrase brutalement sa version pour l'aligner sur votre app
+                compileSdkVersion 36
+            }
+        }
+    }
+}
