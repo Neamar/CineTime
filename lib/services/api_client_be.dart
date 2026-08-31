@@ -186,7 +186,8 @@ class BelgiumApiClient extends ApiClient {
     }
     if (title.isEmpty) return;
 
-    final posterUrl = movieBlock.querySelector('li.moviePoster img')?.attributes['src'];
+    final posterUrl = movieBlock.querySelector('li.moviePoster img')?.attributes['src']
+        ?.replaceFirst('/poster/small/', '/poster/full/');      // Use full-size poster
     final durationDisplay = _extractDuration(movieBlock);
 
     final showTimes = _extractShowTimes(movieBlock);
@@ -214,7 +215,9 @@ class BelgiumApiClient extends ApiClient {
     final durationRegex = RegExp(r'^\d+h\d{2}$');
     for (final li in movieBlock.querySelectorAll('.scheduleMovieInfos ul > li')) {
       final text = li.text.trim();
-      if (durationRegex.hasMatch(text)) return text;
+      if (durationRegex.hasMatch(text)) {
+        return text == '0h00' ? null : text;
+      }
     }
     return null;
   }
