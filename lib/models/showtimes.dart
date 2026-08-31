@@ -155,29 +155,6 @@ class DayShowTimes {
   final List<ShowTime?> showTimes;
 }
 
-enum ShowVersion {
-  local('VF'),        // Version originale française sans sous-titre
-  original('VOST'),   // Version originale (pas français) sous-titrée français
-  dubbed('VF');      // Version voix française (sous-titrée français si la langue du film est en français)
-
-  const ShowVersion(this.label);
-
-  final String label;
-}
-
-enum ShowFormat {
-  f2D(''),
-  f3D('3D'),
-  // ignore: constant_identifier_names
-  IMAX('IMAX'),
-  // ignore: constant_identifier_names
-  IMAX_3D('IMAX 3D');
-
-  const ShowFormat(this.label);
-
-  final String label;
-}
-
 class ShowTime {
   const ShowTime(this.dateTime, {required this.spec, this.ticketingUrl});
 
@@ -227,4 +204,27 @@ class ShowTimeSpec {
 
   @override
   int get hashCode => version.hashCode ^ format.hashCode;
+}
+
+enum ShowVersion {
+  local('VF'),        // Version originale française sans sous-titre
+  original('VOST'),   // Version originale (pas français) sous-titrée français
+  dubbed('VF');      // Version voix française (sous-titrée français si la langue du film est en français)
+
+  const ShowVersion(this.label);
+
+  final String label;
+}
+
+enum ShowFormat {
+  f2D(''),
+  f3D('3D'),
+  // ignore: constant_identifier_names
+  IMAX('IMAX'),
+  // ignore: constant_identifier_names
+  IMAX_3D('IMAX 3D');
+
+  const ShowFormat(this.label);
+
+  final String label;
 }
