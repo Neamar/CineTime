@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
-import 'dart:io';
-
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
@@ -34,6 +32,9 @@ class BelgiumApiClient extends ApiClient {
   static const _maxStartedShowtimeDuration = Duration(hours: 1);    // TODO put in common with FR
 
   final SleekHttpClient _client;
+
+  @override
+  ApiId decodeStoredId(String encoded) => BelgiumApiId(encoded);
   //#endregion
 
   //#region Requests
@@ -58,7 +59,7 @@ class BelgiumApiClient extends ApiClient {
       final (street, zipCode, city) = _parseAddress(block.querySelector('p.adress'));
 
       theaters.add(Theater(
-        id: ApiId(theaterId, ApiId.typeTheater),
+        id: BelgiumApiId(theaterId),
         name: name,
         street: street,
         zipCode: zipCode,
@@ -193,7 +194,7 @@ class BelgiumApiClient extends ApiClient {
     if (showTimes.isEmpty) return;
 
     final movie = Movie(
-      id: ApiId(movieId, 'Movie'),
+      id: BelgiumApiId(movieId),
       title: title,
       poster: posterUrl,
       durationDisplay: durationDisplay,
@@ -318,4 +319,9 @@ class BelgiumApiClient extends ApiClient {
     return (hour, minute);
   }
   //#endregion
+}
+
+/// Belgium specific [ApiId]. This source doesn't need any encoding: [encodedId] is simply [id].
+class BelgiumApiId extends ApiId {
+  BelgiumApiId(String id) : super(id, id);
 }

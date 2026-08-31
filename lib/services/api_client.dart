@@ -1,6 +1,9 @@
 import 'package:cinetime/models/_models.dart';
 
 abstract class ApiClient {
+  /// Decode an [ApiId] previously persisted via [ApiId.encodedId] (e.g. from local storage).
+  ApiId decodeStoredId(String encoded);
+
   Future<List<Theater>> searchTheaters(String query);
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude);
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters);

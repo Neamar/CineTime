@@ -1,23 +1,17 @@
-import 'package:cinetime/utils/_utils.dart';
-class ApiId {
-  static const typeTheater = 'Theater';
+/// Generic identifier for API entities (movies, theaters, videos...).
+///
+/// Each API provider (country) has its own id encoding scheme. Concrete
+/// subclasses are implemented alongside their respective [ApiClient]
+/// (e.g. `FranceApiId` in `api_client_fr.dart`, `BelgiumApiId` in `api_client_be.dart`),
+/// which own the knowledge of how to build and decode their ids.
+abstract class ApiId {
+  const ApiId(this.id, this.encodedId);
 
-  ApiId(this.id, String type) : encodedId = '$type:$id'.toBase64();
-  ApiId.fromEncoded(this.encodedId) : id = _decodeId(encodedId);
-
-  /// Base64 encoded [code]
-  /// Decoded examples : 'Movie:133392', 'Theater:C0026', 'Video:brand.video_legacy.AC.19589606'
-  final String encodedId;
-
-  /// API codes may be int or string.
-  /// Examples : 133392 (movie), 'P0671' (theater)
+  /// Unique identifier for the entity, as used by the owning API provider.
   final String id;
 
-  /// Decode an encoded id
-  static String _decodeId(String id) {
-    final decoded = id.decodeBase64();
-    return decoded.substring(decoded.indexOf(':') + 1);
-  }
+  /// Encoded form of [id], as used/persisted by the owning API provider.
+  final String encodedId;
 
   @override
   String toString() => id;

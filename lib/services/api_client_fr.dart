@@ -60,6 +60,9 @@ class FranceApiClient extends ApiClient {
   );
 
   final SleekHttpClient _client;
+
+  @override
+  ApiId decodeStoredId(String encoded) => FranceApiId.fromEncoded(encoded);
   //#endregion
 
   //#region Requests
@@ -76,7 +79,7 @@ class FranceApiClient extends ApiClient {
       final JsonObject theaterInfo = theaterJson['data']!;
 
       return Theater(
-        id: ApiId(theaterInfo['id'], ApiId.typeTheater),
+        id: FranceApiId(theaterInfo['id'], FranceApiId.typeTheater),
         name: theaterJson['label'],
         street: theaterInfo['address'],
         zipCode: theaterInfo['zip'],
@@ -109,7 +112,7 @@ class FranceApiClient extends ApiClient {
       final JsonObject? address = theaterJson['location'];
 
       return Theater(
-        id: ApiId.fromEncoded(theaterJson['id']),
+        id: FranceApiId.fromEncoded(theaterJson['id']),
         name: theaterJson['name'],
         street: address?['address'],
         zipCode: address?['zip'],
@@ -295,7 +298,7 @@ class FranceApiClient extends ApiClient {
           final releaseDate = (releaseDates == null || releaseDates.isEmpty) ? null : releaseDates.reduce((a, b) => a.isBefore(b) ? a : b);
 
           movie = Movie(
-            id: ApiId.fromEncoded(movieId),
+            id: FranceApiId.fromEncoded(movieId),
             title: movieJson['title'],
             languages: languagesJson?.map((languageCode) => _movieLanguageMap[languageCode]).joinNotEmpty(', '),
             directors: personsFromJson(movieJson['credits']?['edges']),
@@ -304,7 +307,7 @@ class FranceApiClient extends ApiClient {
             durationDisplay: buildDurationFromApi(movieJson['runTime']),
             genres: genresJson?.map((genreApi) => _movieGenresMap[genreApi]).joinNotEmpty(', '),
             poster: _getPathFromUrl(posterUrl),
-            trailerId: isStringNullOrEmpty(trailerId) ? null : ApiId.fromEncoded(trailerId!),
+            trailerId: isStringNullOrEmpty(trailerId) ? null : FranceApiId.fromEncoded(trailerId!),
             usersRating: (statisticsJson['userRating']?['score'] as num?)?.toDouble(),
             pressRating: (statisticsJson['pressReview']?['score'] as num?)?.toDouble(),
           );
@@ -565,6 +568,24 @@ class FranceApiClient extends ApiClient {
     }
   }
   //#endregion
+}
+
+/// France specific [ApiId], encoded as base64 of `'$type:$id'`.
+/// Base-64 decoded examples : 'Movie:133392', 'Theater:C0026', 'Video:brand.video_legacy.AC.19589606'
+///
+/// API codes may be int or string.
+/// Examples : 133392 (movie), 'P0671' (theater)
+class FranceApiId extends ApiId {
+  FranceApiId(String id, String type) : super(id, '$type:$id'.toBase64());
+  FranceApiId.fromEncoded(String encoded) : super(_decodeId(encoded), encoded);
+
+  static const typeTheater = 'Theater';
+
+  /// Decode an encoded id
+  static String _decodeId(String id) {
+    final decoded = id.decodeBase64();
+    return decoded.substring(decoded.indexOf(':') + 1);
+  }
 }
 
 /// Caches successful responses to disk, keyed by [keyBuilder].

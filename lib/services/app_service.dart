@@ -22,7 +22,7 @@ class AppService {
 
   //#region Selected theaters
   static const _maxSelected = 5;
-  final Set<Theater> _selectedTheaters = StorageService.readSelectedTheaters().toSet();
+  late final Set<Theater> _selectedTheaters = StorageService.readSelectedTheaters().toSet();    // Must be "late" to ensure proper class instanciation flow
   UnmodifiableSetView<Theater> get selectedTheaters => UnmodifiableSetView(_selectedTheaters);
 
   bool isSelected(Theater theater) => _selectedTheaters.contains(theater);

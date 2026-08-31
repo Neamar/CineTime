@@ -81,7 +81,7 @@ class StorageService {
 
   //#region Hidden movies
   static const _hiddenMoviesIdsKey = 'hiddenMoviesIds';
-  static saveHiddenMoviesIds(Iterable<String> moviesIds) => _storage.setString(_hiddenMoviesIdsKey, moviesIds.join(_listSeparator));
+  static Future<void> saveHiddenMoviesIds(Iterable<String> moviesIds) => _storage.setString(_hiddenMoviesIdsKey, moviesIds.join(_listSeparator));
   static List<String> readHiddenMoviesIds() => _storage.getString(_hiddenMoviesIdsKey)?.split(_listSeparator) ?? [];
   //#endregion
 }

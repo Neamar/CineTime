@@ -1,3 +1,5 @@
+import 'package:cinetime/services/app_service.dart';
+
 import '_models.dart';
 
 class Theater extends Identifiable implements Comparable<Theater> {
@@ -48,7 +50,7 @@ class Theater extends Identifiable implements Comparable<Theater> {
   int compareTo(Theater other) => name.compareTo(other.name);
 
   factory Theater.fromJson(Map<String, dynamic> json) => Theater(
-    id: ApiId.fromEncoded(json['id']),
+    id: AppService.api.decodeStoredId(json['id']),
     name: json['name'],
     street: json['street'],
     zipCode: json['zipCode'],
