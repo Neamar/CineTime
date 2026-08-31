@@ -192,32 +192,51 @@ class FranceApiClient extends ApiClient {
       for (JsonObject movieShowTimesJson in moviesShowTimesJson) {
         movieShowTimesJson = movieShowTimesJson['node']!;
 
+        // Basic movie info needed for ShowTime building
+        final JsonObject? movieJson = movieShowTimesJson['movie'];
+        final JsonList? languagesJson = movieJson?['languages'];
+
         // Build ShowTimes
         final JsonList? showTimesJson = movieShowTimesJson['showtimes'];
         if (isIterableNullOrEmpty(showTimesJson))
           continue;
 
-        const versionMap = {
-          'ORIGINAL': ShowVersion.original,
-          'DUBBED': ShowVersion.dubbed,
-          'LOCAL': ShowVersion.local,
-        };
-        ShowFormat parseFormat(JsonList? json) {
-          if (isIterableNullOrEmpty(json)) return ShowFormat.f2D;
-          final flat = json!.join('|');
-          if (flat.contains('IMAX'))
-            return flat.contains('3D') ? ShowFormat.IMAX_3D : ShowFormat.IMAX;
-          if (flat.contains('3D'))
-            return ShowFormat.f3D;
-          return ShowFormat.f2D;
-        }
-
         final showTimes = showTimesJson!.map((showTimeJson) {
+          final rawDiffusionVersion = showTimeJson['diffusionVersion'] as String?;
+          ShowAudioVersion audioVersion;
+          final subtitles = <ShowSubtitles>{};
+
+          // Version originale française sans sous-titre
+          if (rawDiffusionVersion == 'LOCAL') {
+            audioVersion = ShowAudioVersion.french;
+          }
+
+          // Version originale (pas français) sous-titrée français
+          else if (rawDiffusionVersion == 'ORIGINAL') {
+            audioVersion = ShowAudioVersion.original;
+            subtitles.add(ShowSubtitles.french);
+          }
+
+          // Version voix française (sous-titrée français si la langue du film est en français)
+          else if (rawDiffusionVersion == 'DUBBED') {
+            audioVersion = ShowAudioVersion.french;
+            final isMovieFrench = languagesJson?.singleOrNull == _frenchLanguageCode;
+            if (isMovieFrench) subtitles.add(ShowSubtitles.french);
+          }
+
+          // Other cases
+          else {
+            audioVersion = ShowAudioVersion.original;
+            reportError(UnimplementedError('Unknown diffusionVersion "$rawDiffusionVersion" for showtime at ${showTimeJson['startsAt']}'), StackTrace.current);
+          }
+
+          // Build instance
           return ShowTime(
             DateTime.parse(showTimeJson['startsAt']),
             spec: ShowTimeSpec(
-              version: versionMap[showTimeJson['diffusionVersion']] ?? ShowVersion.original,
-              format: parseFormat(showTimeJson['projection']),
+              audioVersion: audioVersion,
+              subtitles: subtitles,
+              technologies: showTimeJson['projection'],
             ),
             ticketingUrl: () {    // Needs to be in multiple steps to enforce [firstOrNull] extension static resolution
               final JsonList? ticketing = showTimeJson['data']?['ticketing'];
@@ -235,7 +254,6 @@ class FranceApiClient extends ApiClient {
         if (showTimes.isEmpty) continue;
 
         // Check movie info
-        final JsonObject? movieJson = movieShowTimesJson['movie'];
         if (movieJson == null) {
           // This may happen when an event (usually a movie, but may be a special local show) doesn't have a proper page on API provider.
           // In that case, showTimes are still available (and ticketing links works), but movie info is empty.
@@ -265,7 +283,6 @@ class FranceApiClient extends ApiClient {
           final JsonList? videosJson = movieJson['videos'];
           final String? trailerId = videosJson?.firstOrNull?['id'];
           final JsonObject statisticsJson = movieJson['stats'] ?? {};
-          final JsonList? languagesJson = movieJson['languages'];
 
           String? personsFromJson(JsonList? personsJson) {
             if (personsJson == null) return null;
@@ -511,6 +528,22 @@ class FranceApiClient extends ApiClient {
 
     return null;
   }
+
+  @override
+  String showTimeSpecToDisplayString(ShowTimeSpec spec) {
+    String label = spec.audioVersion.code;
+    if (spec.subtitles.isNotEmpty) {
+      label += 'ST';
+      if (spec.subtitles.length > 1 || spec.subtitles.first != ShowSubtitles.french) {
+        reportError(UnimplementedError('ShowTimeSpec subtitles display not implemented for ${spec.subtitles}'), StackTrace.current);
+      }
+    }
+
+    if (spec.technologies.isNotEmpty) {
+      label += ' ${spec.technologies.join(' ')}';
+    }
+    return label;
+  }
   //#endregion
 
   //#region Generics
@@ -697,6 +730,8 @@ const _movieGenresMap = {
   'WESTERN': 'Western',
 };
 
+const _frenchLanguageCode = 'FRENCH';
+
 /// Map of language codes to their French display names
 const _movieLanguageMap = {
   'ABORIGINAL_LANGUAGE': 'Langue aborigène',
@@ -729,7 +764,7 @@ const _movieLanguageMap = {
   'FILIPINO': 'Filipino',
   'FINNISH': 'Finnois',
   'FLEMISH': 'Flamand',
-  'FRENCH': Movie.frenchLanguage,
+  _frenchLanguageCode: 'Français',
   'GAELIC': 'Gaélique',
   'GALLEGO': 'Galicien',
   'GEORGIAN': 'Géorgien',

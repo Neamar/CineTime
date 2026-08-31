@@ -19,7 +19,6 @@ class Movie extends Identifiable {
     this.usersRating,
     this.pressRating,
   }) : super(id);
-  static const frenchLanguage = 'Français';
 
   final String title;
   final String? poster;    //Path to the image (not full url)
@@ -29,8 +28,6 @@ class Movie extends Identifiable {
 
   /// Formated, displayable list of language, in french
   final String? languages;
-  /// True if the movie is fully in french (no other languages)
-  late final bool isFrench = languages == frenchLanguage;
 
   final ApiId? trailerId;
   final String? directors;

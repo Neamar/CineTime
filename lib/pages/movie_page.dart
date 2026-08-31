@@ -274,7 +274,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                               return TheaterShowTimesWidget(
                                 theaterName: theaterShowTimes.theater.name,
                                 showTimes: theaterShowTimes.formattedShowTimes,
-                                filterName: filter.toDisplayString(movie.isFrench),
+                                filterName: AppService.api.showTimeSpecToDisplayString(filter),
                                 scrollController: bloc.theaterShowTimesScrollControllers[theaterShowTimes.theater]!,
                                 onShowtimePressed: (showtime) => ShowtimeDialog.open(
                                   context: context,
@@ -534,7 +534,7 @@ class _TagFilterSelector extends StatelessWidget {
       children: options.map((option) {
         return Padding(
           padding: const EdgeInsets.all(5),
-          child: Text(option.toDisplayString(movie.isFrench)),
+          child: Text(AppService.api.showTimeSpecToDisplayString(option)),
         );
       }).toList(growable: false),
     );

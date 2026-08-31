@@ -49,7 +49,7 @@ class MovieShowTimes {
 
   /// Lazily computed & cached list of all showtimes specs, sorted.
   late final List<ShowTimeSpec> showTimesSpecOptions = () {
-    final options = SplayTreeSet<ShowTimeSpec>((s1, s2) => s1.compareTo(s2, movie.isFrench));
+    final options = SplayTreeSet<ShowTimeSpec>((s1, s2) => s1.compareTo(s2));
     for (final theaterShowTimes in theatersShowTimes) {
       for (final showTime in theaterShowTimes.showTimes) {
         options.add(showTime.spec);
@@ -168,63 +168,68 @@ class ShowTime {
   final String? ticketingUrl;
 }
 
-class ShowTimeSpec {
+class ShowTimeSpec implements Comparable<ShowTimeSpec> {
   const ShowTimeSpec({
-    this.version = ShowVersion.original,
-    this.format = ShowFormat.f2D,
+    required this.audioVersion,
+    this.subtitles = const {},
+    this.technologies = const {},
   });
 
-  final ShowVersion version;
-  final ShowFormat format;
+  // Audio version
+  final ShowAudioVersion audioVersion;
 
-  String toDisplayString(bool? isMovieFrench) {
-    isMovieFrench ??= false;
-    String label = version.label;
-    if (version == ShowVersion.dubbed && isMovieFrench) label += 'ST';
-    if (format != ShowFormat.f2D) label += ' ${format.label}';
-    return label;
-  }
+  /// Subtitles
+  final Set<ShowSubtitles> subtitles;
 
-  int compareTo(ShowTimeSpec other, bool isMovieFrench) {
-    // Compare version
-    final versionComparison = Enum.compareByIndex(version, other.version);
-    if (versionComparison != 0) return versionComparison;
+  /// Technologies
+  /// Examples: 3D, IMAX, IMAX 3D, LaserUltra, ScreenX, 4DX, ...
+  final Set<String> technologies;
 
-    // Compare format
-    return Enum.compareByIndex(format, other.format);
+  @override
+  int compareTo(ShowTimeSpec other) {
+    // 1. Compare audio version
+    final audioVersionComparison = Enum.compareByIndex(audioVersion, other.audioVersion);
+    if (audioVersionComparison != 0) return audioVersionComparison;
+
+    // 2. Compare subtitles by length (shorter first)
+    final subtitleComparison = subtitles.length.compareTo(other.subtitles.length);
+    if (subtitleComparison != 0) return subtitleComparison;
+
+    // 3. Compare technologies by length (shorter first)
+    return technologies.length.compareTo(other.technologies.length);
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
           other is ShowTimeSpec &&
-          runtimeType == other.runtimeType &&
-          version == other.version &&
-          format == other.format;
+              runtimeType == other.runtimeType &&
+              audioVersion == other.audioVersion &&
+              subtitles == other.subtitles &&
+              technologies == other.technologies;
 
   @override
-  int get hashCode => version.hashCode ^ format.hashCode;
+  int get hashCode => audioVersion.hashCode ^ subtitles.hashCode ^ technologies.hashCode;
 }
 
-enum ShowVersion {
-  local('VF'),        // Version originale française sans sous-titre
-  original('VOST'),   // Version originale (pas français) sous-titrée français
-  dubbed('VF');      // Version voix française (sous-titrée français si la langue du film est en français)
+enum ShowAudioVersion {
+  original('VO', 'Version originale'),
+  french('VF', 'Version française'),
+  dutch('VN', 'Version néerlandaise'),
+  german('DF', 'Version allemande');
 
-  const ShowVersion(this.label);
+  const ShowAudioVersion(this.code, this.label);
 
+  final String code;
   final String label;
 }
 
-enum ShowFormat {
-  f2D(''),
-  f3D('3D'),
-  // ignore: constant_identifier_names
-  IMAX('IMAX'),
-  // ignore: constant_identifier_names
-  IMAX_3D('IMAX 3D');
+enum ShowSubtitles {
+  french('FR', 'Sous-titres français'),
+  dutch('NL', 'Sous-titres néerlandais');
 
-  const ShowFormat(this.label);
+  const ShowSubtitles(this.code, this.label);
 
+  final String code;
   final String label;
 }

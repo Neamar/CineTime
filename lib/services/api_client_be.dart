@@ -150,6 +150,22 @@ class BelgiumApiClient extends ApiClient {
   }
   //#endregion
 
+  //#region Other
+  @override
+  String showTimeSpecToDisplayString(ShowTimeSpec spec) {
+    String label = spec.audioVersion.code;
+    if (spec.subtitles.isNotEmpty) {
+      label += ' st ${spec.subtitles.map((s) => s.code).join('/')}';
+    }
+
+    if (spec.technologies.isNotEmpty) {
+      label += ' ${spec.technologies.join(' ')}';
+    }
+    return label;
+
+  }
+  //#endregion
+
   //#region HTML Parsing
   void _parseMoviesFromCinemaPage(
     html_dom.Document document,
@@ -223,8 +239,21 @@ class BelgiumApiClient extends ApiClient {
   }
 
   /// Parse showtimes from the schedule table.
-  /// Rows: tr.audioVO.video2D etc., date in th span.date (dd/MM),
-  /// version in td abbr.audioVersion, times in td.representation div.hours span.
+  ///
+  /// Each row looks like:
+  /// ```html
+  /// <tr class="audioVF video3D even">
+  ///   <th scope="row"><span class="day">lundi</span><span class="date">31/08</span></th>
+  ///   <td><abbr class="audioVersion VF" title="Version française">VF</abbr>&nbsp;<abbr title="Sous-titres français et néerlandais">S.t. fr/nl</abbr></td>
+  ///   <td><abbr class="videoVersion v3D" title="3D">3D</abbr></td>
+  ///   <td><img src="..." alt="4DX" title="4DX" /></td>
+  ///   <td class="representation"><div class="hours"><span>13:45</span></div></td>
+  /// </tr>
+  /// ```
+  /// The row's own class list reliably gives the audio version (`audioVO`/`audioVF`/`audioNV`/`audioDF`)
+  /// and the base format (`video2D`/`video3D`), which is much more robust than parsing the nested `<abbr>` tags.
+  /// Subtitles are given by the `title` of the 2nd `<abbr>` in the 1st `<td>` (no dedicated class exists for it).
+  /// Extra technologies (IMAX, 4DX, ScreenX, LaserUltra, ...) appear as an `<img alt="...">` in the 3rd `<td>`.
   List<ShowTime> _extractShowTimes(html_dom.Element movieBlock) {
     final showTimes = <ShowTime>[];
 
@@ -234,9 +263,42 @@ class BelgiumApiClient extends ApiClient {
       final date = _parseDateDayMonth(dateText);
       if (date == null) continue;
 
-      final version = _parseAudioVersion(row.querySelector('td abbr.audioVersion'));
-      final format = _parseVideoFormat(row);
-      final spec = ShowTimeSpec(version: version, format: format);
+      // Audio version & base format (2D/3D) are reliably encoded in the row's own class list
+      final rowClasses = row.classes;
+      final audioVersion = switch (rowClasses.firstWhereOrNull((c) => c.startsWith('audio'))) {
+        'audioVF' => ShowAudioVersion.french,
+        'audioNV' => ShowAudioVersion.dutch,
+        'audioDF' => ShowAudioVersion.german,
+        _ => ShowAudioVersion.original,   // TODO use explicit VO + handle fallback ?
+      };
+
+      final technologies = <String>{};
+      final videoClass = rowClasses.firstWhereOrNull((c) => c.startsWith('video'));
+      if (videoClass != null && videoClass != 'video2D') technologies.add(videoClass.replaceFirst('video', ''));    // TODO use "videoVersion" class content instead ?
+
+      final tds = row.querySelectorAll('td');
+
+      // Subtitles: 2nd <abbr> of the 1st <td> holds the subtitles info in its `title` attribute
+      final subtitles = <ShowSubtitles>{};
+      if (tds.isNotEmpty) {
+        final subtitlesTitle = tds.first.querySelectorAll('abbr').elementAtOrNull(1)?.attributes['title'];    // TODO use text content instead ("S.t. fr/nl")
+        if (subtitlesTitle != null) {
+          if (subtitlesTitle.contains('français')) subtitles.add(ShowSubtitles.french);
+          if (subtitlesTitle.contains('néerlandais')) subtitles.add(ShowSubtitles.dutch);
+        }
+      }
+
+      // Extra technology (IMAX, 4DX, ScreenX, LaserUltra, ...) shown as an icon in the 2nd-to-last <td>
+      if (tds.length >= 2) {
+        final techLabel = tds[tds.length - 2].querySelector('img')?.attributes['alt']?.trim();    // TODO use "title" instead
+        if (techLabel != null && techLabel.isNotEmpty) technologies.add(techLabel);
+      }
+
+      final spec = ShowTimeSpec(
+        audioVersion: audioVersion,
+        subtitles: subtitles,
+        technologies: technologies,
+      );
 
       for (final timeSpan in row.querySelectorAll('td.representation div.hours span')) {
         final time = _parseTime(timeSpan.text.trim());
@@ -291,24 +353,6 @@ class BelgiumApiClient extends ApiClient {
     if (DateTime(year, month, day).isBefore(now.subtract(const Duration(days: 60)))) year++;
 
     return DateTime(year, month, day);
-  }
-
-  ShowVersion _parseAudioVersion(html_dom.Element? element) {
-    if (element == null) return ShowVersion.original;
-    final classes = element.className.toLowerCase();
-    if (classes.contains(' vf')) return ShowVersion.dubbed;
-    // VO, NV (Dutch), DF (German) → treated as original
-    return ShowVersion.original;
-  }
-
-  ShowFormat _parseVideoFormat(html_dom.Element row) {
-    final rowClass = row.className.toLowerCase();
-    if (rowClass.contains('video3d')) {
-      if (rowClass.contains('imax')) return ShowFormat.IMAX_3D;
-      return ShowFormat.f3D;
-    }
-    if (rowClass.contains('imax')) return ShowFormat.IMAX;
-    return ShowFormat.f2D;
   }
 
   /// Parse "HH:MM" or "H:MM" time string, returns (hour, minute) or null.

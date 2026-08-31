@@ -138,7 +138,7 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
           // Language
           AppResources.spacerSmall,
           Text(
-            widget.showtime.spec.toDisplayString(widget.movie?.isFrench),
+            AppService.api.showTimeSpecToDisplayString(widget.showtime.spec),
             style: context.textTheme.titleLarge,
           ),
 
@@ -185,7 +185,7 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
   }
 
   Future<void> _share() => SharePlus.instance.share(ShareParams(
-    text: '''$movieTitle [${widget.showtime.spec.toDisplayString(widget.movie?.isFrench)}]
+    text: '''$movieTitle [${AppService.api.showTimeSpecToDisplayString(widget.showtime.spec)}]
 ${widget.theater.name}
 $dateDisplay''',
   ));
@@ -194,7 +194,7 @@ $dateDisplay''',
 
   Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
     title: 'Cinema : $movieTitle',    // Adding 'Cinema' to the title makes Google Calendar show a nice picture automatically, make it easier to find in the calendar
-    description: 'Séance de cinéma pour $movieTitle en ${widget.showtime.spec.toDisplayString(widget.movie?.isFrench)}${widget.showtime.ticketingUrl != null ? '\n\nRéservation:\n${widget.showtime.ticketingUrl}' : ''}\n\nRemarque: ${isEndDateApprox ? 'Heure de fin de séance approximative basée sur la durée du film' : 'Heure de fin de séance donnée par le cinéma'}',
+    description: 'Séance de cinéma pour $movieTitle en ${AppService.api.showTimeSpecToDisplayString(widget.showtime.spec)}${widget.showtime.ticketingUrl != null ? '\n\nRéservation:\n${widget.showtime.ticketingUrl}' : ''}\n\nRemarque: ${isEndDateApprox ? 'Heure de fin de séance approximative basée sur la durée du film' : 'Heure de fin de séance donnée par le cinéma'}',
     location: '${widget.theater.name}\n${widget.theater.fullAddress}',
     startDate: widget.showtime.dateTime,
     endDate: endDate ?? widget.showtime.dateTime.add(const Duration(hours: 2)),
