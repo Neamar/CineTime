@@ -117,9 +117,27 @@ class BelgiumApiClient extends ApiClient {
     String? certificate = certificateElement?.attributes['alt']?.trim();
     if (certificate?.isEmpty == true) certificate = null;
 
+    // Release date
+    final releaseDate = _parseDateDayMonthYear(document.querySelector('.releaseDate a')?.text.trim());
+
+    // Genres
+    final genresElement = document.querySelectorAll('.movieInfosGroup > div')
+        .firstWhereOrNull((element) => element.querySelector('strong')?.text.trim() == 'Genres');
+    String? genres = genresElement?.querySelectorAll('li')
+        .map((element) => element.text.trim())
+        .where((genre) => genre.isNotEmpty)
+        .join(', ');
+    if (genres?.isEmpty == true) genres = null;
+
+    // Press rating
+    final pressRating = _parseRating(document.querySelector('.pressCritic .criticItem')?.text);
+
     return MovieInfo(
       synopsis: synopsis,
       certificate: certificate,
+      releaseDate: releaseDate,
+      genres: genres,
+      pressRating: pressRating,
     );
   }
 
@@ -419,6 +437,34 @@ class BelgiumApiClient extends ApiClient {
     }
 
     return (street, zipCode, city);
+  }
+
+  /// Parse a "dd/MM/yyyy" date string.
+  DateTime? _parseDateDayMonthYear(String? text) {
+    if (text == null) return null;
+    final match = RegExp(r'^(\d{2})/(\d{2})/(\d{4})$').firstMatch(text);
+    if (match == null) return null;
+
+    final day = int.tryParse(match.group(1)!);
+    final month = int.tryParse(match.group(2)!);
+    final year = int.tryParse(match.group(3)!);
+    if (day == null || month == null || year == null) return null;
+
+    final date = DateTime(year, month, day);
+    if (date.year != year || date.month != month || date.day != day) return null;
+    return date;
+  }
+
+  /// Parse a rating fraction and normalize it to a five-point scale.
+  double? _parseRating(String? text) {
+    if (text == null) return null;
+    final match = RegExp(r'(\d+(?:[.,]\d+)?)\s*/\s*(\d+(?:[.,]\d+)?)').firstMatch(text);
+    if (match == null) return null;
+
+    final value = double.tryParse(match.group(1)!.replaceAll(',', '.'));
+    final scale = double.tryParse(match.group(2)!.replaceAll(',', '.'));
+    if (value == null || scale == null || scale <= 0 || value < 0 || value > scale) return null;
+    return value / scale * 5;
   }
 
   /// Parse "dd/MM" date string, adjusting year if needed.

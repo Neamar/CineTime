@@ -119,11 +119,21 @@ class Movie extends Identifiable {
   }
 }
 
+/// Movie informations, that needs a dedicated movie network call to be fetched.
 class MovieInfo {
-  const MovieInfo({this.synopsis, this.certificate});
+  const MovieInfo({
+    this.synopsis,
+    this.certificate,
+    this.releaseDate,
+    this.genres,
+    this.pressRating,
+  });
 
   final String? synopsis;
   final String? certificate;
+  final DateTime? releaseDate;
+  final String? genres;
+  final double? pressRating;
 }
 
 class MovieVideo {
