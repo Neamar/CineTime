@@ -7,10 +7,14 @@ class Movie extends Identifiable {
   Movie({
     required ApiId id,
     required this.title,
+    this.originalTitle,
     this.poster,
+    this.releaseYear,
     this.releaseDate,
     this.languages,
     this.trailerId,
+    this.country,
+    this.countryCode,
     this.directors,
     this.actors,
     this.genres,
@@ -21,13 +25,38 @@ class Movie extends Identifiable {
   }) : super(id);
 
   final String title;
-  final String? poster;    //Path to the image (not full url)
+  final String? originalTitle;
+  final String? poster;    // Path to the image (not full url)
 
+  final String? releaseYear;    // Only the year (when full release date is not available)
   final DateTime? releaseDate;
+  late final String? releaseYearDisplay = () {
+    final releaseYearResolved = () {
+      final releaseDate = this.releaseDate;
+      if (releaseDate != null) {
+        // Display release year if movie is more than 6 month old
+        return AppService.now.difference(releaseDate) > const Duration(days: 6 * 30)
+            ? releaseDate.year.toString()
+            : null;
+      } else if (releaseYear != null) {
+        // Display is year is NOT current year
+        final currentYear = AppService.now.year.toString();
+        return currentYear != releaseYear
+            ? releaseYear
+            : null;
+      }
+      return null;
+    } ();
+    return releaseYearResolved != null ? '($releaseYearResolved)' : null;
+  } ();
   late final String? releaseDateDisplay = releaseDate != null ? AppResources.formatterDate.format(releaseDate!) : null;
 
   /// Formated, displayable list of language, in french
   final String? languages;
+
+  final String? country;
+  final String? countryCode;
+  late final String? countryDisplay = countryCode ?? country;
 
   final ApiId? trailerId;
   final String? directors;

@@ -191,6 +191,7 @@ class BelgiumApiClient extends ApiClient {
 
     // Extract title from h4.sshd — use only direct text nodes, skip .originalTitle span
     String title = '';
+    String? originalTitle;
     final titleElement = movieBlock.querySelector('h4.sshd');
     if (titleElement != null) {
       title = titleElement.nodes
@@ -199,12 +200,20 @@ class BelgiumApiClient extends ApiClient {
           .join(' ')
           .trim()
           .replaceAll(RegExp(r'\s+'), ' ');
+
+      originalTitle = titleElement.querySelector('span.originalTitle')?.text.trim();
+      if (originalTitle != null && originalTitle.startsWith('(') && originalTitle.endsWith(')')) {
+        originalTitle = originalTitle.substring(1, originalTitle.length - 1).trim();
+      }
+      if (originalTitle?.isEmpty == true) originalTitle = null;
     }
     if (title.isEmpty) return;
 
     final posterUrl = movieBlock.querySelector('li.moviePoster img')?.attributes['src']
         ?.replaceFirst('/poster/small/', '/poster/full/');      // Use full-size poster
     final durationDisplay = _extractDuration(movieBlock);
+    final (directors, actors) = _parsePersonList(movieBlock.querySelector('div.moviePersonList p'));
+    final (country, countryCode, releaseYear) = _parseCountryAndYear(movieBlock);
 
     final showTimes = _extractShowTimes(movieBlock);
     showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(AppService.now));
@@ -213,8 +222,14 @@ class BelgiumApiClient extends ApiClient {
     final movie = Movie(
       id: BelgiumApiId(movieId),
       title: title,
+      originalTitle: originalTitle,
       poster: posterUrl,
       durationDisplay: durationDisplay,
+      directors: directors,
+      actors: actors,
+      country: country,
+      countryCode: countryCode,
+      releaseYear: releaseYear,
     );
 
     final movieShowTimes = moviesShowTimesMap.putIfAbsent(movieId, () => MovieShowTimes(movie));
@@ -236,6 +251,74 @@ class BelgiumApiClient extends ApiClient {
       }
     }
     return null;
+  }
+
+  /// Parse director(s) and actor(s) from the `div.moviePersonList > p` element.
+  ///
+  /// Content looks like:
+  /// ```html
+  /// <p>
+  ///     de
+  ///     <a href="/personne/30511/Pierre_Coffin">Pierre Coffin</a>
+  ///     avec
+  ///     <a href="/personne/22811/Amy_Sedaris">Amy Sedaris</a>,
+  ///     <a href="...">...</a>
+  ///     …
+  /// </p>
+  /// ```
+  /// Names appearing before the "avec" marker are directors, names after are actors.
+  (String?, String?) _parsePersonList(html_dom.Element? element) {
+    if (element == null) return (null, null);
+
+    final directors = <String>[];
+    final actors = <String>[];
+    var inActorsSection = false;
+
+    for (final node in element.nodes) {
+      if (node is html_dom.Text) {
+        if (RegExp(r'\bavec\b').hasMatch(node.text)) inActorsSection = true;
+      } else if (node is html_dom.Element && node.localName == 'a') {
+        final name = node.text.trim();
+        if (name.isEmpty) continue;
+        (inActorsSection ? actors : directors).add(name);
+      }
+    }
+
+    return (
+      directors.isEmpty ? null : directors.join(', '),
+      actors.isEmpty ? null : actors.join(', '),
+    );
+  }
+
+  /// Parse country, countryCode and release year from the `.scheduleMovieInfos` list.
+  ///
+  /// The relevant `<li>` looks like:
+  /// ```html
+  /// <li>
+  ///     <abbr title="États-Unis">US</abbr>
+  ///     -
+  ///     2026
+  /// </li>
+  /// ```
+  (String?, String?, String?) _parseCountryAndYear(html_dom.Element movieBlock) {
+    for (final li in movieBlock.querySelectorAll('.scheduleMovieInfos ul > li')) {
+      final abbr = li.querySelector('abbr');
+      if (abbr == null) continue;
+
+      final countryCode = abbr.text.trim();
+      final country = abbr.attributes['title']?.trim();
+      if (countryCode.isEmpty) continue;
+
+      final yearMatch = RegExp(r'(\d{4})').firstMatch(li.text);
+      final releaseYear = yearMatch?.group(1);
+
+      return (
+        country?.isEmpty == true ? null : country,
+        countryCode,
+        releaseYear,
+      );
+    }
+    return (null, null, null);
   }
 
   /// Parse showtimes from the schedule table.
