@@ -138,6 +138,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                     movie.title,
                                     style: context.textTheme.titleLarge,
                                   ),
+                                  if (movie.originalTitle != null)
+                                    TextWithLabel(
+                                      label: 'Original',
+                                      text: movie.originalTitle!,
+                                    ),
+                                  if (movie.country != null)
+                                    TextWithLabel(
+                                      label: 'Pays',
+                                      text: movie.country!,
+                                    ),
                                   if (movie.directors != null)
                                     TextWithLabel(
                                       label: 'De',
