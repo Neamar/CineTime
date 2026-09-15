@@ -108,7 +108,7 @@ class BelgiumApiClient extends ApiClient {
     final document = html_parser.parse(htmlContent);
 
     // Synopsis
-    final synopsisElement = document.querySelector('.synopsis, [itemprop="description"]');
+    final synopsisElement = document.querySelector('.synopsis p, [itemprop="description"]');
     String? synopsis = synopsisElement?.text.trim();
     if (synopsis?.isEmpty == true) synopsis = null;
 
