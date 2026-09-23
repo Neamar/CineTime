@@ -49,7 +49,7 @@ class Movie extends Identifiable {
     } ();
     return releaseYearResolved != null ? '($releaseYearResolved)' : null;
   } ();
-  late final String? releaseDateDisplay = releaseDate != null ? AppResources.formatterDate.format(releaseDate!) : null;
+  late final String? releaseDateDisplay = releaseDate?.toReleaseDateDisplay();
 
   /// Formated, displayable list of language, in french
   final String? languages;

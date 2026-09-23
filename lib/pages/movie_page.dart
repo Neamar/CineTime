@@ -178,11 +178,17 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      if (movie.releaseDate != null)
-                                        TextWithLabel(
-                                          label: 'Sortie',
-                                          text: movie.releaseDateDisplay!,
-                                        ),
+                                      FetchBuilder<DateTime?>(    // TODO handle display animation (size transition)
+                                        task: () async => movie.releaseDate ?? (await bloc.getMovieInfo()).releaseDate,
+                                        config: FetcherConfig.silent(),
+                                        builder: (context, releaseDate) {
+                                          if (releaseDate == null) return const SizedBox(height: 0);    // TODO handle null : currently this will make duration stays on the right
+                                          return TextWithLabel(
+                                            label: 'Sortie',
+                                            text: releaseDate.toReleaseDateDisplay(),
+                                          );
+                                        },
+                                      ),
                                       if (movie.durationDisplay != null)
                                         TextWithLabel(
                                           label: 'Durée',
