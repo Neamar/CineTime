@@ -215,7 +215,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                         // Synopsis
                         AppResources.spacerMedium,
                         SynopsisWidget(
-                          movieId: movie.id,
+                          fetchMovieInfo: bloc.getMovieInfo,
                         ),
 
                       ],
@@ -480,14 +480,14 @@ class _MovieVisibilityToggleButtonState extends State<_MovieVisibilityToggleButt
 class SynopsisWidget extends StatelessWidget {
   static const collapsedHeight = 80.0;
 
-  const SynopsisWidget({super.key, required this.movieId});
+  const SynopsisWidget({super.key, required this.fetchMovieInfo});
 
-  final ApiId movieId;
+  final Future<MovieInfo> Function() fetchMovieInfo;
 
   @override
   Widget build(BuildContext context) {
     return FetchBuilder<MovieInfo>(
-      task: () => AppService.api.getMovieInfo(movieId),
+      task: fetchMovieInfo,
       config: FetcherConfig(
         isDense: true,
         fetchingBuilder: (context) {
@@ -715,6 +715,23 @@ class MoviePageBloc with Disposable {
       'theatersId': movieShowTimes.theatersShowTimes.map((tst) => tst.theater).toIdListString(),
       'availableSpec': movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
     });
+  }
+
+  /// Cache for [getMovieInfo]
+  Future<MovieInfo>? _movieInfo;
+
+  /// Single shared source of [MovieInfo] for this page, so every [FetchBuilder]-based widget
+  /// that needs complementary movie info (rating fallback, info lines, synopsis, ...) can consume
+  /// it independently while only ever triggering a single network request.
+  Future<MovieInfo> getMovieInfo() => _movieInfo ??= _fetchMovieInfo();
+
+  Future<MovieInfo> _fetchMovieInfo() async {
+    try {
+      return await AppService.api.getMovieInfo(movieShowTimes.movie.id);
+    } catch (e) {
+      _movieInfo = null;   // Allow a retry to actually re-fetch instead of replaying the same rejected future
+      rethrow;
+    }
   }
 
   final MovieShowTimes movieShowTimes;
