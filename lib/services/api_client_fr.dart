@@ -372,10 +372,12 @@ class FranceApiClient extends ApiClient {
     // Synopsis
     String? synopsis = movieJson?['synopsis'];
     if (synopsis != null) synopsis = convertBasicHtmlTags(synopsis);
+    if (synopsis?.isEmpty == true) synopsis = null;
 
     // Certificate
     final JsonList releasesJson = movieJson?['releases'] ?? [];
-    final String? certificate = releasesJson.firstOrNull?['certificate']?['label'];
+    String? certificate = releasesJson.firstOrNull?['certificate']?['label'];
+    if (certificate?.isEmpty == true) certificate = null;
 
     // Return data
     return MovieInfo(

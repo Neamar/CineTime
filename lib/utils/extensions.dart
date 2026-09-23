@@ -119,12 +119,11 @@ extension ExtendedSet<T> on Set<T> {
 
 extension ExtendedObjectIterable<Object> on Iterable<Object> {
   /// Converts each element to a String and concatenates the strings, ignoring null and empty values.
-  String joinNotEmpty(String separator) => map((e) => e?.toString())
-      .where((string) => !isStringNullOrEmpty(string))
-      .join(separator);
-
-  /// Returns a string separated by a newline character for each non-null element
-  String toLines() => joinNotEmpty('\n');
+  /// Returns null if there is nothing left to join, rather than an empty string.
+  String? joinNotEmpty(String separator) {
+    final strings = map((e) => e?.toString()).where((string) => !isStringNullOrEmpty(string));
+    return strings.isEmpty ? null : strings.join(separator);
+  }
 }
 
 extension ExtendedTimeOfDay on TimeOfDay {

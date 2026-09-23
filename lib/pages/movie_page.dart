@@ -163,10 +163,10 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                     task: () async => movie.genres ?? (await bloc.getMovieInfo()).genres,
                                     config: FetcherConfig.silent(),
                                     builder: (context, genres) {
-                                      if (genres.isNullOrEmpty) return const SizedBox(height: 0);
+                                      if (genres == null) return const SizedBox(height: 0);
                                       return TextWithLabel(
                                         label: 'Genres',
-                                        text: genres!,
+                                        text: genres,
                                       );
                                     },
                                   ),
