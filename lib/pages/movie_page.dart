@@ -158,11 +158,18 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                       label: 'Avec',
                                       text: movie.actors!,
                                     ),
-                                  if (movie.genres.isNotNullOrEmpty)
-                                    TextWithLabel(
-                                      label: 'Genre',
-                                      text: movie.genres!,
-                                    ),
+                                  // Genres
+                                  FetchBuilder<String?>(    // TODO handle display animation (size transition)
+                                    task: () async => movie.genres ?? (await bloc.getMovieInfo()).genres,
+                                    config: FetcherConfig.silent(),
+                                    builder: (context, genres) {
+                                      if (genres.isNullOrEmpty) return const SizedBox(height: 0);
+                                      return TextWithLabel(
+                                        label: 'Genres',
+                                        text: genres!,
+                                      );
+                                    },
+                                  ),
                                   if (movie.languages != null)
                                     TextWithLabel(
                                       label: 'Langues',
@@ -191,7 +198,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
 
                         // Rating
                         AppResources.spacerMedium,
-                        FetchBuilder<double?>(
+                        FetchBuilder<double?>(    // TODO handle hide animation (size transition). Maybe hide loader completly instead ? So only Synopsis has a loader & erorr display ?
                           task: () async => movie.pressRating ?? (await bloc.getMovieInfo()).pressRating,
                           builder: (context, pressRating) {
                             return Row(
