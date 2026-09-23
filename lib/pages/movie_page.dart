@@ -191,25 +191,30 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
 
                         // Rating
                         AppResources.spacerMedium,
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            if (movie.usersRating != null)
-                              _RatingWidget(
-                                icon: FontAwesomeIcons.users.data,
-                                rating: movie.usersRating!,
-                                tooltip: 'Spectateurs',
-                                iconSizeDelta: -3,
-                                onPressed: () => launchUrlString(movie.usersRatingUrl),
-                              ),
-                            if (movie.pressRating != null)
-                              _RatingWidget(
-                                icon: FontAwesomeIcons.newspaper.data,
-                                rating: movie.pressRating!,
-                                tooltip: 'Presse',
-                                onPressed: () => launchUrlString(movie.pressRatingUrl),
-                              ),
-                          ],
+                        FetchBuilder<double?>(
+                          task: () async => movie.pressRating ?? (await bloc.getMovieInfo()).pressRating,
+                          builder: (context, pressRating) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                if (movie.usersRating != null)
+                                  _RatingWidget(
+                                    icon: FontAwesomeIcons.users.data,
+                                    rating: movie.usersRating!,
+                                    tooltip: 'Spectateurs',
+                                    iconSizeDelta: -3,
+                                    onPressed: () => launchUrlString(movie.usersRatingUrl),
+                                  ),
+                                if (pressRating != null)
+                                  _RatingWidget(
+                                    icon: FontAwesomeIcons.newspaper.data,
+                                    rating: pressRating,
+                                    tooltip: 'Presse',
+                                    onPressed: () => launchUrlString(movie.pressRatingUrl),
+                                  ),
+                              ],
+                            );
+                          },
                         ),
 
                         // Synopsis
