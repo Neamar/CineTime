@@ -236,7 +236,7 @@ class FranceApiClient extends ApiClient {
             spec: ShowTimeSpec(
               audioVersion: audioVersion,
               subtitles: subtitles,
-              technologies: showTimeJson['projection'],
+              technology: ShowTimeSpec.formatTechnology(((showTimeJson['projection'] as JsonList?) ?? const []).cast<String>()),
             ),
             ticketingUrl: () {    // Needs to be in multiple steps to enforce [firstOrNull] extension static resolution
               final JsonList? ticketing = showTimeJson['data']?['ticketing'];
@@ -541,8 +541,8 @@ class FranceApiClient extends ApiClient {
       }
     }
 
-    if (spec.technologies.isNotEmpty) {
-      label += ' ${spec.technologies.join(' ')}';
+    if (spec.technology != null) {
+      label += ' ${spec.technology}';
     }
     return label;
   }

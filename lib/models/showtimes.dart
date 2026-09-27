@@ -172,7 +172,7 @@ class ShowTimeSpec implements Comparable<ShowTimeSpec> {
   const ShowTimeSpec({
     required this.audioVersion,
     this.subtitles = const {},
-    this.technologies = const {},
+    this.technology,
   });
 
   // Audio version
@@ -181,9 +181,18 @@ class ShowTimeSpec implements Comparable<ShowTimeSpec> {
   /// Subtitles
   final Set<ShowSubtitles> subtitles;
 
-  /// Technologies
-  /// Examples: 3D, IMAX, IMAX 3D, LaserUltra, ScreenX, 4DX, ...
-  final Set<String> technologies;
+  /// Technology, already formatted for display.
+  /// Examples: 3D, IMAX, IMAX 3D, LaserUltra, 4DX 3D, ...
+  final String? technology;
+
+  /// Build a display-ready technology string from raw source tokens (HTML classes, JSON tags, ...).
+  /// Tokens are deduplicated (order preserved), joined with a space, with "3D" always placed last (e.g. "IMAX 3D", "4DX 3D").
+  static String? formatTechnology(Iterable<String> tokens) {
+    final unique = LinkedHashSet<String>.of(tokens.where((t) => t.isNotEmpty));
+    if (unique.isEmpty) return null;
+    final has3D = unique.remove('3D');
+    return [...unique, if (has3D) '3D'].join(' ');
+  }
 
   @override
   int compareTo(ShowTimeSpec other) {
@@ -197,10 +206,8 @@ class ShowTimeSpec implements Comparable<ShowTimeSpec> {
     final subtitleContentComparison = subtitles.map((s) => s.code).compareUnordered(other.subtitles.map((s) => s.code));
     if (subtitleContentComparison != 0) return subtitleContentComparison;
 
-    // 3. Compare technologies by length (shorter first), then by content (so specs with different technologies never compare equal)
-    final technologiesLengthComparison = technologies.length.compareTo(other.technologies.length);
-    if (technologiesLengthComparison != 0) return technologiesLengthComparison;
-    return technologies.compareUnordered(other.technologies);
+    // 3. Compare technology
+    return (technology ?? '').compareTo(other.technology ?? '');
   }
 
   static const _setEquality = SetEquality();
@@ -212,10 +219,10 @@ class ShowTimeSpec implements Comparable<ShowTimeSpec> {
               runtimeType == other.runtimeType &&
               audioVersion == other.audioVersion &&
               _setEquality.equals(subtitles, other.subtitles) &&
-              _setEquality.equals(technologies, other.technologies);
+              technology == other.technology;
 
   @override
-  int get hashCode => audioVersion.hashCode ^ _setEquality.hash(subtitles) ^ _setEquality.hash(technologies);
+  int get hashCode => audioVersion.hashCode ^ _setEquality.hash(subtitles) ^ technology.hashCode;
 }
 
 enum ShowAudioVersion {

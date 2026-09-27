@@ -176,8 +176,8 @@ class BelgiumApiClient extends ApiClient {
       label += ' st ${spec.subtitles.map((s) => s.code).join('/')}';
     }
 
-    if (spec.technologies.isNotEmpty) {
-      label += ' ${spec.technologies.join(' ')}';
+    if (spec.technology != null) {
+      label += ' ${spec.technology}';
     }
     return label;
   }
@@ -397,7 +397,7 @@ class BelgiumApiClient extends ApiClient {
       final spec = ShowTimeSpec(
         audioVersion: audioVersion,
         subtitles: subtitles,
-        technologies: technologies,
+        technology: ShowTimeSpec.formatTechnology(technologies),
       );
 
       for (final timeSpan in row.querySelectorAll('td.representation div.hours span')) {
