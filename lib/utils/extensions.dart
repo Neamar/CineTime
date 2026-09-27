@@ -117,6 +117,21 @@ extension ExtendedSet<T> on Set<T> {
   bool isEqualTo(Set<T>? other) => const SetEquality().equals(this, other);
 }
 
+extension ExtendedComparableIterable<T extends Comparable<T>> on Iterable<T> {
+  /// Compare this iterable with [other] element-wise, order independent (elements are sorted first).
+  /// Useful to make a [Comparable.compareTo] consistent with `==` on a [Set]/unordered collection field,
+  /// so equal-length-but-different-content collections don't wrongly compare as equal (e.g. in a [SplayTreeSet]).
+  int compareUnordered(Iterable<T> other) {
+    final sortedThis = toList()..sort();
+    final sortedOther = other.toList()..sort();
+    for (var i = 0; i < sortedThis.length && i < sortedOther.length; i++) {
+      final comparison = sortedThis[i].compareTo(sortedOther[i]);
+      if (comparison != 0) return comparison;
+    }
+    return 0;
+  }
+}
+
 extension ExtendedObjectIterable<Object> on Iterable<Object> {
   /// Converts each element to a String and concatenates the strings, ignoring null and empty values.
   /// Returns null if there is nothing left to join, rather than an empty string.

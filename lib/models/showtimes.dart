@@ -191,12 +191,16 @@ class ShowTimeSpec implements Comparable<ShowTimeSpec> {
     final audioVersionComparison = Enum.compareByIndex(audioVersion, other.audioVersion);
     if (audioVersionComparison != 0) return audioVersionComparison;
 
-    // 2. Compare subtitles by length (shorter first)
-    final subtitleComparison = subtitles.length.compareTo(other.subtitles.length);
-    if (subtitleComparison != 0) return subtitleComparison;
+    // 2. Compare subtitles by length (shorter first), then by content (so specs with different subtitles never compare equal)
+    final subtitleLengthComparison = subtitles.length.compareTo(other.subtitles.length);
+    if (subtitleLengthComparison != 0) return subtitleLengthComparison;
+    final subtitleContentComparison = subtitles.map((s) => s.code).compareUnordered(other.subtitles.map((s) => s.code));
+    if (subtitleContentComparison != 0) return subtitleContentComparison;
 
-    // 3. Compare technologies by length (shorter first)
-    return technologies.length.compareTo(other.technologies.length);
+    // 3. Compare technologies by length (shorter first), then by content (so specs with different technologies never compare equal)
+    final technologiesLengthComparison = technologies.length.compareTo(other.technologies.length);
+    if (technologiesLengthComparison != 0) return technologiesLengthComparison;
+    return technologies.compareUnordered(other.technologies);
   }
 
   static const _setEquality = SetEquality();
