@@ -289,7 +289,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                             ),
 
                             // Content
-                            AppResources.spacerSmall,
+                            AppResources.spacerLarge,
                             ...bloc.getFormattedShowTimes(filter).map((theaterShowTimes) {
                               return TheaterShowTimesWidget(
                                 theaterName: theaterShowTimes.theater.name,
@@ -607,6 +607,7 @@ class _TagFilterSelector extends StatelessWidget {
         controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
         child: ToggleButtons(
           isSelected: isSelected,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
           borderRadius: BorderRadius.circular(5),
           onPressed: onPressed,
