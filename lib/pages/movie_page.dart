@@ -268,25 +268,17 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                     child: Align(
                                       alignment: Alignment.centerRight,
                                       child: IntrinsicWidth(
-                                        child: FadingEdgeScrollView.fromSingleChildScrollView(
-                                          // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
-                                          gradientFractionOnEnd: 0.5,
-                                          child: SingleChildScrollView(
-                                            scrollDirection: Axis.horizontal,
-                                            controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
-                                            child: _TagFilterSelector(
-                                              movie: movie,
-                                              options: widget.movieShowTimes.showTimesSpecOptions,
-                                              selected: filter,
-                                              onChanged: (value) {
-                                                bloc.selectedSpec.add(value);
-                                                AnalyticsService.trackEvent('Movie spec changed', {
-                                                  'value': value.toString(),
-                                                  'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
-                                                });
-                                              },
-                                            ),
-                                          ),
+                                        child: _TagFilterSelector(
+                                          movie: movie,
+                                          options: widget.movieShowTimes.showTimesSpecOptions,
+                                          selected: filter,
+                                          onChanged: (value) {
+                                            bloc.selectedSpec.add(value);
+                                            AnalyticsService.trackEvent('Movie spec changed', {
+                                              'value': value.toString(),
+                                              'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+                                            });
+                                          },
                                         ),
                                       ),
                                     ),
@@ -549,22 +541,83 @@ class _TagFilterSelector extends StatelessWidget {
   final ShowTimeSpec selected;
   final ValueChanged<ShowTimeSpec>? onChanged;
 
+  static const _defaultTechnologyLabel = '2D';
+
+  /// Strip [spec] down to its audio version + subtitles, ignoring technology, so specs that only differ by technology compare equal.
+  static ShowTimeSpec _audioSubtitlesKey(ShowTimeSpec spec) => ShowTimeSpec(audioVersion: spec.audioVersion, subtitles: spec.subtitles);
+
   @override
   Widget build(BuildContext context) {
-    return ToggleButtons(
-      isSelected: options.map((option) => option == selected).toList(growable: false),
-      constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-      borderRadius: BorderRadius.circular(5),
-      onPressed: (int index) {
-        final tapped = options[index];
-        if (tapped != selected) onChanged?.call(tapped);
-      },
-      children: options.map((option) {
-        return Padding(
-          padding: const EdgeInsets.all(5),
-          child: Text(AppService.api.showTimeSpecToDisplayString(option)),
-        );
-      }).toList(growable: false),
+    // Row 1 options: one representative ShowTimeSpec per distinct (audioVersion, subtitles) pair
+    final audioSubtitlesOptions = <ShowTimeSpec>{
+      for (final option in options) _audioSubtitlesKey(option),
+    }.toList(growable: false);
+
+    final selectedAudioSubtitles = _audioSubtitlesKey(selected);
+
+    // Row 2 options: technologies available for the currently selected audio+subtitles combo
+    final technologyOptions = options
+        .where((option) => _audioSubtitlesKey(option) == selectedAudioSubtitles)
+        .map((option) => option.technology)
+        .toSet()
+        .toList(growable: false);
+    final hasTechnologies = technologyOptions.any((technology) => technology != null);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+
+        // Audio + subtitles
+        _buildToggleRow(
+          isSelected: audioSubtitlesOptions.map((option) => option == selectedAudioSubtitles).toList(growable: false),
+          labels: audioSubtitlesOptions.map((option) => AppService.api.showTimeAudioSubtitlesToDisplayString(option)).toList(growable: false),
+          onPressed: (index) {
+            final tapped = audioSubtitlesOptions[index];
+            if (tapped == selectedAudioSubtitles) return;
+            final matches = options.where((option) => _audioSubtitlesKey(option) == tapped);
+            onChanged?.call(matches.firstWhere((option) => option.technology == selected.technology, orElse: () => matches.first));
+          },
+        ),
+
+        // Technology
+        if (hasTechnologies) ...[
+          AppResources.spacerTiny,
+          _buildToggleRow(
+            isSelected: technologyOptions.map((technology) => technology == selected.technology).toList(growable: false),
+            labels: technologyOptions.map((technology) => technology ?? _defaultTechnologyLabel).toList(growable: false),
+            onPressed: (index) {
+              final tapped = technologyOptions[index];
+              if (tapped == selected.technology) return;
+              onChanged?.call(options.firstWhere((option) => _audioSubtitlesKey(option) == selectedAudioSubtitles && option.technology == tapped));
+            },
+          ),
+        ],
+
+      ],
+    );
+  }
+
+  Widget _buildToggleRow({required List<bool> isSelected, required List<String> labels, required ValueChanged<int> onPressed}) {
+    return FadingEdgeScrollView.fromSingleChildScrollView(
+      // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
+      gradientFractionOnEnd: 0.5,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+        child: ToggleButtons(
+          isSelected: isSelected,
+          constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+          borderRadius: BorderRadius.circular(5),
+          onPressed: onPressed,
+          children: labels.map((label) {
+            return Padding(
+              padding: const EdgeInsets.all(5),
+              child: Text(label),
+            );
+          }).toList(growable: false),
+        ),
+      ),
     );
   }
 }

@@ -170,12 +170,17 @@ class BelgiumApiClient extends ApiClient {
 
   //#region Other
   @override
-  String showTimeSpecToDisplayString(ShowTimeSpec spec) {
+  String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec) {
     String label = spec.audioVersion.code;
     if (spec.subtitles.isNotEmpty) {
       label += ' st ${spec.subtitles.map((s) => s.code).join('/')}';
     }
+    return label;
+  }
 
+  @override
+  String showTimeSpecToDisplayString(ShowTimeSpec spec) {
+    String label = showTimeAudioSubtitlesToDisplayString(spec);
     if (spec.technology != null) {
       label += ' ${spec.technology}';
     }

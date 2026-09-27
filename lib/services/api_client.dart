@@ -15,5 +15,6 @@ abstract class ApiClient {
   String movieUsersRatingUrl(String movieId);
   String moviePressRatingUrl(String movieId);
 
+  String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec);
   String showTimeSpecToDisplayString(ShowTimeSpec spec);
 }

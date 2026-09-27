@@ -532,7 +532,7 @@ class FranceApiClient extends ApiClient {
   }
 
   @override
-  String showTimeSpecToDisplayString(ShowTimeSpec spec) {
+  String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec) {
     String label = spec.audioVersion.code;
     if (spec.subtitles.isNotEmpty) {
       label += 'ST';
@@ -540,7 +540,12 @@ class FranceApiClient extends ApiClient {
         reportError(UnimplementedError('ShowTimeSpec subtitles display not implemented for ${spec.subtitles}'), StackTrace.current);
       }
     }
+    return label;
+  }
 
+  @override
+  String showTimeSpecToDisplayString(ShowTimeSpec spec) {
+    String label = showTimeAudioSubtitlesToDisplayString(spec);
     if (spec.technology != null) {
       label += ' ${spec.technology}';
     }
