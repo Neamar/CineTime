@@ -180,7 +180,6 @@ class BelgiumApiClient extends ApiClient {
       label += ' ${spec.technologies.join(' ')}';
     }
     return label;
-
   }
   //#endregion
 

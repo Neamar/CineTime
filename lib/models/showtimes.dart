@@ -199,17 +199,19 @@ class ShowTimeSpec implements Comparable<ShowTimeSpec> {
     return technologies.length.compareTo(other.technologies.length);
   }
 
+  static const _setEquality = SetEquality();
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
           other is ShowTimeSpec &&
               runtimeType == other.runtimeType &&
               audioVersion == other.audioVersion &&
-              subtitles == other.subtitles &&
-              technologies == other.technologies;
+              _setEquality.equals(subtitles, other.subtitles) &&
+              _setEquality.equals(technologies, other.technologies);
 
   @override
-  int get hashCode => audioVersion.hashCode ^ subtitles.hashCode ^ technologies.hashCode;
+  int get hashCode => audioVersion.hashCode ^ _setEquality.hash(subtitles) ^ _setEquality.hash(technologies);
 }
 
 enum ShowAudioVersion {
