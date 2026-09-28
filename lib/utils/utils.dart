@@ -76,6 +76,39 @@ Future<T?> navigateTo<T>(BuildContext context, WidgetBuilder builder, {
 void popToRoot(BuildContext context) => Navigator.of(context).popUntil((route) => route.isFirst);
 
 
+/// Open a confirmation pop-up.
+/// Return true if the user confirmed, false otherwise.
+/// If [onConfirmation] is provided, it will be called if the user confirms.
+Future<bool> askConfirmation({
+  required BuildContext context,
+  required String title,
+  required String caption,
+  String? confirmText,
+  String? cancelText,
+  VoidCallback? onConfirmation,
+}) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(caption),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(cancelText ?? 'Annuler'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(confirmText ?? 'Continuer'),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed == true) onConfirmation?.call();
+  return confirmed ?? false;
+}
+
 /// Display an error to the user
 Future<void> showError(BuildContext context, Object error) async {
   final message = () {

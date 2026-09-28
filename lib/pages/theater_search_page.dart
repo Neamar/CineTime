@@ -28,31 +28,19 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
 
     // Warn before deleting local data, if any
     if (AppService.instance.hasLocalData) {
-      final confirmed = await showDialog<bool>(
+      final confirmed = await askConfirmation(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Changer de pays'),
-          content: const Text('Vos cinémas sélectionnés, favoris et films masqués seront supprimés. Continuer ?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Continuer'),
-            ),
-          ],
-        ),
+        title: 'Changer de pays',
+        caption: 'Vos cinémas sélectionnés, favoris et films masqués seront supprimés. Continuer ?',
       );
-      if (confirmed != true) return;
+      if (!confirmed) return;
     }
 
     // Switch API provider
     AppService.instance.switchCountry(country);
 
     // Refresh UI: rebuild for the toggle's new selected state,
-    if (!mounted) return
+    if (!mounted) return;
     setState(() {});
 
     // and either re-run the current search on the new country or go back to the onboarding message
