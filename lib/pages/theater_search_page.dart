@@ -44,12 +44,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
     setState(() {});
 
     // and either re-run the current search on the new country or go back to the onboarding message
-    final query = _searchController.text;
-    if (query.isNotEmpty) {
-      bloc.startQuerySearch(query);
-    } else {
-      bloc.fetchBuilderController.refresh(clearDataFirst: true);
-    }
+    bloc.startQuerySearch(_searchController.text);
   }
 
   @override
@@ -142,7 +137,9 @@ class _TheaterSearchPageBloc with Disposable {
 
   void startGeoSearch() => fetchBuilderController.refresh(param: const _SearchParams(isGeo: true), clearDataFirst: true);
 
-  void startQuerySearch(String query) => fetchBuilderController.refresh(param: _SearchParams(query: query), clearDataFirst: true);
+  void startQuerySearch(String query) => query.isNotEmpty
+      ? fetchBuilderController.refresh(param: _SearchParams(query: query), clearDataFirst: true)
+      : fetchBuilderController.refresh(clearDataFirst: true);
 
   Future<_SearchResult> fetchTheaters(_SearchParams? searchParams) async {
     // If search hasn't started yet
