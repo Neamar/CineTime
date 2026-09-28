@@ -195,27 +195,47 @@ class _CountryToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ToggleButtons(
-      isSelected: [country == Country.france, country == Country.belgium],
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-      borderRadius: BorderRadius.circular(5),
-      color: AppResources.colorLightGrey,
-      selectedColor: Colors.white,
-      borderColor: AppResources.colorLightGrey,
-      selectedBorderColor: Colors.white,
-      fillColor: Colors.white24,
-      onPressed: (index) => onChanged(Country.values[index]),
-      children: const [
-        Padding(
-          padding: EdgeInsets.all(8),
-          child: Text('🇫🇷 FR'),
+    return Column(
+      children: [
+        // Title
+        AppResources.spacerLarge,
+        Text(
+          'Pays',
+          style: context.textTheme.titleLarge?.copyWith(color: Colors.white),
         ),
-        Padding(
-          padding: EdgeInsets.all(8),
-          child: Text('🇧🇪 BE'),
+
+        // Buttons
+        AppResources.spacerSmall,
+        ToggleButtons(
+          isSelected: [country == Country.france, country == Country.belgium],
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+          borderRadius: BorderRadius.circular(5),
+          color: AppResources.colorLightGrey,
+          selectedColor: Colors.white,
+          borderColor: AppResources.colorLightGrey,
+          selectedBorderColor: Colors.white,
+          fillColor: Colors.white24,
+          onPressed: (index) => onChanged(Country.values[index]),
+          children: [
+            _buildOption('🇫🇷', 'France'),
+            _buildOption('🇧🇪', 'Belgique'),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildOption(String flag, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(flag, style: const TextStyle(fontSize: 40)),
+          Text(label),
+        ],
+      ),
     );
   }
 }
