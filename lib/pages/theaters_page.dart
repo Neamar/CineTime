@@ -1,4 +1,5 @@
 import 'package:cinetime/models/theater.dart';
+import 'package:cinetime/resources/resources.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
@@ -38,6 +39,14 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
       body: DataStreamBuilder<List<Theater>>(
         stream: bloc.theaters,
         builder: (context, theaters) {
+          if (theaters.isEmpty)
+            return EmptySearchResultMessage(
+              icon: Icons.add_location_alt_outlined,
+              message: 'Aucun\nCINÉMA\nAjoutez-en un avec le bouton +',
+              backgroundColor: AppResources.colorDarkRed,
+              imageAssetPath: 'assets/welcome.png',
+            );
+
           return ListView.builder(
             itemExtent: TheaterCard.height,
             itemCount: theaters.length,
