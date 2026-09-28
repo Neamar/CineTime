@@ -1,5 +1,7 @@
 import 'package:cinetime/models/_models.dart';
 
+enum Country { france, belgium }
+
 abstract class ApiClient {
   /// Decode an [ApiId] previously persisted via [ApiId.encodedId] (e.g. from local storage).
   ApiId decodeStoredId(String encoded);

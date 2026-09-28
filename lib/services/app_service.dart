@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cinetime/main.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/analytics_service.dart';
@@ -13,11 +15,48 @@ class AppService {
   //#region Init
   static final AppService instance = AppService();
 
-  final ApiClient apiClient = BelgiumApiClient();   // TODO add selector
+  Country _country = StorageService.readCountry() ?? _defaultCountry;
+  Country get country => _country;
+
+  /// Default country, based on device locale when no country has been selected yet.
+  static Country get _defaultCountry => PlatformDispatcher.instance.locale.countryCode == 'BE' ? Country.belgium : Country.france;
+
+  static ApiClient _apiClientFor(Country country) => switch (country) {
+    Country.france => FranceApiClient(),
+    Country.belgium => BelgiumApiClient(),
+  };
+
+  late ApiClient apiClient = _apiClientFor(_country);
   static ApiClient get api => instance.apiClient;
 
   /// Mockable [DateTime.now()]
   static DateTime get now => false ? DateTime(2021, 9, 13, 11, 55) : DateTime.now();
+  //#endregion
+
+  //#region Country
+  /// Whether there is local data (selected/favorite theaters, hidden movies) that would be lost by switching country.
+  bool get hasLocalData => _selectedTheaters.isNotEmpty || _favoriteTheaters.isNotEmpty || hiddenMoviesIds.value.isNotEmpty;
+
+  /// Switch to another country's API provider.
+  /// Wipes all local storage, since it's tied to the previous provider's data (theater/movie ids, etc).
+  void switchCountry(Country country) async {
+    if (country == _country) return;
+
+    // Clear in-memory state
+    _selectedTheaters.clear();
+    _favoriteTheaters.clear();
+    hiddenMoviesIds.add(UnmodifiableSetView(<String>{}));
+
+    // Swap provider
+    _country = country;
+    apiClient = _apiClientFor(country);
+
+    // Update local storage
+    () async {
+      await StorageService.clear();
+      await StorageService.saveCountry(country);
+    } ();
+  }
   //#endregion
 
   //#region Selected theaters
