@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/analytics_service.dart';
@@ -141,10 +143,12 @@ class _TheaterSearchPageBloc with Disposable {
       ? fetchBuilderController.refresh(param: _SearchParams(query: query), clearDataFirst: true)
       : fetchBuilderController.refresh(clearDataFirst: true);
 
-  Future<_SearchResult> fetchTheaters(_SearchParams? searchParams) async {
-    // If search hasn't started yet
-    if (searchParams == null) return const _SearchResult.none();
+  /// Returns synchronously when search hasn't started yet, to skip the loader.
+  FutureOr<_SearchResult> fetchTheaters(_SearchParams? searchParams) => searchParams == null
+      ? const _SearchResult.none()
+      : _search(searchParams);
 
+  Future<_SearchResult> _search(_SearchParams searchParams) async {
     // Search
     final theaters = await (searchParams.isGeo ? _geoSearch() : _querySearch(searchParams.query!));
 

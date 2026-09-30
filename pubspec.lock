@@ -181,10 +181,10 @@ packages:
     dependency: "direct main"
     description:
       name: fetcher
-      sha256: "22bc4fcb2f164753692a20553522c117e0365ad797956131501cf50717d4bea9"
+      sha256: ab3c1097e5c7e505d466ba62e2d578bde72cc95f3fe2ad35459accaaeed9028e
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.0"
+    version: "4.6.0"
   ffi:
     dependency: transitive
     description:

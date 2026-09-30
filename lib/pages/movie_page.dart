@@ -160,7 +160,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                     ),
                                   // Genres
                                   FetchBuilder<String?>(    // TODO handle display animation (size transition)
-                                    task: () async => movie.genres ?? (await bloc.getMovieInfo()).genres,
+                                    task: () => movie.genres ?? bloc.getMovieInfo().then((info) => info.genres),
                                     config: FetcherConfig.silent(),
                                     builder: (context, genres) {
                                       if (genres == null) return const SizedBox(height: 0);
@@ -179,7 +179,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
                                       FetchBuilder<DateTime?>(    // TODO handle display animation (size transition)
-                                        task: () async => movie.releaseDate ?? (await bloc.getMovieInfo()).releaseDate,
+                                        task: () => movie.releaseDate ?? bloc.getMovieInfo().then((info) => info.releaseDate),
                                         config: FetcherConfig.silent(),
                                         builder: (context, releaseDate) {
                                           if (releaseDate == null) return const SizedBox(height: 0);    // TODO handle null : currently this will make duration stays on the right
@@ -205,7 +205,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                         // Rating
                         AppResources.spacerMedium,
                         FetchBuilder<double?>(    // TODO handle hide animation (size transition). Maybe hide loader completly instead ? So only Synopsis has a loader & erorr display ?
-                          task: () async => movie.pressRating ?? (await bloc.getMovieInfo()).pressRating,
+                          task: () => movie.pressRating ?? bloc.getMovieInfo().then((info) => info.pressRating),
                           builder: (context, pressRating) {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
