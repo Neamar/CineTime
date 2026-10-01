@@ -68,18 +68,6 @@ extension ExtendedBuildContext on BuildContext {
   /// Clear current context focus (Second method)
   /// Use this method if [clearFocus] doesn't work.
   void clearFocus2() => FocusScope.of(this).requestFocus(FocusNode());
-
-  /// Validate the enclosing [Form]
-  void validateForm({VoidCallback? onSuccess}) {
-    clearFocus();
-    final form = Form.maybeOf(this);
-    if (form == null) return;
-
-    if (form.validate()) {
-      form.save();
-      onSuccess?.call();
-    }
-  }
 }
 
 extension ExtendedIterable<T> on Iterable<T> {
