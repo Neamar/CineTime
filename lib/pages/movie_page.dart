@@ -361,20 +361,17 @@ class _TextIconButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.disabled) ? Colors.white38 : Colors.white,
+        ),
         overlayColor: WidgetStateProperty.all(Colors.white24),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(
-            icon,
-            color: Colors.white,
-          ),
+          Icon(icon),
           SizedBox(width: 8.0),
-          Text(
-            label,
-            style: TextStyle(color: Colors.white),
-          )
+          Text(label),
         ],
       ),
     );
