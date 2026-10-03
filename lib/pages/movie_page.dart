@@ -260,9 +260,19 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                 children: <Widget>[
 
                                   // Title
-                                  Text(
-                                    'Séances',
-                                    style: context.textTheme.headlineSmall,
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        'Séances',
+                                        style: context.textTheme.headlineSmall,
+                                      ),
+                                      AppResources.spacerExtraTiny,
+                                      Text(
+                                        _getShowTimesCountLabel(filter),
+                                        style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
+                                      ),
+                                    ],
                                   ),
 
                                   // Filters
@@ -319,6 +329,13 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
         ],
       ),
     );
+  }
+
+  /// Examples: '36 séances sur 46', '46 séances', '1 séance'
+  String _getShowTimesCountLabel(ShowTimeSpec filter) {
+    final total = widget.movieShowTimes.showTimesCount;
+    final filtered = widget.movieShowTimes.getFilteredShowTimesCount(filter);
+    return filtered == total ? 'séance'.plural(total) : '${'séance'.plural(filtered)} sur $total';
   }
 
   Widget _buildTrailerButton(ApiId? trailerId) => _TextIconButton(

@@ -62,6 +62,12 @@ class MovieShowTimes {
   late final Map<ShowTimeSpec, List<ShowTimeSpec>> showTimesSpecOptionsByAudioSubtitles =
       showTimesSpecOptions.groupListsBy((spec) => spec.withoutTechnology);
 
+  /// Total number of showtimes across all theaters, whatever their spec.
+  late final int showTimesCount = theatersShowTimes.map((tst) => tst.showTimes.length).sum;
+
+  /// Number of showtimes across all theaters matching [spec].
+  int getFilteredShowTimesCount(ShowTimeSpec spec) => theatersShowTimes.map((tst) => tst.getFilteredShowTimes(spec).length).sum;
+
   /// The earliest upcoming showtime date across all theaters.
   late final DateTime? nextShowDate = theatersShowTimes
     .map((tst) => tst.showTimes.firstOrNull?.dateTime)
