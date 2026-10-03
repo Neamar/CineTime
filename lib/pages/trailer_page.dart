@@ -1,5 +1,6 @@
 import 'package:chewie/chewie.dart';
 import 'package:cinetime/models/api_id.dart';
+import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:flutter/material.dart';
@@ -20,10 +21,10 @@ class TrailerPage extends StatelessWidget {
       backgroundColor: Colors.black,
       body: SafeArea(
         top: false,
-        child: FetchBuilder<Uri?>(
-          task: () => AppService.api.getVideoUri(trailerId),
-          builder: (context, trailerUri) {
-            if (trailerUri == null) {
+        child: FetchBuilder<VideoData?>(
+          task: () => AppService.api.getVideoData(trailerId),
+          builder: (context, trailerData) {
+            if (trailerData == null) {
               return IconMessage(
                 icon: IconMessage.iconError,
                 message: 'Aucune bande annonce trouvée',
@@ -32,7 +33,7 @@ class TrailerPage extends StatelessWidget {
               );
             }
             return _VideoPlayerWidget(
-              videoUri: trailerUri,
+              videoData: trailerData,
             );
           },
         ),
@@ -42,9 +43,9 @@ class TrailerPage extends StatelessWidget {
 }
 
 class _VideoPlayerWidget extends StatefulWidget {
-  const _VideoPlayerWidget({required this.videoUri});
+  const _VideoPlayerWidget({required this.videoData});
 
-  final Uri videoUri;
+  final VideoData videoData;
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -59,7 +60,10 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
   @override
   void initState() {
     super.initState();
-    _videoPlayerController = VideoPlayerController.networkUrl(widget.videoUri);
+    _videoPlayerController = VideoPlayerController.networkUrl(
+      widget.videoData.uri,
+      httpHeaders: widget.videoData.headers,
+    );
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
       showOptions: false,

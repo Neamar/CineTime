@@ -10,7 +10,7 @@ abstract class ApiClient {
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude);
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters);
   Future<MovieInfo> getMovieInfo(ApiId movieId);
-  Future<Uri?> getVideoUri(ApiId videoId);
+  Future<VideoData?> getVideoData(ApiId videoId);
   String? getImageUrl(String? path, {bool isThumbnail = false});
   Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri);
   String moviePageUrl(String movieId);
@@ -19,4 +19,14 @@ abstract class ApiClient {
 
   String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec);
   String showTimeSpecToDisplayString(ShowTimeSpec spec);
+}
+
+/// Everything needed to play a video.
+class VideoData {
+  const VideoData(this.uri, {this.headers = const {}});
+
+  final Uri uri;
+
+  /// HTTP headers required to read [uri]
+  final Map<String, String> headers;
 }

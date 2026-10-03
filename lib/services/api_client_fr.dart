@@ -387,7 +387,7 @@ class FranceApiClient extends ApiClient {
   }
 
   @override
-  Future<Uri?> getVideoUri(ApiId videoId) async {
+  Future<VideoData?> getVideoData(ApiId videoId) async {
     // Send request
     JsonObject? responseJson = await _sendGraphQL<JsonObject>(
       query: r'query Video($id: String!, $country: CountryCode) { video(id: $id) { __typename id internalId title type duration language publication { __typename startsAt } relatedEntities { __typename ... on Movie { id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename internalId id countries { __typename id } } } } } releases(type: [RELEASED, SVOD_RELEASE], country: $country) { __typename releaseDate { __typename date } certificate { __typename label } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id internalId name } } } releaseFlags { __typename ...ReleaseUpcomingFragment } credits(department: DIRECTION, first: 5) { __typename edges { __typename node { __typename person { __typename id firstName lastName countries { __typename id } } position { __typename name } } } } data { __typename productionYear } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } relatedTags { __typename id internalId name scope } } ... on Series { ...VideoSeries } ... on Season { internalId series { __typename ...VideoSeries } } ... on Episode { internalId season { __typename series { __typename ...VideoSeries } } } } files { __typename quality height url size } snapshot { __typename id url } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } } fragment VideoSeries on Series { __typename id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId countries { __typename id } } } } } direction: credits(department: DIRECTION) { __typename edges { __typename node { __typename position { __typename name } person { __typename id firstName lastName countries { __typename id } } } } } releaseFlags { __typename ...ReleaseUpcomingFragment } releases(country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } relatedTags { __typename id internalId scope } }',
@@ -407,14 +407,14 @@ class FranceApiClient extends ApiClient {
       });
       return null;
     }
-    if (videosJson.length == 1) return MovieVideo.fromJson(videosJson.first).uri;
 
     // Find highest quality video, but not greater than 720p
     final videos = videosJson.map((json) => MovieVideo.fromJson(json)).toList();
     videos.sort((v1, v2) => v1.height.compareTo(v2.height));
     var bestVideo = videos.firstWhereOrNull((video) => video.height > 700);
     bestVideo ??= videos.last;
-    return bestVideo.uri;
+    final uri = bestVideo.uri;
+    return uri != null ? VideoData(uri) : null;
   }
   //#endregion
 

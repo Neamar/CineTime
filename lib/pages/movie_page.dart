@@ -54,7 +54,6 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
     const double overlapContentHeight = 50;
 
     final movie = widget.movieShowTimes.movie;
-    final hasTrailer = movie.trailerId != null;
     final poster = movie.poster;
 
     return Scaffold(
@@ -81,10 +80,14 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  _TextIconButton(
-                    icon: Icons.ondemand_video_outlined,
-                    label:'Bande annonce',
-                    onPressed: hasTrailer ? _openTrailer : null,
+                  FetchBuilder<ApiId?>(
+                    task: () => movie.trailerId ?? bloc.getMovieInfo().then((info) => info.trailerId),
+                    config: FetcherConfig(    // Keep the (disabled) button displayed while loading or on error
+                      fetchingBuilder: (_) => _buildTrailerButton(null),
+                      fetchErrorBuilder: (_, __) => _buildTrailerButton(null),
+                      onDisplayError: (_, __) {},
+                    ),
+                    builder: (context, trailerId) => _buildTrailerButton(trailerId),
                   ),
                   _TextIconButton(
                     icon: Icons.open_in_new,
@@ -319,10 +322,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
     );
   }
 
+  Widget _buildTrailerButton(ApiId? trailerId) => _TextIconButton(
+    icon: Icons.ondemand_video_outlined,
+    label: 'Bande annonce',
+    onPressed: trailerId != null ? () => _openTrailer(trailerId) : null,
+  );
+
   void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster!));
 
-  void _openTrailer() {
-    navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!));
+  void _openTrailer(ApiId trailerId) {
+    navigateTo(context, (_) => TrailerPage(trailerId));
     AnalyticsService.trackEvent('Trailer displayed', {
       'movieTitle': widget.movieShowTimes.movie.title,
     });

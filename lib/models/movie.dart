@@ -127,6 +127,7 @@ class MovieInfo {
     this.releaseDate,
     this.genres,
     this.pressRating,
+    this.trailerId,
   });
 
   final String? synopsis;
@@ -134,6 +135,7 @@ class MovieInfo {
   final DateTime? releaseDate;
   final String? genres;
   final double? pressRating;
+  final ApiId? trailerId;
 }
 
 class MovieVideo {

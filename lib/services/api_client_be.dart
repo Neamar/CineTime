@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as html_dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException;
+import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonList, JsonObject;
 
 import 'api_client.dart';
 
@@ -27,6 +27,10 @@ class BelgiumApiClient extends ApiClient {
   );
 
   static const _authority = 'cin' + 'ebel.dhnet.be';
+
+  /// Trailers are hosted on Dailymotion
+  static const _videoAuthority = 'www.dailymotion.com';
+  static const _videoOrigin = 'https://geo.dailymotion.com';
 
   /// Shows started for more than this duration are filtered out.
   static const _maxStartedShowtimeDuration = Duration(hours: 1);    // TODO put in common with FR
@@ -132,17 +136,40 @@ class BelgiumApiClient extends ApiClient {
     // Press rating
     final pressRating = _parseRating(document.querySelector('.pressCritic .criticItem')?.text);
 
+    // Trailer (Dailymotion embed, e.g. "https://geo.dailymotion.com/player/x1nrd2.html?video=xb17xhy")
+    final trailerSrc = document.querySelector('#movieVideos iframe[src*="dailymotion.com"]')?.attributes['src'];
+    final trailerVideoId = trailerSrc != null ? Uri.tryParse(trailerSrc)?.queryParameters['video'] : null;
+
     return MovieInfo(
       synopsis: synopsis,
       certificate: certificate,
       releaseDate: releaseDate,
       genres: genres,
       pressRating: pressRating,
+      trailerId: trailerVideoId?.isNotEmpty == true ? BelgiumApiId(trailerVideoId!) : null,
     );
   }
 
   @override
-  Future<Uri?> getVideoUri(ApiId videoId) async => null;
+  Future<VideoData?> getVideoData(ApiId videoId) async {
+    // Ask Dailymotion for the stream manifest (HLS), the same way its embedded player does.
+    // The manifest url can't be built from the video id: it carries a signed `sec` token
+    // (`...m3u8?sec=...`, 403 without it) that is only delivered by this call, and whose lifetime is unknown.
+    // That's why we only store the video id (see MovieInfo.trailerId) and request a fresh url right when the video is played.
+    final responseJson = await _client.send<JsonObject>(
+      HttpMethod.get,
+      '/player/metadata/video/${videoId.id}',
+      authority: _videoAuthority,
+    );
+
+    final JsonList? autoQualitiesJson = responseJson['qualities']?['auto'];
+    final String? url = autoQualitiesJson?.firstOrNull?['url'];
+    final uri = url != null ? Uri.tryParse(url) : null;
+    if (uri == null) return null;
+
+    // The manifest is rejected (403) without the Origin of the official player
+    return VideoData(uri, headers: const {'Origin': _videoOrigin});
+  }
 
   @override
   Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async => null;
