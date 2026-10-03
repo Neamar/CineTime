@@ -65,6 +65,9 @@ class FranceApiClient extends ApiClient {
   ApiId decodeStoredId(String encoded) => FranceApiId.fromEncoded(encoded);
   //#endregion
 
+  @override
+  bool get supportsGeoSearch => true;
+
   //#region Requests
   /// Get theaters that match [query] (free text query)
   @override

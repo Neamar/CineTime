@@ -6,6 +6,9 @@ abstract class ApiClient {
   /// Decode an [ApiId] previously persisted via [ApiId.encodedId] (e.g. from local storage).
   ApiId decodeStoredId(String encoded);
 
+  /// Whether the source supports searching theaters around a geo-position.
+  bool get supportsGeoSearch;
+
   Future<List<Theater>> searchTheaters(String query);
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude);
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters);

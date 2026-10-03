@@ -41,6 +41,9 @@ class BelgiumApiClient extends ApiClient {
   ApiId decodeStoredId(String encoded) => BelgiumApiId(encoded);
   //#endregion
 
+  @override
+  bool get supportsGeoSearch => false;
+
   //#region Requests
   @override
   Future<List<Theater>> searchTheaters(String query) async {
@@ -75,10 +78,7 @@ class BelgiumApiClient extends ApiClient {
   }
 
   @override
-  Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) async {    // TODO disable this behavior for this country (hide button)
-    // Source doesn't support geo-search; return all theaters
-    return searchTheaters('');
-  }
+  Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) => throw UnsupportedError('Geo-search is not supported for Belgium');
 
   @override
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {

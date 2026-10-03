@@ -70,10 +70,11 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             onSubmitted: bloc.startQuerySearch,
           ),
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.location_on_outlined),
-              onPressed: bloc.startGeoSearch,
-            ),
+            if (AppService.api.supportsGeoSearch)
+              IconButton(
+                icon: const Icon(Icons.location_on_outlined),
+                onPressed: bloc.startGeoSearch,
+              ),
             if (context.canPop)   // Hide when page is shown at app start
               MultiSelectionModeButton(
                 onPressed: toggleSelectionMode,
@@ -88,7 +89,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             if (searchResult.theaters == null)
               return EmptySearchResultMessage(
                 icon: Icons.search,
-                message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
+                message: 'Cherchez\nUN CINÉMA\npar nom${AppService.api.supportsGeoSearch ? ' ou localisation' : ''}',
                 backgroundColor: AppResources.colorDarkRed,
                 imageAssetPath: 'assets/welcome.png',
                 footer: countryToggle,
