@@ -95,7 +95,7 @@ class AppService {
   //#endregion
 
   //#region Favorite theaters
-  final Set<Theater> _favoriteTheaters = StorageService.readFavoriteTheaters().toSet();
+  late final Set<Theater> _favoriteTheaters = StorageService.readFavoriteTheaters().toSet();    // Must be "late" to ensure proper class instanciation flow
   UnmodifiableSetView<Theater> get favoriteTheaters => UnmodifiableSetView(_favoriteTheaters);
 
   bool isFavorite(Theater theater) => _favoriteTheaters.contains(theater);
