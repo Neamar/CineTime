@@ -429,7 +429,7 @@ class BelgiumApiClient extends ApiClient {
       final spec = ShowTimeSpec(
         audioVersion: audioVersion,
         subtitles: subtitles,
-        technology: ShowTimeSpec.formatTechnology(technologies),
+        technology: _formatTechnology(technologies),
       );
 
       for (final timeSpan in row.querySelectorAll('td.representation div.hours span')) {
@@ -441,6 +441,13 @@ class BelgiumApiClient extends ApiClient {
     }
 
     return showTimes;
+  }
+
+  /// Build a display-ready technology string from the technologies found on a schedule row, with "3D" always placed last (e.g. "IMAX 3D", "4DX 3D").
+  /// Returns `null` when there is none (standard 2D).
+  static String? _formatTechnology(Set<String> technologies) {
+    if (technologies.isEmpty) return null;
+    return [...technologies.where((t) => t != '3D'), if (technologies.contains('3D')) '3D'].join(' ');
   }
 
   /// Parse address parts from a `p.adress` element.

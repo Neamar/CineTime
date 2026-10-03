@@ -193,21 +193,12 @@ class ShowTimeSpec implements Comparable<ShowTimeSpec> {
   /// Subtitles
   final Set<ShowSubtitles> subtitles;
 
-  /// Technology, already formatted for display.
+  /// Technology, already formatted for display by the API client (`null` for a standard 2D projection).
   /// Examples: 3D, IMAX, IMAX 3D, LaserUltra, 4DX 3D, ...
   final String? technology;
 
   /// This spec without its technology, to group specs by audio version + subtitles.
   ShowTimeSpec get withoutTechnology => ShowTimeSpec(audioVersion: audioVersion, subtitles: subtitles);
-
-  /// Build a display-ready technology string from raw source tokens (HTML classes, JSON tags, ...).
-  /// Tokens are deduplicated (order preserved), joined with a space, with "3D" always placed last (e.g. "IMAX 3D", "4DX 3D").
-  static String? formatTechnology(Iterable<String> tokens) {
-    final unique = LinkedHashSet<String>.of(tokens.where((t) => t.isNotEmpty));
-    if (unique.isEmpty) return null;
-    final has3D = unique.remove('3D');
-    return [...unique, if (has3D) '3D'].join(' ');
-  }
 
   @override
   int compareTo(ShowTimeSpec other) {

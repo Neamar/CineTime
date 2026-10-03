@@ -54,7 +54,7 @@ class FranceApiClient extends ApiClient {
         reportError(UnimplementedError('Unknown projection "$projection"'), StackTrace.current);
       }
     }
-    return ShowTimeSpec.formatTechnology(labels);
+    return labels.isEmpty ? null : labels.join(' ');
   }
 
   /// Request timeout duration
