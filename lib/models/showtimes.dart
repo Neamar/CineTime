@@ -58,6 +58,10 @@ class MovieShowTimes {
     return options.toList(growable: false);
   } ();
 
+  /// [showTimesSpecOptions] grouped by audio version + subtitles (keys have no technology), order preserved.
+  late final Map<ShowTimeSpec, List<ShowTimeSpec>> showTimesSpecOptionsByAudioSubtitles =
+      showTimesSpecOptions.groupListsBy((spec) => spec.withoutTechnology);
+
   /// The earliest upcoming showtime date across all theaters.
   late final DateTime? nextShowDate = theatersShowTimes
     .map((tst) => tst.showTimes.firstOrNull?.dateTime)
@@ -184,6 +188,9 @@ class ShowTimeSpec implements Comparable<ShowTimeSpec> {
   /// Technology, already formatted for display.
   /// Examples: 3D, IMAX, IMAX 3D, LaserUltra, 4DX 3D, ...
   final String? technology;
+
+  /// This spec without its technology, to group specs by audio version + subtitles.
+  ShowTimeSpec get withoutTechnology => ShowTimeSpec(audioVersion: audioVersion, subtitles: subtitles);
 
   /// Build a display-ready technology string from raw source tokens (HTML classes, JSON tags, ...).
   /// Tokens are deduplicated (order preserved), joined with a space, with "3D" always placed last (e.g. "IMAX 3D", "4DX 3D").
