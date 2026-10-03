@@ -30,6 +30,9 @@ class Movie extends Identifiable {
 
   final String? releaseYear;    // Only the year (when full release date is not available)
   final DateTime? releaseDate;
+  /// Release date used for sorting : falls back to the 1st january of [releaseYear] when the full date is not available
+  late final int? _releaseYearInt = int.tryParse(releaseYear ?? '');
+  late final DateTime? releaseDateForSort = releaseDate ?? (_releaseYearInt != null ? DateTime(_releaseYearInt) : null);
   late final String? releaseYearDisplay = () {
     final releaseYearResolved = () {
       final releaseDate = this.releaseDate;
@@ -108,13 +111,15 @@ class Movie extends Identifiable {
         if (usersRating != null && other.usersRating != null) return other.usersRating!.compareTo(usersRating!);
         return title.compareTo(other.title);
       case MovieSortType.releaseDate:
-        final date1 = releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final date2 = other.releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return date2.compareTo(date1);
+        final date1 = releaseDateForSort ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final date2 = other.releaseDateForSort ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateComparison = date2.compareTo(date1);
+        return dateComparison != 0 ? dateComparison : title.compareTo(other.title);
       case MovieSortType.nextShow:
         return title.compareTo(other.title);  // Fallback: showtime data not available at Movie level
       case MovieSortType.duration:
-        return duration.compareTo(other.duration);
+        final durationComparison = duration.compareTo(other.duration);
+        return durationComparison != 0 ? durationComparison : title.compareTo(other.title);
     }
   }
 }
