@@ -803,6 +803,7 @@ class MoviePageBloc with Disposable {
   /// Single shared source of [MovieInfo] for this page, so every [FetchBuilder]-based widget
   /// that needs complementary movie info (rating fallback, info lines, synopsis, ...) can consume
   /// it independently while only ever triggering a single network request.
+  /// Memoized in memory (a failed request isn't kept, so the next call retries).
   Future<MovieInfo> getMovieInfo() => _movieInfo ??= _fetchMovieInfo();
 
   Future<MovieInfo> _fetchMovieInfo() async {
@@ -822,7 +823,7 @@ class MoviePageBloc with Disposable {
   final _formattedShowTimes = <ShowTimeSpec, List<FormattedTheaterShowTimes>>{};
 
   /// List of [FormattedTheaterShowTimes] for this [filter].
-  /// With simple caching system.
+  /// Memoized in memory per [filter].
   List<FormattedTheaterShowTimes> getFormattedShowTimes(ShowTimeSpec filter) {
     return _formattedShowTimes.putIfAbsent(filter, () {
       // Compute days with show

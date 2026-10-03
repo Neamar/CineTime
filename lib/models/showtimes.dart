@@ -97,10 +97,11 @@ class TheaterShowTimes {
   final List<ShowTime> showTimes;
 
 
-  /// Simple cache for [filteredShowTimes]
+  /// Simple cache for [getFilteredShowTimes]
   final _filteredShowTimes = <ShowTimeSpec, List<ShowTime>>{};
 
-  /// Return showtimes filtered by [spec]
+  /// Return showtimes filtered by [spec].
+  /// Memoized in memory per [spec].
   List<ShowTime> getFilteredShowTimes(ShowTimeSpec spec) => _filteredShowTimes.putIfAbsent(spec, () => showTimes.where((st) => st.spec == spec).toList(growable: false));
 
 
@@ -108,10 +109,11 @@ class TheaterShowTimes {
   late final SplayTreeSet<Date> daysWithShow = showTimes.daysWithShow;
 
 
-  /// Simple cache for [filteredDayWithShow]
+  /// Simple cache for [getFilteredDayWithShow]
   final _filteredDayWithShow = <ShowTimeSpec, SplayTreeSet<Date>>{};
 
   /// All dates with at least a show, filtered by [spec], without duplicates, sorted.
+  /// Memoized in memory per [spec].
   SplayTreeSet<Date> getFilteredDayWithShow(ShowTimeSpec spec) => _filteredDayWithShow.putIfAbsent(spec, () => getFilteredShowTimes(spec).daysWithShow);
 
 
