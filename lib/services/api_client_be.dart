@@ -32,11 +32,12 @@ class BelgiumApiClient extends ApiClient {
     ],
   );
 
-  static const _authority = 'cin' + 'ebel.dhnet.be';
+  static const _authority = 'cine' + 'bel.dh' + 'net.be';
 
-  /// Trailers are hosted on Dailymotion
-  static const _videoAuthority = 'www.dail' + 'ymotion.com';
-  static const _videoOrigin = 'https://geo.dail' + 'ymotion.com';
+  /// Trailers are hosted on a third-party video platform
+  static const _videoDomain = 'dail' + 'ymotion.com';
+  static const _videoAuthority = 'www.' + _videoDomain;
+  static const _videoOrigin = 'https://geo.' + _videoDomain;
 
   /// Shows started for more than this duration are filtered out.
   static const _maxStartedShowtimeDuration = Duration(hours: 1);    // TODO put in common with FR
@@ -146,8 +147,8 @@ class BelgiumApiClient extends ApiClient {
     // Press rating
     final pressRating = _parseRating(document.querySelector('.pressCritic .criticItem')?.text);
 
-    // Trailer (Dailymotion embed, e.g. "https://geo.dailymotion.com/player/x1nrd2.html?video=xb17xhy")
-    final trailerSrc = document.querySelector('#movieVideos iframe[src*="dailymotion.com"]')?.attributes['src'];
+    // Trailer (video platform embed, e.g. ".../player/<playerId>.html?video=<videoId>")
+    final trailerSrc = document.querySelector('#movieVideos iframe[src*="$_videoDomain"]')?.attributes['src'];
     final trailerVideoId = trailerSrc != null ? Uri.tryParse(trailerSrc)?.queryParameters['video'] : null;
 
     return MovieInfo(
@@ -162,7 +163,7 @@ class BelgiumApiClient extends ApiClient {
 
   @override
   Future<VideoData?> getVideoData(ApiId videoId) async {
-    // Ask Dailymotion for the stream manifest (HLS), the same way its embedded player does.
+    // Ask the video platform for the stream manifest (HLS), the same way its embedded player does.
     // The manifest url can't be built from the video id: it carries a signed `sec` token
     // (`...m3u8?sec=...`, 403 without it) that is only delivered by this call, and whose lifetime is unknown.
     // That's why we only store the video id (see MovieInfo.trailerId) and request a fresh url right when the video is played.
@@ -186,7 +187,7 @@ class BelgiumApiClient extends ApiClient {
   //#endregion
 
   //#region URL helpers
-  static const _movieBaseUrl = 'https://cine' + 'bel.dhnet.be/film';
+  static const _movieBaseUrl = 'https://' + _authority + '/film';
 
   @override
   String moviePageUrl(String movieId) => '$_movieBaseUrl/$movieId';

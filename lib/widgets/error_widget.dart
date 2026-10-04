@@ -22,7 +22,7 @@ class CtErrorWidget extends StatelessWidget {
             Tooltip(
               triggerMode: TooltipTriggerMode.longPress,
               preferBelow: false,
-              message: error.toString().replaceAll('all' + 'ocine', '***'),
+              message: error.toString().replaceAll('all' + 'ocine', '***').replaceAll('dh' + 'net', '***'),
               child: Icon(
                 Icons.error_outline,
                 color: AppResources.colorRed,
