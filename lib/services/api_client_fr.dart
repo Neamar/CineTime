@@ -30,9 +30,18 @@ class FranceApiClient extends ApiClient {
   /// Shows started for more than this duration are filtered out.
   static const _maxStartedShowtimeDuration = Duration(hours: 1);
 
-  /// Build the technology to display from the raw `projection` values of a showtime.
-  static String? _parseTechnology(JsonList? projections) {
+  /// Build the technology to display from the raw `experience` and `projection` values of a showtime.
+  /// Experiences come first (e.g. "4DX 3D").
+  static String? _parseTechnology(JsonList? experiences, JsonList? projections) {
     final labels = <String>[];
+    for (final experience in (experiences ?? const []).cast<String>()) {
+      final label = _showtimeExperienceMap[experience];
+      if (label != null) {
+        labels.add(label);
+      } else if (!_showtimeExperienceMap.containsKey(experience)) {
+        reportError(UnimplementedError('Unknown experience "$experience"'), StackTrace.current);
+      }
+    }
     for (final projection in (projections ?? const []).cast<String>()) {
       if (_showtimeProjectionMap.containsKey(projection)) {
         final label = _showtimeProjectionMap[projection];
@@ -179,7 +188,7 @@ class FranceApiClient extends ApiClient {
          * Example: for count = 200 : 19400 points
          *
          */
-        query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
+        query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection experience diffusionVersion data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
         variables: {
           'id': theater.id.encodedId,
           'from': _dateToString(from),
@@ -254,7 +263,7 @@ class FranceApiClient extends ApiClient {
             spec: ShowTimeSpec(
               audioVersion: audioVersion,
               subtitles: subtitles,
-              technology: _parseTechnology(showTimeJson['projection']),
+              technology: _parseTechnology(showTimeJson['experience'], showTimeJson['projection']),
             ),
             ticketingUrl: () {    // Needs to be in multiple steps to enforce [firstOrNull] extension static resolution
               final JsonList? ticketing = showTimeJson['data']?['ticketing'];
@@ -722,6 +731,15 @@ const _showtimeProjectionMap = <String, String?>{
   'F_4K': '4K', 'F_4K3D': '4K 3D',
   'F_35MM': '35mm', 'F_70MM': '70mm', 'F_3D70MM': '3D 70mm',
   'F_ATMOS': 'Atmos', 'ANALOG': 'Analogique', 'LASER': 'Laser',
+};
+
+/// Display label of each value of the API `Experience` enum.
+/// `null` = not displayed (rare or generic formats): the showtime is considered as a standard one.
+const _showtimeExperienceMap = <String, String?>{
+  'E_4DX': '4DX', 'SCREEN_X': 'ScreenX', 'DOLBY_CINEMA': 'Dolby Cinema', 'ICE': 'ICE', 'LASER_ULTRA': 'Laser Ultra',
+  'PLF': null, 'PREMIUM': null, 'PLATINUM': null, 'JUMBO': null, 'GRAND_LARGE': null, 'INFINITE': null, 'ONYX_LED': null,
+  'MX4D': null, 'E_4D_EMOTION': null, 'DBOX': null, 'BUTT_KICKER': null, 'TREMOR_FX': null, 'LIGHT_VIBES': null,
+  'DOLBY_ATMOS': null, 'ATMOS_EXPERIENCE': null, 'DOLBY_VISION_ATMOS': null, 'ECLAIR_COLOR': null, 'TRADITIONAL_AUDITORIUM': null,
 };
 
 const _movieGenresMap = {
