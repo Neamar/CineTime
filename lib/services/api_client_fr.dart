@@ -30,24 +30,12 @@ class FranceApiClient extends ApiClient {
   /// Shows started for more than this duration are filtered out.
   static const _maxStartedShowtimeDuration = Duration(hours: 1);
 
-  /// Display label of each value of the API `Projection` enum.
-  /// `null` = standard projection, no technology to display (like "Dig" on BE).
-  static const _projectionLabels = <String, String?>{
-    'DIGITAL': null, 'F_2D': null,
-    'F_3D': '3D', 'REALD_3D': 'RealD 3D',
-    'IMAX': 'IMAX', 'IMAX_3D': 'IMAX 3D', 'IMAX_70MM': 'IMAX 70mm', 'IMAX_3D_HFR': 'IMAX 3D HFR',
-    'HFR': 'HFR', 'F_3DHFR': '3D HFR',
-    'F_4K': '4K', 'F_4K3D': '4K 3D',
-    'F_35MM': '35mm', 'F_70MM': '70mm', 'F_3D70MM': '3D 70mm',
-    'F_ATMOS': 'Atmos', 'ANALOG': 'Analogique', 'LASER': 'Laser',
-  };
-
   /// Build the technology to display from the raw `projection` values of a showtime.
   static String? _parseTechnology(JsonList? projections) {
     final labels = <String>[];
     for (final projection in (projections ?? const []).cast<String>()) {
-      if (_projectionLabels.containsKey(projection)) {
-        final label = _projectionLabels[projection];
+      if (_showtimeProjectionMap.containsKey(projection)) {
+        final label = _showtimeProjectionMap[projection];
         if (label != null) labels.add(label);
       } else {
         labels.add(projection);
@@ -723,6 +711,18 @@ class _GraphQLErrorInterceptor implements HttpInterceptor {
     return response;
   }
 }
+
+/// Display label of each value of the API `Projection` enum.
+/// `null` = standard projection, no technology to display (like "Dig" on BE).
+const _showtimeProjectionMap = <String, String?>{
+  'DIGITAL': null, 'F_2D': null,
+  'F_3D': '3D', 'REALD_3D': 'RealD 3D',
+  'IMAX': 'IMAX', 'IMAX_3D': 'IMAX 3D', 'IMAX_70MM': 'IMAX 70mm', 'IMAX_3D_HFR': 'IMAX 3D HFR',
+  'HFR': 'HFR', 'F_3DHFR': '3D HFR',
+  'F_4K': '4K', 'F_4K3D': '4K 3D',
+  'F_35MM': '35mm', 'F_70MM': '70mm', 'F_3D70MM': '3D 70mm',
+  'F_ATMOS': 'Atmos', 'ANALOG': 'Analogique', 'LASER': 'Laser',
+};
 
 const _movieGenresMap = {
   'ACTION': 'Action',
