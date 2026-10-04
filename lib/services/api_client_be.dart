@@ -6,11 +6,13 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
 import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as html_dom;
+import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonList, JsonObject;
 
 import 'api_client.dart';
+import 'cache_interceptor.dart';
 
 /// API client for Belgium
 class BelgiumApiClient extends ApiClient {
@@ -21,7 +23,11 @@ class BelgiumApiClient extends ApiClient {
     ),
     authorityGetter: () => _authority,
     errorBuilder: HttpResponseException.new,
-    interceptors: [   // TODO add caching
+    interceptors: [
+      if (CacheInterceptor.enabled) CacheInterceptor(
+        keyBuilder: _getCacheKeyFromRequest,
+        shouldCache: (request) => request.url.host != _videoAuthority,    // Video manifest url carries a signed token of unknown lifetime
+      ),
       LoggingInterceptor(logger: debugPrint),
     ],
   );
@@ -29,13 +35,17 @@ class BelgiumApiClient extends ApiClient {
   static const _authority = 'cin' + 'ebel.dhnet.be';
 
   /// Trailers are hosted on Dailymotion
-  static const _videoAuthority = 'www.dailymotion.com';
-  static const _videoOrigin = 'https://geo.dailymotion.com';
+  static const _videoAuthority = 'www.dail' + 'ymotion.com';
+  static const _videoOrigin = 'https://geo.dail' + 'ymotion.com';
 
   /// Shows started for more than this duration are filtered out.
   static const _maxStartedShowtimeDuration = Duration(hours: 1);    // TODO put in common with FR
 
   final SleekHttpClient _client;
+
+  /// Build a unique key based on the request, used for cache.
+  /// Pages have no date in their url but their content depends on the current day, so the date is part of the key (cache is refreshed daily).
+  static String _getCacheKeyFromRequest(http.BaseRequest request) => '${request.url}|${AppService.now.toDate}';
 
   @override
   ApiId decodeStoredId(String encoded) => BelgiumApiId(encoded);
