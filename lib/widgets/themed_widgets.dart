@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:flutter/material.dart';
