@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: amplitude_flutter
-      sha256: "1247371e95a47181b6b99f980f5fff257b8a4b97e8855266b49566e4b1abe08c"
+      sha256: "9e25080f20e03ec755c3d9a88f8a7ae126461b489cc36c3b8cceb17a7fc3e9db"
       url: "https://pub.dev"
     source: hosted
-    version: "4.7.1"
+    version: "4.7.2"
   args:
     dependency: transitive
     description:
@@ -69,10 +69,10 @@ packages:
     dependency: "direct main"
     description:
       name: chewie
-      sha256: "507f7dbcb2018f45ea6297fbbc0c47a3dc51432779d32495e97a06c4bc9f728c"
+      sha256: "56b6641693ddd72f0cd54ddfedf4f3e9390e6d7b7b22dc2503b7e6ad91476f7f"
       url: "https://pub.dev"
     source: hosted
-    version: "1.15.0"
+    version: "1.17.2"
   clock:
     dependency: transitive
     description:
@@ -141,10 +141,10 @@ packages:
     dependency: transitive
     description:
       name: dbus
-      sha256: "0ce9b0a839e6dee59a37a623d2fc26a35bbbe6404213e419b0d6411023d62645"
+      sha256: a48d5da28e89bd02196e80d81ed8d7954923d00a0f4a68cc20b575038f023383
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.14"
+    version: "0.7.15"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -583,18 +583,18 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: c2ecd8abe82e63cdcb6947f71320612ced56e10ba94db7529d85cc02be47cb3b
+      sha256: "40a247686af64e497df29ab0de1303a20ca55a2e3c7c7e39b989fac47dcadf84"
       url: "https://pub.dev"
     source: hosted
-    version: "9.27.0"
+    version: "9.30.1"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
-      sha256: ec89cc6ba939ca19155ea83900d9740a36544f50b3b6baf265518e3348fb0f50
+      sha256: bdd8897b38ce31185c42ed910628059c4eccbc0b0641213e8d1c63e2fda3f5a3
       url: "https://pub.dev"
     source: hosted
-    version: "9.27.0"
+    version: "9.30.1"
   share_plus:
     dependency: "direct main"
     description:
@@ -884,10 +884,10 @@ packages:
     dependency: transitive
     description:
       name: video_player
-      sha256: "20ef311160e2ced020a62f38e4cc399a1bf289e722fc5fe37c9d7b18e44c9e8d"
+      sha256: "07ae1e03f2d4c8e2e9a75ee678f90acbc4506d4458a9c628512d119a1eee5754"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.14.1"
   video_player_android:
     dependency: transitive
     description:
@@ -924,18 +924,18 @@ packages:
     dependency: transitive
     description:
       name: wakelock_plus
-      sha256: "7253bca0fcf40d8413ddfcf4d2a1fa0a82475e79be25a4f2c564b695c9351486"
+      sha256: "22b3e7e937721de70e63c85e7139f4ac781dc22863b9262431a53ac030eb074b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.7.0"
+    version: "1.8.0"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:
       name: wakelock_plus_platform_interface
-      sha256: "0618d1799f0b28bcf98255b4ee8313e6fc4d38589dc4ee5fe5840d57d1aff6da"
+      sha256: "764c25504562abc8ac3406f5d175f126b276e6ba916c7c2675690b73368ca384"
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.0"
+    version: "1.7.0"
   web:
     dependency: transitive
     description:
