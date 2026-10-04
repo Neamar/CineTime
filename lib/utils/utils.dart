@@ -180,8 +180,10 @@ Future<geo.Position> getCurrentLocation() async {
 
     // Get localisation
     return await geo.Geolocator.getCurrentPosition(
-      desiredAccuracy: geo.LocationAccuracy.low,
-      timeLimit: const Duration(seconds: 10),
+      locationSettings: const geo.LocationSettings(
+        accuracy: geo.LocationAccuracy.low,
+        timeLimit: Duration(seconds: 10),
+      ),
     );
   } catch(e) {
     if (e is geo.PermissionDeniedException || e is geo.LocationServiceDisabledException)

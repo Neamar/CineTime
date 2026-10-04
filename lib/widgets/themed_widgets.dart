@@ -57,7 +57,7 @@ class CtCachedImage extends StatelessWidget {
         color: placeHolderBackground ? AppResources.colorGrey : null,
         child: CtProgressIndicator(),
       ),
-      errorWidget: (_, url, error) => errorWidget,
+      errorBuilder: (_, url, error) => errorWidget,
     );
   }
 }
@@ -77,7 +77,7 @@ class CtAnimatedSwitcher extends StatelessWidget {
     return AnimatedSwitcher(
       duration: AppResources.durationAnimationMedium,
       transitionBuilder: sizeAnimation == true
-        ? (child, animation) => FadeTransition(opacity: animation, child: SizeTransition(sizeFactor: animation, axisAlignment: -1, child: child))
+        ? (child, animation) => FadeTransition(opacity: animation, child: SizeTransition(sizeFactor: animation, alignment: Alignment.topCenter, child: child))
         : AnimatedSwitcher.defaultTransitionBuilder,
       layoutBuilder: _animatedSwitcherLayoutBuilder,
       child: child,

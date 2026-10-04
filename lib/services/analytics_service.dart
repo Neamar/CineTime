@@ -1,6 +1,6 @@
 import 'package:amplitude_flutter/amplitude.dart';
 import 'package:amplitude_flutter/configuration.dart';
-import 'package:amplitude_flutter/default_tracking.dart';
+import 'package:amplitude_flutter/autocapture/autocapture.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:cinetime/main.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +12,7 @@ class AnalyticsService {
   static final Amplitude _instance = Amplitude(Configuration(
     apiKey: kReleaseMode ? _amplitudeKey : _amplitudeDevKey,
     enableCoppaControl: true,
-    defaultTracking: const DefaultTrackingOptions(
+    autocapture: const AutocaptureOptions(
       sessions: true,
     ),
   ));
