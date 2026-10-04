@@ -565,15 +565,6 @@ class FranceApiClient extends ApiClient {
     }
     return label;
   }
-
-  @override
-  String showTimeSpecToDisplayString(ShowTimeSpec spec) {
-    String label = showTimeAudioSubtitlesToDisplayString(spec);
-    if (spec.technology != null) {
-      label += ' ${spec.technology}';
-    }
-    return label;
-  }
   //#endregion
 
   //#region Generics

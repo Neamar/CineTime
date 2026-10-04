@@ -21,7 +21,17 @@ abstract class ApiClient {
   String moviePressRatingUrl(String movieId);
 
   String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec);
-  String showTimeSpecToDisplayString(ShowTimeSpec spec);
+
+  final _specDisplayCache = <ShowTimeSpec, String>{};
+
+  /// Full display label of a spec (audio + subtitles + technology), cached since it's used in build methods.
+  String showTimeSpecToDisplayString(ShowTimeSpec spec) => _specDisplayCache.putIfAbsent(spec, () {
+    String label = showTimeAudioSubtitlesToDisplayString(spec);
+    if (spec.technology != null) {
+      label += ' ${spec.technology}';
+    }
+    return label;
+  });
 }
 
 /// Everything needed to play a video.
