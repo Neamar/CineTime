@@ -206,7 +206,7 @@ bool typesEqual<T1, T2>() => T1 == T2;
 bool isTypeUndefined<T>() => typesEqual<T, Object?>() || typesEqual<T, Null>() || typesEqual<T, void>() || typesEqual<T, dynamic>();
 
 /// Returns true if T is nullable.
-/// Like [isTypeUndefined] but will also return true for nullable types like <bool?> or <Object?>.
+/// Like [isTypeUndefined] but will also return true for nullable types like `<bool?>` or `<Object?>`.
 bool isTypeNullable<T>() => null is T;
 
 DateTime? dateFromString(String? dateString) => DateTime.tryParse(dateString ?? '');

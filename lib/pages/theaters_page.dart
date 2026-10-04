@@ -131,7 +131,7 @@ class TheatersPageBloc with Disposable {
   /// List of theaters
   final theaters = DataStream(<Theater>[]);
 
-  refresh() {
+  void refresh() {
     refreshID++;
     theaters.add({
       ...AppService.instance.selectedTheaters,
