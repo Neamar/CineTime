@@ -49,7 +49,7 @@ class CtCachedImage extends StatelessWidget {
         child: Image(
           image: image,
           fit: BoxFit.cover,
-          color: applyDarken ? Colors.black.withOpacity(0.3) : null,
+          color: applyDarken ? Colors.black.withValues(alpha: 0.3) : null,
           colorBlendMode: BlendMode.srcATop,
         ),
       ),

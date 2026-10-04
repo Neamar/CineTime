@@ -90,7 +90,7 @@ class _TheaterCardState extends State<TheaterCard> {
                             if (widget.theater.distanceDisplay != null)
                               Text(
                                 ' à ${widget.theater.distanceDisplay!}',
-                                style: context.textTheme.bodyMedium?.copyWith(color: context.textTheme.bodyMedium?.color?.withOpacity(0.5)),
+                                style: context.textTheme.bodyMedium?.copyWith(color: context.textTheme.bodyMedium?.color?.withValues(alpha: 0.5)),
                               ),
 
                             // Spacer for favorite button

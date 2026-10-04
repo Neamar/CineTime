@@ -124,8 +124,8 @@ class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProvider
       bottom: widget.bottom,
       elevation: widget.elevation,
       backgroundColor: widget.backgroundColor != null
-          ? widget.backgroundColor!.withOpacity(_animationController.value)
-          : Theme.of(context).primaryColor.withOpacity(_animationController.value),
+          ? widget.backgroundColor!.withValues(alpha: _animationController.value)
+          : Theme.of(context).primaryColor.withValues(alpha: _animationController.value),
       iconTheme: widget.iconTheme,
       primary: widget.primary,
       centerTitle: widget.centerTitle,

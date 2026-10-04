@@ -323,7 +323,7 @@ class _SortButton extends StatelessWidget {
             return days.map((day) {
               return PopupMenuItem<Date>(
                 value: day,
-                textStyle: buildTextStyle(day == dayFilterValue, color: daysWithShow.contains(day) ? null : textStyle?.color?.withOpacity(0.5)),
+                textStyle: buildTextStyle(day == dayFilterValue, color: daysWithShow.contains(day) ? null : textStyle?.color?.withValues(alpha: 0.5)),
                 child: Text(day.toDayString().capitalized),
               );
             });
