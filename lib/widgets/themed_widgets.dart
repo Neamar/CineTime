@@ -61,37 +61,3 @@ class CtCachedImage extends StatelessWidget {
     );
   }
 }
-
-class CtAnimatedSwitcher extends StatelessWidget {
-  const CtAnimatedSwitcher({super.key, this.child, this.sizeAnimation = false});
-
-  /// The current child widget to display
-  final Widget? child;
-
-  /// Will also animate it's size with a [SizeTransition].
-  /// Be aware that this will add a ClipRect.
-  final bool sizeAnimation;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: AppResources.durationAnimationMedium,
-      transitionBuilder: sizeAnimation == true
-        ? (child, animation) => FadeTransition(opacity: animation, child: SizeTransition(sizeFactor: animation, alignment: Alignment.topLeft, child: child))
-        : AnimatedSwitcher.defaultTransitionBuilder,
-      layoutBuilder: _animatedSwitcherLayoutBuilder,
-      child: child,
-    );
-  }
-
-  /// Copied from AnimatedSwitcher.defaultLayoutBuilder
-  static Widget _animatedSwitcherLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
-    return Stack(
-      alignment: Alignment.topLeft,
-      children: <Widget>[
-        ...previousChildren,
-        if (currentChild != null) currentChild,
-      ],
-    );
-  }
-}

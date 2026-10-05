@@ -168,16 +168,14 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                       text: movie.actors!,
                                     ),
                                   // Genres
-                                  FetchBuilder<String?>.snapshot(
+                                  FetchBuilder<String?>(
                                     task: () => movie.genres ?? bloc.getMovieInfo().then((info) => info.genres),
-                                    snapshotBuilder: (context, snapshot) {
-                                      final genres = snapshot.data;
-                                      return CtAnimatedSwitcher(
-                                        sizeAnimation: true,
-                                        child: genres == null ? null : TextWithLabel(
-                                          label: 'Genres',
-                                          text: genres,
-                                        ),
+                                    config: FetcherConfig.silent(fadeSize: true),
+                                    builder: (context, genres) {
+                                      if (genres == null) return const SizedBox(height: 0);
+                                      return TextWithLabel(
+                                        label: 'Genres',
+                                        text: genres,
                                       );
                                     },
                                   ),
@@ -189,16 +187,14 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      FetchBuilder<DateTime?>.snapshot(
+                                      FetchBuilder<DateTime?>(
                                         task: () => movie.releaseDate ?? bloc.getMovieInfo().then((info) => info.releaseDate),
-                                        snapshotBuilder: (context, snapshot) {
-                                          final releaseDate = snapshot.data;
-                                          return CtAnimatedSwitcher(
-                                            sizeAnimation: true,
-                                            child: releaseDate == null ? null : TextWithLabel(
-                                              label: 'Sortie',
-                                              text: releaseDate.toReleaseDateDisplay(),
-                                            ),
+                                        config: FetcherConfig.silent(fadeSize: true),
+                                        builder: (context, releaseDate) {
+                                          if (releaseDate == null) return const SizedBox(height: 0);
+                                          return TextWithLabel(
+                                            label: 'Sortie',
+                                            text: releaseDate.toReleaseDateDisplay(),
                                           );
                                         },
                                       ),
@@ -217,8 +213,9 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
 
                         // Rating
                         AppResources.spacerMedium,
-                        FetchBuilder<double?>(    // TODO handle hide animation (size transition). Maybe hide loader completly instead ? So only Synopsis has a loader & erorr display ?
+                        FetchBuilder<double?>(
                           task: () => movie.pressRating ?? bloc.getMovieInfo().then((info) => info.pressRating),
+                          config: FetcherConfig.silent(fadeSize: true),
                           builder: (context, pressRating) {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -523,39 +520,45 @@ class SynopsisWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FetchBuilder<MovieInfo>(
-      task: fetchMovieInfo,
-      config: FetcherConfig(
-        isDense: true,
-        fetchingBuilder: (context) {
-          return SizedBox(
-            height: collapsedHeight,
-            child: Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: List.generate(3, (index) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: Container(
-                      color: Colors.white,
+    // Animate the height change between the loader and the text (e.g. when the synopsis is shorter than the loader)
+    return AnimatedSize(
+      duration: AppResources.durationAnimationMedium,
+      alignment: Alignment.topLeft,
+      child: FetchBuilder<MovieInfo>(
+        task: fetchMovieInfo,
+        config: FetcherConfig(
+          isDense: true,
+          fadeDuration: Duration.zero,    // Not ideal, but allow to handles size animation gracefully when synopsis text is short (animation in sync with other size animation of the page)
+          fetchingBuilder: (context) {
+            return SizedBox(
+              height: collapsedHeight,
+              child: Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: List.generate(3, (index) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 3),
+                      child: Container(
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                )),
+                  )),
+                ),
               ),
-            ),
+            );
+          },
+        ),
+        builder: (context, info) {
+          return ShowMoreText(
+            header: info.certificate,
+            text: info.synopsis ?? '\nAucun synopsis\n',
+            collapsedHeight: collapsedHeight,
           );
         },
       ),
-      builder: (context, info) {
-        return ShowMoreText(
-          header: info.certificate,
-          text: info.synopsis ?? '\nAucun synopsis\n',
-          collapsedHeight: collapsedHeight,
-        );
-      },
     );
   }
 }
