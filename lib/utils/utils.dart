@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cinetime/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:sleek_http_client/sleek_http_client.dart' show ConnectivityException;
+import 'package:sleek_http_client/sleek_http_client.dart';
 
 import '_utils.dart';
 import 'exceptions/displayable_exception.dart';
@@ -12,8 +12,8 @@ import 'exceptions/permission_exception.dart';
 import 'exceptions/unreported_exception.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 
-typedef JsonObject = Map<String, dynamic>;
-typedef JsonList = Iterable<dynamic>;
+export 'package:sleek_http_client/src/types.dart';
+
 typedef AsyncTask<R> = Future<R> Function();
 typedef ParameterizedAsyncTask<T, R> = Future<R> Function(T? param);
 typedef AsyncValueChanged<T> = Future<void> Function(T value);
