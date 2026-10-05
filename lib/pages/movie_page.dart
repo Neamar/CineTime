@@ -80,14 +80,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  FetchBuilder<ApiId?>(
+                  FetchBuilder<ApiId?>.snapshot(    // Keep the (disabled) button displayed while loading or on error
                     task: () => movie.trailerId ?? bloc.getMovieInfo().then((info) => info.trailerId),
-                    config: FetcherConfig(    // Keep the (disabled) button displayed while loading or on error
-                      fetchingBuilder: (_) => _buildTrailerButton(null),
-                      fetchErrorBuilder: (_, __) => _buildTrailerButton(null),
-                      onDisplayError: (_, __) {},
-                    ),
-                    builder: (context, trailerId) => _buildTrailerButton(trailerId),
+                    snapshotBuilder: (context, snapshot) {
+                      final trailerId = snapshot.data;
+                      return _TextIconButton(
+                        icon: Icons.ondemand_video_outlined,
+                        label: 'Bande annonce',
+                        onPressed: trailerId != null ? () => _openTrailer(trailerId) : null,
+                      );
+                    },
                   ),
                   _TextIconButton(
                     icon: Icons.open_in_new,
@@ -337,12 +339,6 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
     final filtered = widget.movieShowTimes.getFilteredShowTimesCount(filter);
     return filtered == total ? 'séance'.plural(total) : '${'séance'.plural(filtered)} sur $total';
   }
-
-  Widget _buildTrailerButton(ApiId? trailerId) => _TextIconButton(
-    icon: Icons.ondemand_video_outlined,
-    label: 'Bande annonce',
-    onPressed: trailerId != null ? () => _openTrailer(trailerId) : null,
-  );
 
   void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster!));
 
