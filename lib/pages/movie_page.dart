@@ -13,7 +13,6 @@ import 'package:fetcher/fetcher_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 const _contentPadding = 16.0;
@@ -520,36 +519,14 @@ class SynopsisWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Animate the height change between the loader and the text (e.g. when the synopsis is shorter than the loader)
-    return AnimatedSize(
-      duration: AppResources.durationAnimationMedium,
-      alignment: Alignment.topLeft,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: collapsedHeight,
+      ),
       child: FetchBuilder<MovieInfo>(
         task: fetchMovieInfo,
         config: FetcherConfig(
           isDense: true,
-          fadeDuration: Duration.zero,    // Not ideal, but allow to handles size animation gracefully when synopsis text is short (animation in sync with other size animation of the page)
-          fetchingBuilder: (context) {
-            return SizedBox(
-              height: collapsedHeight,
-              child: Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: List.generate(3, (index) => Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 3),
-                      child: Container(
-                        color: Colors.white,
-                      ),
-                    ),
-                  )),
-                ),
-              ),
-            );
-          },
         ),
         builder: (context, info) {
           return ShowMoreText(
