@@ -84,10 +84,14 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                     task: () => movie.trailerId ?? bloc.getMovieInfo().then((info) => info.trailerId),
                     snapshotBuilder: (context, snapshot) {
                       final trailerId = snapshot.data;
-                      return _TextIconButton(
-                        icon: Icons.ondemand_video_outlined,
-                        label: 'Bande annonce',
-                        onPressed: trailerId != null ? () => _openTrailer(trailerId) : null,
+                      return AnimatedSwitcher(
+                        duration: AppResources.durationAnimationMedium,
+                        child: _TextIconButton(
+                          key: ObjectKey(snapshot),
+                          icon: Icons.ondemand_video_outlined,
+                          label: 'Bande annonce',
+                          onPressed: trailerId != null ? () => _openTrailer(trailerId) : null,
+                        ),
                       );
                     },
                   ),
@@ -359,6 +363,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
 
 class _TextIconButton extends StatelessWidget {
   const _TextIconButton({
+    super.key,
     required this.icon,
     required this.label,
     this.onPressed,
