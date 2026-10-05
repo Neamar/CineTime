@@ -77,7 +77,7 @@ class CtAnimatedSwitcher extends StatelessWidget {
     return AnimatedSwitcher(
       duration: AppResources.durationAnimationMedium,
       transitionBuilder: sizeAnimation == true
-        ? (child, animation) => FadeTransition(opacity: animation, child: SizeTransition(sizeFactor: animation, alignment: Alignment.topCenter, child: child))
+        ? (child, animation) => FadeTransition(opacity: animation, child: SizeTransition(sizeFactor: animation, alignment: Alignment.topLeft, child: child))
         : AnimatedSwitcher.defaultTransitionBuilder,
       layoutBuilder: _animatedSwitcherLayoutBuilder,
       child: child,

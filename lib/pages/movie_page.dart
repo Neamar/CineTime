@@ -168,14 +168,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                       text: movie.actors!,
                                     ),
                                   // Genres
-                                  FetchBuilder<String?>(    // TODO handle display animation (size transition)
+                                  FetchBuilder<String?>.snapshot(
                                     task: () => movie.genres ?? bloc.getMovieInfo().then((info) => info.genres),
-                                    config: FetcherConfig.silent(),
-                                    builder: (context, genres) {
-                                      if (genres == null) return const SizedBox(height: 0);
-                                      return TextWithLabel(
-                                        label: 'Genres',
-                                        text: genres,
+                                    snapshotBuilder: (context, snapshot) {
+                                      final genres = snapshot.data;
+                                      return CtAnimatedSwitcher(
+                                        sizeAnimation: true,
+                                        child: genres == null ? null : TextWithLabel(
+                                          label: 'Genres',
+                                          text: genres,
+                                        ),
                                       );
                                     },
                                   ),
@@ -187,14 +189,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      FetchBuilder<DateTime?>(    // TODO handle display animation (size transition)
+                                      FetchBuilder<DateTime?>.snapshot(
                                         task: () => movie.releaseDate ?? bloc.getMovieInfo().then((info) => info.releaseDate),
-                                        config: FetcherConfig.silent(),
-                                        builder: (context, releaseDate) {
-                                          if (releaseDate == null) return const SizedBox(height: 0);    // TODO handle null : currently this will make duration stays on the right
-                                          return TextWithLabel(
-                                            label: 'Sortie',
-                                            text: releaseDate.toReleaseDateDisplay(),
+                                        snapshotBuilder: (context, snapshot) {
+                                          final releaseDate = snapshot.data;
+                                          return CtAnimatedSwitcher(
+                                            sizeAnimation: true,
+                                            child: releaseDate == null ? null : TextWithLabel(
+                                              label: 'Sortie',
+                                              text: releaseDate.toReleaseDateDisplay(),
+                                            ),
                                           );
                                         },
                                       ),
