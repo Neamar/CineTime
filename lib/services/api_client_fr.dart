@@ -100,7 +100,7 @@ class FranceApiClient extends ApiClient {
 
       return Theater(
         id: FranceApiId(theaterInfo['id'], FranceApiId.typeTheater),
-        name: theaterJson['label'],
+        name: (theaterJson['label'] as String).trim(),
         street: theaterInfo['address'],
         zipCode: theaterInfo['zip'],
         city: theaterInfo['city'],
@@ -133,7 +133,7 @@ class FranceApiClient extends ApiClient {
 
       return Theater(
         id: FranceApiId.fromEncoded(theaterJson['id']),
-        name: theaterJson['name'],
+        name: (theaterJson['name'] as String).trim(),
         street: address?['address'],
         zipCode: address?['zip'],
         city: address?['city'],
@@ -146,7 +146,7 @@ class FranceApiClient extends ApiClient {
   Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {
     // Prepare period
     final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
-    final to = from.add(const Duration(days: 21));     // Fetch next 7 days (seventh included)
+    final to = from.add(const Duration(days: 21));     // Fetch next 21 days
 
     // Build movieShowTimes list
     final moviesShowTimesMap = <Movie, MovieShowTimes>{};
@@ -336,7 +336,7 @@ class FranceApiClient extends ApiClient {
 
           movie = Movie(
             id: FranceApiId.fromEncoded(movieId),
-            title: movieJson['title'],
+            title: (movieJson['title'] as String).trim(),
             languages: languagesJson?.map((languageCode) => _movieLanguageMap[languageCode]).joinNotEmpty(', '),
             directors: personsFromJson(movieJson['credits']?['edges']),
             actors: personsFromJson(movieJson['cast']?['edges']),
@@ -395,9 +395,11 @@ class FranceApiClient extends ApiClient {
     if (synopsis?.isEmpty == true) synopsis = null;
 
     // Certificate
+    // Releases are sorted from newest to oldest, and a re-release often has no certificate: take the first one available
     final JsonList releasesJson = movieJson?['releases'] ?? [];
-    String? certificate = releasesJson.firstOrNull?['certificate']?['label'];
-    if (certificate?.isEmpty == true) certificate = null;
+    final certificate = releasesJson
+        .map((release) => release['certificate']?['label'] as String?)
+        .firstWhereOrNull((label) => label?.isNotEmpty == true);
 
     // Return data
     return MovieInfo(
@@ -668,6 +670,8 @@ const _showtimeProjectionMap = <String, String?>{
   'F_4K': '4K', 'F_4K3D': '4K 3D',
   'F_35MM': '35mm', 'F_70MM': '70mm', 'F_3D70MM': '3D 70mm',
   'F_ATMOS': 'Atmos', 'ANALOG': 'Analogique', 'LASER': 'Laser',
+  'F_4D': '4D', 'DOLBY_VISION': 'Dolby Vision', 'HDR': 'HDR', 'MACROXE': 'MacroXE',
+  'SCOPE': null, 'ONYX': null, 'LED': null,
 };
 
 /// Display label of each value of the API `Experience` enum.
@@ -677,6 +681,7 @@ const _showtimeExperienceMap = <String, String?>{
   'PLF': null, 'PREMIUM': null, 'PLATINUM': null, 'JUMBO': null, 'GRAND_LARGE': null, 'INFINITE': null, 'ONYX_LED': null,
   'MX4D': null, 'E_4D_EMOTION': null, 'DBOX': null, 'BUTT_KICKER': null, 'TREMOR_FX': null, 'LIGHT_VIBES': null,
   'DOLBY_ATMOS': null, 'ATMOS_EXPERIENCE': null, 'DOLBY_VISION_ATMOS': null, 'ECLAIR_COLOR': null, 'TRADITIONAL_AUDITORIUM': null,
+  'INFINITY_VISION': null, 'SUPER_SCREEN': null, 'GOLD_CLASS': null, 'LUXURY': null,
 };
 
 const _movieGenresMap = {
