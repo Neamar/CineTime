@@ -245,6 +245,7 @@ enum ShowAudioVersion {
 
 enum ShowSubtitles {
   french('FR', 'Sous-titres français'),
+  english('EN', 'Sous-titres anglais'),
   dutch('NL', 'Sous-titres néerlandais');
 
   const ShowSubtitles(this.code, this.label);

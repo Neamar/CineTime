@@ -431,7 +431,11 @@ class BelgiumApiClient extends ApiClient {
         final subtitlesTitle = tds.first.querySelectorAll('abbr').elementAtOrNull(1)?.attributes['title'];    // TODO use text content instead ("S.t. fr/nl")
         if (subtitlesTitle != null) {
           if (subtitlesTitle.contains('français')) subtitles.add(ShowSubtitles.french);
+          if (subtitlesTitle.contains('anglais')) subtitles.add(ShowSubtitles.english);
           if (subtitlesTitle.contains('néerlandais')) subtitles.add(ShowSubtitles.dutch);
+          if (subtitlesTitle.isNotEmpty && subtitles.isEmpty) {
+            reportError(UnimplementedError('Subtitles not handled: $subtitlesTitle'), StackTrace.current);
+          }
         }
       }
 
