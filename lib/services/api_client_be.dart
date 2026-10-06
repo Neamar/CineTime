@@ -98,7 +98,7 @@ class BelgiumApiClient extends ApiClient {
 
     for (final theater in theaters) {
       final encodedName = Uri.encodeComponent(theater.name);
-      final htmlContent = await _client.send<String>(HttpMethod.get, '/fr/cinema/${theater.id.id}/$encodedName');
+      final htmlContent = await _client.send<String>(HttpMethod.get, '/cinema/${theater.id.id}/$encodedName');
 
       final document = html_parser.parse(htmlContent);
       _parseMoviesFromCinemaPage(document, theater, moviesShowTimesMap, ghostShowTimesMap);
@@ -120,9 +120,14 @@ class BelgiumApiClient extends ApiClient {
     final document = html_parser.parse(htmlContent);
 
     // Synopsis
-    final synopsisElement = document.querySelector('.synopsis p, [itemprop="description"]');
-    String? synopsis = synopsisElement?.text.trim();
-    if (synopsis?.isEmpty == true) synopsis = null;
+    // (can be split into several paragraphs)
+    var synopsisElements = document.querySelectorAll('.synopsis p');
+    if (synopsisElements.isEmpty) synopsisElements = document.querySelectorAll('[itemprop="description"]');
+    String? synopsis = synopsisElements
+        .map((element) => element.text.trim())
+        .where((paragraph) => paragraph.isNotEmpty)
+        .join('\n\n');
+    if (synopsis.isEmpty) synopsis = null;
 
     // Certificate (age rating image alt text)
     final certificateElement = document.querySelector('li.movieAudience img');
@@ -132,17 +137,21 @@ class BelgiumApiClient extends ApiClient {
     // Release date
     final releaseDate = _parseDateDayMonthYear(document.querySelector('.releaseDate a')?.text.trim());
 
-    // Genres
+    // Genres (label is singular when there is only one genre)
     final genresElement = document.querySelectorAll('.movieInfosGroup > div')
-        .firstWhereOrNull((element) => element.querySelector('strong')?.text.trim() == 'Genres');
+        .firstWhereOrNull((element) => const {'Genre', 'Genres'}.contains(element.querySelector('strong')?.text.trim()));
     String? genres = genresElement?.querySelectorAll('li')
         .map((element) => element.text.trim())
         .where((genre) => genre.isNotEmpty)
         .join(', ');
     if (genres?.isEmpty == true) genres = null;
 
-    // Press rating
-    final pressRating = _parseRating(document.querySelector('.pressCritic .criticItem')?.text);
+    // Press rating (average of all press sources, there can be up to 3)
+    final pressRatings = document.querySelectorAll('.pressCritic .criticItem')
+        .map((element) => _parseRating(element.text))
+        .nonNulls
+        .toList();
+    final pressRating = pressRatings.isEmpty ? null : pressRatings.sum / pressRatings.length;
 
     // Trailer (video platform embed, e.g. ".../player/<playerId>.html?video=<videoId>")
     final trailerSrc = document.querySelector('#movieVideos iframe[src*="$_videoDomain"]')?.attributes['src'];
@@ -257,8 +266,10 @@ class BelgiumApiClient extends ApiClient {
     }
     if (title.isEmpty) return;
 
-    final posterUrl = movieBlock.querySelector('li.moviePoster img')?.attributes['src']
-        ?.replaceFirst('/poster/small/', '/poster/full/');      // Use full-size poster
+    final posterSrc = movieBlock.querySelector('li.moviePoster img')?.attributes['src'];
+    final posterUrl = posterSrc == null || posterSrc.endsWith('/poster/small/default.png')    // Site's own placeholder, let the app display its own
+        ? null
+        : posterSrc.replaceFirst('/poster/small/', '/poster/full/');      // Use full-size poster
     final durationDisplay = _extractDuration(movieBlock);
     final (directors, actors) = _parsePersonList(movieBlock.querySelector('div.moviePersonList p'));
     final (country, countryCode, releaseYear) = _parseCountryAndYear(movieBlock);
@@ -348,10 +359,15 @@ class BelgiumApiClient extends ApiClient {
   ///     2026
   /// </li>
   /// ```
+  /// The country can be missing, in which case the `<li>` is just "- 2025" (or "-" when the year is missing too).
   (String?, String?, String?) _parseCountryAndYear(html_dom.Element movieBlock) {
     for (final li in movieBlock.querySelectorAll('.scheduleMovieInfos ul > li')) {
       final abbr = li.querySelector('abbr');
-      if (abbr == null) continue;
+      if (abbr == null) {
+        final yearOnly = RegExp(r'^-\s*(\d{4})$').firstMatch(li.text.trim())?.group(1);
+        if (yearOnly != null) return (null, null, yearOnly);
+        continue;
+      }
 
       final countryCode = abbr.text.trim();
       final country = abbr.attributes['title']?.trim();
