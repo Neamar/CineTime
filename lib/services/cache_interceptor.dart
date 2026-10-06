@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:cached_network_image_ce/cached_network_image.dart' show BaseCacheManager, CachedNetworkImageProvider;
 import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonObject, JsonList;
 
@@ -14,11 +14,13 @@ class CacheInterceptor implements HttpInterceptor {
   /// Whether to use cache or not
   static const enabled = true;
 
-  /// Shared by all API clients (hosts differ, so keys can't collide), and created only once even if a client is re-instantiated.
-  static final _cacheManager = CacheManager(Config(
-    'CtCache',
-    stalePeriod: const Duration(days: 1),
-  ));
+  /// How long a cached response stays valid
+  static const _maxAge = Duration(days: 1);
+
+  /// Same manager as the images' one (shared by all API clients, hosts differ so keys can't collide).
+  /// A second [DefaultCacheManager] can't be created: it would open the same Hive box as this one.
+  /// Besides, its constructor can't be configured with the (conditionally exported) public API.
+  static BaseCacheManager get _cacheManager => CachedNetworkImageProvider.defaultCacheManager;
 
   final String Function(http.BaseRequest request) keyBuilder;
 
@@ -55,7 +57,7 @@ class CacheInterceptor implements HttpInterceptor {
     // Store in cache
     if (SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
       try {
-        await _cacheManager.putFile(cacheKey, response.bodyBytes);
+        await _cacheManager.putFile(cacheKey, response.bodyBytes, maxAge: _maxAge);
         debugPrint('[CacheInterceptor] 💾 Writing response to cache for $cacheKey');
       } catch (e, s) {
         reportError(e, s);
