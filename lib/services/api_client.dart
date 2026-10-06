@@ -1,4 +1,6 @@
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/app_service.dart';
+import 'package:flutter/foundation.dart';
 
 enum Country { france, belgium }
 
@@ -21,6 +23,13 @@ abstract class ApiClient {
   String moviePressRatingUrl(String movieId);
 
   String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec);
+
+  /// Shows started for more than this duration are filtered out.
+  static const _maxStartedShowtimeDuration = Duration(hours: 1);
+
+  /// Remove from [showTimes] the shows that started for more than [_maxStartedShowtimeDuration].
+  @protected
+  void removeStartedShowTimes(List<ShowTime> showTimes) => showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(AppService.now));
 
   final _specDisplayCache = <ShowTimeSpec, String>{};
 

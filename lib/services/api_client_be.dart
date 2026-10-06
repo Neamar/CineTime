@@ -39,9 +39,6 @@ class BelgiumApiClient extends ApiClient {
   static const _videoAuthority = 'www.' + _videoDomain;
   static const _videoOrigin = 'https://geo.' + _videoDomain;
 
-  /// Shows started for more than this duration are filtered out.
-  static const _maxStartedShowtimeDuration = Duration(hours: 1);    // TODO put in common with FR
-
   final SleekHttpClient _client;
 
   /// Build a unique key based on the request, used for cache.
@@ -267,7 +264,7 @@ class BelgiumApiClient extends ApiClient {
     final (country, countryCode, releaseYear) = _parseCountryAndYear(movieBlock);
 
     final showTimes = _extractShowTimes(movieBlock);
-    showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(AppService.now));
+    removeStartedShowTimes(showTimes);
     if (showTimes.isEmpty) return;
 
     final movie = Movie(

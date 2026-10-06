@@ -24,9 +24,6 @@ class FranceApiClient extends ApiClient {
   static const _graphAuthority = 'graph.all' + 'ocine.fr';
   static const _graphPath = '/v1/mobile/';
 
-  /// Shows started for more than this duration are filtered out.
-  static const _maxStartedShowtimeDuration = Duration(hours: 1);
-
   /// Build the technology to display from the raw `experience` and `projection` values of a showtime.
   /// Experiences come first (e.g. "4DX 3D").
   static String? _parseTechnology(JsonList? experiences, JsonList? projections) {
@@ -271,7 +268,7 @@ class FranceApiClient extends ApiClient {
         }).toList();
 
         // Filter passed shows
-        showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(AppService.now));
+        removeStartedShowTimes(showTimes);
 
         // Skip this movie if there are no valid showtimes (all passed)
         if (showTimes.isEmpty) continue;
