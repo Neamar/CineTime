@@ -69,7 +69,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
               placeHolderBackground: true,
               onPressed: _openPoster,
               isThumbnail: false,
-              applyDarken: true,
+              dimmed: true,
             ),
             overlapContentHeight: overlapContentHeight,
             overlapContentRadius: overlapContentHeight / 2,

@@ -22,14 +22,14 @@ class CtCachedImage extends StatelessWidget {
     super.key,
     this.path,
     this.isThumbnail = false,
-    this.applyDarken = false,
+    this.dimmed = false,
     this.placeHolderBackground = false,
     this.onPressed,
   });
 
   final String? path;
   final bool isThumbnail;
-  final bool applyDarken;   //TODO find better name
+  final bool dimmed;
   final bool placeHolderBackground;
   final VoidCallback? onPressed;
 
@@ -49,7 +49,7 @@ class CtCachedImage extends StatelessWidget {
         child: Image(
           image: image,
           fit: BoxFit.cover,
-          color: applyDarken ? Colors.black.withValues(alpha: 0.3) : null,
+          color: dimmed ? Colors.black.withValues(alpha: 0.3) : null,
           colorBlendMode: BlendMode.srcATop,
         ),
       ),
