@@ -273,6 +273,7 @@ class BelgiumApiClient extends ApiClient {
     final durationDisplay = _extractDuration(movieBlock);
     final (directors, actors) = _parsePersonList(movieBlock.querySelector('div.moviePersonList p'));
     final (country, countryCode, releaseYear) = _parseCountryAndYear(movieBlock);
+    final usersRating = _parseRating(movieBlock.querySelector('li.ratingAverage img')?.attributes['alt']);    // e.g. "80 sur 100", only present for the few movies with enough votes
 
     final showTimes = _extractShowTimes(movieBlock);
     removeStartedShowTimes(showTimes);
@@ -289,6 +290,7 @@ class BelgiumApiClient extends ApiClient {
       country: country,
       countryCode: countryCode,
       releaseYear: releaseYear,
+      usersRating: usersRating,
     );
 
     final movieShowTimes = moviesShowTimesMap.putIfAbsent(movieId, () => MovieShowTimes(movie));
@@ -512,10 +514,10 @@ class BelgiumApiClient extends ApiClient {
     return date;
   }
 
-  /// Parse a rating fraction and normalize it to a five-point scale.
+  /// Parse a rating fraction ("7.5/10" or "80 sur 100") and normalize it to a five-point scale.
   double? _parseRating(String? text) {
     if (text == null) return null;
-    final match = RegExp(r'(\d+(?:[.,]\d+)?)\s*/\s*(\d+(?:[.,]\d+)?)').firstMatch(text);
+    final match = RegExp(r'(\d+(?:[.,]\d+)?)\s*(?:/|sur)\s*(\d+(?:[.,]\d+)?)').firstMatch(text);
     if (match == null) return null;
 
     final value = double.tryParse(match.group(1)!.replaceAll(',', '.'));
