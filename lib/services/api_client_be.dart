@@ -3,6 +3,7 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
+import 'package:cinetime/utils/exceptions/detailed_exception.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
 import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as html_dom;
@@ -28,6 +29,7 @@ class BelgiumApiClient extends ApiClient {
         keyBuilder: _getCacheKeyFromRequest,
         shouldCache: (request) => request.url.host != _videoAuthority,    // Video manifest url carries a signed token of unknown lifetime
       ),
+      const _IncompletePageInterceptor(),
       LoggingInterceptor(logger: debugPrint),
     ],
   );
@@ -554,6 +556,28 @@ class BelgiumApiClient extends ApiClient {
     return (hour, minute);
   }
   //#endregion
+}
+
+/// The site sometimes returns an HTTP 200 with an empty page (no `#mainContent`), typically under load.
+/// Without this check it would be parsed as "no movie", and cached for the whole day.
+/// Placed after [CacheInterceptor], so the exception prevents the response from being cached.
+class _IncompletePageInterceptor implements HttpInterceptor {
+  const _IncompletePageInterceptor();
+
+  @override
+  Future<http.Response> intercept(http.BaseRequest request, HttpInterceptorChain chain) async {
+    final response = await chain.proceed(request);
+
+    // Only HTML pages of the site (not the JSON of the video host)
+    if (request.url.host == BelgiumApiClient._authority && !response.body.contains('id="mainContent"')) {
+      throw DetailedException(
+        'Réponse incomplète du serveur, veuillez réessayer',
+        details: '[${request.method}] ${request.url} (${response.body.length} chars)',
+      );
+    }
+
+    return response;
+  }
 }
 
 /// Belgium specific [ApiId]. This source doesn't need any encoding: [encodedId] is simply [id].

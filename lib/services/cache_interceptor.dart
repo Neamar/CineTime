@@ -12,7 +12,7 @@ class CacheInterceptor implements HttpInterceptor {
   CacheInterceptor({required this.keyBuilder, this.shouldCache});
 
   /// Whether to use cache or not
-  static const enabled = true;
+  static const enabled = false;
 
   /// How long a cached response stays valid
   static const _maxAge = Duration(days: 1);
