@@ -25,9 +25,9 @@ class FranceApiClient extends ApiClient {
   static const _graphPath = '/v1/mobile/';
 
   /// Build the technology to display from the raw `experience` and `projection` values of a showtime.
-  /// Experiences come first (e.g. "4DX 3D").
+  /// Experiences come first (e.g. "4DX 3D"). Duplicated labels are kept once (Set keeps insertion order).
   static String? _parseTechnology(JsonList? experiences, JsonList? projections) {
-    final labels = <String>[];
+    final labels = <String>{};
     for (final experience in (experiences ?? const []).cast<String>()) {
       final label = _showtimeExperienceMap[experience];
       if (label != null) {
@@ -661,27 +661,27 @@ class _GraphQLErrorInterceptor implements HttpInterceptor {
 }
 
 /// Display label of each value of the API `Projection` enum.
-/// `null` = standard projection, no technology to display (like "Dig" on BE).
+/// `null` = no extra charge expected (standard or widespread format): no technology to display (like "Dig" on BE).
 const _showtimeProjectionMap = <String, String?>{
-  'DIGITAL': null, 'F_2D': null,
-  'F_3D': '3D', 'REALD_3D': 'RealD 3D',
+  'DIGITAL': null, 'F_2D': null, 'SCOPE': null, 'LED': null,
+  'F_4K': null, 'LASER': null, 'HDR': null, 'F_ATMOS': null, 'DOLBY_VISION': null,
+  'F_3D': '3D', 'REALD_3D': 'RealD 3D', 'F_4K3D': '3D',
   'IMAX': 'IMAX', 'IMAX_3D': 'IMAX 3D', 'IMAX_70MM': 'IMAX 70mm', 'IMAX_3D_HFR': 'IMAX 3D HFR',
   'HFR': 'HFR', 'F_3DHFR': '3D HFR',
-  'F_4K': '4K', 'F_4K3D': '4K 3D',
-  'F_35MM': '35mm', 'F_70MM': '70mm', 'F_3D70MM': '3D 70mm',
-  'F_ATMOS': 'Atmos', 'ANALOG': 'Analogique', 'LASER': 'Laser',
-  'F_4D': '4D', 'DOLBY_VISION': 'Dolby Vision', 'HDR': 'HDR', 'MACROXE': 'MacroXE',
-  'SCOPE': null, 'ONYX': null, 'LED': null,
+  'F_35MM': '35mm', 'F_70MM': '70mm', 'F_3D70MM': '3D 70mm', 'ANALOG': 'Analogique',
+  'F_4D': '4D', 'ONYX': 'Onyx LED', 'MACROXE': 'MacroXE',
 };
 
 /// Display label of each value of the API `Experience` enum.
-/// `null` = not displayed (rare or generic formats): the showtime is considered as a standard one.
+/// `null` = no extra charge expected (generic, sound or comfort-only format): the showtime is considered as a standard one.
 const _showtimeExperienceMap = <String, String?>{
   'E_4DX': '4DX', 'SCREEN_X': 'ScreenX', 'DOLBY_CINEMA': 'Dolby Cinema', 'ICE': 'ICE', 'LASER_ULTRA': 'Laser Ultra',
-  'PLF': null, 'PREMIUM': null, 'PLATINUM': null, 'JUMBO': null, 'GRAND_LARGE': null, 'INFINITE': null, 'ONYX_LED': null,
-  'MX4D': null, 'E_4D_EMOTION': null, 'DBOX': null, 'BUTT_KICKER': null, 'TREMOR_FX': null, 'LIGHT_VIBES': null,
-  'DOLBY_ATMOS': null, 'ATMOS_EXPERIENCE': null, 'DOLBY_VISION_ATMOS': null, 'ECLAIR_COLOR': null, 'TRADITIONAL_AUDITORIUM': null,
-  'INFINITY_VISION': null, 'SUPER_SCREEN': null, 'GOLD_CLASS': null, 'LUXURY': null,
+  'INFINITY_VISION': 'Infinity Vision', 'GRAND_LARGE': 'Grand Large', 'INFINITE': 'Infinite', 'ONYX_LED': 'Onyx LED',
+  'E_4D_EMOTION': '4D E-Motion', 'MX4D': 'MX4D', 'DBOX': 'D-Box',
+  'PLF': null, 'PREMIUM': null, 'PLATINUM': null, 'JUMBO': null, 'SUPER_SCREEN': null,
+  'GOLD_CLASS': null, 'LUXURY': null, 'TRADITIONAL_AUDITORIUM': null,
+  'DOLBY_ATMOS': null, 'ATMOS_EXPERIENCE': null, 'DOLBY_VISION_ATMOS': null, 'ECLAIR_COLOR': null,
+  'BUTT_KICKER': null, 'TREMOR_FX': null, 'LIGHT_VIBES': null,
 };
 
 const _movieGenresMap = {
