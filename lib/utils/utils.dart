@@ -212,32 +212,35 @@ bool isTypeNullable<T>() => null is T;
 DateTime? dateFromString(String? dateString) => DateTime.tryParse(dateString ?? '');
 String? dateToString(DateTime? date) => date?.toIso8601String();
 
+/// Convert a basic HTML text to plain text, with one line per paragraph.
 String convertBasicHtmlTags(String htmlText) {
-  const replacements = {
-    // Replace all double line break with single line break
-    '<br><br>': '\n',
-    // Replace all remaining line break
-    '<br>': '\n',
-    // Replace basic html chars
+  // Like in HTML, raw line breaks are just whitespaces (sources often add "\r\n" after tags)
+  htmlText = htmlText.replaceAll(RegExp(r'[ \t\r\n]+'), ' ');    // Not "\s", to keep non-breaking spaces
+
+  // Line breaks and ends of paragraphs (e.g. "<br>", "<br />", "</p>", "</div>") become line breaks
+  htmlText = htmlText.replaceAll(RegExp(r'<br\s*/?>|</(p|div)>', caseSensitive: false), '\n');
+
+  // Remove other tags
+  htmlText = htmlText.replaceAll(RegExp(r'<[^>]*>'), '');
+
+  // Replace HTML entities with their corresponding characters
+  const entities = {
     '&quot;': '"',
     '&apos;': "'",
-    '&#039;': "'",
-    '&amp;': '&',
     '&lt;': '<',
     '&gt;': '>',
     '&nbsp;': ' ',
   };
-
-  // Replace all HTML entities with their corresponding characters
-  for (final MapEntry(:key, :value) in replacements.entries) {
+  for (final MapEntry(:key, :value) in entities.entries) {
     htmlText = htmlText.replaceAll(key, value);
   }
+  htmlText = htmlText.replaceAllMapped(RegExp(r'&#(\d+);'), (match) => String.fromCharCode(int.parse(match[1]!)));    // e.g. "&#039;"
+  // Not in the map above: must be decoded after all other entities, otherwise "&amp;lt;" (escaped "&lt;" text) would become "&lt;" then "<"
+  htmlText = htmlText.replaceAll('&amp;', '&');
 
-  // Remove other tags
-  RegExp exp = RegExp(
-    r'<[^>]*>',
-    multiLine: true,
-    caseSensitive: true,
-  );
-  return htmlText.replaceAll(exp, '');
+  // Remove empty lines (e.g. "<br><br>", empty paragraphs), spaces around line breaks and double spaces (e.g. "&nbsp; ")
+  return htmlText
+      .replaceAll(RegExp(r' *\n\s*'), '\n')
+      .replaceAll(RegExp(r' {2,}'), ' ')
+      .trim();
 }
