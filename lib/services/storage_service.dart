@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,9 +12,17 @@ class StorageService {
   static Future<void> init() async => _storage = await SharedPreferences.getInstance();
   //#endregion
 
+  //#region Country
+  static const _countryKey = 'country';
+  static Future<void> saveCountry(Country country) => _storage.setString(_countryKey, country.name);
+  static Country? readCountry() => Country.values.firstWhereOrNull((c) => c.name == _storage.getString(_countryKey));
+
+  /// Whether there is data tied to an API provider (selected/favorite theaters, hidden movies).
+  static bool get hasProviderData => [_selectedTheatersKey, _favoriteTheatersKey, _hiddenMoviesIdsKey].any(_storage.containsKey);
+  //#endregion
+
   //#region Sorting
   static const _movieSortingKey = 'movieSorting';
-
   static Future<void> saveMovieSorting(MovieSortType value) => _storage.setString(_movieSortingKey, value.name);
   static MovieSortType? readMovieSorting() => MovieSortType.values.firstWhereOrNull((e) => e.name == _storage.getString(_movieSortingKey));
   //#endregion
@@ -81,7 +90,10 @@ class StorageService {
 
   //#region Hidden movies
   static const _hiddenMoviesIdsKey = 'hiddenMoviesIds';
-  static saveHiddenMoviesIds(Iterable<String> moviesIds) => _storage.setString(_hiddenMoviesIdsKey, moviesIds.join(_listSeparator));
+  static Future<void> saveHiddenMoviesIds(Iterable<String> moviesIds) => _storage.setString(_hiddenMoviesIdsKey, moviesIds.join(_listSeparator));
   static List<String> readHiddenMoviesIds() => _storage.getString(_hiddenMoviesIdsKey)?.split(_listSeparator) ?? [];
   //#endregion
+
+  /// Wipe all local storage. Used when switching country, since selected/favorite theaters and hidden movies are tied to the previous provider's data.
+  static Future<void> clear() => _storage.clear();
 }

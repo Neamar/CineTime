@@ -13,7 +13,6 @@ import 'package:fetcher/fetcher_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 const _contentPadding = 16.0;
@@ -54,7 +53,6 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
     const double overlapContentHeight = 50;
 
     final movie = widget.movieShowTimes.movie;
-    final hasTrailer = movie.trailerId != null;
     final poster = movie.poster;
 
     return Scaffold(
@@ -71,7 +69,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
               placeHolderBackground: true,
               onPressed: _openPoster,
               isThumbnail: false,
-              applyDarken: true,
+              dimmed: true,
             ),
             overlapContentHeight: overlapContentHeight,
             overlapContentRadius: overlapContentHeight / 2,
@@ -81,10 +79,20 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  _TextIconButton(
-                    icon: Icons.ondemand_video_outlined,
-                    label:'Bande annonce',
-                    onPressed: hasTrailer ? _openTrailer : null,
+                  FetchBuilder<ApiId?>.snapshot(    // Keep the (disabled) button displayed while loading or on error
+                    task: () => movie.trailerId ?? bloc.getMovieInfo().then((info) => info.trailerId),
+                    snapshotBuilder: (context, snapshot) {
+                      final trailerId = snapshot.data;
+                      return AnimatedSwitcher(
+                        duration: AppResources.durationAnimationMedium,
+                        child: _TextIconButton(
+                          key: ObjectKey(snapshot),
+                          icon: Icons.ondemand_video_outlined,
+                          label: 'Bande annonce',
+                          onPressed: trailerId != null ? () => _openTrailer(trailerId) : null,
+                        ),
+                      );
+                    },
                   ),
                   _TextIconButton(
                     icon: Icons.open_in_new,
@@ -138,6 +146,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                     movie.title,
                                     style: context.textTheme.titleLarge,
                                   ),
+                                  if (movie.originalTitle != null)
+                                    TextWithLabel(
+                                      label: 'Original',
+                                      text: movie.originalTitle!,
+                                    ),
+                                  if (movie.country != null)
+                                    TextWithLabel(
+                                      label: 'Pays',
+                                      text: movie.country!,
+                                    ),
                                   if (movie.directors != null)
                                     TextWithLabel(
                                       label: 'De',
@@ -148,11 +166,18 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                       label: 'Avec',
                                       text: movie.actors!,
                                     ),
-                                  if (movie.genres.isNotNullOrEmpty)
-                                    TextWithLabel(
-                                      label: 'Genre',
-                                      text: movie.genres!,
-                                    ),
+                                  // Genres
+                                  FetchBuilder<String?>(
+                                    task: () => movie.genres ?? bloc.getMovieInfo().then((info) => info.genres),
+                                    config: FetcherConfig.silent(fadeSize: true),
+                                    builder: (context, genres) {
+                                      if (genres == null) return const SizedBox(height: 0);
+                                      return TextWithLabel(
+                                        label: 'Genres',
+                                        text: genres,
+                                      );
+                                    },
+                                  ),
                                   if (movie.languages != null)
                                     TextWithLabel(
                                       label: 'Langues',
@@ -161,11 +186,17 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      if (movie.releaseDate != null)
-                                        TextWithLabel(
-                                          label: 'Sortie',
-                                          text: movie.releaseDateDisplay!,
-                                        ),
+                                      FetchBuilder<DateTime?>(
+                                        task: () => movie.releaseDate ?? bloc.getMovieInfo().then((info) => info.releaseDate),
+                                        config: FetcherConfig.silent(fadeSize: true),
+                                        builder: (context, releaseDate) {
+                                          if (releaseDate == null) return const SizedBox(height: 0);
+                                          return TextWithLabel(
+                                            label: 'Sortie',
+                                            text: releaseDate.toReleaseDateDisplay(),
+                                          );
+                                        },
+                                      ),
                                       if (movie.durationDisplay != null)
                                         TextWithLabel(
                                           label: 'Durée',
@@ -181,31 +212,37 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
 
                         // Rating
                         AppResources.spacerMedium,
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            if (movie.usersRating != null)
-                              _RatingWidget(
-                                icon: FontAwesomeIcons.users.data,
-                                rating: movie.usersRating!,
-                                tooltip: 'Spectateurs',
-                                iconSizeDelta: -3,
-                                onPressed: () => launchUrlString(movie.usersRatingUrl),
-                              ),
-                            if (movie.pressRating != null)
-                              _RatingWidget(
-                                icon: FontAwesomeIcons.newspaper.data,
-                                rating: movie.pressRating!,
-                                tooltip: 'Presse',
-                                onPressed: () => launchUrlString(movie.pressRatingUrl),
-                              ),
-                          ],
+                        FetchBuilder<double?>(
+                          task: () => movie.pressRating ?? bloc.getMovieInfo().then((info) => info.pressRating),
+                          config: FetcherConfig.silent(fadeSize: true),
+                          builder: (context, pressRating) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                if (movie.usersRating != null)
+                                  _RatingWidget(
+                                    icon: FontAwesomeIcons.users.data,
+                                    rating: movie.usersRating!,
+                                    tooltip: 'Spectateurs',
+                                    iconSizeDelta: -3,
+                                    onPressed: () => launchUrlString(movie.usersRatingUrl),
+                                  ),
+                                if (pressRating != null)
+                                  _RatingWidget(
+                                    icon: FontAwesomeIcons.newspaper.data,
+                                    rating: pressRating,
+                                    tooltip: 'Presse',
+                                    onPressed: () => launchUrlString(movie.pressRatingUrl),
+                                  ),
+                              ],
+                            );
+                          },
                         ),
 
                         // Synopsis
                         AppResources.spacerMedium,
                         SynopsisWidget(
-                          movieId: movie.id,
+                          fetchMovieInfo: bloc.getMovieInfo,
                         ),
 
                       ],
@@ -229,9 +266,19 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                 children: <Widget>[
 
                                   // Title
-                                  Text(
-                                    'Séances',
-                                    style: context.textTheme.headlineSmall,
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        'Séances',
+                                        style: context.textTheme.headlineSmall,
+                                      ),
+                                      AppResources.spacerExtraTiny,
+                                      Text(
+                                        _getShowTimesCountLabel(filter),
+                                        style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
+                                      ),
+                                    ],
                                   ),
 
                                   // Filters
@@ -240,25 +287,16 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                     child: Align(
                                       alignment: Alignment.centerRight,
                                       child: IntrinsicWidth(
-                                        child: FadingEdgeScrollView.fromSingleChildScrollView(
-                                          // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
-                                          gradientFractionOnEnd: 0.5,
-                                          child: SingleChildScrollView(
-                                            scrollDirection: Axis.horizontal,
-                                            controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
-                                            child: _TagFilterSelector(
-                                              movie: movie,
-                                              options: widget.movieShowTimes.showTimesSpecOptions,
-                                              selected: filter,
-                                              onChanged: (value) {
-                                                bloc.selectedSpec.add(value);
-                                                AnalyticsService.trackEvent('Movie spec changed', {
-                                                  'value': value.toString(),
-                                                  'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
-                                                });
-                                              },
-                                            ),
-                                          ),
+                                        child: _TagFilterSelector(
+                                          optionsByAudioSubtitles: widget.movieShowTimes.showTimesSpecOptionsByAudioSubtitles,
+                                          selected: filter,
+                                          onChanged: (value) {
+                                            bloc.selectedSpec.add(value);
+                                            AnalyticsService.trackEvent('Movie spec changed', {
+                                              'value': value.toString(),
+                                              'availableSpec': widget.movieShowTimes.showTimesSpecOptions.map((s) => s.toString()).join(','),
+                                            });
+                                          },
                                         ),
                                       ),
                                     ),
@@ -269,12 +307,12 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                             ),
 
                             // Content
-                            AppResources.spacerSmall,
+                            AppResources.spacerLarge,
                             ...bloc.getFormattedShowTimes(filter).map((theaterShowTimes) {
                               return TheaterShowTimesWidget(
                                 theaterName: theaterShowTimes.theater.name,
                                 showTimes: theaterShowTimes.formattedShowTimes,
-                                filterName: filter.toDisplayString(movie.isFrench),
+                                filterName: AppService.api.showTimeSpecToDisplayString(filter),
                                 scrollController: bloc.theaterShowTimesScrollControllers[theaterShowTimes.theater]!,
                                 onShowtimePressed: (showtime) => ShowtimeDialog.open(
                                   context: context,
@@ -299,10 +337,17 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
     );
   }
 
+  /// Examples: '36 séances sur 46', '46 séances', '1 séance'
+  String _getShowTimesCountLabel(ShowTimeSpec filter) {
+    final total = widget.movieShowTimes.showTimesCount;
+    final filtered = widget.movieShowTimes.getFilteredShowTimesCount(filter);
+    return filtered == total ? 'séance'.plural(total) : '${'séance'.plural(filtered)} sur $total';
+  }
+
   void _openPoster() => navigateTo(context, (_) => PosterPage(widget.movieShowTimes.movie.poster!));
 
-  void _openTrailer() {
-    navigateTo(context, (_) => TrailerPage(widget.movieShowTimes.movie.trailerId!));
+  void _openTrailer(ApiId trailerId) {
+    navigateTo(context, (_) => TrailerPage(trailerId));
     AnalyticsService.trackEvent('Trailer displayed', {
       'movieTitle': widget.movieShowTimes.movie.title,
     });
@@ -318,6 +363,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
 
 class _TextIconButton extends StatelessWidget {
   const _TextIconButton({
+    super.key,
     required this.icon,
     required this.label,
     this.onPressed,
@@ -332,20 +378,17 @@ class _TextIconButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.disabled) ? Colors.white38 : Colors.white,
+        ),
         overlayColor: WidgetStateProperty.all(Colors.white24),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(
-            icon,
-            color: Colors.white,
-          ),
+          Icon(icon),
           SizedBox(width: 8.0),
-          Text(
-            label,
-            style: TextStyle(color: Colors.white),
-          )
+          Text(label),
         ],
       ),
     );
@@ -470,73 +513,105 @@ class _MovieVisibilityToggleButtonState extends State<_MovieVisibilityToggleButt
 class SynopsisWidget extends StatelessWidget {
   static const collapsedHeight = 80.0;
 
-  const SynopsisWidget({super.key, required this.movieId});
+  const SynopsisWidget({super.key, required this.fetchMovieInfo});
 
-  final ApiId movieId;
+  final Future<MovieInfo> Function() fetchMovieInfo;
 
   @override
   Widget build(BuildContext context) {
-    return FetchBuilder<MovieInfo>(
-      task: () => AppService.api.getMovieInfo(movieId),
-      config: FetcherConfig(
-        isDense: true,
-        fetchingBuilder: (context) {
-          return SizedBox(
-            height: collapsedHeight,
-            child: Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: List.generate(3, (index) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: Container(
-                      color: Colors.white,
-                    ),
-                  ),
-                )),
-              ),
-            ),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: collapsedHeight,
+      ),
+      child: FetchBuilder<MovieInfo>(
+        task: fetchMovieInfo,
+        config: FetcherConfig(
+          isDense: true,
+        ),
+        builder: (context, info) {
+          return ShowMoreText(
+            header: info.certificate,
+            text: info.synopsis ?? '\nAucun synopsis\n',
+            collapsedHeight: collapsedHeight,
           );
         },
       ),
-      builder: (context, info) {
-        return ShowMoreText(
-          header: info.certificate,
-          text: info.synopsis ?? '\nAucun synopsis\n',
-          collapsedHeight: collapsedHeight,
-        );
-      },
     );
   }
 }
 
 class _TagFilterSelector extends StatelessWidget {
-  const _TagFilterSelector({required this.movie, required this.options, required this.selected, this.onChanged});
+  const _TagFilterSelector({required this.optionsByAudioSubtitles, required this.selected, this.onChanged});
 
-  final Movie movie;
-  final List<ShowTimeSpec> options;
+  /// Available specs, grouped by audio version + subtitles (see [ShowTimeSpec.withoutTechnology])
+  final Map<ShowTimeSpec, List<ShowTimeSpec>> optionsByAudioSubtitles;
   final ShowTimeSpec selected;
   final ValueChanged<ShowTimeSpec>? onChanged;
 
+  static const _defaultTechnologyLabel = '2D';
+
+  void _select(ShowTimeSpec spec) {
+    if (spec != selected) onChanged?.call(spec);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ToggleButtons(
-      isSelected: options.map((option) => option == selected).toList(growable: false),
-      constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-      borderRadius: BorderRadius.circular(5),
-      onPressed: (int index) {
-        final tapped = options[index];
-        if (tapped != selected) onChanged?.call(tapped);
-      },
-      children: options.map((option) {
-        return Padding(
-          padding: const EdgeInsets.all(5),
-          child: Text(option.toDisplayString(movie.isFrench)),
-        );
-      }).toList(growable: false),
+    final selectedAudioSubtitles = selected.withoutTechnology;
+    final technologyOptions = optionsByAudioSubtitles[selectedAudioSubtitles]!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+
+        // Audio + subtitles
+        _buildToggleRow(
+          values: optionsByAudioSubtitles.keys.toList(growable: false),
+          selected: selectedAudioSubtitles,
+          labelOf: AppService.api.showTimeAudioSubtitlesToDisplayString,
+          onSelected: (audioSubtitles) {
+            // Keep the current technology if available, otherwise fallback to the first one
+            final specs = optionsByAudioSubtitles[audioSubtitles]!;
+            _select(specs.firstWhereOrNull((spec) => spec.technology == selected.technology) ?? specs.first);
+          },
+        ),
+
+        // Technology
+        if (technologyOptions.any((spec) => spec.technology != null)) ...[
+          AppResources.spacerTiny,
+          _buildToggleRow(
+            values: technologyOptions,
+            selected: selected,
+            labelOf: (spec) => spec.technology ?? _defaultTechnologyLabel,
+            onSelected: _select,
+          ),
+        ],
+
+      ],
+    );
+  }
+
+  Widget _buildToggleRow<T>({required List<T> values, required T selected, required String Function(T) labelOf, required ValueChanged<T> onSelected}) {
+    return FadingEdgeScrollView.fromSingleChildScrollView(
+      // gradientFractionOnStart: 0.5,    // TODO Doesn't work for now https://github.com/mponkin/fading_edge_scrollview/issues/2
+      gradientFractionOnEnd: 0.5,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: ScrollController(),  // FadingEdgeScrollView needs a controller set
+        child: ToggleButtons(
+          isSelected: values.map((value) => value == selected).toList(growable: false),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+          borderRadius: BorderRadius.circular(5),
+          onPressed: (index) => onSelected(values[index]),
+          children: values.map((value) {
+            return Padding(
+              padding: const EdgeInsets.all(5),
+              child: Text(labelOf(value)),
+            );
+          }).toList(growable: false),
+        ),
+      ),
     );
   }
 }
@@ -707,6 +782,24 @@ class MoviePageBloc with Disposable {
     });
   }
 
+  /// Cache for [getMovieInfo]
+  Future<MovieInfo>? _movieInfo;
+
+  /// Single shared source of [MovieInfo] for this page, so every [FetchBuilder]-based widget
+  /// that needs complementary movie info (rating fallback, info lines, synopsis, ...) can consume
+  /// it independently while only ever triggering a single network request.
+  /// Memoized in memory (a failed request isn't kept, so the next call retries).
+  Future<MovieInfo> getMovieInfo() => _movieInfo ??= _fetchMovieInfo();
+
+  Future<MovieInfo> _fetchMovieInfo() async {
+    try {
+      return await AppService.api.getMovieInfo(movieShowTimes.movie.id);
+    } catch (e) {
+      _movieInfo = null;   // Allow a retry to actually re-fetch instead of replaying the same rejected future
+      rethrow;
+    }
+  }
+
   final MovieShowTimes movieShowTimes;
 
   final DataStream<ShowTimeSpec> selectedSpec;
@@ -715,7 +808,7 @@ class MoviePageBloc with Disposable {
   final _formattedShowTimes = <ShowTimeSpec, List<FormattedTheaterShowTimes>>{};
 
   /// List of [FormattedTheaterShowTimes] for this [filter].
-  /// With simple caching system.
+  /// Memoized in memory per [filter].
   List<FormattedTheaterShowTimes> getFormattedShowTimes(ShowTimeSpec filter) {
     return _formattedShowTimes.putIfAbsent(filter, () {
       // Compute days with show

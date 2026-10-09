@@ -7,13 +7,15 @@ class CtErrorWidget extends StatelessWidget {
 
   final Object error;
   final bool isDense;
+
+  /// Ignored when [isDense] (no retry in dense mode)
   final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: InkWell(
-        onTap: isDense ? onRetry : null,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Flex(
           mainAxisSize: MainAxisSize.min,
           direction: isDense ? Axis.horizontal : Axis.vertical,
@@ -22,7 +24,7 @@ class CtErrorWidget extends StatelessWidget {
             Tooltip(
               triggerMode: TooltipTriggerMode.longPress,
               preferBelow: false,
-              message: error.toString().replaceAll('all' + 'ocine', '***'),
+              message: error.toString().replaceAll('all' + 'ocine', '***').replaceAll('dh' + 'net', '***'),
               child: Icon(
                 Icons.error_outline,
                 color: AppResources.colorRed,
@@ -34,19 +36,12 @@ class CtErrorWidget extends StatelessWidget {
             AppResources.spacerTiny,
             const Text('Impossible de récupérer les données'),
 
-            // Retry
-            if (isDense)...[
-              AppResources.spacerTiny,
-              const Icon(Icons.refresh),
-            ]
-            else
+            // Retry & update app
+            if (!isDense)...[
               TextButton(
                 onPressed: onRetry,
                 child: const Text('Re-essayer'),
               ),
-
-            // Update app
-            if (!isDense)...[
               AppResources.spacerMedium,
               const UpdateAppWidget(),
             ],

@@ -1,15 +1,20 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 
 class Movie extends Identifiable {
   Movie({
     required ApiId id,
     required this.title,
+    this.originalTitle,
     this.poster,
+    this.releaseYear,
     this.releaseDate,
     this.languages,
     this.trailerId,
+    this.country,
+    this.countryCode,
     this.directors,
     this.actors,
     this.genres,
@@ -18,18 +23,43 @@ class Movie extends Identifiable {
     this.usersRating,
     this.pressRating,
   }) : super(id);
-  static const frenchLanguage = 'Français';
 
   final String title;
-  final String? poster;    //Path to the image (not full url)
+  final String? originalTitle;
+  final String? poster;    // Path to the image (not full url)
 
+  final String? releaseYear;    // Only the year (when full release date is not available)
   final DateTime? releaseDate;
-  late final String? releaseDateDisplay = releaseDate != null ? AppResources.formatterDate.format(releaseDate!) : null;
+  /// Release date used for sorting : falls back to the 1st january of [releaseYear] when the full date is not available
+  late final int? _releaseYearInt = int.tryParse(releaseYear ?? '');
+  late final DateTime? releaseDateForSort = releaseDate ?? (_releaseYearInt != null ? DateTime(_releaseYearInt) : null);
+  late final String? releaseYearDisplay = () {
+    final releaseYearResolved = () {
+      final releaseDate = this.releaseDate;
+      if (releaseDate != null) {
+        // Display release year if movie is more than 6 month old
+        return AppService.now.difference(releaseDate) > const Duration(days: 6 * 30)
+            ? releaseDate.year.toString()
+            : null;
+      } else if (releaseYear != null) {
+        // Display is year is NOT current year
+        final currentYear = AppService.now.year.toString();
+        return currentYear != releaseYear
+            ? releaseYear
+            : null;
+      }
+      return null;
+    } ();
+    return releaseYearResolved != null ? '($releaseYearResolved)' : null;
+  } ();
+  late final String? releaseDateDisplay = releaseDate?.toReleaseDateDisplay();
 
   /// Formated, displayable list of language, in french
   final String? languages;
-  /// True if the movie is fully in french (no other languages)
-  late final bool isFrench = languages == frenchLanguage;
+
+  final String? country;
+  final String? countryCode;
+  late final String? countryDisplay = countryCode ?? country;
 
   final ApiId? trailerId;
   final String? directors;
@@ -57,10 +87,9 @@ class Movie extends Identifiable {
     MovieRatingType.press => pressRating ?? usersRating,
   };
 
-  static const String _movieBaseUrl = 'https://www.all' + 'ocine.fr/film/fich' + 'efilm';
-  String get movieUrl => '${_movieBaseUrl}_gen_cfilm=$id.html';
-  String get usersRatingUrl => '$_movieBaseUrl-$id/critiques/spectateurs/';
-  String get pressRatingUrl => '$_movieBaseUrl-$id/critiques/presse/';
+  String get movieUrl => AppService.api.moviePageUrl(id.id);
+  String get usersRatingUrl => AppService.api.movieUsersRatingUrl(id.id);
+  String get pressRatingUrl => AppService.api.moviePressRatingUrl(id.id);
 
   /// Return true if this movie match the [search] query
   bool matchSearch(String search) {
@@ -82,22 +111,36 @@ class Movie extends Identifiable {
         if (usersRating != null && other.usersRating != null) return other.usersRating!.compareTo(usersRating!);
         return title.compareTo(other.title);
       case MovieSortType.releaseDate:
-        final date1 = releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final date2 = other.releaseDate ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return date2.compareTo(date1);
+        final date1 = releaseDateForSort ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final date2 = other.releaseDateForSort ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateComparison = date2.compareTo(date1);
+        return dateComparison != 0 ? dateComparison : title.compareTo(other.title);
       case MovieSortType.nextShow:
         return title.compareTo(other.title);  // Fallback: showtime data not available at Movie level
       case MovieSortType.duration:
-        return duration.compareTo(other.duration);
+        final durationComparison = duration.compareTo(other.duration);
+        return durationComparison != 0 ? durationComparison : title.compareTo(other.title);
     }
   }
 }
 
+/// Movie informations, that needs a dedicated movie network call to be fetched.
 class MovieInfo {
-  const MovieInfo({this.synopsis, this.certificate});
+  const MovieInfo({
+    this.synopsis,
+    this.certificate,
+    this.releaseDate,
+    this.genres,
+    this.pressRating,
+    this.trailerId,
+  });
 
   final String? synopsis;
   final String? certificate;
+  final DateTime? releaseDate;
+  final String? genres;
+  final double? pressRating;
+  final ApiId? trailerId;
 }
 
 class MovieVideo {

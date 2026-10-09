@@ -62,4 +62,5 @@ class AppResources {
 
 extension ExtendedDateTime on DateTime {
   String toDayString() => AppResources._formatterDay.format(this);
+  String toReleaseDateDisplay() => AppResources.formatterDate.format(this);
 }

@@ -16,12 +16,14 @@ class EmptySearchResultMessage extends StatelessWidget {
     required this.message,
     required this.backgroundColor,
     required this.imageAssetPath,
+    this.footer,
   });
 
   final IconData icon;
   final String message;
   final Color backgroundColor;
   final String imageAssetPath;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,11 @@ class EmptySearchResultMessage extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: (i.isOdd ? textTheme.headlineSmall : textTheme.titleLarge)?.copyWith(color: AppResources.colorLightGrey),
                         ),
+
+                      if (footer != null) ...[
+                        AppResources.spacerLarge,
+                        footer!,
+                      ],
                     ],
                   );
                 },

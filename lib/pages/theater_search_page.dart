@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/analytics_service.dart';
+import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
@@ -17,16 +20,48 @@ class TheaterSearchPage extends StatefulWidget {
 }
 
 class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider<TheaterSearchPage, _TheaterSearchPageBloc>, MultiSelectionMode<TheaterSearchPage> {
+  final _searchController = TextEditingController();
+
   @override
   initBloc() => _TheaterSearchPageBloc();
 
+  Future<void> _switchCountry(Country country) async {
+    if (country == AppService.instance.country) return;
+
+    // Warn before deleting local data, if any
+    if (AppService.instance.hasLocalData) {
+      final confirmed = await askConfirmation(
+        context: context,
+        title: 'Changer de pays',
+        caption: 'Vos cinémas sélectionnés, favoris et films masqués seront supprimés. Continuer ?',
+      );
+      if (!confirmed) return;
+    }
+
+    // Switch API provider
+    AppService.instance.switchCountry(country);
+
+    // Refresh UI: rebuild for the toggle's new selected state,
+    if (!mounted) return;
+    setState(() {});
+
+    // and either re-run the current search on the new country or go back to the onboarding message
+    bloc.startQuerySearch(_searchController.text);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final countryToggle = _CountryToggle(
+      country: AppService.instance.country,
+      onChanged: _switchCountry,
+    );
+
     return ClearFocusBackground(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: TextField(
+            controller: _searchController,
             decoration: const InputDecoration(
               hintText: 'Nom ou adresse',
             ),
@@ -35,10 +70,11 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             onSubmitted: bloc.startQuerySearch,
           ),
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.location_on_outlined),
-              onPressed: bloc.startGeoSearch,
-            ),
+            if (AppService.api.supportsGeoSearch)
+              IconButton(
+                icon: const Icon(Icons.location_on_outlined),
+                onPressed: bloc.startGeoSearch,
+              ),
             if (context.canPop)   // Hide when page is shown at app start
               MultiSelectionModeButton(
                 onPressed: toggleSelectionMode,
@@ -51,16 +87,23 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
           builder: (context, searchResult) {
             // No data
             if (searchResult.theaters == null)
-              return const EmptySearchResultMessage(
+              return EmptySearchResultMessage(
                 icon: Icons.search,
-                message: 'Cherchez\nUN CINÉMA\npar nom ou localisation',
+                message: 'Cherchez\nUN CINÉMA\npar nom${AppService.api.supportsGeoSearch ? ' ou localisation' : ''}',
                 backgroundColor: AppResources.colorDarkRed,
                 imageAssetPath: 'assets/welcome.png',
+                footer: countryToggle,
               );
 
             // Empty list
             if (searchResult.theaters!.isEmpty)
-              return EmptySearchResultMessage.noResult;
+              return EmptySearchResultMessage(
+                icon: IconMessage.iconSad,
+                message: 'Aucun\nRÉSULTAT',
+                backgroundColor: AppResources.colorDarkBlue,
+                imageAssetPath: 'assets/empty.png',
+                footer: countryToggle,
+              );
 
             return Scaffold(
               resizeToAvoidBottomInset: true,
@@ -83,6 +126,12 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 }
 
 
@@ -91,12 +140,16 @@ class _TheaterSearchPageBloc with Disposable {
 
   void startGeoSearch() => fetchBuilderController.refresh(param: const _SearchParams(isGeo: true), clearDataFirst: true);
 
-  void startQuerySearch(String query) => fetchBuilderController.refresh(param: _SearchParams(query: query), clearDataFirst: true);
+  void startQuerySearch(String query) => query.isNotEmpty
+      ? fetchBuilderController.refresh(param: _SearchParams(query: query), clearDataFirst: true)
+      : fetchBuilderController.refresh(clearDataFirst: true);
 
-  Future<_SearchResult> fetchTheaters(_SearchParams? searchParams) async {
-    // If search hasn't started yet
-    if (searchParams == null) return const _SearchResult.none();
+  /// Returns synchronously when search hasn't started yet, to skip the loader.
+  FutureOr<_SearchResult> fetchTheaters(_SearchParams? searchParams) => searchParams == null
+      ? const _SearchResult.none()
+      : _search(searchParams);
 
+  Future<_SearchResult> _search(_SearchParams searchParams) async {
     // Search
     final theaters = await (searchParams.isGeo ? _geoSearch() : _querySearch(searchParams.query!));
 
@@ -136,6 +189,60 @@ class _SearchParams {
 
   final String? query;
   final bool isGeo;
+}
+
+/// Toggle button to switch the API provider's country.
+class _CountryToggle extends StatelessWidget {
+  const _CountryToggle({required this.country, required this.onChanged});
+
+  final Country country;
+  final ValueChanged<Country> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Title
+        AppResources.spacerLarge,
+        Text(
+          'Pays',
+          style: context.textTheme.titleLarge?.copyWith(color: Colors.white),
+        ),
+
+        // Buttons
+        AppResources.spacerSmall,
+        ToggleButtons(
+          isSelected: [country == Country.france, country == Country.belgium],
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+          borderRadius: BorderRadius.circular(5),
+          color: AppResources.colorLightGrey,
+          selectedColor: Colors.white,
+          borderColor: AppResources.colorLightGrey,
+          selectedBorderColor: Colors.white,
+          fillColor: Colors.white24,
+          onPressed: (index) => onChanged(Country.values[index]),
+          children: [
+            _buildOption('🇫🇷', 'France'),
+            _buildOption('🇧🇪', 'Belgique'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOption(String flag, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(flag, style: const TextStyle(fontSize: 40)),
+          Text(label),
+        ],
+      ),
+    );
+  }
 }
 
 class _SearchResult {

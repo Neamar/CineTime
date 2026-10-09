@@ -1,7 +1,7 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
-import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -51,7 +51,7 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
     final ticketingUri = Uri.tryParse(widget.showtime.ticketingUrl ?? '-');
     if (ticketingUri != null) {
       try {
-        final endTimeDate = await ApiClient.getShowEndTime(widget.showtime.dateTime, widget.movie?.duration, ticketingUri).timeout(const Duration(seconds: 15));
+        final endTimeDate = await AppService.api.getShowEndTime(widget.showtime.dateTime, widget.movie?.duration, ticketingUri).timeout(const Duration(seconds: 15));
         if (endTimeDate != null) {
           endDate = endTimeDate;
           isEndDateApprox = false;
@@ -138,7 +138,7 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
           // Language
           AppResources.spacerSmall,
           Text(
-            widget.showtime.spec.toDisplayString(widget.movie?.isFrench),
+            AppService.api.showTimeSpecToDisplayString(widget.showtime.spec),
             style: context.textTheme.titleLarge,
           ),
 
@@ -185,7 +185,7 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
   }
 
   Future<void> _share() => SharePlus.instance.share(ShareParams(
-    text: '''$movieTitle [${widget.showtime.spec.toDisplayString(widget.movie?.isFrench)}]
+    text: '''$movieTitle [${AppService.api.showTimeSpecToDisplayString(widget.showtime.spec)}]
 ${widget.theater.name}
 $dateDisplay''',
   ));
@@ -194,7 +194,7 @@ $dateDisplay''',
 
   Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
     title: 'Cinema : $movieTitle',    // Adding 'Cinema' to the title makes Google Calendar show a nice picture automatically, make it easier to find in the calendar
-    description: 'Séance de cinéma pour $movieTitle en ${widget.showtime.spec.toDisplayString(widget.movie?.isFrench)}${widget.showtime.ticketingUrl != null ? '\n\nRéservation:\n${widget.showtime.ticketingUrl}' : ''}\n\nRemarque: ${isEndDateApprox ? 'Heure de fin de séance approximative basée sur la durée du film' : 'Heure de fin de séance donnée par le cinéma'}',
+    description: 'Séance de cinéma pour $movieTitle en ${AppService.api.showTimeSpecToDisplayString(widget.showtime.spec)}${widget.showtime.ticketingUrl != null ? '\n\nRéservation:\n${widget.showtime.ticketingUrl}' : ''}\n\nRemarque: ${isEndDateApprox ? 'Heure de fin de séance approximative basée sur la durée du film' : 'Heure de fin de séance donnée par le cinéma'}',
     location: '${widget.theater.name}\n${widget.theater.fullAddress}',
     startDate: widget.showtime.dateTime,
     endDate: endDate ?? widget.showtime.dateTime.add(const Duration(hours: 2)),

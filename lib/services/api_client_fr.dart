@@ -1,0 +1,859 @@
+// ignore_for_file: prefer_interpolation_to_compose_strings
+
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:cinetime/models/_models.dart';
+import 'package:cinetime/services/analytics_service.dart';
+import 'package:cinetime/utils/_utils.dart';
+import 'package:cinetime/utils/exceptions/data_error.dart';
+import 'package:cinetime/utils/exceptions/http_response_exception.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonObject, JsonList;
+
+import 'api_client.dart';
+import 'app_service.dart';
+import 'cache_interceptor.dart';
+
+class FranceApiClient extends ApiClient {
+  //#region Vars
+  /// GraphQL API host and path
+  static const _graphAuthority = 'graph.all' + 'ocine.fr';
+  static const _graphPath = '/v1/mobile/';
+
+  /// Build the technology to display from the raw `experience` and `projection` values of a showtime.
+  /// Experiences come first (e.g. "4DX 3D"). Duplicated labels are kept once (Set keeps insertion order).
+  static String? _parseTechnology(JsonList? experiences, JsonList? projections) {
+    final labels = <String>{};
+    for (final experience in (experiences ?? const []).cast<String>()) {
+      final label = _showtimeExperienceMap[experience];
+      if (label != null) {
+        labels.add(label);
+      } else if (!_showtimeExperienceMap.containsKey(experience)) {
+        reportError(UnimplementedError('Unknown experience "$experience"'), StackTrace.current);
+      }
+    }
+    for (final projection in (projections ?? const []).cast<String>()) {
+      if (_showtimeProjectionMap.containsKey(projection)) {
+        final label = _showtimeProjectionMap[projection];
+        if (label != null) labels.add(label);
+      } else {
+        labels.add(projection);
+        reportError(UnimplementedError('Unknown projection "$projection"'), StackTrace.current);
+      }
+    }
+    return labels.isEmpty ? null : labels.join(' ');
+  }
+
+  /// Request timeout duration
+  static const _timeOutDuration = Duration(seconds: 30);
+
+  /// Whether to log headers also or not.
+  static const _logHeaders = false;
+
+  FranceApiClient() : _client = SleekHttpClient(
+    client: SentryHttpClient(
+      failedRequestStatusCodes: [
+        SentryStatusCode.range(400, 599),   // Report all errors
+      ],
+    ),
+    authorityGetter: () => _graphAuthority,
+    timeOutDuration: _timeOutDuration,
+    headersGetter: () => {
+      HttpHeaders.acceptHeader: SleekHttpClient.contentTypeJson,
+      'user-agent': 'androidapp/0.0.1',
+    },
+    errorBuilder: HttpResponseException.new,
+    interceptors: [
+      if (CacheInterceptor.enabled) CacheInterceptor(
+        keyBuilder: _getCacheKeyFromRequest,
+      ),
+      const _GraphQLErrorInterceptor(),
+      LoggingInterceptor(logger: debugPrint, logHeaders: _logHeaders),
+    ],
+  );
+
+  final SleekHttpClient _client;
+
+  @override
+  ApiId decodeStoredId(String encoded) => FranceApiId.fromEncoded(encoded);
+  //#endregion
+
+  @override
+  bool get supportsGeoSearch => true;
+
+  //#region Requests
+  /// Get theaters that match [query] (free text query)
+  @override
+  Future<List<Theater>> searchTheaters(String query) async {
+    // Send request
+    // Note: no need to pre-encode query, Uri.https (used internally by SleekHttpClient) already encodes the path.
+    final responseJson = await _client.send<JsonObject>(HttpMethod.get, '/_/autocomplete/mobile/theater/$query', authority: 'www.all' + 'ocine.fr');
+
+    // Process result
+    final JsonList theatersJson = responseJson['results']!;
+    return theatersJson.map((theaterJson) {
+      final JsonObject theaterInfo = theaterJson['data']!;
+
+      return Theater(
+        id: FranceApiId(theaterInfo['id'], FranceApiId.typeTheater),
+        name: (theaterJson['label'] as String).trim(),
+        street: theaterInfo['address'],
+        zipCode: theaterInfo['zip'],
+        city: theaterInfo['city'],
+      );
+    }).toList(growable: false);
+  }
+
+  /// Get theaters around geo-position
+  @override
+  Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) async {
+    // Send request
+    final responseJson = await _sendGraphQL<JsonObject>(
+      query: r'query TheatersList($after: String, $location: CoordinateType, $radius: Float, $card: [LoyaltyCard], $country: CountryCode) { theaterList(location: $location, radius: $radius, after: $after, loyaltyCard:$card, countries: [$country], order: [CLOSEST]) { __typename pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename ...TheaterFragment } } } } fragment TheaterFragment on Theater { __typename id internalId experience flags { __typename hasPreview hasBooking } poster { __typename id url } name coordinates { __typename distance(from: $location, ' + 'unit: "km") latitude longitude } theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename activity company { __typename id internalId name } } location { __typename address zip city country region } tags { __typename list } }',
+      variables: {
+        'location': {
+          'lat': latitude,
+          'lon': longitude,
+        },
+        'radius': 20000,
+        'card': [],
+        'country': 'FRANCE'
+      },
+    );
+
+    // Process result
+    final JsonList theatersJson = responseJson['data']!['theaterList']!['edges']!;
+    return theatersJson.map((theaterJson) {
+      theaterJson = theaterJson['node']!;
+      final JsonObject? address = theaterJson['location'];
+
+      return Theater(
+        id: FranceApiId.fromEncoded(theaterJson['id']),
+        name: (theaterJson['name'] as String).trim(),
+        street: address?['address'],
+        zipCode: address?['zip'],
+        city: address?['city'],
+        distance: theaterJson['coordinates']?['distance']?.toDouble(),
+      );
+    }).toList(growable: false);
+  }
+
+  @override
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {
+    // Prepare period
+    final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
+    final to = from.add(const Duration(days: 21));     // Fetch next 21 days
+
+    // Build movieShowTimes list
+    final moviesShowTimesMap = <Movie, MovieShowTimes>{};
+
+    // Prepare ghost showtimes map
+    final ghostShowTimesMap = <Theater, List<ShowTime>>{};
+
+    // For each theater
+    for (final theater in theaters) {
+      // Send request
+      var responseJson = await _sendGraphQL<JsonObject>(
+        /*** Notes
+         * Each request can have a maximum complexity of 12000 points.
+         * The [count] variable linearly increase the total request complexity point count.
+         *
+         * -- 1. Original query --
+         * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }'
+         *
+         * Complexity: 21 + 203 * count
+         * Example: for count = 100 : 20321 points
+         *
+         * -- 2. Lighter query (minimal fields, but all types kept) --
+         * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename startsAt projection diffusionVersion } movie { __typename id title credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename firstName lastName } voiceActor { __typename firstName lastName } originalVoiceActor { __typename firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } poster { __typename url } } } } } }'
+         *
+         * Complexity: 152 * count
+         * Example: for count = 100 : 15200 points
+         *
+         * -- 3. Minimalist query --
+         * 'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion } movie { id title credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }'
+         *
+         * Complexity: 97 * count
+         * Example: for count = 200 : 19400 points
+         *
+         */
+        query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection experience diffusionVersion tags data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
+        variables: {
+          'id': theater.id.encodedId,
+          'from': _dateToString(from),
+          'to': _dateToString(to),
+          'count': 100,
+          'hasPreview': false,
+          'order': [
+            'PREVIEW',
+            'REVERSE_RELEASE_DATE',
+            'WEEKLY_POPULARITY'
+          ],
+          'country': 'FRANCE'
+        },
+      );
+
+      // Process response
+      responseJson = responseJson['data']!;
+
+      // Check data
+      final JsonObject moviesShowTimesDataJson = responseJson['movieShowtimeList']!;
+      if (moviesShowTimesDataJson['pageInfo']['hasNextPage'] == true) {
+        final totalCount = moviesShowTimesDataJson['totalCount'];
+        reportError(UnimplementedError('MovieShowtimes has more results to be fetched for "${theater.name}" (totalCount: $totalCount)'), StackTrace.current);
+      }
+
+      // Get movie info
+      final JsonList moviesShowTimesJson = moviesShowTimesDataJson['edges']!;
+      for (JsonObject movieShowTimesJson in moviesShowTimesJson) {
+        movieShowTimesJson = movieShowTimesJson['node']!;
+
+        // Basic movie info needed for ShowTime building
+        final JsonObject? movieJson = movieShowTimesJson['movie'];
+        final JsonList? languagesJson = movieJson?['languages'];
+
+        // Build ShowTimes
+        final JsonList? showTimesJson = movieShowTimesJson['showtimes'];
+        if (isIterableNullOrEmpty(showTimesJson))
+          continue;
+
+        final showTimes = showTimesJson!.map((showTimeJson) {
+          /*** Audio version & subtitles
+           * The API `diffusionVersion` alone is not enough: for french movies, some theaters send "DUBBED" (e.g. UGC),
+           * and french subtitles are only announced by the showtime `tags`.
+           * So we combine `diffusionVersion` with the `tags`, without any theater-specific rule:
+           *   1. LOCAL / DUBBED  -> french audio, subtitles only if announced by a tag
+           *   2. ORIGINAL        -> original audio, french subtitles (always the case in France)
+           *   (a DUBBED showtime tagged as original version is handled as ORIGINAL, because the theater contradicts itself and the tag is the right one)
+           *
+           * The movie `languages` is NOT used to guess the version (e.g. to show an ORIGINAL french movie as VF), because:
+           *   - it's incomplete for co-productions: a multilingual movie may be listed as french only, while its original version really is subtitled
+           *   - some theaters send ORIGINAL for all their showtimes, and also label their french movies as "VOSTF" on their own website
+           * So we trust what the theater declares, even if a few theaters give wrong data.
+           */
+          final rawDiffusionVersion = showTimeJson['diffusionVersion'] as String?;
+          final tags = (showTimeJson['tags'] as JsonList?)?.cast<String>() ?? const [];
+          final isOriginal = rawDiffusionVersion == 'ORIGINAL' || (rawDiffusionVersion == 'DUBBED' && tags.contains(_showtimeOriginalVersionTag));
+          ShowAudioVersion audioVersion;
+          final subtitles = <ShowSubtitles>{};
+
+          // 1. Version in french (LOCAL = french movie in its original language, DUBBED = foreign movie with french voice, or french movie for some theaters)
+          // Not subtitled by default: a theater showing it with subtitles (e.g. for deaf people) announces it with a tag.
+          if (!isOriginal && (rawDiffusionVersion == 'LOCAL' || rawDiffusionVersion == 'DUBBED')) {
+            audioVersion = ShowAudioVersion.french;
+            if (tags.any(_showtimeSubtitlesTags.contains)) subtitles.add(ShowSubtitles.french);
+          }
+
+          // 2. Original version: subtitles are assumed, even without tag (usual case in France).
+          else if (isOriginal) {
+            audioVersion = ShowAudioVersion.original;
+            subtitles.add(ShowSubtitles.french);
+          }
+
+          // Other cases
+          else {
+            audioVersion = ShowAudioVersion.original;
+            reportError(UnimplementedError('Unknown diffusionVersion "$rawDiffusionVersion" for showtime at ${showTimeJson['startsAt']}'), StackTrace.current);
+          }
+
+          // Build instance
+          return ShowTime(
+            DateTime.parse(showTimeJson['startsAt']),
+            spec: ShowTimeSpec(
+              audioVersion: audioVersion,
+              subtitles: subtitles,
+              technology: _parseTechnology(showTimeJson['experience'], showTimeJson['projection']),
+            ),
+            ticketingUrl: () {    // Needs to be in multiple steps to enforce [firstOrNull] extension static resolution
+              final JsonList? ticketing = showTimeJson['data']?['ticketing'];
+              if (ticketing == null) return null;
+              final JsonList? urls = (ticketing.firstWhereOrNull((t) => t['provider'] == 'default') ?? ticketing.firstOrNull)?['urls'];
+              return urls?.firstOrNull as String?;
+            } (),
+          );
+        }).toList();
+
+        // Filter passed shows
+        removeStartedShowTimes(showTimes);
+
+        // Skip this movie if there are no valid showtimes (all passed)
+        if (showTimes.isEmpty) continue;
+
+        // Check movie info
+        if (movieJson == null) {
+          // This may happen when an event (usually a movie, but may be a special local show) doesn't have a proper page on API provider.
+          // In that case, showTimes are still available (and ticketing links works), but movie info is empty.
+          // On the official Android app, it is displayed as a "blank" movie session: we can add to calendar and book, but no movie info is displayed.
+          // On the web site, session is just not displayed at all.
+          AnalyticsService.trackEvent('Ghost showtimes', {
+            'theater': theater.name,
+            'showTimesCount': showTimes.length,
+            'firstShowTime': showTimes.first.dateTime.toIso8601String(),
+          });
+
+          // In that case, collect ghost showtimes in a separate map
+          ghostShowTimesMap.putIfAbsent(theater, () => []).addAll(showTimes);
+
+          // And skip movie processing
+          continue;
+        }
+
+        // Build Movie info
+        final String movieId = movieJson['id'];
+        var movie = moviesShowTimesMap.keys.firstWhereOrNull((m) => m.id.id == movieId);
+
+        if (movie == null) {
+          final JsonList? releasesJson = movieJson['releases'];
+          final JsonList? genresJson = movieJson['genres'];
+          final String? posterUrl = movieJson['poster']?['url'];
+          final JsonList? videosJson = movieJson['videos'];
+          final String? trailerId = videosJson?.firstOrNull?['id'];
+          final JsonObject statisticsJson = movieJson['stats'] ?? {};
+
+          String? personsFromJson(JsonList? personsJson) {
+            if (personsJson == null) return null;
+            return personsJson.map((json) {
+              json = json['node'];
+              final JsonObject? personJson = json['person'] ?? json['actor'] ?? json['voiceActor'] ?? json['originalVoiceActor'];
+              return [
+                personJson?['firstName'],
+                personJson?['lastName'],
+              ].joinNotEmpty(' ');
+            }).joinNotEmpty(', ');
+          }
+
+          String? buildDurationFromApi(String? durationApi) {
+            if (isStringNullOrEmpty(durationApi)) return null;
+
+            List<String> parts = durationApi!.split(':');
+            if (parts.length != 3) return null;
+
+            final hours = int.tryParse(parts[0]);
+            if (hours == null) return null;
+
+            final minutes = int.tryParse(parts[1]);
+            if (minutes == null) return null;
+
+            return '${hours}h${minutes.toTwoDigitsString()}';
+          }
+
+          final releaseDates = releasesJson?.map((r) => dateFromString(r['releaseDate']?['date'])).nonNulls;
+          final releaseDate = (releaseDates == null || releaseDates.isEmpty) ? null : releaseDates.reduce((a, b) => a.isBefore(b) ? a : b);
+
+          movie = Movie(
+            id: FranceApiId.fromEncoded(movieId),
+            title: (movieJson['title'] as String).trim(),
+            languages: languagesJson?.map((languageCode) => _movieLanguageMap[languageCode]).joinNotEmpty(', '),
+            directors: personsFromJson(movieJson['credits']?['edges']),
+            actors: personsFromJson(movieJson['cast']?['edges']),
+            releaseDate: releaseDate,
+            durationDisplay: buildDurationFromApi(movieJson['runTime']),
+            genres: genresJson?.map((genreApi) => _movieGenresMap[genreApi]).joinNotEmpty(', '),
+            poster: _getPathFromUrl(posterUrl),
+            trailerId: isStringNullOrEmpty(trailerId) ? null : FranceApiId.fromEncoded(trailerId!),
+            usersRating: (statisticsJson['userRating']?['score'] as num?)?.toDouble(),
+            pressRating: (statisticsJson['pressReview']?['score'] as num?)?.toDouble(),
+          );
+        }
+
+        // Get or create MovieShowTimes
+        final movieShowTimes = moviesShowTimesMap.putIfAbsent(movie, () => MovieShowTimes(movie!));
+
+        // Update or create TheaterShowTimes
+        var theaterShowTimes = movieShowTimes.theatersShowTimes.firstWhereOrNull((t) => t.theater == theater);
+        if (theaterShowTimes == null) {
+          theaterShowTimes = TheaterShowTimes(theater);
+          movieShowTimes.theatersShowTimes.add(theaterShowTimes);
+        }
+        theaterShowTimes.showTimes.addAll(showTimes);
+      }
+    }
+
+    // Return data
+    return MoviesShowTimes(
+      theaters: theaters,
+      moviesShowTimes: moviesShowTimesMap.values.toList(growable: false),
+      ghostShowTimes: ghostShowTimesMap.entries.map((e) => TheaterShowTimes(e.key, showTimes: e.value)).toList(growable: false),
+      fetchedFrom: from,
+      fetchedTo: to,
+    );
+  }
+
+  /// Get detailed movie info
+  /// Return synopsis and certificate
+  @override
+  Future<MovieInfo> getMovieInfo(ApiId movieId) async {
+    // Send request
+    final responseJson = await _sendGraphQL<JsonObject>(
+      query: r'query MovieMoreInfoQuery($id: String, $country: CountryCode) { movie(id: $id) { __typename id internalId title originalTitle genres type poster { __typename id internalId url } synopsis(long: true) mainRelease { __typename type } movieOperation: operation { __typename target { __typename main { __typename code } data } } countries { __typename id name localizedName } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } certificate { __typename label } } dvdReleases: releases(type: [DVD_RELEASE], country: $country) { __typename releaseDate { __typename date } } blueRayReleases: releases(type: [BLU_RAY_RELEASE], country: $country) { __typename releaseDate { __typename date } } VODReleases: releases(type: [VOD_RELEASE], country: $country) { __typename releaseDate { __typename date } } releaseFlags { __typename ...ReleaseUpcomingFragment } data { __typename productionYear budget } format { __typename color audio } languages boxOfficeFR: boxOffice(type: ENTRY, country: FRANCE, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } boxOfficeUS: boxOffice(type: PROFIT, country: USA, period: WEEK) { __typename range { __typename startsAt endsAt } value cumulative } relatedTags { __typename internalId name } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } }',
+      variables: {
+        'id': movieId.encodedId,
+        'country': 'FRANCE'
+      },
+    );
+
+    // Process data
+    final JsonObject? movieJson = responseJson['data']?['movie'];
+
+    // Synopsis
+    String? synopsis = movieJson?['synopsis'];
+    if (synopsis != null) synopsis = convertBasicHtmlTags(synopsis);
+    if (synopsis?.isEmpty == true) synopsis = null;
+
+    // Certificate
+    // Releases are sorted from newest to oldest, and a re-release often has no certificate: take the first one available
+    final JsonList releasesJson = movieJson?['releases'] ?? [];
+    final certificate = releasesJson
+        .map((release) => release['certificate']?['label'] as String?)
+        .firstWhereOrNull((label) => label?.isNotEmpty == true);
+
+    // Return data
+    return MovieInfo(
+      synopsis: synopsis,
+      certificate: certificate,
+    );
+  }
+
+  @override
+  Future<VideoData?> getVideoData(ApiId videoId) async {
+    // Send request
+    JsonObject? responseJson = await _sendGraphQL<JsonObject>(
+      query: r'query Video($id: String!, $country: CountryCode) { video(id: $id) { __typename id internalId title type duration language publication { __typename startsAt } relatedEntities { __typename ... on Movie { id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename internalId id countries { __typename id } } } } } releases(type: [RELEASED, SVOD_RELEASE], country: $country) { __typename releaseDate { __typename date } certificate { __typename label } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id internalId name } } } releaseFlags { __typename ...ReleaseUpcomingFragment } credits(department: DIRECTION, first: 5) { __typename edges { __typename node { __typename person { __typename id firstName lastName countries { __typename id } } position { __typename name } } } } data { __typename productionYear } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } relatedTags { __typename id internalId name scope } } ... on Series { ...VideoSeries } ... on Season { internalId series { __typename ...VideoSeries } } ... on Episode { internalId season { __typename series { __typename ...VideoSeries } } } } files { __typename quality height url size } snapshot { __typename id url } } } fragment ReleaseUpcomingFragment on ReleaseFlags { __typename release { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } upcoming { __typename svod { __typename original exclusive amazonPrime appletv canalplay disney filmotv globoplay mycanal netflix ocs salto sfrPlay adn } } } fragment VideoSeries on Series { __typename id title genres poster { __typename url } countries { __typename id name localizedName } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId countries { __typename id } } } } } direction: credits(department: DIRECTION) { __typename edges { __typename node { __typename position { __typename name } person { __typename id firstName lastName countries { __typename id } } } } } releaseFlags { __typename ...ReleaseUpcomingFragment } releases(country: $country) { __typename releaseDate { __typename date } companies(activity: [DISTRIBUTION_COMPANIES]) { __typename company { __typename id name } } } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } relatedTags { __typename id internalId scope } }',
+      variables: {
+        'id': videoId.encodedId,
+        'country': 'FRANCE'
+      },
+    );
+
+    // Process result
+    responseJson = responseJson['data']?['video'];
+    final JsonList? videosJson = responseJson?['files'];
+    if (videosJson == null) {
+      AnalyticsService.trackEvent('Empty video', {
+        'videoId': videoId.id,
+        'videoTitle': responseJson?['title'],
+      });
+      return null;
+    }
+
+    // Find highest quality video, but not greater than 720p
+    final videos = videosJson.map((json) => MovieVideo.fromJson(json)).toList();
+    videos.sort((v1, v2) => v1.height.compareTo(v2.height));
+    var bestVideo = videos.firstWhereOrNull((video) => video.height > 700);
+    bestVideo ??= videos.last;
+    final uri = bestVideo.uri;
+    return uri != null ? VideoData(uri) : null;
+  }
+  //#endregion
+
+  //#region Tools
+  static const String _movieBaseUrl = 'https://www.all' + 'ocine.fr/film/fich' + 'efilm';
+
+  @override
+  String moviePageUrl(String movieId) => '${_movieBaseUrl}_gen_cfilm=$movieId.html';
+
+  @override
+  String movieUsersRatingUrl(String movieId) => '$_movieBaseUrl-$movieId/critiques/spectateurs/';
+
+  @override
+  String moviePressRatingUrl(String movieId) => '$_movieBaseUrl-$movieId/critiques/presse/';
+
+  /// Get the full url or an image from [path].
+  /// if [isThumbnail] is true, image will be small. Otherwise it will return full size.
+  @override
+  String? getImageUrl(String? path, {bool isThumbnail = false}) {
+    if (path?.isNotEmpty != true) return null;
+    return 'https://images.all' + 'ocine.fr/' + (isThumbnail ? 'r_200_200' : '') + path!;
+  }
+  //#endregion
+
+  //#region Other
+  /// Get the show end time from ticketing url
+  // OPTI: study migrating this to sleek_http_client too (needs a second, generic client instance since target hosts vary per call). Not very important though (would be nice for logging).
+  @override
+  Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
+    // UGC
+    if (ticketingUri.host.contains('ugc.fr')) {
+      final response = await http.get(ticketingUri);
+      throwIfHttpError(response);
+      final htmlContent = response.body;
+
+      // Extract raw value
+      final regex = RegExp(r'<div class="showing-endtime.*?">.*?(\d{2}:\d{2}).*?</div>', dotAll: true, caseSensitive: false);
+      final match = regex.firstMatch(htmlContent);
+
+      // Extract the captured group containing the time
+      final endTime = match?.group(1)?.trim();
+      if (endTime == null) throw const DataError('Could not find end time in UGC page');
+
+      // Parse the time and build end date
+      final timeParts = endTime.split(':');
+      var endDate = startAt.copyWith(
+        hour: int.parse(timeParts[0]),
+        minute: int.parse(timeParts[1]),
+      );
+
+      // If the end time is before the start time, it means it's on the next day
+      if (endDate.isBefore(startAt)) {
+        endDate = endDate.copyWith(day: endDate.day + 1);
+      }
+      return endDate;
+    }
+
+    // Pathé
+    else if (ticketingUri.host.contains('pa' + 'the.fr')) {
+      // Pathé ticketing page is more complex:
+      // - Requires javascript to load
+      // - Displayed end time is actually just based on start time, movie duration and ads duration
+      // So we just fetch the ads duration (actually independent of the movie) and add it to the start time.
+
+      // Ignore if movieDuration is null
+      if (movieDuration == null) return null;
+
+      // First, get a auth token
+      final authResponse = await http.post(Uri.parse('https://s.pa' + 'the.fr/oauth/api/jwt/token'), body: json.encode({
+        'grant_type': 'client_credentials',
+        'client_id': 'API_CLI'
+      }));
+      throwIfHttpError(authResponse);
+      final authToken = json.decode(authResponse.body)['access_token'];
+      final headers = {
+        'Authorization': 'Bearer $authToken',
+      };
+
+      // Then, get the ads duration
+      final adsResponse = await http.get(Uri.parse('https://s.pa' + 'the.fr/api/setting/fr-FR/booking/display'), headers: headers);
+      throwIfHttpError(adsResponse);
+      final adsDuration = json.decode(adsResponse.body)['adsDuration'] as int;
+
+      // Compute total show duration
+      final showDuration = movieDuration + Duration(minutes: adsDuration);
+
+      // Return end time
+      return startAt.add(showDuration);
+    }
+
+    // Ciné Boutique
+    if (ticketingUri.host.contains('cine.bo' + 'utique')) {
+      // Get API token
+      final response = await http.get(ticketingUri);
+      throwIfHttpError(response);
+      final htmlContent = response.body;
+
+      // Extract API token
+      final apiToken = RegExp(r'<meta.+api_token.+content="(.+)">', caseSensitive: false).firstMatch(htmlContent)?.group(1);
+      if (apiToken == null) throw const DataError('Could not find APi Token in Ciné Boutique page');
+
+      // Get showtime data
+      final showTimeId = ticketingUri.queryParameters['showId'];
+      final subDomain = ticketingUri.host.split('.').first;
+      final showTimeResponse = await http.get(Uri.parse('https://$subDomain.cineo' + 'ffice.fr/vad/shows/$showTimeId?api_token=$apiToken'));
+      throwIfHttpError(showTimeResponse);
+
+      // Extract showtime data
+      final showTimeData = json.decode(showTimeResponse.body);
+      final endTime = showTimeData['showend'] as String;
+      return DateTime.parse(endTime).toLocal();
+    }
+
+    return null;
+  }
+
+  @override
+  String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec) {
+    String label = spec.audioVersion.code;
+    if (spec.subtitles.isNotEmpty) {
+      label += 'ST';
+      if (spec.subtitles.length > 1 || spec.subtitles.first != ShowSubtitles.french) {
+        reportError(UnimplementedError('ShowTimeSpec subtitles display not implemented for ${spec.subtitles}'), StackTrace.current);
+      }
+    }
+    return label;
+  }
+  //#endregion
+
+  //#region Generics
+  static final _dateFormat = DateFormat('yyyy-MM-dd');
+
+  /// Return correctly formatted date
+  static String _dateToString(DateTime date) => '${_dateFormat.format(date)}T00:00:00';
+
+  /// Return the path part of an url
+  static String? _getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
+
+  /// Build a unique key based on the request, used for cache.
+  static String _getCacheKeyFromRequest(http.BaseRequest request) {
+    // If it's a GraphQL request
+    if (request.url.path == _graphPath) {
+      final body = (request as http.Request).body;
+      return body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
+    }
+
+    // If it's a classic request
+    else {
+      return request.url.toString();
+    }
+  }
+
+  /// Get an auth token for GraphQL request.
+  Future<String> _getAuthToken() async {
+    // Using hardcoded token works for now, but it may be revoked at any time.
+    return 'eUtg7EujStmMxN6gQ6-b1s:APA91bHtJ2l0ECSwjps5kQ3EcnIv9UNWW2wW5fN5HTdzYJrBlNROWLZGDUsa_wgzG4NuMHT-Hpqs1f1EUmCZByAlBV0InrbkOa6urf4IpX2fyYwt_3832po';    // samA3 windIP 9.10.18
+  }
+
+  /// Send a graphQL request
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
+    // Headers
+    final headers = {
+      'a' + 'c-auth-token': await _getAuthToken(),
+      'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciO' + 'iJSUzI1NiJ9.eyJpYXQiOjE2NzU0NDEwNTksImV4cCI6MTgzMzU4MDc5OSwidXNlcm5hbWUiOiJhbm9ueW1vdXMiLCJhcHBsaWNhdGlvbl9uYW1lIjoibW9iaWxlIiwidX' + 'VpZCI6ImJmMDQ3YjgzLWQ0MzktNGM0My1iYWQ4LTBhNTc3MzFkZGM4OCIsInNjb3BlIjpudWxsfQ.s-_yFAY2wLi0ggRE_GKjuoH4A1lPBaf9iVhbzqUu_ityjVMe4R' + 'UdQHwlXqedQv3cinnLszpwfMPDg78qrQEn2vfoWe6_Af_pj0WRJV3mhrf4EpTnBFy-7NZoXDLNDtobi99XRUJpG-89kreZXzBZbMuuirVyn0XwHgDk8Pnatdh6uLWiQHSxXz9qeXgNT-R1FOS0aNlS604oAvQ_PJa1CC6qmLFtmjOZUhWul' + 'yBSUos1rhrf3BvEHM4G0XME_ocr_79PIOKWP5c4PrW-8hydQRDQmu-OAaMldsRc9Rgy_8UAYSn4n-AqiUAa1Ckdjz3UpVbA75pJJ6HsbiMZBpNb4nVanaPisL0LuyqcMp0I49iIZbOF0szHK0wZMcVmCuU3ZLTHcQsDWhVhMpA2SdMV6-vR-Vgw86nGCJZ89KQ_-mnvBxI6fPPinzhaTsvspfcnoggJLcZjqV_bRzwB6wn4MjCbI1jEkTSng0ebPZSHXqNx6EHriQ7LEAoMKmckYVVuvKGaYkriemY6SWGSeNTDNn9QPnh4BKAIhitRN0Anxs6vE1IQYUBcpFm7GSxjGi2_wzEy6g5iobEn2MR80wIWLP9k932c' + '7mcE69NSD4y5iyFYIwcdxfBvsrVoPWoEWLdSkwXjsGBgtBv3MA6jRTkFUlZH90V' + 'xcIsNz0BEnH6G240',
+      'host': 'graph.all' + 'ocine.fr',
+    };
+
+    // Body
+    final body = {
+      'query': query,
+      'variables': variables,
+    };
+
+    // Send request
+    // Note: a GraphQL request may return a 200 HTTP status code with errors — handled by [_GraphQLErrorInterceptor].
+    return await _client.send<T>(HttpMethod.post, _graphPath, headers: headers, bodyJson: body);
+  }
+
+  static void throwIfHttpError(http.Response response) {
+    if (!SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
+      throw HttpResponseException(response);
+    }
+  }
+  //#endregion
+}
+
+/// France specific [ApiId], encoded as base64 of `'$type:$id'`.
+/// Base-64 decoded examples : 'Movie:133392', 'Theater:C0026', 'Video:brand.video_legacy.AC.19589606'
+///
+/// API codes may be int or string.
+/// Examples : 133392 (movie), 'P0671' (theater)
+class FranceApiId extends ApiId {
+  FranceApiId(String id, String type) : super(id, '$type:$id'.toBase64());
+  FranceApiId.fromEncoded(String encoded) : super(_decodeId(encoded), encoded);
+
+  static const typeTheater = 'Theater';
+
+  /// Decode an encoded id
+  static String _decodeId(String id) {
+    final decoded = id.decodeBase64();
+    return decoded.substring(decoded.indexOf(':') + 1);
+  }
+}
+
+/// A GraphQL request may return a 200 HTTP status code with errors in the body.
+/// Detects this case and throws [HttpResponseException], since [SleekHttpClient] only treats non-2xx status codes as errors.
+class _GraphQLErrorInterceptor implements HttpInterceptor {
+  const _GraphQLErrorInterceptor();
+
+  @override
+  Future<http.Response> intercept(http.BaseRequest request, HttpInterceptorChain chain) async {
+    final response = await chain.proceed(request);
+    if (response.isJson) {
+      final parsed = response.tryDecodeJson<JsonObject>();
+      if (parsed?['errors'] != null) {
+        throw HttpResponseException(response, parsed);
+      }
+    }
+
+    return response;
+  }
+}
+
+/// Display label of each value of the API `Projection` enum.
+/// `null` = no extra charge expected (standard or widespread format): no technology to display (like "Dig" on BE).
+const _showtimeProjectionMap = <String, String?>{
+  'DIGITAL': null, 'F_2D': null, 'SCOPE': null, 'LED': null,
+  'F_4K': null, 'LASER': null, 'HDR': null, 'F_ATMOS': null, 'DOLBY_VISION': null,
+  'F_3D': '3D', 'REALD_3D': 'RealD 3D', 'F_4K3D': '3D',
+  'IMAX': 'IMAX', 'IMAX_3D': 'IMAX 3D', 'IMAX_70MM': 'IMAX 70mm', 'IMAX_3D_HFR': 'IMAX 3D HFR',
+  'HFR': 'HFR', 'F_3DHFR': '3D HFR',
+  'F_35MM': '35mm', 'F_70MM': '70mm', 'F_3D70MM': '3D 70mm', 'ANALOG': 'Analogique',
+  'F_4D': '4D', 'ONYX': 'Onyx LED', 'MACROXE': 'MacroXE',
+};
+
+/// Display label of each value of the API `Experience` enum.
+/// `null` = no extra charge expected (generic, sound or comfort-only format): the showtime is considered as a standard one.
+const _showtimeExperienceMap = <String, String?>{
+  'E_4DX': '4DX', 'SCREEN_X': 'ScreenX', 'DOLBY_CINEMA': 'Dolby Cinema', 'ICE': 'ICE', 'LASER_ULTRA': 'Laser Ultra',
+  'INFINITY_VISION': 'Infinity Vision', 'GRAND_LARGE': 'Grand Large', 'INFINITE': 'Infinite', 'ONYX_LED': 'Onyx LED',
+  'E_4D_EMOTION': '4D E-Motion', 'MX4D': 'MX4D', 'DBOX': 'D-Box',
+  'PLF': null, 'PREMIUM': null, 'PLATINUM': null, 'JUMBO': null, 'SUPER_SCREEN': null,
+  'GOLD_CLASS': null, 'LUXURY': null, 'TRADITIONAL_AUDITORIUM': null,
+  'DOLBY_ATMOS': null, 'ATMOS_EXPERIENCE': null, 'DOLBY_VISION_ATMOS': null, 'ECLAIR_COLOR': null,
+  'BUTT_KICKER': null, 'TREMOR_FX': null, 'LIGHT_VIBES': null,
+};
+
+const _movieGenresMap = {
+  'ACTION': 'Action',
+  'ADVENTURE': 'Aventure',
+  'ANIMATION': 'Animation',
+  'BIOPIC': 'Biopic',
+  'BOLLYWOOD': 'Bollywood',
+  'CARTOON': 'Dessin animé',
+  'CLASSIC': 'Classique',
+  'COMEDY': 'Comédie',
+  'COMEDY_DRAMA': 'Comédie dramatique',
+  'CONCERT': 'Concert',
+  'DETECTIVE': 'Policier',
+  'DIVERS': 'Divers',
+  'DOCUMENTARY': 'Documentaire',
+  'DRAMA': 'Drame',
+  'EROTIC': 'Érotique',
+  'EXPERIMENTAL': 'Expérimental',
+  'FAMILY': 'Famille',
+  'FANTASY': 'Fantaisie',
+  'HISTORICAL': 'Historique',
+  'HISTORICAL_EPIC': 'Épique',
+  'HORROR': 'Horreur',
+  'JUDICIAL': 'Judiciaire',
+  'KOREAN_DRAMA': 'Drama',
+  'MARTIAL_ARTS': 'Arts Martiaux',
+  'MEDICAL': 'Médical',
+  'MOBISODE': 'Programme court',
+  'MOVIE_NIGHT': 'Nuit du cinéma',
+  'MUSIC': 'Musique',
+  'MUSICAL': 'Comédie musicale',
+  'OPERA': 'Opéra',
+  'ROMANCE': 'Romance',
+  'SCIENCE_FICTION': 'Science-fiction',
+  'PERFORMANCE': 'Performance',
+  'SOAP': 'Drame',
+  'SPORT_EVENT': 'Sport',
+  'SPY': 'Espion',
+  'THRILLER': 'Thriller',
+  'WARMOVIE': 'Film de guerre',
+  'WEB_SERIES': 'Série web',
+  'WESTERN': 'Western',
+};
+
+const _frenchLanguageCode = 'FRENCH';
+
+/// Showtime tag announcing the original version.
+/// Only used on DUBBED showtimes, where it contradicts `diffusionVersion` (not on LOCAL, where it's set on some french movies).
+const _showtimeOriginalVersionTag = 'Localization.Version.Original';
+
+/// Showtime tags announcing french subtitles, on a version in french.
+/// "Showtime.Accessibility.HearingImpaired" is NOT one of them: it only means the room is equipped for hearing-impaired people
+/// (e.g. induction loop), and can be set on showtimes without any subtitles.
+const _showtimeSubtitlesTags = {
+  'Localization.Subtitle.French',
+  'Showtime.Accessibility.Subtitled',
+  'Showtime.Accessibility.OpenCaption',
+};
+
+/// Map of language codes to their French display names
+const _movieLanguageMap = {
+  'ABORIGINAL_LANGUAGE': 'Langue aborigène',
+  'AFRICAN_DIALECT': 'Dialecte africain',
+  'AFRIKAANS': 'Afrikaans',
+  'ALBANIAN': 'Albanais',
+  'ALGERIAN': 'Algérien',
+  'AMHARIC': 'Amharique',
+  'ARABIC': 'Arabe',
+  'ARAMAIC': 'Araméen',
+  'ARMENIAN': 'Arménien',
+  'AZERI': 'Azéri',
+  'BAMBARA': 'Bambara',
+  'BENGALI': 'Bengali',
+  'BOSNIAN': 'Bosnien',
+  'BRITON': 'Breton',
+  'BULGARIAN': 'Bulgare',
+  'BURMESE': 'Birman',
+  'CANTONESE': 'Cantonais',
+  'CATALAN': 'Catalan',
+  'CHINESE': 'Chinois',
+  'CREOLE': 'Créole',
+  'CZECH': 'Tchèque',
+  'DANISH': 'Danois',
+  'DUTCH': 'Néerlandais',
+  'ENGLISH': 'Anglais',
+  'ESTONIAN': 'Estonien',
+  'EUSKERA': 'Basque',
+  'FARSI': 'Persan (Farsi)',
+  'FILIPINO': 'Filipino',
+  'FINNISH': 'Finnois',
+  'FLEMISH': 'Flamand',
+  _frenchLanguageCode: 'Français',
+  'GAELIC': 'Gaélique',
+  'GALLEGO': 'Galicien',
+  'GEORGIAN': 'Géorgien',
+  'GERMAN': 'Allemand',
+  'GREEK': 'Grec',
+  'GUARANI': 'Guarani',
+  'HEBREW': 'Hébreu',
+  'HINDI': 'Hindi',
+  'HOKKIEN': 'Hokkien',
+  'HUNGARIAN': 'Hongrois',
+  'ICELANDIC': 'Islandais',
+  'INDONESIAN': 'Indonésien',
+  'INUKTITUT': 'Inuktitut',
+  'ITALIAN': 'Italien',
+  'JAPANESE': 'Japonais',
+  'KANNADA': 'Kannada',
+  'KAZAKH': 'Kazakh',
+  'KHMER': 'Khmer',
+  'KIRGIZIAN': 'Kirghize',
+  'KLINGON': 'Klingon',
+  'KOREAN': 'Coréen',
+  'KURDISH': 'Kurde',
+  'LATIN': 'Latin',
+  'LATVIAN': 'Letton',
+  'LINGALA': 'Lingala',
+  'LITHUANIAN': 'Lituanien',
+  'MACEDONIAN': 'Macédonien',
+  'MALAGASY': 'Malgache',
+  'MALAY': 'Malais',
+  'MALAYALAM': 'Malayalam',
+  'MANDARIN': 'Mandarin',
+  'MARATHI': 'Marathi',
+  'MAYA': 'Maya',
+  'MONGOLESE': 'Mongol',
+  'NORWEGIAN': 'Norvégien',
+  'OTHER': 'Autre',
+  'PASHTO': 'Pachto',
+  'PERSIAN': 'Persan',
+  'POLISH': 'Polonais',
+  'PORTUGUESE': 'Portugais',
+  'PUNJABI': 'Pendjabi',
+  'ROMANIAN': 'Roumain',
+  'ROMANY': 'Romani',
+  'RUSSIAN': 'Russe',
+  'SERB': 'Serbe',
+  'SERBO_CROAT': 'Serbo-croate',
+  'SIGN_LANGUAGE': 'Langue des signes',
+  'SILENT': 'Muet',
+  'SLOVAK': 'Slovaque',
+  'SLOVENIAN': 'Slovène',
+  'SOMALI': 'Somali',
+  'SOTHO': 'Sotho',
+  'SPANISH': 'Espagnol',
+  'SWAHILI': 'Swahili',
+  'SWEDISH': 'Suédois',
+  'SWISS_GERMAN': 'Suisse allemand',
+  'TADZHIK': 'Tadjik',
+  'TAMIL': 'Tamoul',
+  'THAI': 'Thaï',
+  'TELUGU': 'Télougou',
+  'TIBETAN': 'Tibétain',
+  'TURKISH': 'Turc',
+  'UKRAINIAN': 'Ukrainien',
+  'UNDETERMINED_LANGUAGE': 'Langue indéterminée',
+  'URDU': 'Ourdou',
+  'VALENCIANO': 'Valencien',
+  'VIETNAMESE': 'Vietnamien',
+  'WOLOF': 'Wolof',
+  'YIDDISH': 'Yiddish',
+  'ZANSKARI': 'Zanskari',
+  'ZULU': 'Zoulou',
+};

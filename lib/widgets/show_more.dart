@@ -2,8 +2,6 @@ import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
-import 'themed_widgets.dart';
-
 class ShowMoreText extends StatefulWidget {
   const ShowMoreText({super.key, this.header, required this.text, required this.collapsedHeight});
 
@@ -50,6 +48,7 @@ class _ShowMoreTextState extends State<ShowMoreText> {
           textAlign: TextAlign.justify,
           maxLines: 100,
           overflow: TextOverflow.ellipsis,
+          textScaler: MediaQuery.textScalerOf(context),   // Same as the painter, so the measured height matches
         );
 
         // If the text is smaller than the collapsed height, don't show the "Show more" button
@@ -58,34 +57,36 @@ class _ShowMoreTextState extends State<ShowMoreText> {
         }
 
         return GestureDetector(
-          child: CtAnimatedSwitcher(
-            sizeAnimation: true,
-            child: () {
-              if (isExpanded) {
-                return text;
-              } else {
-                return ShaderMask(    // Draw a gradient overlay would probably be more performant, but ShaderMask works on all backgrounds.
-                  shaderCallback: (rect) {
-                    return const LinearGradient(
-                      begin: Alignment.center,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.black, Colors.transparent],
-                    ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-                  },
-                  blendMode: BlendMode.dstIn,
-                  child: SizedBox(
-                    height: widget.collapsedHeight,
-                    child: text,
+          onTap: () => setState(() => isExpanded = !isExpanded),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(end: isExpanded ? 1 : 0),
+            duration: AppResources.durationAnimationMedium,
+            curve: Curves.easeInOut,
+            // Draw a gradient overlay would probably be more performant, but ShaderMask works on all backgrounds.
+            // It's outside the ClipRect so the gradient follows the animated height.
+            builder: (context, expansion, child) {
+              // The text always keeps its full height, only the visible window animates (otherwise the text would be clipped instantly when collapsing)
+              final collapsedFactor = widget.collapsedHeight / height;
+              return ShaderMask(
+                shaderCallback: (rect) {
+                  return LinearGradient(
+                    begin: Alignment.center,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black, Colors.black.withValues(alpha: expansion)],
+                  ).createShader(rect);
+                },
+                blendMode: BlendMode.dstIn,
+                child: ClipRect(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    heightFactor: collapsedFactor + (1 - collapsedFactor) * expansion,
+                    child: child,
                   ),
-                );
-              }
-            } (),
+                ),
+              );
+            },
+            child: text,
           ),
-          onTap: () {
-            setState(() {
-              isExpanded = !isExpanded;
-            });
-          },
         );
       },
     );

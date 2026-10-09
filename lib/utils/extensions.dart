@@ -68,18 +68,6 @@ extension ExtendedBuildContext on BuildContext {
   /// Clear current context focus (Second method)
   /// Use this method if [clearFocus] doesn't work.
   void clearFocus2() => FocusScope.of(this).requestFocus(FocusNode());
-
-  /// Validate the enclosing [Form]
-  void validateForm({VoidCallback? onSuccess}) {
-    clearFocus();
-    final form = Form.maybeOf(this);
-    if (form == null) return;
-
-    if (form.validate()) {
-      form.save();
-      onSuccess?.call();
-    }
-  }
 }
 
 extension ExtendedIterable<T> on Iterable<T> {
@@ -117,14 +105,28 @@ extension ExtendedSet<T> on Set<T> {
   bool isEqualTo(Set<T>? other) => const SetEquality().equals(this, other);
 }
 
+extension ExtendedComparableIterable<T extends Comparable<T>> on Iterable<T> {
+  /// Compare this iterable with [other] element-wise, order independent (elements are sorted first).
+  /// Useful to make a [Comparable.compareTo] consistent with `==` on a [Set]/unordered collection field,
+  /// so equal-length-but-different-content collections don't wrongly compare as equal (e.g. in a [SplayTreeSet]).
+  int compareUnordered(Iterable<T> other) {
+    final sortedThis = toList()..sort();
+    final sortedOther = other.toList()..sort();
+    for (var i = 0; i < sortedThis.length && i < sortedOther.length; i++) {
+      final comparison = sortedThis[i].compareTo(sortedOther[i]);
+      if (comparison != 0) return comparison;
+    }
+    return 0;
+  }
+}
+
 extension ExtendedObjectIterable<Object> on Iterable<Object> {
   /// Converts each element to a String and concatenates the strings, ignoring null and empty values.
-  String joinNotEmpty(String separator) => map((e) => e?.toString())
-      .where((string) => !isStringNullOrEmpty(string))
-      .join(separator);
-
-  /// Returns a string separated by a newline character for each non-null element
-  String toLines() => joinNotEmpty('\n');
+  /// Returns null if there is nothing left to join, rather than an empty string.
+  String? joinNotEmpty(String separator) {
+    final strings = map((e) => e?.toString()).where((string) => !isStringNullOrEmpty(string));
+    return strings.isEmpty ? null : strings.join(separator);
+  }
 }
 
 extension ExtendedTimeOfDay on TimeOfDay {

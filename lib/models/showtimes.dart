@@ -49,7 +49,7 @@ class MovieShowTimes {
 
   /// Lazily computed & cached list of all showtimes specs, sorted.
   late final List<ShowTimeSpec> showTimesSpecOptions = () {
-    final options = SplayTreeSet<ShowTimeSpec>((s1, s2) => s1.compareTo(s2, movie.isFrench));
+    final options = SplayTreeSet<ShowTimeSpec>((s1, s2) => s1.compareTo(s2));
     for (final theaterShowTimes in theatersShowTimes) {
       for (final showTime in theaterShowTimes.showTimes) {
         options.add(showTime.spec);
@@ -57,6 +57,16 @@ class MovieShowTimes {
     }
     return options.toList(growable: false);
   } ();
+
+  /// [showTimesSpecOptions] grouped by audio version + subtitles (keys have no technology), order preserved.
+  late final Map<ShowTimeSpec, List<ShowTimeSpec>> showTimesSpecOptionsByAudioSubtitles =
+      showTimesSpecOptions.groupListsBy((spec) => spec.withoutTechnology);
+
+  /// Total number of showtimes across all theaters, whatever their spec.
+  late final int showTimesCount = theatersShowTimes.map((tst) => tst.showTimes.length).sum;
+
+  /// Number of showtimes across all theaters matching [spec].
+  int getFilteredShowTimesCount(ShowTimeSpec spec) => theatersShowTimes.map((tst) => tst.getFilteredShowTimes(spec).length).sum;
 
   /// The earliest upcoming showtime date across all theaters.
   late final DateTime? nextShowDate = theatersShowTimes
@@ -87,10 +97,11 @@ class TheaterShowTimes {
   final List<ShowTime> showTimes;
 
 
-  /// Simple cache for [filteredShowTimes]
+  /// Simple cache for [getFilteredShowTimes]
   final _filteredShowTimes = <ShowTimeSpec, List<ShowTime>>{};
 
-  /// Return showtimes filtered by [spec]
+  /// Return showtimes filtered by [spec].
+  /// Memoized in memory per [spec].
   List<ShowTime> getFilteredShowTimes(ShowTimeSpec spec) => _filteredShowTimes.putIfAbsent(spec, () => showTimes.where((st) => st.spec == spec).toList(growable: false));
 
 
@@ -98,10 +109,11 @@ class TheaterShowTimes {
   late final SplayTreeSet<Date> daysWithShow = showTimes.daysWithShow;
 
 
-  /// Simple cache for [filteredDayWithShow]
+  /// Simple cache for [getFilteredDayWithShow]
   final _filteredDayWithShow = <ShowTimeSpec, SplayTreeSet<Date>>{};
 
   /// All dates with at least a show, filtered by [spec], without duplicates, sorted.
+  /// Memoized in memory per [spec].
   SplayTreeSet<Date> getFilteredDayWithShow(ShowTimeSpec spec) => _filteredDayWithShow.putIfAbsent(spec, () => getFilteredShowTimes(spec).daysWithShow);
 
 
@@ -155,29 +167,6 @@ class DayShowTimes {
   final List<ShowTime?> showTimes;
 }
 
-enum ShowVersion {
-  local('VF'),        // Version originale française sans sous-titre
-  original('VOST'),   // Version originale (pas français) sous-titrée français
-  dubbed('VF');      // Version voix française (sous-titrée français si la langue du film est en français)
-
-  const ShowVersion(this.label);
-
-  final String label;
-}
-
-enum ShowFormat {
-  f2D(''),
-  f3D('3D'),
-  // ignore: constant_identifier_names
-  IMAX('IMAX'),
-  // ignore: constant_identifier_names
-  IMAX_3D('IMAX 3D');
-
-  const ShowFormat(this.label);
-
-  final String label;
-}
-
 class ShowTime {
   const ShowTime(this.dateTime, {required this.spec, this.ticketingUrl});
 
@@ -191,40 +180,76 @@ class ShowTime {
   final String? ticketingUrl;
 }
 
-class ShowTimeSpec {
+class ShowTimeSpec implements Comparable<ShowTimeSpec> {
   const ShowTimeSpec({
-    this.version = ShowVersion.original,
-    this.format = ShowFormat.f2D,
+    required this.audioVersion,
+    this.subtitles = const {},
+    this.technology,
   });
 
-  final ShowVersion version;
-  final ShowFormat format;
+  // Audio version
+  final ShowAudioVersion audioVersion;
 
-  String toDisplayString(bool? isMovieFrench) {
-    isMovieFrench ??= false;
-    String label = version.label;
-    if (version == ShowVersion.dubbed && isMovieFrench) label += 'ST';
-    if (format != ShowFormat.f2D) label += ' ${format.label}';
-    return label;
+  /// Subtitles
+  final Set<ShowSubtitles> subtitles;
+
+  /// Technology, already formatted for display by the API client (`null` for a standard 2D projection).
+  /// Examples: 3D, IMAX, IMAX 3D, LaserUltra, 4DX 3D, ...
+  final String? technology;
+
+  /// This spec without its technology, to group specs by audio version + subtitles.
+  ShowTimeSpec get withoutTechnology => ShowTimeSpec(audioVersion: audioVersion, subtitles: subtitles);
+
+  @override
+  int compareTo(ShowTimeSpec other) {
+    // 1. Compare audio version
+    final audioVersionComparison = Enum.compareByIndex(audioVersion, other.audioVersion);
+    if (audioVersionComparison != 0) return audioVersionComparison;
+
+    // 2. Compare subtitles by length (shorter first), then by content (so specs with different subtitles never compare equal)
+    final subtitleLengthComparison = subtitles.length.compareTo(other.subtitles.length);
+    if (subtitleLengthComparison != 0) return subtitleLengthComparison;
+    final subtitleContentComparison = subtitles.map((s) => s.code).compareUnordered(other.subtitles.map((s) => s.code));
+    if (subtitleContentComparison != 0) return subtitleContentComparison;
+
+    // 3. Compare technology
+    return (technology ?? '').compareTo(other.technology ?? '');
   }
 
-  int compareTo(ShowTimeSpec other, bool isMovieFrench) {
-    // Compare version
-    final versionComparison = Enum.compareByIndex(version, other.version);
-    if (versionComparison != 0) return versionComparison;
-
-    // Compare format
-    return Enum.compareByIndex(format, other.format);
-  }
+  static const _setEquality = SetEquality();
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
           other is ShowTimeSpec &&
-          runtimeType == other.runtimeType &&
-          version == other.version &&
-          format == other.format;
+              runtimeType == other.runtimeType &&
+              audioVersion == other.audioVersion &&
+              _setEquality.equals(subtitles, other.subtitles) &&
+              technology == other.technology;
 
   @override
-  int get hashCode => version.hashCode ^ format.hashCode;
+  int get hashCode => audioVersion.hashCode ^ _setEquality.hash(subtitles) ^ technology.hashCode;
+}
+
+enum ShowAudioVersion {
+  original('VO', 'Version originale'),
+  french('VF', 'Version française'),
+  dutch('VN', 'Version néerlandaise'),
+  german('DF', 'Version allemande');
+
+  const ShowAudioVersion(this.code, this.label);
+
+  final String code;
+  final String label;
+}
+
+enum ShowSubtitles {
+  french('FR', 'Sous-titres français'),
+  english('EN', 'Sous-titres anglais'),
+  dutch('NL', 'Sous-titres néerlandais');
+
+  const ShowSubtitles(this.code, this.label);
+
+  final String code;
+  final String label;
 }

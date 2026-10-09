@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/pages/movie_page.dart';
 import 'package:cinetime/resources/_resources.dart';
-import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -20,12 +19,6 @@ class MovieCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final movieShowTimes = moviesShowTimes[movieIndex];
-
-    // Display release year if movie is more than 6 month old
-    final releaseDate = movieShowTimes.movie.releaseDate;
-    int? releaseYear;
-    if (releaseDate != null && AppService.now.difference(releaseDate) > const Duration(days: 6 * 30))
-      releaseYear = releaseDate.year;
 
     // Rating
     final rating = movieShowTimes.movie.getRating(preferredType: preferredRatingType);
@@ -56,7 +49,7 @@ class MovieCard extends StatelessWidget {
                 // Content
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(5),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
@@ -80,9 +73,9 @@ class MovieCard extends StatelessWidget {
                                     ),
                                   ),
 
-                                  // Release date
-                                  if (releaseYear != null)
-                                    Text('  ($releaseYear)'),
+                                  // Release year
+                                  if (movieShowTimes.movie.releaseYearDisplay != null)
+                                    Text('  ${movieShowTimes.movie.releaseYearDisplay}'),
                                 ],
                               ),
                             ),
@@ -91,6 +84,12 @@ class MovieCard extends StatelessWidget {
                             if (rating != null && rating > 0)...[
                               AppResources.spacerLarge,
                               StarRating(rating),
+                            ]
+
+                            // Country
+                            else if (movieShowTimes.movie.countryDisplay != null)...[
+                              AppResources.spacerLarge,
+                              Text(movieShowTimes.movie.countryDisplay!),
                             ],
                           ],
                         ),
@@ -100,14 +99,30 @@ class MovieCard extends StatelessWidget {
                         Row(
                           children: <Widget>[
                             Expanded(
-                              child: Text(
-                                movieShowTimes.movie.genres ?? '',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              child: () {
+                                final genres = movieShowTimes.movie.genres;
+                                if (genres != null) {
+                                  return Text(
+                                    genres,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  );
+                                }
+                                final actors = movieShowTimes.movie.actors;
+                                if (actors != null) {
+                                  return TextWithLabel(
+                                    label: 'avec',
+                                    text: actors,
+                                    singleLine: true,
+                                  );
+                                }
+                                return const SizedBox();
+                              } (),
                             ),
-                            if (movieShowTimes.movie.durationDisplay != null)
+                            if (movieShowTimes.movie.durationDisplay != null)...[
+                              AppResources.spacerSmall,
                               Text(movieShowTimes.movie.durationDisplay!),
+                            ],
                           ],
                         ),
 

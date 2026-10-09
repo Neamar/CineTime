@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cinetime/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:sleek_http_client/sleek_http_client.dart' show ConnectivityException;
+import 'package:sleek_http_client/sleek_http_client.dart';
 
 import '_utils.dart';
 import 'exceptions/displayable_exception.dart';
@@ -12,8 +12,8 @@ import 'exceptions/permission_exception.dart';
 import 'exceptions/unreported_exception.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 
-typedef JsonObject = Map<String, dynamic>;
-typedef JsonList = Iterable<dynamic>;
+export 'package:sleek_http_client/src/types.dart';
+
 typedef AsyncTask<R> = Future<R> Function();
 typedef ParameterizedAsyncTask<T, R> = Future<R> Function(T? param);
 typedef AsyncValueChanged<T> = Future<void> Function(T value);
@@ -75,6 +75,39 @@ Future<T?> navigateTo<T>(BuildContext context, WidgetBuilder builder, {
 
 void popToRoot(BuildContext context) => Navigator.of(context).popUntil((route) => route.isFirst);
 
+
+/// Open a confirmation pop-up.
+/// Return true if the user confirmed, false otherwise.
+/// If [onConfirmation] is provided, it will be called if the user confirms.
+Future<bool> askConfirmation({
+  required BuildContext context,
+  required String title,
+  required String caption,
+  String? confirmText,
+  String? cancelText,
+  VoidCallback? onConfirmation,
+}) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(caption),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(cancelText ?? 'Annuler'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(confirmText ?? 'Continuer'),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed == true) onConfirmation?.call();
+  return confirmed ?? false;
+}
 
 /// Display an error to the user
 Future<void> showError(BuildContext context, Object error) async {
@@ -147,8 +180,10 @@ Future<geo.Position> getCurrentLocation() async {
 
     // Get localisation
     return await geo.Geolocator.getCurrentPosition(
-      desiredAccuracy: geo.LocationAccuracy.low,
-      timeLimit: const Duration(seconds: 10),
+      locationSettings: const geo.LocationSettings(
+        accuracy: geo.LocationAccuracy.low,
+        timeLimit: Duration(seconds: 10),
+      ),
     );
   } catch(e) {
     if (e is geo.PermissionDeniedException || e is geo.LocationServiceDisabledException)
@@ -171,38 +206,41 @@ bool typesEqual<T1, T2>() => T1 == T2;
 bool isTypeUndefined<T>() => typesEqual<T, Object?>() || typesEqual<T, Null>() || typesEqual<T, void>() || typesEqual<T, dynamic>();
 
 /// Returns true if T is nullable.
-/// Like [isTypeUndefined] but will also return true for nullable types like <bool?> or <Object?>.
+/// Like [isTypeUndefined] but will also return true for nullable types like `<bool?>` or `<Object?>`.
 bool isTypeNullable<T>() => null is T;
 
 DateTime? dateFromString(String? dateString) => DateTime.tryParse(dateString ?? '');
 String? dateToString(DateTime? date) => date?.toIso8601String();
 
+/// Convert a basic HTML text to plain text, with one line per paragraph.
 String convertBasicHtmlTags(String htmlText) {
-  const replacements = {
-    // Replace all double line break with single line break
-    '<br><br>': '\n',
-    // Replace all remaining line break
-    '<br>': '\n',
-    // Replace basic html chars
+  // Like in HTML, raw line breaks are just whitespaces (sources often add "\r\n" after tags)
+  htmlText = htmlText.replaceAll(RegExp(r'[ \t\r\n]+'), ' ');    // Not "\s", to keep non-breaking spaces
+
+  // Line breaks and ends of paragraphs (e.g. "<br>", "<br />", "</p>", "</div>") become line breaks
+  htmlText = htmlText.replaceAll(RegExp(r'<br\s*/?>|</(p|div)>', caseSensitive: false), '\n');
+
+  // Remove other tags
+  htmlText = htmlText.replaceAll(RegExp(r'<[^>]*>'), '');
+
+  // Replace HTML entities with their corresponding characters
+  const entities = {
     '&quot;': '"',
     '&apos;': "'",
-    '&#039;': "'",
-    '&amp;': '&',
     '&lt;': '<',
     '&gt;': '>',
     '&nbsp;': ' ',
   };
-
-  // Replace all HTML entities with their corresponding characters
-  for (final MapEntry(:key, :value) in replacements.entries) {
+  for (final MapEntry(:key, :value) in entities.entries) {
     htmlText = htmlText.replaceAll(key, value);
   }
+  htmlText = htmlText.replaceAllMapped(RegExp(r'&#(\d+);'), (match) => String.fromCharCode(int.parse(match[1]!)));    // e.g. "&#039;"
+  // Not in the map above: must be decoded after all other entities, otherwise "&amp;lt;" (escaped "&lt;" text) would become "&lt;" then "<"
+  htmlText = htmlText.replaceAll('&amp;', '&');
 
-  // Remove other tags
-  RegExp exp = RegExp(
-    r'<[^>]*>',
-    multiLine: true,
-    caseSensitive: true,
-  );
-  return htmlText.replaceAll(exp, '');
+  // Remove empty lines (e.g. "<br><br>", empty paragraphs), spaces around line breaks and double spaces (e.g. "&nbsp; ")
+  return htmlText
+      .replaceAll(RegExp(r' *\n\s*'), '\n')
+      .replaceAll(RegExp(r' {2,}'), ' ')
+      .trim();
 }

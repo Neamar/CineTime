@@ -3,10 +3,16 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
 class TextWithLabel extends StatelessWidget {
+  const TextWithLabel({
+    super.key,
+    required this.label,
+    required this.text,
+    this.singleLine = false,
+  });
+
   final String label;
   final String text;
-
-  const TextWithLabel({super.key, required this.label, required this.text});
+  final bool singleLine;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +29,8 @@ class TextWithLabel extends StatelessWidget {
         Flexible(
           child: Text(
             text,
+            maxLines: singleLine ? 1 : null,
+            overflow: singleLine ? TextOverflow.ellipsis : null,
           ),
         )
       ],
