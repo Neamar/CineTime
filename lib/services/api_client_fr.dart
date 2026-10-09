@@ -228,6 +228,7 @@ class FranceApiClient extends ApiClient {
            * So we combine `diffusionVersion` with the `tags`, without any theater-specific rule:
            *   1. LOCAL / DUBBED  -> french audio, subtitles only if announced by a tag
            *   2. ORIGINAL        -> original audio, french subtitles (always the case in France)
+           *   (a DUBBED showtime tagged as original version is handled as ORIGINAL, because the theater contradicts itself and the tag is the right one)
            *
            * The movie `languages` is NOT used to guess the version (e.g. to show an ORIGINAL french movie as VF), because:
            *   - it's incomplete for co-productions: a multilingual movie may be listed as french only, while its original version really is subtitled
@@ -236,18 +237,19 @@ class FranceApiClient extends ApiClient {
            */
           final rawDiffusionVersion = showTimeJson['diffusionVersion'] as String?;
           final tags = (showTimeJson['tags'] as JsonList?)?.cast<String>() ?? const [];
+          final isOriginal = rawDiffusionVersion == 'ORIGINAL' || (rawDiffusionVersion == 'DUBBED' && tags.contains(_showtimeOriginalVersionTag));
           ShowAudioVersion audioVersion;
           final subtitles = <ShowSubtitles>{};
 
           // 1. Version in french (LOCAL = french movie in its original language, DUBBED = foreign movie with french voice, or french movie for some theaters)
           // Not subtitled by default: a theater showing it with subtitles (e.g. for deaf people) announces it with a tag.
-          if (rawDiffusionVersion == 'LOCAL' || rawDiffusionVersion == 'DUBBED') {
+          if (!isOriginal && (rawDiffusionVersion == 'LOCAL' || rawDiffusionVersion == 'DUBBED')) {
             audioVersion = ShowAudioVersion.french;
             if (tags.any(_showtimeSubtitlesTags.contains)) subtitles.add(ShowSubtitles.french);
           }
 
           // 2. Original version: subtitles are assumed, even without tag (usual case in France).
-          else if (rawDiffusionVersion == 'ORIGINAL') {
+          else if (isOriginal) {
             audioVersion = ShowAudioVersion.original;
             subtitles.add(ShowSubtitles.french);
           }
@@ -736,6 +738,10 @@ const _movieGenresMap = {
 };
 
 const _frenchLanguageCode = 'FRENCH';
+
+/// Showtime tag announcing the original version.
+/// Only used on DUBBED showtimes, where it contradicts `diffusionVersion` (not on LOCAL, where it's set on some french movies).
+const _showtimeOriginalVersionTag = 'Localization.Version.Original';
 
 /// Showtime tags announcing french subtitles, on a version in french.
 /// "Showtime.Accessibility.HearingImpaired" is NOT one of them: it only means the room is equipped for hearing-impaired people
