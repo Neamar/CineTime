@@ -29,7 +29,7 @@ dependencies:
   http: ^1.6.0
   sleek_http_client: ^1.1.0
   cached_network_image_ce: ^4.13.1
-  amplitude_flutter: ^4.7.2
+  amplitude_flutter: ^4.7.3
 
   # Device
   device_info_plus: ^13.2.0
