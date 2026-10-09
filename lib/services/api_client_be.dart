@@ -416,23 +416,28 @@ class BelgiumApiClient extends ApiClient {
 
       // Audio version & base format (2D/3D) are reliably encoded in the row's own class list
       final rowClasses = row.classes;
-      final audioVersion = switch (rowClasses.firstWhereOrNull((c) => c.startsWith('audio'))) {
+      final audioClass = rowClasses.firstWhereOrNull((c) => c.startsWith('audio'));
+      final audioVersion = switch (audioClass) {
+        'audioVO' => ShowAudioVersion.original,
         'audioVF' => ShowAudioVersion.french,
         'audioNV' => ShowAudioVersion.dutch,
         'audioDF' => ShowAudioVersion.german,
-        _ => ShowAudioVersion.original,   // TODO use explicit VO + handle fallback ?
+        _ => () {
+          reportError(UnimplementedError('Unknown audio version "$audioClass"'), StackTrace.current);
+          return ShowAudioVersion.original;
+        } (),
       };
 
       final technologies = <String>{};
       final videoClass = rowClasses.firstWhereOrNull((c) => c.startsWith('video'));
-      if (videoClass != null && videoClass != 'video2D') technologies.add(videoClass.replaceFirst('video', ''));    // TODO use "videoVersion" class content instead ?
+      if (videoClass != null && videoClass != 'video2D') technologies.add(videoClass.replaceFirst('video', ''));
 
       final tds = row.querySelectorAll('td');
 
       // Subtitles: 2nd <abbr> of the 1st <td> holds the subtitles info in its `title` attribute
       final subtitles = <ShowSubtitles>{};
       if (tds.isNotEmpty) {
-        final subtitlesTitle = tds.first.querySelectorAll('abbr').elementAtOrNull(1)?.attributes['title'];    // TODO use text content instead ("S.t. fr/nl")
+        final subtitlesTitle = tds.first.querySelectorAll('abbr').elementAtOrNull(1)?.attributes['title'];
         if (subtitlesTitle != null) {
           if (subtitlesTitle.contains('français')) subtitles.add(ShowSubtitles.french);
           if (subtitlesTitle.contains('anglais')) subtitles.add(ShowSubtitles.english);
@@ -445,7 +450,7 @@ class BelgiumApiClient extends ApiClient {
 
       // Extra technology (IMAX, 4DX, ScreenX, LaserUltra, ...) shown as an icon in the 2nd-to-last <td>
       if (tds.length >= 2) {
-        final techLabel = tds[tds.length - 2].querySelector('img')?.attributes['alt']?.trim();    // TODO use "title" instead
+        final techLabel = tds[tds.length - 2].querySelector('img')?.attributes['alt']?.trim();
         if (techLabel != null && techLabel.isNotEmpty) technologies.add(techLabel);
       }
 
