@@ -16,6 +16,9 @@ class StorageService {
   static const _countryKey = 'country';
   static Future<void> saveCountry(Country country) => _storage.setString(_countryKey, country.name);
   static Country? readCountry() => Country.values.firstWhereOrNull((c) => c.name == _storage.getString(_countryKey));
+
+  /// Whether there is data tied to an API provider (selected/favorite theaters, hidden movies).
+  static bool get hasProviderData => [_selectedTheatersKey, _favoriteTheatersKey, _hiddenMoviesIdsKey].any(_storage.containsKey);
   //#endregion
 
   //#region Sorting

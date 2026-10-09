@@ -15,11 +15,17 @@ class AppService {
   //#region Init
   static final AppService instance = AppService();
 
-  Country _country = StorageService.readCountry() ?? _defaultCountry;
+  Country _country = StorageService.readCountry() ?? _initCountry();
   Country get country => _country;
 
-  /// Default country, based on device locale when no country has been selected yet.
-  static Country get _defaultCountry => PlatformDispatcher.instance.locale.countryCode == 'BE' ? Country.belgium : Country.france;
+  /// Country to use when none has been saved yet, saved right away so it doesn't change on next launch.
+  /// Existing data means an update from v2 (France only, country wasn't saved): keep France, so this data stays valid.
+  /// Otherwise (fresh install), based on device locale.
+  static Country _initCountry() {
+    final country = StorageService.hasProviderData || PlatformDispatcher.instance.locale.countryCode != 'BE' ? Country.france : Country.belgium;
+    StorageService.saveCountry(country);    // No need to await
+    return country;
+  }
 
   static ApiClient _apiClientFor(Country country) => switch (country) {
     Country.france => FranceApiClient(),
