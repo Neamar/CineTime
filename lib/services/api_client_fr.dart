@@ -181,7 +181,7 @@ class FranceApiClient extends ApiClient {
          * Example: for count = 200 : 19400 points
          *
          */
-        query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection experience diffusionVersion data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
+        query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection experience diffusionVersion tags data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
         variables: {
           'id': theater.id.encodedId,
           'from': _dateToString(from),
@@ -222,26 +222,34 @@ class FranceApiClient extends ApiClient {
           continue;
 
         final showTimes = showTimesJson!.map((showTimeJson) {
+          /*** Audio version & subtitles
+           * The API `diffusionVersion` alone is not enough: for french movies, some theaters send "DUBBED" (e.g. UGC),
+           * and french subtitles are only announced by the showtime `tags`.
+           * So we combine `diffusionVersion` with the `tags`, without any theater-specific rule:
+           *   1. LOCAL / DUBBED  -> french audio, subtitles only if announced by a tag
+           *   2. ORIGINAL        -> original audio, french subtitles (always the case in France)
+           *
+           * The movie `languages` is NOT used to guess the version (e.g. to show an ORIGINAL french movie as VF), because:
+           *   - it's incomplete for co-productions: a multilingual movie may be listed as french only, while its original version really is subtitled
+           *   - some theaters send ORIGINAL for all their showtimes, and also label their french movies as "VOSTF" on their own website
+           * So we trust what the theater declares, even if a few theaters give wrong data.
+           */
           final rawDiffusionVersion = showTimeJson['diffusionVersion'] as String?;
+          final tags = (showTimeJson['tags'] as JsonList?)?.cast<String>() ?? const [];
           ShowAudioVersion audioVersion;
           final subtitles = <ShowSubtitles>{};
 
-          // Version originale française sans sous-titre
-          if (rawDiffusionVersion == 'LOCAL') {
+          // 1. Version in french (LOCAL = french movie in its original language, DUBBED = foreign movie with french voice, or french movie for some theaters)
+          // Not subtitled by default: a theater showing it with subtitles (e.g. for deaf people) announces it with a tag.
+          if (rawDiffusionVersion == 'LOCAL' || rawDiffusionVersion == 'DUBBED') {
             audioVersion = ShowAudioVersion.french;
+            if (tags.any(_showtimeSubtitlesTags.contains)) subtitles.add(ShowSubtitles.french);
           }
 
-          // Version originale (pas français) sous-titrée français
+          // 2. Original version: subtitles are assumed, even without tag (usual case in France).
           else if (rawDiffusionVersion == 'ORIGINAL') {
             audioVersion = ShowAudioVersion.original;
             subtitles.add(ShowSubtitles.french);
-          }
-
-          // Version voix française (sous-titrée français si la langue du film est en français)
-          else if (rawDiffusionVersion == 'DUBBED') {
-            audioVersion = ShowAudioVersion.french;
-            final isMovieFrench = languagesJson?.singleOrNull == _frenchLanguageCode;
-            if (isMovieFrench) subtitles.add(ShowSubtitles.french);
           }
 
           // Other cases
@@ -728,6 +736,15 @@ const _movieGenresMap = {
 };
 
 const _frenchLanguageCode = 'FRENCH';
+
+/// Showtime tags announcing french subtitles, on a version in french.
+/// "Showtime.Accessibility.HearingImpaired" is NOT one of them: it only means the room is equipped for hearing-impaired people
+/// (e.g. induction loop), and can be set on showtimes without any subtitles.
+const _showtimeSubtitlesTags = {
+  'Localization.Subtitle.French',
+  'Showtime.Accessibility.Subtitled',
+  'Showtime.Accessibility.OpenCaption',
+};
 
 /// Map of language codes to their French display names
 const _movieLanguageMap = {
