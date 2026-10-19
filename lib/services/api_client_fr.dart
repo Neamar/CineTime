@@ -28,7 +28,7 @@ class FranceApiClient extends ApiClient {
   /// Experiences come first (e.g. "4DX 3D"). Duplicated labels are kept once (Set keeps insertion order).
   static String? _parseTechnology(JsonList? experiences, JsonList? projections) {
     final labels = <String>{};
-    for (final experience in (experiences ?? const []).cast<String>()) {
+    for (final experience in (experiences ?? const []).whereType<String>()) {   // API may send null entries
       final label = _showtimeExperienceMap[experience];
       if (label != null) {
         labels.add(label);
@@ -36,7 +36,7 @@ class FranceApiClient extends ApiClient {
         reportError(UnimplementedError('Unknown experience "$experience"'), StackTrace.current);
       }
     }
-    for (final projection in (projections ?? const []).cast<String>()) {
+    for (final projection in (projections ?? const []).whereType<String>()) {
       if (_showtimeProjectionMap.containsKey(projection)) {
         final label = _showtimeProjectionMap[projection];
         if (label != null) labels.add(label);

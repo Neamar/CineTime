@@ -28,7 +28,7 @@ typedef SubtreeBuilder = Widget Function(BuildContext context, Widget child);
 /// If null, will be set to true if [T] is not set.
 ///
 /// if [animate] is false, the transition animation will be skipped.
-Future<T?> navigateTo<T>(BuildContext context, WidgetBuilder builder, {
+Future<T?> navigateTo<T>(BuildContext context, WidgetBuilder builder, {     // TODO remove context from builder
     bool removePreviousRoutesButFirst = false,
     int? removePreviousRoutesAmount,
     bool clearHistory = false,
