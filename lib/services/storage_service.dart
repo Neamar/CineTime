@@ -4,12 +4,22 @@ import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/util/legacy_to_async_migration_util.dart';
 
 class StorageService {
   //#region Init
-  static late SharedPreferences _storage;
+  static late SharedPreferencesWithCache _storage;
+  static const _migrationCompletedKey = 'migrationCompleted';
 
-  static Future<void> init() async => _storage = await SharedPreferences.getInstance();
+  static Future<void> init() async {
+    // TEMP One-time import of data stored by the legacy API (different store and "flutter." key prefix)
+    await migrateLegacySharedPreferencesToSharedPreferencesAsyncIfNecessary(
+      legacySharedPreferencesInstance: await SharedPreferences.getInstance(),
+      sharedPreferencesAsyncOptions: const SharedPreferencesOptions(),
+      migrationCompletedKey: _migrationCompletedKey,
+    );
+    _storage = await SharedPreferencesWithCache.create(cacheOptions: const SharedPreferencesWithCacheOptions());
+  }
   //#endregion
 
   //#region Country
@@ -95,5 +105,8 @@ class StorageService {
   //#endregion
 
   /// Wipe all local storage. Used when switching country, since selected/favorite theaters and hidden movies are tied to the previous provider's data.
-  static Future<void> clear() => _storage.clear();
+  static Future<void> clear() async {
+    await _storage.clear();
+    await _storage.setBool(_migrationCompletedKey, true);   // Keep the flag, otherwise the legacy data would be re-imported on next launch
+  }
 }
