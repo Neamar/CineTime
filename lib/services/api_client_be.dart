@@ -206,10 +206,15 @@ class BelgiumApiClient extends ApiClient {
   @override
   String moviePressRatingUrl(String movieId) => '$_movieBaseUrl/$movieId';
 
+  static final _posterSizeRegex = RegExp(r'/poster/[^/]+/');
+
   @override
   String? getImageUrl(String? path, {bool isThumbnail = false}) {
     if (path?.isNotEmpty != true) return null;
-    if (path!.startsWith('http')) return path;
+    // Swap the poster size segment (whatever the scraped one is): big is 208x277 (~24 KB), full is 600x800 (~290 KB).
+    // Left untouched if the site changes its url scheme.
+    path = path!.replaceFirst(_posterSizeRegex, isThumbnail ? '/poster/big/' : '/poster/full/');
+    if (path.startsWith('http')) return path;
     return 'https://$_authority$path';
   }
   //#endregion
@@ -271,7 +276,7 @@ class BelgiumApiClient extends ApiClient {
     final posterSrc = movieBlock.querySelector('li.moviePoster img')?.attributes['src'];
     final posterUrl = posterSrc == null || posterSrc.endsWith('/poster/small/default.png')    // Site's own placeholder, let the app display its own
         ? null
-        : posterSrc.replaceFirst('/poster/small/', '/poster/full/');      // Use full-size poster
+        : posterSrc;
     final durationDisplay = _extractDuration(movieBlock);
     final (directors, actors) = _parsePersonList(movieBlock.querySelector('div.moviePersonList p'));
     final (country, countryCode, releaseYear) = _parseCountryAndYear(movieBlock);
