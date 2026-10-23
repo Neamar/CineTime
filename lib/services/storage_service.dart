@@ -19,6 +19,9 @@ class StorageService {
       migrationCompletedKey: _migrationCompletedKey,
     );
     _storage = await SharedPreferencesWithCache.create(cacheOptions: const SharedPreferencesWithCacheOptions());
+
+    // TEMP One-time conversion of theaters stored in the v3.0.0 format
+    await _migrateTheatersStorage();
   }
   //#endregion
 
@@ -38,9 +41,9 @@ class StorageService {
   //#endregion
 
   //#region Theaters
-  static const _selectedTheatersKey = 'selectedTheaters';
-  static const _favoriteTheatersKey = 'favoriteTheaters';
-  static String _theatersKey(String theaterId) => 'theater:$theaterId';
+  // Each list is stored as a whole (theaters data included) in a single key, so a change is a single write.
+  static const _selectedTheatersKey = 'selectedTheaterList';
+  static const _favoriteTheatersKey = 'favoriteTheaterList';
   static const _listSeparator = '|';
 
   static Future<void> saveSelectedTheaters(Iterable<Theater> theaters) => _saveTheaters(_selectedTheatersKey, theaters);
@@ -49,13 +52,9 @@ class StorageService {
   static Future<void> saveFavoriteTheaters(Iterable<Theater> theaters) => _saveTheaters(_favoriteTheatersKey, theaters);
   static List<Theater> readFavoriteTheaters() => _readTheaters(_favoriteTheatersKey);
 
-  static Future<void> _saveTheaters(String key, Iterable<Theater> theaters) async {
-    // Save theater data
-    await _saveTheatersData(theaters);
-
-    // Save favorite theaters ids
-    await _storage.setString(key, theaters.map((theater) => theater.id.id).join(_listSeparator));
-  }
+  /// Not async on purpose: the write is sent right away, so successive saves are written in call order.
+  static Future<void> _saveTheaters(String key, Iterable<Theater> theaters) =>
+    _storage.setString(key, json.encode(theaters.map((theater) => theater.toJson()).toList()));
 
   static List<Theater> _readTheaters(String key) {
     // Read
@@ -63,37 +62,53 @@ class StorageService {
     if (isStringNullOrEmpty(theatersString)) return [];
 
     // Decode
-    final theatersIds = theatersString!.split(_listSeparator);
+    final List theatersJson;
+    try {
+      theatersJson = json.decode(theatersString!);
+    } catch(e, s) {
+      reportError(e, s);
+      return [];
+    }
 
-    // Convert to Theater
+    // Convert to Theater (a corrupted entry is skipped, without losing the others)
     final theaters = <Theater>[];
-    for (final id in theatersIds) {
-      final theater = _readTheaterData(id);
-      theaters.addNotNull(theater);
+    for (final theaterJson in theatersJson) {
+      try {
+        theaters.add(Theater.fromJson(theaterJson));
+      } catch(e, s) {
+        reportError(e, s);
+      }
     }
     return theaters;
   }
 
-  static Future<void> _saveTheatersData(Iterable<Theater> theaters) async {
-    for (final theater in theaters) {
-      final key = _theatersKey(theater.id.id);
-      if (!_storage.containsKey(key)) {
-        await _storage.setString(key, json.encode(theater.toJson()));
+  /// TEMP Convert theaters stored in the v3.0.0 format: lists of ids ('|' separated), with each theater data in its own `theater:<id>` key.
+  /// Theaters data is kept as raw JSON, because [Theater.fromJson] can't be used before [AppService] is ready.
+  static Future<void> _migrateTheatersStorage() async {
+    const legacyListKeys = {'selectedTheaters': _selectedTheatersKey, 'favoriteTheaters': _favoriteTheatersKey};
+    const legacyTheaterKeyPrefix = 'theater:';
+
+    // Convert lists
+    for (final MapEntry(key: legacyKey, value: key) in legacyListKeys.entries) {
+      final ids = _storage.getString(legacyKey);
+      if (ids == null) continue;
+
+      final theatersJson = <Object?>[];
+      for (final id in ids.split(_listSeparator)) {
+        final theaterString = _storage.getString('$legacyTheaterKeyPrefix$id');
+        if (isStringNullOrEmpty(theaterString)) continue;
+        try {
+          theatersJson.add(json.decode(theaterString!));
+        } catch(e, s) {
+          reportError(e, s);
+        }
       }
+      await _storage.setString(key, json.encode(theatersJson));
     }
-  }
 
-  static Theater? _readTheaterData(String theaterId) {
-    // Read
-    final theaterString = _storage.getString(_theatersKey(theaterId));
-    if (isStringNullOrEmpty(theaterString)) return null;
-
-    // Decode
-    try {
-      return Theater.fromJson(json.decode(theaterString!));
-    } catch(e, s) {
-      reportError(e, s);
-      return null;
+    // Remove legacy keys, only once converted (if interrupted before, conversion is simply done again on next launch)
+    for (final key in _storage.keys.where((key) => legacyListKeys.containsKey(key) || key.startsWith(legacyTheaterKeyPrefix))) {
+      await _storage.remove(key);
     }
   }
   //#endregion
@@ -101,7 +116,10 @@ class StorageService {
   //#region Hidden movies
   static const _hiddenMoviesIdsKey = 'hiddenMoviesIds';
   static Future<void> saveHiddenMoviesIds(Iterable<String> moviesIds) => _storage.setString(_hiddenMoviesIdsKey, moviesIds.join(_listSeparator));
-  static List<String> readHiddenMoviesIds() => _storage.getString(_hiddenMoviesIdsKey)?.split(_listSeparator) ?? [];
+  static List<String> readHiddenMoviesIds() {
+    final ids = _storage.getString(_hiddenMoviesIdsKey);
+    return isStringNullOrEmpty(ids) ? [] : ids!.split(_listSeparator);    // An empty list is saved as '', that split() would read as ['']
+  }
   //#endregion
 
   /// Wipe all local storage. Used when switching country, since selected/favorite theaters and hidden movies are tied to the previous provider's data.

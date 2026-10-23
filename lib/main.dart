@@ -103,7 +103,7 @@ class App extends StatelessWidget {
         theme: appTheme(),
         darkTheme: appTheme(darkMode: true),
         navigatorKey: _navigatorKey,
-        home: AppService.instance.selectedTheaters.isEmpty
+        home: AppService.instance.selectedTheaters.value.isEmpty
           ? const TheaterSearchPage()
           : const MoviesPage(),
         builder: (context, child) {

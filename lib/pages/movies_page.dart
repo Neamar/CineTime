@@ -527,7 +527,7 @@ class MoviesPageBloc with Disposable {
     });
   }
 
-  UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
+  UnmodifiableSetView<Theater> _theaters = const UnmodifiableSetView.empty();
   final fetchController = FetchBuilderController<MoviesShowTimes>();
   final isSearchVisible = DataStream(false);
   final searchController = TextEditingController();
@@ -550,19 +550,18 @@ class MoviesPageBloc with Disposable {
 
   void refresh({bool userAsked = false}) {
     // Compare new list with current one
-    if (AppService.instance.selectedTheaters.isEqualTo(_theaters))
+    if (AppService.instance.selectedTheaters.value.isEqualTo(_theaters))
       return;
 
     // Analytics
     if (userAsked)
       AnalyticsService.trackEvent('Theater selected', {
-        'count': AppService.instance.selectedTheaters.length - _theaters.length,
+        'count': AppService.instance.selectedTheaters.value.length - _theaters.length,
       });
 
-    // Copy selected theater to a local list (to allow deep comparison with the previous one, to avoid unnecessary refresh)
-    // TODO we could edit AppService so each time Set is modified, it creates a new instance for easier and quicker comparison (like for hiddenMoviesIds).
-    // TODO Or we could use a Stream to avoid manual refresh calling (with a stream, it should refresh automatically when data changes. Check it only rebuild page when pop, and not when on upper page)
-    _theaters = UnmodifiableSetView(Set.from(AppService.instance.selectedTheaters));
+    // Keep a reference to the current selection (immutable), to compare it with the next one and avoid unnecessary refresh
+    // TODO we could use the Stream to avoid manual refresh calling (it should refresh automatically when data changes. Check it only rebuild page when pop, and not when on upper page)
+    _theaters = AppService.instance.selectedTheaters.value;
 
     // Refresh data
     fetchController.refresh(clearDataFirst: true);
