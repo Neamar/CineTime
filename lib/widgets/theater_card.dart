@@ -4,9 +4,10 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/widgets/corner_border.dart';
+import 'package:fetcher/fetcher_bloc.dart';
 import 'package:flutter/material.dart';
 
-class TheaterCard extends StatefulWidget {
+class TheaterCard extends StatelessWidget {
   static const height = 85.0;     // Allow 3 lines addresses to fit
 
   const TheaterCard({super.key, required this.theater, this.multiSelectionMode = false, this.onLongPress});
@@ -23,20 +24,6 @@ class TheaterCard extends StatefulWidget {
   final VoidCallback? onLongPress;
 
   @override
-  State<TheaterCard> createState() => _TheaterCardState();
-}
-
-class _TheaterCardState extends State<TheaterCard> {
-  bool isSelected = false;
-  bool isFavorite = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshStatus();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -46,19 +33,24 @@ class _TheaterCardState extends State<TheaterCard> {
 
           // Main content
           InkWell(
-            onTap: _onSelected,
-            onLongPress: widget.multiSelectionMode || widget.onLongPress == null  ? null : _onLongPress,
+            onTap: () => _onSelected(context),
+            onLongPress: multiSelectionMode || onLongPress == null  ? null : _onLongPress,
             child: Row(
               children: <Widget>[
 
                 // Leading
                 SizedBox(
                   width: 60,
-                  child: widget.multiSelectionMode
+                  child: multiSelectionMode
                     ? IgnorePointer(
-                        child: Checkbox(
-                          value: isSelected,
-                          onChanged: (_) {},
+                        child: DataStreamBuilder(
+                          stream: AppService.instance.selectedTheaters,
+                          builder: (context, selectedTheaters) {
+                            return Checkbox(
+                              value: selectedTheaters.contains(theater),
+                              onChanged: (_) {},
+                            );
+                          },
                         ),
                       )
                     : const Icon(
@@ -79,7 +71,7 @@ class _TheaterCardState extends State<TheaterCard> {
                             // Theater name
                             Flexible(
                               child: Text(
-                                widget.theater.name,
+                                theater.name,
                                 style: context.textTheme.titleMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -87,9 +79,9 @@ class _TheaterCardState extends State<TheaterCard> {
                             ),
 
                             // Distance
-                            if (widget.theater.distanceDisplay != null)
+                            if (theater.distanceDisplay != null)
                               Text(
-                                ' à ${widget.theater.distanceDisplay!}',
+                                ' à ${theater.distanceDisplay!}',
                                 style: context.textTheme.bodyMedium?.copyWith(color: context.textTheme.bodyMedium?.color?.withValues(alpha: 0.5)),
                               ),
 
@@ -99,7 +91,7 @@ class _TheaterCardState extends State<TheaterCard> {
                         ),
                         const Spacer(),
                         Text(
-                          widget.theater.fullAddress,
+                          theater.fullAddress,
                           style: context.textTheme.bodySmall,
                         ),
                       ],
@@ -114,28 +106,33 @@ class _TheaterCardState extends State<TheaterCard> {
           Positioned(
             top: 0,
             right: 0,
-            child: Material(
-              color: isFavorite ? Theme.of(context).primaryColor : AppResources.colorGrey,
-              shape: const CornerBorder(CornerBorderPosition.topRight),
-              clipBehavior: Clip.antiAlias,
-              elevation: 2,
-              child: SizedBox.fromSize(
-                size: const Size.square(50),
-                child: InkWell(
-                  onTap: _onFavoriteTap,
-                  child: const Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: EdgeInsets.all(5),
-                      child: Icon(
-                        Icons.star,
-                        color: Colors.white,
-                        size: 20,
+            child: DataStreamBuilder(
+              stream: AppService.instance.favoriteTheaters,
+              builder: (context, favoriteTheaters) {
+                return Material(
+                  color: favoriteTheaters.contains(theater) ? Theme.of(context).primaryColor : AppResources.colorGrey,
+                  shape: const CornerBorder(CornerBorderPosition.topRight),
+                  clipBehavior: Clip.antiAlias,
+                  elevation: 2,
+                  child: SizedBox.fromSize(
+                    size: const Size.square(50),
+                    child: InkWell(
+                      onTap: _onFavoriteTap,
+                      child: const Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: EdgeInsets.all(5),
+                          child: Icon(
+                            Icons.star,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -143,60 +140,33 @@ class _TheaterCardState extends State<TheaterCard> {
     );
   }
 
-  void _onSelected() {
-    if (widget.multiSelectionMode) {
-      // Save value
-      if (isSelected)
-        AppService.instance.unselectTheater(widget.theater);
+  // UI is updated by listening to AppService streams, which are updated synchronously (saving is handled by AppService).
+
+  void _onSelected(BuildContext context) {
+    if (multiSelectionMode) {
+      if (AppService.instance.isSelected(theater))
+        AppService.instance.unselectTheater(theater);
       else
-        AppService.instance.selectTheater(widget.theater);
-
-      // Update UI
-      setState(() {
-        _refreshStatus();
-      });
+        AppService.instance.selectTheater(theater);
     } else {
-      // Save value
-      AppService.instance.selectTheater(widget.theater, clearFirst: true);
+      AppService.instance.selectTheater(theater, clearFirst: true);
 
-      // Update UI
-      if (mounted) {
-        if (context.canPop)
-          Navigator.of(context).pop(!widget.multiSelectionMode);
-        else
-          navigateTo(context, (_) => const MoviesPage(), clearHistory: true);
-      }
+      if (context.canPop)
+        Navigator.of(context).pop(true);
+      else
+        navigateTo(context, (_) => const MoviesPage(), clearHistory: true);
     }
   }
 
   void _onLongPress() {
-    // Save value
-    AppService.instance.selectTheater(widget.theater);
-
-    // Update UI
-    setState(() {
-      _refreshStatus();
-    });
-
-    // Callback
-    widget.onLongPress?.call();
+    AppService.instance.selectTheater(theater);
+    onLongPress?.call();
   }
 
   void _onFavoriteTap() {
-    // Save value
-    if (isFavorite)
-      AppService.instance.removeFromFavorites(widget.theater);
+    if (AppService.instance.isFavorite(theater))
+      AppService.instance.removeFromFavorites(theater);
     else
-      AppService.instance.addToFavorites(widget.theater);
-
-    // Update UI
-    setState(() {
-      _refreshStatus();
-    });
-  }
-
-  void _refreshStatus() {
-    isSelected = AppService.instance.isSelected(widget.theater);
-    isFavorite = AppService.instance.isFavorite(widget.theater);
+      AppService.instance.addToFavorites(theater);
   }
 }

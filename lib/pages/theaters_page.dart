@@ -53,7 +53,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
             itemBuilder: (context, index) {
               final theater = theaters[index];
               return TheaterCard(
-                key: ValueKey(theater.id.id + bloc.refreshID.toString()),
+                key: ValueKey(theater.id.id),
                 theater: theater,
                 multiSelectionMode: multiSelectionMode,
                 onLongPress: toggleSelectionMode,
@@ -125,16 +125,13 @@ class TheatersPageBloc with Disposable {
     refresh();
   }
 
-  /// Used to properly refresh widgets
-  int refreshID = 0;
-
   /// List of theaters
   final theaters = DataStream(<Theater>[]);
 
   /// Refreshed manually on purpose, rather than by listening to the selected/favorite theaters streams:
   /// a theater that gets unselected or removed from favorites must stay in the list, so the user can restore it.
+  /// Cards don't need to be rebuilt here, as they listen to those streams themselves.
   void refresh() {
-    refreshID++;
     theaters.add({
       ...AppService.instance.selectedTheaters.value,
       ...AppService.instance.favoriteTheaters.value,
