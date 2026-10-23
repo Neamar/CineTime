@@ -27,9 +27,10 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
           'Mes cinémas',
         ),
         actions: <Widget>[
-          MultiSelectionModeButton(
-            onPressed: toggleSelectionMode,
-          ),
+          if (!multiSelectionMode)
+            MultiSelectionModeButton(
+              onPressed: enableMultiSelectionMode,
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -56,7 +57,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
                 key: ValueKey(theater.id.id),
                 theater: theater,
                 multiSelectionMode: multiSelectionMode,
-                onLongPress: toggleSelectionMode,
+                onLongPress: enableMultiSelectionMode,
               );
             },
           );
@@ -103,19 +104,23 @@ mixin MultiSelectionMode<T extends StatefulWidget> on State<T> {
   }
 
   void autoUpdateSelectionMode() {
-    if (!multiSelectionMode && AppService.instance.selectedTheaters.value.length >= 2) {
-      toggleSelectionMode();
+    if (AppService.instance.selectedTheaters.value.length >= 2) {
+      enableMultiSelectionMode();
     }
   }
 
-  void toggleSelectionMode() {
+  /// Multi selection mode can't be turned off, as several theaters may be selected.
+  /// It is reset when the page is left (see [initState]).
+  void enableMultiSelectionMode() {
+    if (multiSelectionMode) return;
+
     // Update UI
     setState(() {
-      multiSelectionMode = !multiSelectionMode;
+      multiSelectionMode = true;
     });
 
     // Display a message
-    showMessage(context, 'Sélection multiple de cinéma ${multiSelectionMode ? 'activée' : 'désactivée'}');
+    showMessage(context, 'Sélection multiple de cinéma activée');
   }
 }
 

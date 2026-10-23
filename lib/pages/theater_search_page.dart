@@ -75,9 +75,9 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
                 icon: const Icon(Icons.location_on_outlined),
                 onPressed: bloc.startGeoSearch,
               ),
-            if (context.canPop)   // Hide when page is shown at app start
+            if (context.canPop && !multiSelectionMode)   // Hide when page is shown at app start
               MultiSelectionModeButton(
-                onPressed: toggleSelectionMode,
+                onPressed: enableMultiSelectionMode,
               ),
           ],
         ),
@@ -116,7 +116,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
                     key: ObjectKey(theater),
                     theater: theater,
                     multiSelectionMode: multiSelectionMode,
-                    onLongPress: context.canPop ? toggleSelectionMode : null,  // Disable when page is shown at app start
+                    onLongPress: context.canPop ? enableMultiSelectionMode : null,  // Disable when page is shown at app start
                   );
                 },
               ),
