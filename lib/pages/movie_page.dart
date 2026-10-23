@@ -129,6 +129,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                 child: GestureDetector(
                                   onTap: _openPoster,
                                   child: HeroPoster(
+                                    heroTag: movie.id,
                                     posterPath: poster,
                                     borderRadius: AppResources.borderRadiusTiny,
                                   ),
@@ -437,8 +438,10 @@ class _RatingWidget extends StatelessWidget {
 }
 
 class HeroPoster extends StatelessWidget {
-  const HeroPoster({super.key, this.posterPath, required this.borderRadius});
+  const HeroPoster({super.key, required this.heroTag, this.posterPath, required this.borderRadius});
 
+  /// Must be unique per movie: different movies can share the same poster.
+  final Object heroTag;
   final String? posterPath;
   final BorderRadius borderRadius;
 
@@ -456,7 +459,7 @@ class HeroPoster extends StatelessWidget {
 
     if (posterPath != null)
       return Hero(
-        tag: posterPath!,
+        tag: heroTag,
         flightShuttleBuilder: (flightContext, animation, flightDirection, fromHeroContext, toHeroContext) {
           final from = ((fromHeroContext.widget as Hero).child as ClipRRect).borderRadius;
           final to = ((toHeroContext.widget as Hero).child as ClipRRect).borderRadius;

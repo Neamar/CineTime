@@ -38,6 +38,7 @@ class MovieCard extends StatelessWidget {
                 SizedBox(
                   width: box.maxHeight * 0.75,
                   child: HeroPoster(
+                    heroTag: movieShowTimes.movie.id,
                     posterPath: movieShowTimes.movie.poster,
                     borderRadius: BorderRadius.only(
                       topLeft: AppResources.borderRadiusTiny.topLeft,
