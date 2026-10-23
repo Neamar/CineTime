@@ -99,11 +99,11 @@ mixin MultiSelectionMode<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
-    multiSelectionMode = AppService.instance.selectedTheaters.length >= 2;
+    multiSelectionMode = AppService.instance.selectedTheaters.value.length >= 2;
   }
 
   void autoUpdateSelectionMode() {
-    if (!multiSelectionMode && AppService.instance.selectedTheaters.length >= 2) {
+    if (!multiSelectionMode && AppService.instance.selectedTheaters.value.length >= 2) {
       toggleSelectionMode();
     }
   }
@@ -131,11 +131,13 @@ class TheatersPageBloc with Disposable {
   /// List of theaters
   final theaters = DataStream(<Theater>[]);
 
+  /// Refreshed manually on purpose, rather than by listening to the selected/favorite theaters streams:
+  /// a theater that gets unselected or removed from favorites must stay in the list, so the user can restore it.
   void refresh() {
     refreshID++;
     theaters.add({
-      ...AppService.instance.selectedTheaters,
-      ...AppService.instance.favoriteTheaters,
+      ...AppService.instance.selectedTheaters.value,
+      ...AppService.instance.favoriteTheaters.value,
     }.toList()..sort());
   }
 

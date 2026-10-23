@@ -116,7 +116,10 @@ class StorageService {
   //#region Hidden movies
   static const _hiddenMoviesIdsKey = 'hiddenMoviesIds';
   static Future<void> saveHiddenMoviesIds(Iterable<String> moviesIds) => _storage.setString(_hiddenMoviesIdsKey, moviesIds.join(_listSeparator));
-  static List<String> readHiddenMoviesIds() => _storage.getString(_hiddenMoviesIdsKey)?.split(_listSeparator) ?? [];
+  static List<String> readHiddenMoviesIds() {
+    final ids = _storage.getString(_hiddenMoviesIdsKey);
+    return isStringNullOrEmpty(ids) ? [] : ids!.split(_listSeparator);    // An empty list is saved as '', that split() would read as ['']
+  }
   //#endregion
 
   /// Wipe all local storage. Used when switching country, since selected/favorite theaters and hidden movies are tied to the previous provider's data.

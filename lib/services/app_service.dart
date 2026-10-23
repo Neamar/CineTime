@@ -41,7 +41,7 @@ class AppService {
 
   //#region Country
   /// Whether there is local data (selected/favorite theaters, hidden movies) that would be lost by switching country.
-  bool get hasLocalData => _selectedTheaters.isNotEmpty || _favoriteTheaters.isNotEmpty || hiddenMoviesIds.value.isNotEmpty;
+  bool get hasLocalData => selectedTheaters.value.isNotEmpty || favoriteTheaters.value.isNotEmpty || hiddenMoviesIds.value.isNotEmpty;
 
   /// Switch to another country's API provider.
   /// Wipes all local storage, since it's tied to the previous provider's data (theater/movie ids, etc).
@@ -49,9 +49,9 @@ class AppService {
     if (country == _country) return;
 
     // Clear in-memory state
-    _selectedTheaters.clear();
-    _favoriteTheaters.clear();
-    hiddenMoviesIds.add(UnmodifiableSetView(<String>{}));
+    selectedTheaters.add(UnmodifiableSetView(const {}));
+    favoriteTheaters.add(UnmodifiableSetView(const {}));
+    hiddenMoviesIds.add(UnmodifiableSetView(const {}));
 
     // Swap provider
     _country = country;
@@ -66,70 +66,63 @@ class AppService {
   //#endregion
 
   //#region Selected theaters
+
+  // Selected/favorite theaters and hidden movies all follow the same pattern:
+  // - In-memory state is a stream, updated synchronously: the UI can rely on it right away, and listen to it.
+  // - Every change is persisted by a listener, in emission order: callers don't need to await anything.
+  // - UnmodifiableSetView ensures that every change uses a new Set instance, so the UI is properly refreshed.
+
   static const _maxSelected = 5;
-  late final Set<Theater> _selectedTheaters = StorageService.readSelectedTheaters().toSet();    // Must be "late" to ensure proper class instanciation flow
-  UnmodifiableSetView<Theater> get selectedTheaters => UnmodifiableSetView(_selectedTheaters);
+  late final selectedTheaters = DataStream<UnmodifiableSetView<Theater>>(UnmodifiableSetView(StorageService.readSelectedTheaters().toSet()))
+    ..listen(StorageService.saveSelectedTheaters);    // Must be "late" to ensure proper class instanciation flow
 
-  bool isSelected(Theater theater) => _selectedTheaters.contains(theater);
+  bool isSelected(Theater theater) => selectedTheaters.value.contains(theater);
 
-  Future<bool> selectTheater(Theater theater, {bool clearFirst = false}) async {
-    if (clearFirst) {
-      await StorageService.saveSelectedTheaters(_selectedTheaters
-        ..clear()
-        ..add(theater));
-      return true;
-    } else {
-      if (_selectedTheaters.length >= _maxSelected) {
-        showMessage(App.navigatorContext, 'Maximum $_maxSelected cinémas 😢', isError: true); // Do not await
-        return false;
-      } else {
-        await StorageService.saveSelectedTheaters(_selectedTheaters..add(theater));
-        return true;
-      }
+  bool selectTheater(Theater theater, {bool clearFirst = false}) {
+    if (!clearFirst && selectedTheaters.value.length >= _maxSelected) {
+      showMessage(App.navigatorContext, 'Maximum $_maxSelected cinémas 😢', isError: true); // Do not await
+      return false;
     }
+
+    selectedTheaters.add(UnmodifiableSetView(clearFirst ? {theater} : {...selectedTheaters.value, theater}));
+    return true;
   }
 
-  Future<bool> unselectTheater(Theater theater) async {
-    if (_selectedTheaters.length <= 1) {
+  bool unselectTheater(Theater theater) {
+    if (selectedTheaters.value.length <= 1) {
       showMessage(App.navigatorContext, 'Minium 1 cinéma', isError: true); // Do not await
       return false;
-    } else {
-      await StorageService.saveSelectedTheaters(_selectedTheaters..remove(theater));
-      return true;
     }
+
+    selectedTheaters.add(UnmodifiableSetView({...selectedTheaters.value}..remove(theater)));
+    return true;
   }
   //#endregion
 
   //#region Favorite theaters
-  late final Set<Theater> _favoriteTheaters = StorageService.readFavoriteTheaters().toSet();    // Must be "late" to ensure proper class instanciation flow
-  UnmodifiableSetView<Theater> get favoriteTheaters => UnmodifiableSetView(_favoriteTheaters);
+  late final favoriteTheaters = DataStream<UnmodifiableSetView<Theater>>(UnmodifiableSetView(StorageService.readFavoriteTheaters().toSet()))
+    ..listen(StorageService.saveFavoriteTheaters);    // Must be "late" to ensure proper class instanciation flow
 
-  bool isFavorite(Theater theater) => _favoriteTheaters.contains(theater);
+  bool isFavorite(Theater theater) => favoriteTheaters.value.contains(theater);
 
-  Future<void> addToFavorites(Theater theater) async {
-    await StorageService.saveFavoriteTheaters(_favoriteTheaters..add(theater));
+  void addToFavorites(Theater theater) {
+    favoriteTheaters.add(UnmodifiableSetView({...favoriteTheaters.value, theater}));
     AnalyticsService.trackEvent('Theater favorited', {
       'theaterId': theater.id.id,
-      'favoriteCount': _favoriteTheaters.length,
+      'favoriteCount': favoriteTheaters.value.length,
     });   // Do not await
   }
-  Future<void> removeFromFavorites(Theater theater) => StorageService.saveFavoriteTheaters(_favoriteTheaters..remove(theater));
+
+  void removeFromFavorites(Theater theater) => favoriteTheaters.add(UnmodifiableSetView({...favoriteTheaters.value}..remove(theater)));
   //#endregion
 
   //#region Hidden movies
-  /// Stream of hidden movies ids.
-  /// We use UnmodifiableSetView to ensure that every change to the set uses a new Set instance, to ensure that the UI is properly refreshed.
-  final hiddenMoviesIds = DataStream<UnmodifiableSetView<String>>(UnmodifiableSetView(StorageService.readHiddenMoviesIds().toSet()));
+  final hiddenMoviesIds = DataStream<UnmodifiableSetView<String>>(UnmodifiableSetView(StorageService.readHiddenMoviesIds().toSet()))
+    ..listen(StorageService.saveHiddenMoviesIds);
 
   bool isMovieHidden(Movie movie) => hiddenMoviesIds.value.contains(movie.id.id);
 
-  Future<void> hideMovie(Movie movie) async {
-    hiddenMoviesIds.add(UnmodifiableSetView({...hiddenMoviesIds.value, movie.id.id}));
-    await StorageService.saveHiddenMoviesIds(hiddenMoviesIds.value);
-  }
-  Future<void> unHideMovie(Movie movie) async {
-    hiddenMoviesIds.add(UnmodifiableSetView({...hiddenMoviesIds.value}..remove(movie.id.id)));
-    await StorageService.saveHiddenMoviesIds(hiddenMoviesIds.value);
-  }
+  void hideMovie(Movie movie) => hiddenMoviesIds.add(UnmodifiableSetView({...hiddenMoviesIds.value, movie.id.id}));
+  void unHideMovie(Movie movie) => hiddenMoviesIds.add(UnmodifiableSetView({...hiddenMoviesIds.value}..remove(movie.id.id)));
   //#endregion
 }

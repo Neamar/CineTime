@@ -143,13 +143,13 @@ class _TheaterCardState extends State<TheaterCard> {
     );
   }
 
-  Future<void> _onSelected() async {
+  void _onSelected() {
     if (widget.multiSelectionMode) {
       // Save value
       if (isSelected)
-        await AppService.instance.unselectTheater(widget.theater);
+        AppService.instance.unselectTheater(widget.theater);
       else
-        await AppService.instance.selectTheater(widget.theater);
+        AppService.instance.selectTheater(widget.theater);
 
       // Update UI
       setState(() {
@@ -157,7 +157,7 @@ class _TheaterCardState extends State<TheaterCard> {
       });
     } else {
       // Save value
-      await AppService.instance.selectTheater(widget.theater, clearFirst: true);
+      AppService.instance.selectTheater(widget.theater, clearFirst: true);
 
       // Update UI
       if (mounted) {
@@ -169,9 +169,9 @@ class _TheaterCardState extends State<TheaterCard> {
     }
   }
 
-  Future<void> _onLongPress() async {
+  void _onLongPress() {
     // Save value
-    await AppService.instance.selectTheater(widget.theater);
+    AppService.instance.selectTheater(widget.theater);
 
     // Update UI
     setState(() {
@@ -182,12 +182,12 @@ class _TheaterCardState extends State<TheaterCard> {
     widget.onLongPress?.call();
   }
 
-  Future<void> _onFavoriteTap() async {
+  void _onFavoriteTap() {
     // Save value
     if (isFavorite)
-      await AppService.instance.removeFromFavorites(widget.theater);
+      AppService.instance.removeFromFavorites(widget.theater);
     else
-      await AppService.instance.addToFavorites(widget.theater);
+      AppService.instance.addToFavorites(widget.theater);
 
     // Update UI
     setState(() {
