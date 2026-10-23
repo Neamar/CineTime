@@ -49,9 +49,9 @@ class AppService {
     if (country == _country) return;
 
     // Clear in-memory state
-    selectedTheaters.add(UnmodifiableSetView(const {}));
-    favoriteTheaters.add(UnmodifiableSetView(const {}));
-    hiddenMoviesIds.add(UnmodifiableSetView(const {}));
+    selectedTheaters.add(const UnmodifiableSetView.empty());
+    favoriteTheaters.add(const UnmodifiableSetView.empty());
+    hiddenMoviesIds.add(const UnmodifiableSetView.empty());
 
     // Swap provider
     _country = country;

@@ -527,7 +527,7 @@ class MoviesPageBloc with Disposable {
     });
   }
 
-  UnmodifiableSetView<Theater> _theaters = UnmodifiableSetView(const {});
+  UnmodifiableSetView<Theater> _theaters = const UnmodifiableSetView.empty();
   final fetchController = FetchBuilderController<MoviesShowTimes>();
   final isSearchVisible = DataStream(false);
   final searchController = TextEditingController();
