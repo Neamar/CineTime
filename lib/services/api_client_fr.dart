@@ -236,7 +236,7 @@ class FranceApiClient extends ApiClient {
            * So we trust what the theater declares, even if a few theaters give wrong data.
            */
           final rawDiffusionVersion = showTimeJson['diffusionVersion'] as String?;
-          final tags = (showTimeJson['tags'] as JsonList?)?.cast<String>() ?? const [];
+          final tags = (showTimeJson['tags'] as JsonList?)?.whereType<String>() ?? const <String>[];   // Defensive: null entries were seen in other lists (experiences, projections), not (yet) in tags
           final isOriginal = rawDiffusionVersion == 'ORIGINAL' || (rawDiffusionVersion == 'DUBBED' && tags.contains(_showtimeOriginalVersionTag));
           ShowAudioVersion audioVersion;
           final subtitles = <ShowSubtitles>{};
