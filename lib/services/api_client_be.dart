@@ -570,6 +570,7 @@ class BelgiumApiClient extends ApiClient {
 
 /// The site sometimes returns an HTTP 200 with an empty page (no `#mainContent`), typically under load.
 /// Without this check it would be parsed as "no movie", and cached for the whole day.
+/// Error statuses (e.g. 504 with an empty body) are left untouched, so they surface as a proper [HttpResponseException].
 /// Placed after [CacheInterceptor], so the exception prevents the response from being cached.
 class _IncompletePageInterceptor implements HttpInterceptor {
   const _IncompletePageInterceptor();
@@ -578,8 +579,10 @@ class _IncompletePageInterceptor implements HttpInterceptor {
   Future<http.Response> intercept(http.BaseRequest request, HttpInterceptorChain chain) async {
     final response = await chain.proceed(request);
 
-    // Only HTML pages of the site (not the JSON of the video host)
-    if (request.url.host == BelgiumApiClient._authority && !response.body.contains('id="mainContent"')) {
+    // Only successful HTML pages of the site (not the JSON of the video host, nor HTTP errors which are handled by the client)
+    if (request.url.host == BelgiumApiClient._authority
+        && SleekHttpClient.isStatusCodeSuccess(response.statusCode)
+        && !response.body.contains('id="mainContent"')) {
       throw DetailedException(
         'Réponse incomplète du serveur, veuillez réessayer',
         details: '[${request.method}] ${request.url} (${response.body.length} chars)',
