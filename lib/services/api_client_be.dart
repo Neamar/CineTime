@@ -19,9 +19,7 @@ import 'cache_interceptor.dart';
 class BelgiumApiClient extends ApiClient {
   //#region Vars
   BelgiumApiClient() : _client = SleekHttpClient(
-    client: SentryHttpClient(
-      failedRequestStatusCodes: [SentryStatusCode.range(400, 599)],
-    ),
+    client: SentryHttpClient(),
     authorityGetter: () => _authority,
     errorBuilder: HttpResponseException.new,
     interceptors: [

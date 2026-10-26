@@ -55,11 +55,7 @@ class FranceApiClient extends ApiClient {
   static const _logHeaders = false;
 
   FranceApiClient() : _client = SleekHttpClient(
-    client: SentryHttpClient(
-      failedRequestStatusCodes: [
-        SentryStatusCode.range(400, 599),   // Report all errors
-      ],
-    ),
+    client: SentryHttpClient(),
     authorityGetter: () => _graphAuthority,
     timeOutDuration: _timeOutDuration,
     headersGetter: () => {

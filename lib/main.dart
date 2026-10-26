@@ -27,6 +27,10 @@ Future<void> main() async {
     if (!kReleaseMode) debugPrintThrottled(message, wrapWidth: wrapWidth);
   };
 
+  // Init Sentry first, to report errors thrown by the next init steps.
+  // After the debugPrint override, otherwise it would replace Sentry's own debugPrint hook (release mode breadcrumbs).
+  if (App.enableBugReport) await _initSentry();
+
   // Get android version info
   try {
     App.androidSdkVersion = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
@@ -48,21 +52,26 @@ Future<void> main() async {
   await AnalyticsService.init();
 
   // Start app
-  if (App.enableBugReport) {
-    // Start App inside Sentry's scope
-    await SentryFlutter.init(
-      (options) {
-        options.dsn = 'https://f0a7dfef9b5249c7a57c355ac9d30856@o1038499.ingest.sentry.io/6006844';
-        //options.debug = !kReleaseMode;    // Only needed for extended debugging. If enabled, will flood the console.
-        options.environment = kReleaseMode ? 'release' : 'debug';
-        options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
-        options.captureFailedRequests = false;    // Ignore network errors
-      },
-      appRunner: () => runApp(const App()),
-    );
-  } else {
-    // Start App directly
-    runApp(const App());
+  runApp(const App());
+}
+
+/// Init Sentry bug reporting.
+/// Never throws: a reporting failure must not prevent the app from starting.
+Future<void> _initSentry() async {
+  try {
+    await SentryFlutter.init((options) {
+      options.dsn = 'https://f0a7dfef9b5249c7a57c355ac9d30856@o1038499.ingest.sentry.io/6006844';
+      //options.debug = !kReleaseMode;    // Only needed for extended debugging. If enabled, will flood the console.
+      options.environment = kReleaseMode ? 'release' : 'debug';
+      options.enablePrintBreadcrumbs = true;    // Redirect debugPrint calls to Sentry (only in release mode)
+      options.captureFailedRequests = false;    // Ignore network errors
+      options.beforeSend = (event, hint) {
+        final exception = event.throwable;
+        return exception == null || shouldReportException(exception) ? event : null;
+      };
+    });
+  } catch (e, s) {
+    debugPrint('[Sentry] init failed: $e\n$s');
   }
 }
 
