@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cinetime/main.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:sleek_http_client/sleek_http_client.dart';
 
@@ -168,6 +169,7 @@ bool shouldReportException(Object? exception) =>
     exception is! UnreportedException &&
     exception is! SocketException &&
     exception is! TimeoutException &&
+    exception is! http.ClientException &&
     exception is! ConnectivityException;
 
 /// Get current user location, with low precision.
