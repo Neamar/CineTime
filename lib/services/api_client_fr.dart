@@ -540,13 +540,17 @@ class FranceApiClient extends ApiClient {
       throwIfHttpError(response);
       final htmlContent = response.body;
 
-      // Extract API token
-      final apiToken = RegExp(r'<meta.+api_token.+content="(.+)">', caseSensitive: false).firstMatch(htmlContent)?.group(1);
+      // Extract API token (some pages use a self-closing tag)
+      final apiToken = RegExp(r'''<meta[^>]+name=["']api_token["'][^>]+content=["']([^"']+)''', caseSensitive: false).firstMatch(htmlContent)?.group(1);
       if (apiToken == null) throw const DataError('Could not find APi Token in Ciné Boutique page');
+
+      // Extract API sub-domain from page assets: it may differ from the page sub-domain
+      final subDomain = RegExp(r'https://([\w-]+)\.cineo' + r'ffice\.fr', caseSensitive: false).firstMatch(htmlContent)?.group(1);
+      if (subDomain == null) throw const DataError('Could not find API host in Ciné Boutique page');
 
       // Get showtime data
       final showTimeId = ticketingUri.queryParameters['showId'];
-      final subDomain = ticketingUri.host.split('.').first;
+      if (showTimeId == null) throw const DataError('Could not find show id in Ciné Boutique url');
       final showTimeResponse = await http.get(Uri.parse('https://$subDomain.cineo' + 'ffice.fr/vad/shows/$showTimeId?api_token=$apiToken'));
       throwIfHttpError(showTimeResponse);
 
