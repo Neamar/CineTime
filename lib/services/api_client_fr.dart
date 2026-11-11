@@ -472,7 +472,7 @@ class FranceApiClient extends ApiClient {
   // OPTI: study migrating this to sleek_http_client too (needs a second, generic client instance since target hosts vary per call). Not very important though (would be nice for logging).
   @override
   Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
-    // UGC
+    // -- UGC --
     if (ticketingUri.host.contains('ugc.fr')) {
       final response = await http.get(ticketingUri);
       throwIfHttpError(response);
@@ -500,7 +500,7 @@ class FranceApiClient extends ApiClient {
       return endDate;
     }
 
-    // Pathé
+    // -- Pathé --
     else if (ticketingUri.host.contains('pa' + 'the.fr')) {
       // Pathé ticketing page is more complex:
       // - Requires javascript to load
@@ -533,8 +533,11 @@ class FranceApiClient extends ApiClient {
       return startAt.add(showDuration);
     }
 
-    // Ciné Boutique
-    if (ticketingUri.host.contains('cine.bo' + 'utique')) {
+    // -- Ciné Boutique --
+    // Also white-labeled on theaters' own domains, with the show id in the fragment (e.g. `https://example.org/film.html#/media/2021?showId=13470`)
+    final fragmentUri = Uri.tryParse(ticketingUri.fragment);
+    final isWhiteLabelCineBoutique = ticketingUri.host.isNotEmpty && fragmentUri != null && fragmentUri.path.startsWith('/media/') && fragmentUri.queryParameters.containsKey('showId');
+    if (ticketingUri.host.contains('cine.bo' + 'utique') || isWhiteLabelCineBoutique) {
       // Get API token
       final response = await http.get(ticketingUri);
       throwIfHttpError(response);
@@ -549,7 +552,7 @@ class FranceApiClient extends ApiClient {
       if (subDomain == null) throw const DataError('Could not find API host in Ciné Boutique page');
 
       // Get showtime data
-      final showTimeId = ticketingUri.queryParameters['showId'];
+      final showTimeId = ticketingUri.queryParameters['showId'] ?? fragmentUri?.queryParameters['showId'];
       if (showTimeId == null) throw const DataError('Could not find show id in Ciné Boutique url');
       final showTimeResponse = await http.get(Uri.parse('https://$subDomain.cineo' + 'ffice.fr/vad/shows/$showTimeId?api_token=$apiToken'));
       throwIfHttpError(showTimeResponse);
