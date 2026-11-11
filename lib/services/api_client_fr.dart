@@ -267,7 +267,8 @@ class FranceApiClient extends ApiClient {
             ticketingUrl: () {    // Needs to be in multiple steps to enforce [firstOrNull] extension static resolution
               final JsonList? ticketing = showTimeJson['data']?['ticketing'];
               if (ticketing == null) return null;
-              final JsonList? urls = (ticketing.firstWhereOrNull((t) => t['provider'] == 'default') ?? ticketing.firstOrNull)?['urls'];
+              // The 'relay' provider is ignored: when it's the only one, it always leads to a "Not available online" page
+              final JsonList? urls = (ticketing.firstWhereOrNull((t) => t['provider'] == 'default') ?? ticketing.firstWhereOrNull((t) => t['provider'] != 'relay'))?['urls'];
               return urls?.firstOrNull as String?;
             } (),
           );
