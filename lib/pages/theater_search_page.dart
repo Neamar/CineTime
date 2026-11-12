@@ -20,8 +20,6 @@ class TheaterSearchPage extends StatefulWidget {
 }
 
 class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider<TheaterSearchPage, _TheaterSearchPageBloc>, MultiSelectionMode<TheaterSearchPage> {
-  final _searchController = TextEditingController();
-
   @override
   initBloc() => _TheaterSearchPageBloc();
 
@@ -46,7 +44,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
     setState(() {});
 
     // and either re-run the current search on the new country or go back to the onboarding message
-    bloc.startQuerySearch(_searchController.text);
+    bloc.startQuerySearch();
   }
 
   @override
@@ -61,13 +59,13 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: TextField(
-            controller: _searchController,
+            controller: bloc.searchController,
             decoration: const InputDecoration(
               hintText: 'Nom ou adresse',
             ),
             style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
             textInputAction: TextInputAction.search,
-            onSubmitted: bloc.startQuerySearch,
+            onSubmitted: (_) => bloc.startQuerySearch(),
           ),
           actions: <Widget>[
             if (AppService.api.supportsGeoSearch)
@@ -126,23 +124,26 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 }
 
 
 class _TheaterSearchPageBloc with Disposable {
   final fetchBuilderController = FetchBuilderWithParameterController<_SearchParams, _SearchResult>();
+  final searchController = TextEditingController();
 
   void startGeoSearch() => fetchBuilderController.refresh(param: const _SearchParams(isGeo: true), clearDataFirst: true);
 
-  void startQuerySearch(String query) => query.isNotEmpty
-      ? fetchBuilderController.refresh(param: _SearchParams(query: query), clearDataFirst: true)
-      : fetchBuilderController.refresh(clearDataFirst: true);
+  /// Search for the text in [searchController], after cleaning it (the field is updated to show the cleaned text).
+  void startQuerySearch() {
+    // Replace control characters (e.g. NUL, which gets the request rejected by the server) with spaces, then remove superfluous spaces
+    final query = searchController.text.replaceAll(RegExp(r'[\u0000-\u001F\u007F]'), ' ').replaceAll(RegExp(r' {2,}'), ' ').trim();
+    if (query != searchController.text)
+      searchController.value = TextEditingValue(text: query, selection: TextSelection.collapsed(offset: query.length));
+
+    query.isNotEmpty
+        ? fetchBuilderController.refresh(param: _SearchParams(query: query), clearDataFirst: true)
+        : fetchBuilderController.refresh(clearDataFirst: true);
+  }
 
   /// Returns synchronously when search hasn't started yet, to skip the loader.
   FutureOr<_SearchResult> fetchTheaters(_SearchParams? searchParams) => searchParams == null
@@ -181,6 +182,12 @@ class _TheaterSearchPageBloc with Disposable {
 
     // Get Theater list from server
     return await AppService.api.searchTheaters(query);
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 }
 
