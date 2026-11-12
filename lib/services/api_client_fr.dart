@@ -10,7 +10,6 @@ import 'package:cinetime/utils/exceptions/data_error.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonObject, JsonList;
 
 import 'api_client.dart';
@@ -51,7 +50,6 @@ class FranceApiClient extends ApiClient {
   static const _timeOutDuration = Duration(seconds: 30);
 
   FranceApiClient() : _client = SleekHttpClient(
-    client: SentryHttpClient(),
     authorityGetter: () => _graphAuthority,
     timeOutDuration: _timeOutDuration,
     headersGetter: () => {
@@ -69,6 +67,13 @@ class FranceApiClient extends ApiClient {
   );
 
   final SleekHttpClient _client;
+
+  /// Client for third-party ticketing sites: full urls, hosts vary per call, no cache.
+  final _ticketingClient = SleekHttpClient(
+    timeOutDuration: _timeOutDuration,
+    errorBuilder: HttpResponseException.new,
+    interceptors: [ApiClient.loggingInterceptor],
+  );
 
   @override
   ApiId decodeStoredId(String encoded) => FranceApiId.fromEncoded(encoded);
@@ -466,14 +471,11 @@ class FranceApiClient extends ApiClient {
 
   //#region Other
   /// Get the show end time from ticketing url
-  // OPTI: study migrating this to sleek_http_client too (needs a second, generic client instance since target hosts vary per call). Not very important though (would be nice for logging).
   @override
   Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // -- UGC --
     if (ticketingUri.host.contains('ugc.fr')) {
-      final response = await http.get(ticketingUri);
-      throwIfHttpError(response);
-      final htmlContent = response.body;
+      final htmlContent = await _ticketingClient.sendUri<String>(HttpMethod.get, ticketingUri);
 
       // Extract raw value
       final regex = RegExp(r'<div class="showing-endtime.*?">.*?(\d{2}:\d{2}).*?</div>', dotAll: true, caseSensitive: false);
@@ -508,20 +510,19 @@ class FranceApiClient extends ApiClient {
       if (movieDuration == null) return null;
 
       // First, get a auth token
-      final authResponse = await http.post(Uri.parse('https://s.pa' + 'the.fr/oauth/api/jwt/token'), body: json.encode({
+      // Sent as a plain string body (not [bodyJson]), so the request keeps its original content type
+      final authJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.post, Uri.parse('https://s.pa' + 'the.fr/oauth/api/jwt/token'), stringBody: json.encode({
         'grant_type': 'client_credentials',
         'client_id': 'API_CLI'
       }));
-      throwIfHttpError(authResponse);
-      final authToken = json.decode(authResponse.body)['access_token'];
+      final authToken = authJson['access_token'];
       final headers = {
         'Authorization': 'Bearer $authToken',
       };
 
       // Then, get the ads duration
-      final adsResponse = await http.get(Uri.parse('https://s.pa' + 'the.fr/api/setting/fr-FR/booking/display'), headers: headers);
-      throwIfHttpError(adsResponse);
-      final adsDuration = json.decode(adsResponse.body)['adsDuration'] as int;
+      final adsJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.get, Uri.parse('https://s.pa' + 'the.fr/api/setting/fr-FR/booking/display'), headers: headers);
+      final adsDuration = adsJson['adsDuration'] as int;
 
       // Compute total show duration
       final showDuration = movieDuration + Duration(minutes: adsDuration);
@@ -536,9 +537,7 @@ class FranceApiClient extends ApiClient {
     final isWhiteLabelCineBoutique = ticketingUri.host.isNotEmpty && fragmentUri != null && fragmentUri.path.startsWith('/media/') && fragmentUri.queryParameters.containsKey('showId');
     if (ticketingUri.host.contains('cine.bo' + 'utique') || isWhiteLabelCineBoutique) {
       // Get API token
-      final response = await http.get(ticketingUri);
-      throwIfHttpError(response);
-      final htmlContent = response.body;
+      final htmlContent = await _ticketingClient.sendUri<String>(HttpMethod.get, ticketingUri);
 
       // Extract API token (some pages use a self-closing tag)
       final apiToken = RegExp(r'''<meta[^>]+name=["']api_token["'][^>]+content=["']([^"']+)''', caseSensitive: false).firstMatch(htmlContent)?.group(1);
@@ -551,11 +550,9 @@ class FranceApiClient extends ApiClient {
       // Get showtime data
       final showTimeId = ticketingUri.queryParameters['showId'] ?? fragmentUri?.queryParameters['showId'];
       if (showTimeId == null) throw const DataError('Could not find show id in Ciné Boutique url');
-      final showTimeResponse = await http.get(Uri.parse('https://$subDomain.cineo' + 'ffice.fr/vad/shows/$showTimeId?api_token=$apiToken'));
-      throwIfHttpError(showTimeResponse);
+      final showTimeData = await _ticketingClient.sendUri<JsonObject>(HttpMethod.get, Uri.parse('https://$subDomain.cineo' + 'ffice.fr/vad/shows/$showTimeId?api_token=$apiToken'));
 
       // Extract showtime data
-      final showTimeData = json.decode(showTimeResponse.body);
       final endTime = showTimeData['showend'] as String;
       return DateTime.parse(endTime).toLocal();
     }
@@ -623,12 +620,6 @@ class FranceApiClient extends ApiClient {
     // Send request
     // Note: a GraphQL request may return a 200 HTTP status code with errors — handled by [_GraphQLErrorInterceptor].
     return await _client.send<T>(HttpMethod.post, _graphPath, headers: headers, bodyJson: body);
-  }
-
-  static void throwIfHttpError(http.Response response) {
-    if (!SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
-      throw HttpResponseException(response);
-    }
   }
   //#endregion
 }

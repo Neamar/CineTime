@@ -8,7 +8,6 @@ import 'package:cinetime/utils/exceptions/http_response_exception.dart';
 import 'package:html/dom.dart' as html_dom;
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonList, JsonObject;
 
 import 'api_client.dart';
@@ -18,7 +17,6 @@ import 'cache_interceptor.dart';
 class BelgiumApiClient extends ApiClient {
   //#region Vars
   BelgiumApiClient() : _client = SleekHttpClient(
-    client: SentryHttpClient(),
     authorityGetter: () => _authority,
     errorBuilder: HttpResponseException.new,
     interceptors: [
