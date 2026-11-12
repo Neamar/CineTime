@@ -1,6 +1,7 @@
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sleek_http_client/sleek_http_client.dart' show LoggingInterceptor, LogLayout;
 
 enum Country { france, belgium }
 
@@ -23,6 +24,13 @@ abstract class ApiClient {
   String moviePressRatingUrl(String movieId);
 
   String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec);
+
+  /// Whether to log headers also or not.
+  static const _logHeaders = false;
+
+  /// Shared by all HTTP clients (stateless).
+  /// One line per call in release, as each printed line becomes a Sentry breadcrumb.
+  static final loggingInterceptor = LoggingInterceptor(logger: debugPrint, logHeaders: _logHeaders, layout: kReleaseMode ? LogLayout.compact : LogLayout.multiline);
 
   /// Shows started for more than this duration are filtered out.
   static const _maxStartedShowtimeDuration = Duration(hours: 1);

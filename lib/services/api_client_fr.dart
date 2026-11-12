@@ -8,7 +8,6 @@ import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/data_error.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -51,9 +50,6 @@ class FranceApiClient extends ApiClient {
   /// Request timeout duration
   static const _timeOutDuration = Duration(seconds: 30);
 
-  /// Whether to log headers also or not.
-  static const _logHeaders = false;
-
   FranceApiClient() : _client = SleekHttpClient(
     client: SentryHttpClient(),
     authorityGetter: () => _graphAuthority,
@@ -68,7 +64,7 @@ class FranceApiClient extends ApiClient {
         keyBuilder: _getCacheKeyFromRequest,
       ),
       const _GraphQLErrorInterceptor(),
-      LoggingInterceptor(logger: debugPrint, logHeaders: _logHeaders),
+      ApiClient.loggingInterceptor,
     ],
   );
 

@@ -5,7 +5,6 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/detailed_exception.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
-import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as html_dom;
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
@@ -28,7 +27,7 @@ class BelgiumApiClient extends ApiClient {
         shouldCache: (request) => request.url.host != _videoAuthority,    // Video manifest url carries a signed token of unknown lifetime
       ),
       const _IncompletePageInterceptor(),
-      LoggingInterceptor(logger: debugPrint),
+      ApiClient.loggingInterceptor,
     ],
   );
 
