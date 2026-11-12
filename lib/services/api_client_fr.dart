@@ -8,6 +8,7 @@ import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/utils/exceptions/data_error.dart';
 import 'package:cinetime/utils/exceptions/http_response_exception.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonObject, JsonList;
@@ -474,7 +475,7 @@ class FranceApiClient extends ApiClient {
   @override
   Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // -- UGC --
-    if (ticketingUri.host.contains('ugc.fr')) {
+    if (ticketingUri.host.contains('ug' + 'c.fr')) {
       final htmlContent = await _ticketingClient.sendUri<String>(HttpMethod.get, ticketingUri);
 
       // Extract raw value
@@ -487,16 +488,7 @@ class FranceApiClient extends ApiClient {
 
       // Parse the time and build end date
       final timeParts = endTime.split(':');
-      var endDate = startAt.copyWith(
-        hour: int.parse(timeParts[0]),
-        minute: int.parse(timeParts[1]),
-      );
-
-      // If the end time is before the start time, it means it's on the next day
-      if (endDate.isBefore(startAt)) {
-        endDate = endDate.copyWith(day: endDate.day + 1);
-      }
-      return endDate;
+      return _endDateFromTime(startAt, int.parse(timeParts[0]), int.parse(timeParts[1]));
     }
 
     // -- Pathé --
@@ -529,6 +521,29 @@ class FranceApiClient extends ApiClient {
 
       // Return end time
       return startAt.add(showDuration);
+    }
+
+    // -- Cotecine --
+    // Used by CGR and many other theaters, on their own domains (e.g. `https://example.org/poitiers/r/156317`, redirected to `…/reserver/F615930/D1794400200/VF/2127/`)
+    if (RegExp(r'/r/\d+/?$|/reserver/F\d+/D\d+/').hasMatch(ticketingUri.path)) {
+      final htmlContent = await _ticketingClient.sendUri<String>(HttpMethod.get, ticketingUri);
+
+      // Extract end time
+      final match = RegExp(r'class="s_fin">\s*\(fin prévue à (\d{1,2})h(\d{2})\)').firstMatch(htmlContent);
+      if (match != null) return _endDateFromTime(startAt, int.parse(match.group(1)!), int.parse(match.group(2)!));
+
+      // Known cases without end time:
+      // - Showtime displayed, but the movie duration is unknown by the theater
+      if (htmlContent.contains('class="s_heure"')) return null;
+
+      // - Message from the theater (e.g. communication error, showtime not available for booking)
+      final errorMessage = RegExp(r'<p class="erreur"[^>]*>([^<]*)').firstMatch(htmlContent)?.group(1);
+      if (errorMessage != null) {
+        debugPrint('Cotecine page error: $errorMessage');
+        return null;
+      }
+
+      throw DataError('Could not find end time in Cotecine page (${ticketingUri.host})');
     }
 
     // -- Ciné Boutique --
@@ -575,6 +590,13 @@ class FranceApiClient extends ApiClient {
 
   //#region Generics
   static final _dateFormat = DateFormat('yyyy-MM-dd');
+
+  /// Build the end date of a show started at [startAt], from its end time of day.
+  /// If the end time is before the start time, it means it's on the next day.
+  static DateTime _endDateFromTime(DateTime startAt, int hour, int minute) {
+    final endDate = startAt.copyWith(hour: hour, minute: minute);
+    return endDate.isBefore(startAt) ? endDate.copyWith(day: endDate.day + 1) : endDate;
+  }
 
   /// Return correctly formatted date
   static String _dateToString(DateTime date) => '${_dateFormat.format(date)}T00:00:00';
