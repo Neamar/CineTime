@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:chewie/chewie.dart';
+import 'package:chewie/src/notifiers/player_notifier.dart';   // ignore: implementation_imports
 import 'package:cinetime/models/api_id.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
@@ -9,6 +8,7 @@ import 'package:fetcher/fetcher_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';   // ignore: depend_on_referenced_packages
 import 'package:video_player/video_player.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -113,7 +113,6 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
   late final VideoPlayerController _videoPlayerController;
   ChewieController? _chewieController;
   Object? _initError;
-  Timer? _hideBackButtonTimer;
   bool _wasPlaying = false;
 
   @override
@@ -141,6 +140,7 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
         videoPlayerController: _videoPlayerController,
         aspectRatio: _videoPlayerController.value.aspectRatio,
         showOptions: false,
+        overlay: _ControlsVisibilityProbe(isBackButtonVisible: widget.isBackButtonVisible),
         // The page is already fullscreen.
         // Chewie's `fullScreenByDefault` (once used to fix the aspect ratio) breaks back navigation, so the ratio is fixed by initializing the player first and passing `aspectRatio`.
         // See https://github.com/fluttercommunity/chewie/issues/647
@@ -152,21 +152,16 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
   }
 
   void _onPlayerChanged() {
-    final isPlaying = _videoPlayerController.value.isPlaying;
+    final value = _videoPlayerController.value;
+
+    // Chewie doesn't show its controls on error, so nothing would bring the back button back
+    if (value.hasError) widget.isBackButtonVisible.add(true);
+
+    final isPlaying = value.isPlaying;
     if (isPlaying == _wasPlaying) return;
     _wasPlaying = isPlaying;
 
     WakelockPlus.toggle(enable: isPlaying);
-    _showBackButton();
-  }
-
-  /// Shows the back button, and hides it after a while if the video is playing (same behavior as Chewie controls).
-  void _showBackButton() {
-    _hideBackButtonTimer?.cancel();
-    widget.isBackButtonVisible.add(true);
-    if (_videoPlayerController.value.isPlaying) {
-      _hideBackButtonTimer = Timer(ChewieController.defaultHideControlsTimer, () => widget.isBackButtonVisible.add(false));
-    }
   }
 
   @override
@@ -183,11 +178,8 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
       );
     }
 
-    return Listener(
-      onPointerDown: (_) => _showBackButton(),
-      child: Chewie(
-        controller: chewieController,
-      ),
+    return Chewie(
+      controller: chewieController,
     );
   }
 
@@ -203,10 +195,42 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
 
   @override
   void dispose() {
-    _hideBackButtonTimer?.cancel();
     WakelockPlus.disable();
     _chewieController?.dispose();
     _videoPlayerController.dispose();
+    super.dispose();
+  }
+}
+
+/// Mirrors the visibility of Chewie controls into [isBackButtonVisible].
+/// Chewie doesn't expose it, so it is read from its internal [PlayerNotifier], which is available to the descendants of [Chewie] (like [ChewieController.overlay]).
+/// To be replaced by an official API if one is added. See https://github.com/fluttercommunity/chewie/issues/977
+class _ControlsVisibilityProbe extends StatefulWidget {
+  const _ControlsVisibilityProbe({required this.isBackButtonVisible});
+
+  final DataStream<bool> isBackButtonVisible;
+
+  @override
+  State<_ControlsVisibilityProbe> createState() => _ControlsVisibilityProbeState();
+}
+
+class _ControlsVisibilityProbeState extends State<_ControlsVisibilityProbe> {
+  late final PlayerNotifier _notifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _notifier = Provider.of<PlayerNotifier>(context, listen: false)..addListener(_onControlsVisibilityChanged);
+  }
+
+  void _onControlsVisibilityChanged() => widget.isBackButtonVisible.add(!_notifier.hideStuff);
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
+
+  @override
+  void dispose() {
+    _notifier.removeListener(_onControlsVisibilityChanged);
     super.dispose();
   }
 }
