@@ -34,16 +34,32 @@ class _TrailerPageState extends State<TrailerPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
-  @override
-  void dispose() {
+  /// Restores the orientation and system UI changed in [initState].
+  /// Called as soon as the page is popped, because [dispose] only runs once the exit transition is over, which makes the portrait mode come back late.
+  void _restoreSystemChrome() {
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+  }
+
+  @override
+  void dispose() {
+    // Safety net, in case the route is removed without being popped
+    _restoreSystemChrome();
     _isBackButtonVisible.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) _restoreSystemChrome();
+      },
+      child: _buildContent(),
+    );
+  }
+
+  Widget _buildContent() {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
