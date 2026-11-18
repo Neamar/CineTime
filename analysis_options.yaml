@@ -33,6 +33,7 @@ linter:
     prefer_adjacent_string_concatenation: false
     prefer_void_to_null: false
     sort_constructors_first: true
+    depend_on_referenced_packages: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

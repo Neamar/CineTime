@@ -16,6 +16,7 @@ import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseExcep
 import 'api_client.dart';
 import 'app_service.dart';
 import 'cache_interceptor.dart';
+import 'cache_policies.dart';
 
 class FranceApiClient extends ApiClient {
   //#region Vars
@@ -59,9 +60,7 @@ class FranceApiClient extends ApiClient {
     },
     errorBuilder: HttpResponseException.new,
     interceptors: [
-      if (CacheInterceptor.enabled) CacheInterceptor(
-        keyBuilder: _getCacheKeyFromRequest,
-      ),
+      if (CacheInterceptor.enabled) const CacheInterceptor(),
       const _GraphQLErrorInterceptor(),
       ApiClient.loggingInterceptor,
     ],
@@ -121,6 +120,7 @@ class FranceApiClient extends ApiClient {
         'card': [],
         'country': 'FRANCE'
       },
+      cache: const CacheOptions.disabled(),   // Position always differs, a cached response would never be used
     );
 
     // Process result
@@ -393,6 +393,7 @@ class FranceApiClient extends ApiClient {
         'id': movieId.encodedId,
         'country': 'FRANCE'
       },
+      cache: const CacheOptions(policy: CachePolicies.movieInfo),
     );
 
     // Process data
@@ -604,20 +605,6 @@ class FranceApiClient extends ApiClient {
   /// Return the path part of an url
   static String? _getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
 
-  /// Build a unique key based on the request, used for cache.
-  static String _getCacheKeyFromRequest(http.BaseRequest request) {
-    // If it's a GraphQL request
-    if (request.url.path == _graphPath) {
-      final body = (request as http.Request).body;
-      return body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
-    }
-
-    // If it's a classic request
-    else {
-      return request.url.toString();
-    }
-  }
-
   /// Get an auth token for GraphQL request.
   Future<String> _getAuthToken() async {
     // Using hardcoded token works for now, but it may be revoked at any time.
@@ -625,7 +612,7 @@ class FranceApiClient extends ApiClient {
   }
 
   /// Send a graphQL request
-  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, CacheOptions? cache}) async {
     // Headers
     final headers = {
       'a' + 'c-auth-token': await _getAuthToken(),
@@ -641,7 +628,7 @@ class FranceApiClient extends ApiClient {
 
     // Send request
     // Note: a GraphQL request may return a 200 HTTP status code with errors — handled by [_GraphQLErrorInterceptor].
-    return await _client.send<T>(HttpMethod.post, _graphPath, headers: headers, bodyJson: body);
+    return await _client.send<T>(HttpMethod.post, _graphPath, headers: headers, bodyJson: body, extra: cache?.toExtra());
   }
   //#endregion
 }

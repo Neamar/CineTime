@@ -1,69 +1,249 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:cached_network_image_ce/cached_network_image.dart' show BaseCacheManager, CachedNetworkImageProvider;
 import 'package:cinetime/utils/_utils.dart';
+import 'package:cinetime/utils/exceptions/http_response_exception.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseException, JsonObject, JsonList;
 
-/// Caches successful responses to disk, keyed by [keyBuilder].
-/// Placed outermost in the interceptor list, so a cache hit short-circuits everything after it (GraphQL error check, logging, the real network call).
+import 'cache_policies.dart';
+
+/// Caches successful responses on disk, following a [CachePolicy] per request, and serves them as a fallback when the network call fails.
+/// Raw responses are stored (not parsed data), so parsing changes also apply to cached data.
+/// Configured per request with [CacheOptions].
+///
+/// Placed outermost in the interceptor list, so a cache hit short-circuits everything after it (GraphQL error check, logging, the real network call),
+/// and so any error thrown after it (no internet, timeout, GraphQL error, incomplete page, ...) triggers the fallback.
 class CacheInterceptor implements HttpInterceptor {
-  CacheInterceptor({required this.keyBuilder, this.shouldCache});
+  const CacheInterceptor();
 
   /// Whether to use cache or not
   static const enabled = true;
 
-  /// How long a cached response stays valid
-  static const _maxAge = Duration(days: 1);
+  /// Key of the [CacheOptions] in the request extra
+  static const optionsKey = 'cacheOptions';
 
-  /// Same manager as the images' one (shared by all API clients, hosts differ so keys can't collide).
-  /// A second [DefaultCacheManager] can't be created: it would open the same Hive box as this one.
-  /// Besides, its constructor can't be configured with the (conditionally exported) public API.
-  static BaseCacheManager get _cacheManager => CachedNetworkImageProvider.defaultCacheManager;
+  /// Increase [_version] when the entry format changes: previous entries are then deleted.
+  static const _directoryPrefix = 'http_cache_v';
+  static const _version = 1;
 
-  final String Function(http.BaseRequest request) keyBuilder;
+  /// Cache directory. Null until initialized (or if initialization failed): cache is then bypassed.
+  static Directory? _directory;
 
-  /// When it returns false for a request, cache is bypassed (neither read nor written). Defaults to caching everything.
-  final bool Function(http.BaseRequest request)? shouldCache;
+  /// Get the cache directory ready, then delete old entries in the background.
+  /// Never throws: on failure, cache is just bypassed.
+  static Future<void> init() async {
+    try {
+      final parentPath = (await getApplicationCacheDirectory()).path;
+      final directory = _directory = await Directory('$parentPath/$_directoryPrefix$_version').create(recursive: true);
+      unawaited(_purge(parentPath, directory));
+    } catch (e, s) {
+      reportError(e, s);
+    }
+  }
+
+  /// Delete all entries (e.g. when switching country).
+  static Future<void> clear() async {
+    final directory = _directory;
+    if (directory == null) return;
+    try {
+      await directory.delete(recursive: true);
+      await directory.create(recursive: true);
+    } catch (e, s) {
+      reportError(e, s);
+    }
+  }
+
+  /// Delete directories of previous versions, and entries older than [CachePolicies.deleteAfter].
+  /// Based on files modification date, so entries don't need to be read.
+  static Future<void> _purge(String parentPath, Directory directory) async {
+    try {
+      for (var version = 1; version < _version; version++) {
+        final previousDirectory = Directory('$parentPath/$_directoryPrefix$version');
+        if (await previousDirectory.exists()) await previousDirectory.delete(recursive: true);
+      }
+
+      final deleteBefore = DateTime.now().subtract(CachePolicies.deleteAfter);
+      await for (final entity in directory.list()) {
+        if (entity is File && (await entity.lastModified()).isBefore(deleteBefore)) await entity.delete();
+      }
+    } catch (e, s) {
+      reportError(e, s);
+    }
+  }
 
   @override
   Future<http.Response> intercept(http.BaseRequest request, HttpInterceptorChain chain) async {
-    if (shouldCache?.call(request) == false) return chain.proceed(request);
+    // Get options and directory
+    final options = request.extra[optionsKey] as CacheOptions?;
+    final directory = _directory;
 
-    final cacheKey = keyBuilder(request);
+    // Bypass cache
+    if (!enabled || directory == null || options?.enabled == false) return chain.proceed(request);
+
+    // Get policy and log label
+    final policy = options?.policy ?? CachePolicies.defaultPolicy;
+    final logLabel = '[${request.method}] ${request.url}${options?.key != null ? ' (${options!.key})' : ''}';
+    final file = File('${directory.path}/${_buildKey(request, options?.key)}');
 
     // Check cache
-    final cachedResponseFile = await _cacheManager.getFileFromCache(cacheKey);
+    final entry = await _read(file, maxAge: policy.keepFor);
 
-    // If cache is available
-    if (cachedResponseFile != null) {
-      debugPrint('[CacheInterceptor] ✅ HIT — reading from cache for $cacheKey');
-
-      // Read response from cached file
-      final cachedResponse = await cachedResponseFile.file.readAsString();
-
-      // Process response
-      return http.Response(cachedResponse, 200,
-        headers: {HttpHeaders.contentTypeHeader: SleekHttpClient.contentTypeJson}, // Needed so content is decoded using utf-8
-        request: http.Request('CACHE', Uri.parse(cachedResponseFile.file.path)),
-      );
+    // If entry is fresh, skip network
+    if (entry != null && entry.age < policy.freshFor) {
+      debugPrint('[CacheInterceptor] ✅ HIT — $logLabel');
+      options?.status?._record(entry.storedAt, isFallback: false);
+      return entry.toResponse(request);
     }
 
-    // Cache miss: proceed with the real request
-    debugPrint('[CacheInterceptor] ❌ MISS — fetching from network for $cacheKey');
-    final response = await chain.proceed(request);
+    // Otherwise, proceed with the real request
+    debugPrint('[CacheInterceptor] ❌ MISS — $logLabel');
+    final http.Response response;
+    try {
+      response = await chain.proceed(request);
+    } on RequestAbortedException {
+      rethrow;    // Cancelled on purpose: not a failure
+    } catch (e, s) {
+      if (entry == null) rethrow;
+      return _fallback(request, entry, options, logLabel, e, s);
+    }
+
+    // HTTP errors are received as a response: the client only turns them into an exception after the interceptors
+    if (!SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
+      if (entry == null) return response;
+      return _fallback(request, entry, options, logLabel, HttpResponseException(response), StackTrace.current);
+    }
 
     // Store in cache
-    if (SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
-      try {
-        await _cacheManager.putFile(cacheKey, response.bodyBytes, maxAge: _maxAge);
-        debugPrint('[CacheInterceptor] 💾 Writing response to cache for $cacheKey');
-      } catch (e, s) {
-        reportError(e, s);
-      }
-    }
-
+    final storedAt = DateTime.now();
+    await _write(file, storedAt, response);
+    options?.status?._record(storedAt, isFallback: false);
     return response;
   }
+
+  http.Response _fallback(http.BaseRequest request, _CacheEntry entry, CacheOptions? options, String logLabel, Object error, StackTrace stack) {
+    debugPrint('[CacheInterceptor] 🛟 FALLBACK — $logLabel');
+    reportError(error, stack);    // Swallowed here, so reported here. Network errors are filtered out by reportError.
+    options?.status?._record(entry.storedAt, isFallback: true);
+    return entry.toResponse(request);
+  }
+
+  /// Build the file name of a request's entry.
+  /// Hashed, as raw keys can be long (GraphQL query in the body) and contain characters not allowed in file names.
+  /// Host is always included, so keys of different APIs can't collide.
+  static String _buildKey(http.BaseRequest request, String? key) {
+    key ??= '${request.method}|${request.url}|${request is http.Request ? request.body : ''}';
+    return sha256.convert(utf8.encode('${request.url.host}|$key')).toString();
+  }
+
+  /// Entry file format: a JSON header line, followed by the raw response body.
+  static const _headerSeparator = 0x0A;    // '\n', never found in a JSON-encoded string
+
+  /// Read the entry in [file], if any and younger than [maxAge].
+  static Future<_CacheEntry?> _read(File file, {required Duration maxAge}) async {
+    final Uint8List bytes;
+    try {
+      bytes = await file.readAsBytes();
+    } on PathNotFoundException {
+      return null;
+    } catch (e, s) {
+      reportError(e, s);
+      return null;
+    }
+
+    try {
+      final headerEnd = bytes.indexOf(_headerSeparator);
+      final Map<String, dynamic> header = json.decode(utf8.decode(Uint8List.sublistView(bytes, 0, headerEnd)));
+      final entry = _CacheEntry(
+        storedAt: DateTime.fromMillisecondsSinceEpoch(header['storedAt']),
+        contentType: header['contentType'],
+        body: Uint8List.sublistView(bytes, headerEnd + 1),
+      );
+      return entry.age < maxAge ? entry : null;
+    } catch (e, s) {
+      reportError(e, s);    // Corrupted entry: ignored, and overwritten by the next successful call
+      return null;
+    }
+  }
+
+  /// Never throws: a cache failure must not fail the request.
+  static Future<void> _write(File file, DateTime storedAt, http.Response response) async {
+    try {
+      final header = json.encode({
+        'storedAt': storedAt.millisecondsSinceEpoch,
+        'contentType': response.headers[HttpHeaders.contentTypeHeader],
+      });
+      final bytes = (BytesBuilder(copy: false)
+        ..add(utf8.encode(header))
+        ..addByte(_headerSeparator)
+        ..add(response.bodyBytes)).takeBytes();
+
+      // Write to a temporary file first, then rename it (atomic), so a concurrent read never gets a partial entry
+      final tempFile = File('${file.path}.${storedAt.microsecondsSinceEpoch}.tmp');
+      await tempFile.writeAsBytes(bytes, flush: true);
+      await tempFile.rename(file.path);
+    } catch (e, s) {
+      reportError(e, s);
+    }
+  }
+}
+
+/// Cache options of a request, passed through its extra (see [toExtra]).
+class CacheOptions {
+  const CacheOptions({this.key, this.policy, this.status}) : enabled = true;
+
+  /// Bypass the cache entirely (neither read nor written).
+  const CacheOptions.disabled() : key = null, policy = null, status = null, enabled = false;
+
+  /// Explicit key, instead of the default one built from the request (method, url and body).
+  /// Useful when a response stays usable while the request changes (e.g. a date in the body).
+  final String? key;
+
+  /// Defaults to [CachePolicies.defaultPolicy].
+  final CachePolicy? policy;
+
+  /// Filled by the interceptor, to know where the response comes from.
+  final CacheStatus? status;
+
+  final bool enabled;
+
+  Map<String, Object> toExtra() => {CacheInterceptor.optionsKey: this};
+}
+
+/// Origin of the responses of one or several requests (e.g. one per theater), filled by [CacheInterceptor].
+class CacheStatus {
+  /// Oldest storage date among the responses (the network call date, if not served from cache).
+  DateTime? get oldestUpdate => _oldestUpdate;
+  DateTime? _oldestUpdate;
+
+  /// Whether at least one response is a fallback, served because the network call failed.
+  bool get isFallback => _isFallback;
+  bool _isFallback = false;
+
+  void _record(DateTime storedAt, {required bool isFallback}) {
+    final oldestUpdate = _oldestUpdate;
+    if (oldestUpdate == null || storedAt.isBefore(oldestUpdate)) _oldestUpdate = storedAt;
+    _isFallback |= isFallback;
+  }
+}
+
+class _CacheEntry {
+  const _CacheEntry({required this.storedAt, required this.contentType, required this.body});
+
+  final DateTime storedAt;
+  final String? contentType;
+  final Uint8List body;
+
+  Duration get age => DateTime.now().difference(storedAt);
+
+  /// Original content type is restored, so the body is decoded with the right charset.
+  http.Response toResponse(http.BaseRequest request) => http.Response.bytes(body, 200,
+    headers: {if (contentType != null) HttpHeaders.contentTypeHeader: contentType!},
+    request: request,
+  );
 }
