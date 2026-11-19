@@ -472,9 +472,18 @@ class FranceApiClient extends ApiClient {
   //#endregion
 
   //#region Other
-  /// Get the show end time from ticketing url
+  /// End times already fetched, by ticketing url (one per showtime).
+  /// A show end time doesn't change, so it's kept for the whole session (errors are not kept, so they can be retried).
+  final _showEndTimes = <Uri, DateTime?>{};
+
   @override
   Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
+    if (_showEndTimes.containsKey(ticketingUri)) return _showEndTimes[ticketingUri];
+    return _showEndTimes[ticketingUri] = await _fetchShowEndTime(startAt, movieDuration, ticketingUri);
+  }
+
+  /// Get the show end time from ticketing url
+  Future<DateTime?> _fetchShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // -- UGC --
     if (ticketingUri.host.contains('ug' + 'c.fr')) {
       final htmlContent = await _ticketingClient.sendUri<String>(HttpMethod.get, ticketingUri);
