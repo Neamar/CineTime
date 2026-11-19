@@ -120,9 +120,9 @@ class CacheInterceptor implements HttpInterceptor {
     }
 
     // Store in cache
-    final storedAt = DateTime.now();
-    await _write(file, storedAt, response);
-    options?.status?._record(storedAt, isFallback: false);
+    final newEntry = _CacheEntry.fromResponse(response, storedAt: DateTime.now());
+    await _write(file, newEntry);
+    options?.status?._record(newEntry.storedAt, isFallback: false);
     return response;
   }
 
@@ -141,9 +141,6 @@ class CacheInterceptor implements HttpInterceptor {
     return sha256.convert(utf8.encode('${request.url.host}|$key')).toString();
   }
 
-  /// Entry file format: a JSON header line, followed by the raw response body.
-  static const _headerSeparator = 0x0A;    // '\n', never found in a JSON-encoded string
-
   /// Read the entry in [file], if any and younger than [maxAge].
   static Future<_CacheEntry?> _read(File file, {required Duration maxAge}) async {
     final Uint8List bytes;
@@ -157,13 +154,7 @@ class CacheInterceptor implements HttpInterceptor {
     }
 
     try {
-      final headerEnd = bytes.indexOf(_headerSeparator);
-      final Map<String, dynamic> header = json.decode(utf8.decode(Uint8List.sublistView(bytes, 0, headerEnd)));
-      final entry = _CacheEntry(
-        storedAt: DateTime.fromMillisecondsSinceEpoch(header['storedAt']),
-        contentType: header['contentType'],
-        body: Uint8List.sublistView(bytes, headerEnd + 1),
-      );
+      final entry = _CacheEntry.fromBytes(bytes);
       return entry.age < maxAge ? entry : null;
     } catch (e, s) {
       reportError(e, s);    // Corrupted entry: ignored, and overwritten by the next successful call
@@ -172,20 +163,11 @@ class CacheInterceptor implements HttpInterceptor {
   }
 
   /// Never throws: a cache failure must not fail the request.
-  static Future<void> _write(File file, DateTime storedAt, http.Response response) async {
+  static Future<void> _write(File file, _CacheEntry entry) async {
     try {
-      final header = json.encode({
-        'storedAt': storedAt.millisecondsSinceEpoch,
-        'contentType': response.headers[HttpHeaders.contentTypeHeader],
-      });
-      final bytes = (BytesBuilder(copy: false)
-        ..add(utf8.encode(header))
-        ..addByte(_headerSeparator)
-        ..add(response.bodyBytes)).takeBytes();
-
       // Write to a temporary file first, then rename it (atomic), so a concurrent read never gets a partial entry
-      final tempFile = File('${file.path}.${storedAt.microsecondsSinceEpoch}.tmp');
-      await tempFile.writeAsBytes(bytes, flush: true);
+      final tempFile = File('${file.path}.${entry.storedAt.microsecondsSinceEpoch}.tmp');
+      await tempFile.writeAsBytes(entry.toBytes(), flush: true);
       await tempFile.rename(file.path);
     } catch (e, s) {
       reportError(e, s);
@@ -215,7 +197,8 @@ class CacheOptions {
   Map<String, Object> toExtra() => {CacheInterceptor.optionsKey: this};
 }
 
-/// Origin of the responses of one or several requests (e.g. one per theater), filled by [CacheInterceptor].
+/// Origin of the responses of one or several requests, filled by [CacheInterceptor].
+/// The same instance can be passed to several requests (e.g. one per theater), to get their aggregated origin.
 class CacheStatus {
   /// Oldest storage date among the responses (the network call date, if not served from cache).
   DateTime? get oldestUpdate => _oldestUpdate;
@@ -232,17 +215,51 @@ class CacheStatus {
   }
 }
 
+/// A cached response.
+/// Stored as a JSON header line (metadata), followed by the raw response body.
 class _CacheEntry {
-  const _CacheEntry({required this.storedAt, required this.contentType, required this.body});
+  const _CacheEntry({required this.storedAt, required this.statusCode, required this.contentType, required this.body});
+
+  _CacheEntry.fromResponse(http.Response response, {required this.storedAt}) :
+    statusCode = response.statusCode,
+    contentType = response.headers[HttpHeaders.contentTypeHeader],
+    body = response.bodyBytes;
+
+  /// Throws if [bytes] isn't a valid entry.
+  factory _CacheEntry.fromBytes(Uint8List bytes) {
+    final headerEnd = bytes.indexOf(_headerSeparator);
+    final Map<String, dynamic> header = json.decode(utf8.decode(Uint8List.sublistView(bytes, 0, headerEnd)));
+    return _CacheEntry(
+      storedAt: DateTime.fromMillisecondsSinceEpoch(header['storedAt']),
+      statusCode: header['statusCode'],
+      contentType: header['contentType'],
+      body: Uint8List.sublistView(bytes, headerEnd + 1),
+    );
+  }
+
+  static const _headerSeparator = 0x0A;    // '\n', never found in a JSON-encoded string
 
   final DateTime storedAt;
+  final int statusCode;
   final String? contentType;
   final Uint8List body;
 
   Duration get age => DateTime.now().difference(storedAt);
 
+  Uint8List toBytes() {
+    final header = json.encode({
+      'storedAt': storedAt.millisecondsSinceEpoch,
+      'statusCode': statusCode,
+      'contentType': contentType,
+    });
+    return (BytesBuilder(copy: false)
+      ..add(utf8.encode(header))
+      ..addByte(_headerSeparator)
+      ..add(body)).takeBytes();
+  }
+
   /// Original content type is restored, so the body is decoded with the right charset.
-  http.Response toResponse(http.BaseRequest request) => http.Response.bytes(body, 200,
+  http.Response toResponse(http.BaseRequest request) => http.Response.bytes(body, statusCode,
     headers: {if (contentType != null) HttpHeaders.contentTypeHeader: contentType!},
     request: request,
   );
