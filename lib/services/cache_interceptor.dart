@@ -86,10 +86,11 @@ class CacheInterceptor implements HttpInterceptor {
     // Bypass cache
     if (!enabled || directory == null || options?.enabled == false) return chain.proceed(request);
 
-    // Get policy and log label
+    // Get policy, entry file and log label
     final policy = options?.policy ?? CachePolicies.defaultPolicy;
-    final logLabel = '[${request.method}] ${request.url}${options?.key != null ? ' (${options!.key})' : ''}';
-    final file = File('${directory.path}/${_buildKey(request, options?.key)}');
+    final key = _buildKey(request, options?.key);
+    final file = File('${directory.path}/$key');
+    final logLabel = '[${request.method}] ${request.url} #${key.substring(0, 8)}';    // Key prefix tells entries apart when urls are the same (e.g. GraphQL)
 
     // Check cache
     final entry = await _read(file, maxAge: policy.keepFor);
