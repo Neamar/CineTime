@@ -3,6 +3,13 @@ abstract final class CachePolicies {
   /// Used by requests without a specific policy (e.g. theater search, FR trailers).
   static const defaultPolicy = CachePolicy(freshFor: Duration(days: 1), keepFor: Duration(days: 1));
 
+  /// Showtimes of a theater, fetched automatically (e.g. page opened).
+  /// Kept a week as a fallback, so showtimes are still available offline.
+  static const showtimes = CachePolicy(freshFor: Duration(hours: 3), keepFor: Duration(days: 7));
+
+  /// Showtimes of a theater, refreshed on purpose (e.g. pull-to-refresh): fresher data is required, while avoiding too many calls.
+  static const showtimesRefresh = CachePolicy(freshFor: Duration(minutes: 30), keepFor: Duration(days: 7));
+
   /// Movie details (synopsis, certificate, ...): rarely updated, and still readable offline once opened.
   static const movieInfo = CachePolicy(freshFor: Duration(days: 3), keepFor: Duration(days: 30));
 

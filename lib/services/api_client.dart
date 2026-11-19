@@ -3,6 +3,8 @@ import 'package:cinetime/services/app_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sleek_http_client/sleek_http_client.dart' show LoggingInterceptor, LogLayout;
 
+import 'cache_policies.dart';
+
 enum Country { france, belgium }
 
 abstract class ApiClient {
@@ -14,7 +16,7 @@ abstract class ApiClient {
 
   Future<List<Theater>> searchTheaters(String query);
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude);
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters);
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, {FetchMode mode = FetchMode.normal});
   Future<MovieInfo> getMovieInfo(ApiId movieId);
   Future<VideoData?> getVideoData(ApiId videoId);
   String? getImageUrl(String? path, {bool isThumbnail = false});
@@ -39,6 +41,13 @@ abstract class ApiClient {
   @protected
   void removeStartedShowTimes(List<ShowTime> showTimes) => showTimes.removeWhere((s) => s.dateTime.add(_maxStartedShowtimeDuration).isBefore(AppService.now));
 
+  /// Cache policy of showtimes requests, for [mode].
+  @protected
+  CachePolicy showtimesCachePolicy(FetchMode mode) => switch (mode) {
+    FetchMode.normal => CachePolicies.showtimes,
+    FetchMode.pullToRefresh => CachePolicies.showtimesRefresh,
+  };
+
   final _specDisplayCache = <ShowTimeSpec, String>{};
 
   /// Full display label of a spec (audio + subtitles + technology), cached since it's used in build methods.
@@ -50,6 +59,16 @@ abstract class ApiClient {
     return label;
   });
 }
+
+/// Why showtimes are fetched, which defines how fresh cached data must be.
+enum FetchMode {
+  /// Automatic fetch (e.g. page opened, theaters changed)
+  normal,
+
+  /// Refresh asked by the user, or triggered automatically (e.g. app resumed)
+  pullToRefresh,
+}
+
 
 /// Everything needed to play a video.
 class VideoData {

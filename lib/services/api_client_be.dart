@@ -80,16 +80,20 @@ class BelgiumApiClient extends ApiClient {
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) => throw UnsupportedError('Geo-search is not supported for Belgium');
 
   @override
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, {FetchMode mode = FetchMode.normal}) async {
     final from = AppService.now.toDate;
     final to = from.add(const Duration(days: 7));
 
     final moviesShowTimesMap = <String, MovieShowTimes>{};
     final ghostShowTimesMap = <Theater, List<ShowTime>>{};
+    final cacheStatus = CacheStatus();
 
     for (final theater in theaters) {
+      // Url has no date, so the default cache key stays the same the next days (past showtimes are filtered out when parsing)
       final encodedName = Uri.encodeComponent(theater.name);
-      final htmlContent = await _client.send<String>(HttpMethod.get, '/cinema/${theater.id.id}/$encodedName');
+      final htmlContent = await _client.send<String>(HttpMethod.get, '/cinema/${theater.id.id}/$encodedName',
+        extra: CacheOptions(policy: showtimesCachePolicy(mode), status: cacheStatus).toExtra(),
+      );
 
       final document = html_parser.parse(htmlContent);
       _parseMoviesFromCinemaPage(document, theater, moviesShowTimesMap, ghostShowTimesMap);
@@ -101,6 +105,8 @@ class BelgiumApiClient extends ApiClient {
       ghostShowTimes: ghostShowTimesMap.entries.map((e) => TheaterShowTimes(e.key, showTimes: e.value)).toList(growable: false),
       fetchedFrom: from,
       fetchedTo: to,
+      updatedAt: cacheStatus.oldestUpdate ?? DateTime.now(),
+      isFallback: cacheStatus.isFallback,
     );
   }
 
