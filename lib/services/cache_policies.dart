@@ -13,6 +13,9 @@ abstract final class CachePolicies {
   /// Movie details (synopsis, certificate, ...): rarely updated, and still readable offline once opened.
   static const movieInfo = CachePolicy(freshFor: Duration(days: 3), keepFor: Duration(days: 30));
 
+  /// When a fallback entry is available, the network is awaited at most this long before serving it (instead of the client timeout).
+  static const fallbackAfter = Duration(seconds: 10);
+
   /// Entries older than this are deleted at startup.
   /// Must be greater than or equal to the longest [CachePolicy.keepFor].
   static const deleteAfter = Duration(days: 30);

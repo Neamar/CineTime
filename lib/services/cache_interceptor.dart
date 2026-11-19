@@ -104,9 +104,12 @@ class CacheInterceptor implements HttpInterceptor {
 
     // Otherwise, proceed with the real request
     debugPrint('[CacheInterceptor] ❌ MISS — $logLabel');
+    final networkCall = _fetchAndStore(request, chain, file, logLabel);
     final http.Response response;
     try {
-      response = await chain.proceed(request);
+      // When a fallback is available, don't wait for the client timeout.
+      // The call goes on anyway, so a late response is still stored for the next time.
+      response = await (entry == null ? networkCall : networkCall.timeout(CachePolicies.fallbackAfter));
     } on RequestAbortedException {
       rethrow;    // Cancelled on purpose: not a failure
     } catch (e, s) {
@@ -120,10 +123,18 @@ class CacheInterceptor implements HttpInterceptor {
       return _fallback(request, entry, options, logLabel, HttpResponseException(response), StackTrace.current);
     }
 
-    // Store in cache
-    final newEntry = _CacheEntry.fromResponse(response, storedAt: DateTime.now());
-    await _write(file, newEntry);
-    options?.status?._record(newEntry.storedAt, isFallback: false);
+    // Network response (already stored by the call)
+    options?.status?._record(DateTime.now(), isFallback: false);
+    return response;
+  }
+
+  /// Network call, storing its response in cache when successful.
+  /// Async, so even a synchronous error of the next interceptors ends up in the returned future (and so triggers the fallback).
+  static Future<http.Response> _fetchAndStore(http.BaseRequest request, HttpInterceptorChain chain, File file, String logLabel) async {
+    final response = await chain.proceed(request);
+    if (SleekHttpClient.isStatusCodeSuccess(response.statusCode)) {
+      await _write(file, _CacheEntry.fromResponse(response, storedAt: DateTime.now()), logLabel);
+    }
     return response;
   }
 
@@ -164,12 +175,13 @@ class CacheInterceptor implements HttpInterceptor {
   }
 
   /// Never throws: a cache failure must not fail the request.
-  static Future<void> _write(File file, _CacheEntry entry) async {
+  static Future<void> _write(File file, _CacheEntry entry, String logLabel) async {
     try {
       // Write to a temporary file first, then rename it (atomic), so a concurrent read never gets a partial entry
       final tempFile = File('${file.path}.${entry.storedAt.microsecondsSinceEpoch}.tmp');
       await tempFile.writeAsBytes(entry.toBytes(), flush: true);
       await tempFile.rename(file.path);
+      debugPrint('[CacheInterceptor] 💾 STORED — $logLabel');
     } catch (e, s) {
       reportError(e, s);
     }
