@@ -495,6 +495,9 @@ class FranceApiClient extends ApiClient {
     return _showEndTimes[ticketingUri] = await _fetchShowEndTime(startAt, movieDuration, ticketingUri);
   }
 
+  /// Pathé ads duration, in minutes. Same for all showtimes (no theater, movie or showtime in the request), so it's kept for the whole session.
+  int? _patheAdsDuration;
+
   /// Get the show end time from ticketing url
   Future<DateTime?> _fetchShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // -- UGC --
@@ -524,20 +527,8 @@ class FranceApiClient extends ApiClient {
       // Ignore if movieDuration is null
       if (movieDuration == null) return null;
 
-      // First, get a auth token
-      // Sent as a plain string body (not [bodyJson]), so the request keeps its original content type
-      final authJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.post, Uri.parse('https://s.pa' + 'the.fr/oauth/api/jwt/token'), stringBody: json.encode({
-        'grant_type': 'client_credentials',
-        'client_id': 'API_CLI'
-      }));
-      final authToken = authJson['access_token'];
-      final headers = {
-        'Authorization': 'Bearer $authToken',
-      };
-
-      // Then, get the ads duration
-      final adsJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.get, Uri.parse('https://s.pa' + 'the.fr/api/setting/fr-FR/booking/display'), headers: headers);
-      final adsDuration = adsJson['adsDuration'] as int;
+      // Get the ads duration (fetched once)
+      final adsDuration = _patheAdsDuration ??= await _fetchPatheAdsDuration();
 
       // Compute total show duration
       final showDuration = movieDuration + Duration(minutes: adsDuration);
@@ -596,6 +587,24 @@ class FranceApiClient extends ApiClient {
     }
 
     return null;
+  }
+
+  /// Get the duration of the ads shown before a Pathé movie, in minutes.
+  Future<int> _fetchPatheAdsDuration() async {
+    // First, get a auth token
+    // Sent as a plain string body (not [bodyJson]), so the request keeps its original content type
+    final authJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.post, Uri.parse('https://s.pa' + 'the.fr/oauth/api/jwt/token'), stringBody: json.encode({
+      'grant_type': 'client_credentials',
+      'client_id': 'API_CLI'
+    }));
+    final authToken = authJson['access_token'];
+    final headers = {
+      'Authorization': 'Bearer $authToken',
+    };
+
+    // Then, get the ads duration
+    final adsJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.get, Uri.parse('https://s.pa' + 'the.fr/api/setting/fr-FR/booking/display'), headers: headers);
+    return adsJson['adsDuration'] as int;
   }
 
   @override
