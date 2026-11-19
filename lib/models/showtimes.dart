@@ -5,7 +5,7 @@ import 'package:cinetime/utils/_utils.dart';
 import '_models.dart';
 
 class MoviesShowTimes {
-  MoviesShowTimes({required this.theaters, required this.moviesShowTimes, required this.ghostShowTimes, required this.fetchedFrom, required this.fetchedTo});
+  MoviesShowTimes({required this.theaters, required this.moviesShowTimes, required this.ghostShowTimes, required this.fetchedFrom, required this.fetchedTo, required this.updatedAt, required this.isFallback});
 
   /// List of all theaters
   final List<Theater> theaters;
@@ -21,6 +21,12 @@ class MoviesShowTimes {
 
   /// Date until which showtimes were fetched
   final DateTime fetchedTo;
+
+  /// Date of the oldest theater data (network call date, possibly served from cache since)
+  final DateTime updatedAt;
+
+  /// Whether some theater data is an outdated fallback, served because it couldn't be updated (e.g. offline)
+  final bool isFallback;
 
   late final String periodDisplay = () {
     var fetchedTo = this.fetchedTo;

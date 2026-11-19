@@ -10,6 +10,7 @@ import 'package:value_stream/value_stream.dart';
 
 import 'api_client_be.dart';
 import 'api_client_fr.dart';
+import 'cache_interceptor.dart';
 
 class AppService {
   //#region Init
@@ -62,6 +63,9 @@ class AppService {
       await StorageService.clear();
       await StorageService.saveCountry(country);
     } ();
+
+    // Clear API cache
+    CacheInterceptor.clear();   // No need to await
   }
   //#endregion
 

@@ -12,6 +12,7 @@ import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseExcep
 
 import 'api_client.dart';
 import 'cache_interceptor.dart';
+import 'cache_policies.dart';
 
 /// API client for Belgium
 class BelgiumApiClient extends ApiClient {
@@ -20,10 +21,7 @@ class BelgiumApiClient extends ApiClient {
     authorityGetter: () => _authority,
     errorBuilder: HttpResponseException.new,
     interceptors: [
-      if (CacheInterceptor.enabled) CacheInterceptor(
-        keyBuilder: _getCacheKeyFromRequest,
-        shouldCache: (request) => request.url.host != _videoAuthority,    // Video manifest url carries a signed token of unknown lifetime
-      ),
+      if (CacheInterceptor.enabled) const CacheInterceptor(),
       const _IncompletePageInterceptor(),
       ApiClient.loggingInterceptor,
     ],
@@ -37,10 +35,6 @@ class BelgiumApiClient extends ApiClient {
   static const _videoOrigin = 'https://geo.' + _videoDomain;
 
   final SleekHttpClient _client;
-
-  /// Build a unique key based on the request, used for cache.
-  /// Pages have no date in their url but their content depends on the current day, so the date is part of the key (cache is refreshed daily).
-  static String _getCacheKeyFromRequest(http.BaseRequest request) => '${request.url}|${AppService.now.toDate}';
 
   @override
   ApiId decodeStoredId(String encoded) => BelgiumApiId(encoded);
@@ -86,16 +80,20 @@ class BelgiumApiClient extends ApiClient {
   Future<List<Theater>> searchTheatersGeo(double latitude, double longitude) => throw UnsupportedError('Geo-search is not supported for Belgium');
 
   @override
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, {FetchMode mode = FetchMode.normal}) async {
     final from = AppService.now.toDate;
     final to = from.add(const Duration(days: 7));
 
     final moviesShowTimesMap = <String, MovieShowTimes>{};
     final ghostShowTimesMap = <Theater, List<ShowTime>>{};
+    final cacheStatus = CacheStatus();
 
     for (final theater in theaters) {
+      // Url has no date, so the default cache key stays the same the next days (past showtimes are filtered out when parsing)
       final encodedName = Uri.encodeComponent(theater.name);
-      final htmlContent = await _client.send<String>(HttpMethod.get, '/cinema/${theater.id.id}/$encodedName');
+      final htmlContent = await _client.send<String>(HttpMethod.get, '/cinema/${theater.id.id}/$encodedName',
+        extra: CacheOptions(policy: showtimesCachePolicy(mode), status: cacheStatus).toExtra(),
+      );
 
       final document = html_parser.parse(htmlContent);
       _parseMoviesFromCinemaPage(document, theater, moviesShowTimesMap, ghostShowTimesMap);
@@ -107,12 +105,14 @@ class BelgiumApiClient extends ApiClient {
       ghostShowTimes: ghostShowTimesMap.entries.map((e) => TheaterShowTimes(e.key, showTimes: e.value)).toList(growable: false),
       fetchedFrom: from,
       fetchedTo: to,
+      updatedAt: cacheStatus.oldestUpdate ?? DateTime.now(),
+      isFallback: cacheStatus.isFallback,
     );
   }
 
   @override
   Future<MovieInfo> getMovieInfo(ApiId movieId) async {
-    final htmlContent = await _client.send<String>(HttpMethod.get, '/film/${movieId.id}');
+    final htmlContent = await _client.send<String>(HttpMethod.get, '/film/${movieId.id}', extra: const CacheOptions(policy: CachePolicies.movieInfo).toExtra());
 
     final document = html_parser.parse(htmlContent);
 
@@ -174,6 +174,7 @@ class BelgiumApiClient extends ApiClient {
       HttpMethod.get,
       '/player/metadata/video/${videoId.id}',
       authority: _videoAuthority,
+      extra: const CacheOptions.disabled().toExtra(),    // The manifest url is signed (see above)
     );
 
     final JsonList? autoQualitiesJson = responseJson['qualities']?['auto'];
@@ -564,7 +565,7 @@ class BelgiumApiClient extends ApiClient {
 }
 
 /// The site sometimes returns an HTTP 200 with an empty page (no `#mainContent`), typically under load.
-/// Without this check it would be parsed as "no movie", and cached for the whole day.
+/// Without this check it would be parsed as "no movie", and cached.
 /// Error statuses (e.g. 504 with an empty body) are left untouched, so they surface as a proper [HttpResponseException].
 /// Placed after [CacheInterceptor], so the exception prevents the response from being cached.
 class _IncompletePageInterceptor implements HttpInterceptor {

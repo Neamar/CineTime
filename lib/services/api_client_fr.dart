@@ -16,6 +16,7 @@ import 'package:sleek_http_client/sleek_http_client.dart' hide HttpResponseExcep
 import 'api_client.dart';
 import 'app_service.dart';
 import 'cache_interceptor.dart';
+import 'cache_policies.dart';
 
 class FranceApiClient extends ApiClient {
   //#region Vars
@@ -59,9 +60,7 @@ class FranceApiClient extends ApiClient {
     },
     errorBuilder: HttpResponseException.new,
     interceptors: [
-      if (CacheInterceptor.enabled) CacheInterceptor(
-        keyBuilder: _getCacheKeyFromRequest,
-      ),
+      if (CacheInterceptor.enabled) const CacheInterceptor(),
       const _GraphQLErrorInterceptor(),
       ApiClient.loggingInterceptor,
     ],
@@ -121,6 +120,7 @@ class FranceApiClient extends ApiClient {
         'card': [],
         'country': 'FRANCE'
       },
+      cache: const CacheOptions.disabled(),   // Position always differs, a cached response would never be used
     );
 
     // Process result
@@ -141,7 +141,7 @@ class FranceApiClient extends ApiClient {
   }
 
   @override
-  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters) async {
+  Future<MoviesShowTimes> getMoviesList(List<Theater> theaters, {FetchMode mode = FetchMode.normal}) async {
     // Prepare period
     final from = AppService.now.toDate;    // Truncate date to midnight, so it match request date (that is truncated).
     final to = from.add(const Duration(days: 21));     // Fetch next 21 days
@@ -152,34 +152,40 @@ class FranceApiClient extends ApiClient {
     // Prepare ghost showtimes map
     final ghostShowTimesMap = <Theater, List<ShowTime>>{};
 
+    // Origin of all theaters data
+    final cacheStatus = CacheStatus();
+
     // For each theater
     for (final theater in theaters) {
+      // Prepare request
+      /*** Notes
+       * Each request can have a maximum complexity of 12000 points.
+       * The [count] variable linearly increase the total request complexity point count.
+       *
+       * -- 1. Original query --
+       * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }'
+       *
+       * Complexity: 21 + 203 * count
+       * Example: for count = 100 : 20321 points
+       *
+       * -- 2. Lighter query (minimal fields, but all types kept) --
+       * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename startsAt projection diffusionVersion } movie { __typename id title credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename firstName lastName } voiceActor { __typename firstName lastName } originalVoiceActor { __typename firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } poster { __typename url } } } } } }'
+       *
+       * Complexity: 152 * count
+       * Example: for count = 100 : 15200 points
+       *
+       * -- 3. Minimalist query --
+       * 'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion } movie { id title credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }'
+       *
+       * Complexity: 97 * count
+       * Example: for count = 200 : 19400 points
+       *
+       */
+      const query = r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection experience diffusionVersion tags data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }';
+
       // Send request
       var responseJson = await _sendGraphQL<JsonObject>(
-        /*** Notes
-         * Each request can have a maximum complexity of 12000 points.
-         * The [count] variable linearly increase the total request complexity point count.
-         *
-         * -- 1. Original query --
-         * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { theater(id: $id) { __typename id internalId name theaterCircuits { __typename id internalId name } flags { __typename hasBooking } companies { __typename company { __typename id internalId name } activity } } movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename id internalId startsAt isPreview projection techno diffusionVersion data { __typename ticketing { __typename urls type provider } } } movie { __typename id title languages credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename id internalId firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename id internalId firstName lastName } voiceActor { __typename id internalId firstName lastName } originalVoiceActor { __typename id internalId firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } editorialReviews { __typename rating } poster { __typename url } } } } } }'
-         *
-         * Complexity: 21 + 203 * count
-         * Example: for count = 100 : 20321 points
-         *
-         * -- 2. Lighter query (minimal fields, but all types kept) --
-         * r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { __typename totalCount pageInfo { __typename hasNextPage endCursor } edges { __typename node { __typename showtimes { __typename startsAt projection diffusionVersion } movie { __typename id title credits(department: DIRECTION, first: 3) { __typename edges { __typename node { __typename person { __typename firstName lastName } } } } cast(first: 5) { __typename edges { __typename node { __typename actor { __typename firstName lastName } voiceActor { __typename firstName lastName } originalVoiceActor { __typename firstName lastName } } } } releases(type: [RELEASED], country: $country) { __typename releaseDate { __typename date } } genres runTime videos(externalVideo: false, first: 1) { __typename id internalId } stats { __typename userRating { __typename score(base: 5) } pressReview { __typename score(base: 5) } } poster { __typename url } } } } } }'
-         *
-         * Complexity: 152 * count
-         * Example: for count = 100 : 15200 points
-         *
-         * -- 3. Minimalist query --
-         * 'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection diffusionVersion } movie { id title credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }'
-         *
-         * Complexity: 97 * count
-         * Example: for count = 200 : 19400 points
-         *
-         */
-        query: r'query MovieShowtimes($id: String!, $after: String, $count: Int, $from: DateTime!, $to: DateTime!, $hasPreview: Boolean, $order: [ShowtimeSorting], $country: CountryCode) { movieShowtimeList(theater: $id, from: $from, to: $to, after: $after, first: $count, hasPreview: $hasPreview, order: $order) { totalCount pageInfo { hasNextPage endCursor } edges { node { showtimes { startsAt projection experience diffusionVersion tags data { ticketing { urls provider } } } movie { id title languages credits(department: DIRECTION, first: 3) { edges { node { person { firstName lastName } } } } cast(first: 5) { edges { node { actor { firstName lastName } voiceActor { firstName lastName } originalVoiceActor { firstName lastName } } } } releases(type: [RELEASED], country: $country) { releaseDate { date } } genres runTime videos(externalVideo: false, first: 1) { id internalId } stats { userRating { score(base: 5) } pressReview { score(base: 5) } } poster { url } } } } } }',
+        query: query,
         variables: {
           'id': theater.id.encodedId,
           'from': _dateToString(from),
@@ -193,6 +199,11 @@ class FranceApiClient extends ApiClient {
           ],
           'country': 'FRANCE'
         },
+        cache: CacheOptions(
+          key: '$query|${theater.id.encodedId}',    // Without dates, so a response stays usable the next days (past showtimes are filtered out when parsing)
+          policy: showtimesCachePolicy(mode),
+          status: cacheStatus,
+        ),
       );
 
       // Process response
@@ -379,6 +390,8 @@ class FranceApiClient extends ApiClient {
       ghostShowTimes: ghostShowTimesMap.entries.map((e) => TheaterShowTimes(e.key, showTimes: e.value)).toList(growable: false),
       fetchedFrom: from,
       fetchedTo: to,
+      updatedAt: cacheStatus.oldestUpdate ?? DateTime.now(),
+      isFallback: cacheStatus.isFallback,
     );
   }
 
@@ -393,6 +406,7 @@ class FranceApiClient extends ApiClient {
         'id': movieId.encodedId,
         'country': 'FRANCE'
       },
+      cache: const CacheOptions(policy: CachePolicies.movieInfo),
     );
 
     // Process data
@@ -471,9 +485,21 @@ class FranceApiClient extends ApiClient {
   //#endregion
 
   //#region Other
-  /// Get the show end time from ticketing url
+  /// End times already fetched, by ticketing url (one per showtime).
+  /// A show end time doesn't change, so it's kept for the whole session (errors are not kept, so they can be retried).
+  final _showEndTimes = <Uri, DateTime?>{};
+
   @override
   Future<DateTime?> getShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
+    if (_showEndTimes.containsKey(ticketingUri)) return _showEndTimes[ticketingUri];
+    return _showEndTimes[ticketingUri] = await _fetchShowEndTime(startAt, movieDuration, ticketingUri);
+  }
+
+  /// Pathé ads duration, in minutes. Same for all showtimes (no theater, movie or showtime in the request), so it's kept for the whole session.
+  int? _patheAdsDuration;
+
+  /// Get the show end time from ticketing url
+  Future<DateTime?> _fetchShowEndTime(DateTime startAt, Duration? movieDuration, Uri ticketingUri) async {
     // -- UGC --
     if (ticketingUri.host.contains('ug' + 'c.fr')) {
       final htmlContent = await _ticketingClient.sendUri<String>(HttpMethod.get, ticketingUri);
@@ -501,20 +527,8 @@ class FranceApiClient extends ApiClient {
       // Ignore if movieDuration is null
       if (movieDuration == null) return null;
 
-      // First, get a auth token
-      // Sent as a plain string body (not [bodyJson]), so the request keeps its original content type
-      final authJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.post, Uri.parse('https://s.pa' + 'the.fr/oauth/api/jwt/token'), stringBody: json.encode({
-        'grant_type': 'client_credentials',
-        'client_id': 'API_CLI'
-      }));
-      final authToken = authJson['access_token'];
-      final headers = {
-        'Authorization': 'Bearer $authToken',
-      };
-
-      // Then, get the ads duration
-      final adsJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.get, Uri.parse('https://s.pa' + 'the.fr/api/setting/fr-FR/booking/display'), headers: headers);
-      final adsDuration = adsJson['adsDuration'] as int;
+      // Get the ads duration (fetched once)
+      final adsDuration = _patheAdsDuration ??= await _fetchPatheAdsDuration();
 
       // Compute total show duration
       final showDuration = movieDuration + Duration(minutes: adsDuration);
@@ -575,6 +589,24 @@ class FranceApiClient extends ApiClient {
     return null;
   }
 
+  /// Get the duration of the ads shown before a Pathé movie, in minutes.
+  Future<int> _fetchPatheAdsDuration() async {
+    // First, get a auth token
+    // Sent as a plain string body (not [bodyJson]), so the request keeps its original content type
+    final authJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.post, Uri.parse('https://s.pa' + 'the.fr/oauth/api/jwt/token'), stringBody: json.encode({
+      'grant_type': 'client_credentials',
+      'client_id': 'API_CLI'
+    }));
+    final authToken = authJson['access_token'];
+    final headers = {
+      'Authorization': 'Bearer $authToken',
+    };
+
+    // Then, get the ads duration
+    final adsJson = await _ticketingClient.sendUri<JsonObject>(HttpMethod.get, Uri.parse('https://s.pa' + 'the.fr/api/setting/fr-FR/booking/display'), headers: headers);
+    return adsJson['adsDuration'] as int;
+  }
+
   @override
   String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec) {
     String label = spec.audioVersion.code;
@@ -604,20 +636,6 @@ class FranceApiClient extends ApiClient {
   /// Return the path part of an url
   static String? _getPathFromUrl(String? url) => url != null ? Uri.parse(url).path : null;
 
-  /// Build a unique key based on the request, used for cache.
-  static String _getCacheKeyFromRequest(http.BaseRequest request) {
-    // If it's a GraphQL request
-    if (request.url.path == _graphPath) {
-      final body = (request as http.Request).body;
-      return body.replaceAllMapped(RegExp(r'.+?query (.+?)\(.+",.+?variables":(.+)', dotAll: true), (match) => '${match.group(1)}${match.group(2)}');
-    }
-
-    // If it's a classic request
-    else {
-      return request.url.toString();
-    }
-  }
-
   /// Get an auth token for GraphQL request.
   Future<String> _getAuthToken() async {
     // Using hardcoded token works for now, but it may be revoked at any time.
@@ -625,7 +643,7 @@ class FranceApiClient extends ApiClient {
   }
 
   /// Send a graphQL request
-  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables}) async {
+  Future<T> _sendGraphQL<T>({required String query, required JsonObject variables, CacheOptions? cache}) async {
     // Headers
     final headers = {
       'a' + 'c-auth-token': await _getAuthToken(),
@@ -641,7 +659,7 @@ class FranceApiClient extends ApiClient {
 
     // Send request
     // Note: a GraphQL request may return a 200 HTTP status code with errors — handled by [_GraphQLErrorInterceptor].
-    return await _client.send<T>(HttpMethod.post, _graphPath, headers: headers, bodyJson: body);
+    return await _client.send<T>(HttpMethod.post, _graphPath, headers: headers, bodyJson: body, extra: cache?.toExtra());
   }
   //#endregion
 }
