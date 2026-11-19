@@ -1,3 +1,4 @@
+import 'package:cached_network_image_ce/cached_network_image.dart' show CachedNetworkImageProvider, DefaultCacheManager;
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
@@ -51,6 +52,13 @@ Future<void> main() async {
 
   // Init API cache
   await CacheInterceptor.init();
+
+  // Init images cache: larger than default, so posters remain available offline as long as showtimes.
+  // Must be set before any image is loaded, so the default manager is never created.
+  CachedNetworkImageProvider.defaultCacheManager = DefaultCacheManager(
+    maxNrOfCacheObjects: 1000,
+    stalePeriod: const Duration(days: 30),
+  );
 
   // Init analytics
   await AnalyticsService.init();
