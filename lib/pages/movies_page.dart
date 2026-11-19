@@ -1,13 +1,17 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/services/analytics_service.dart';
+import 'package:cinetime/services/api_client.dart';
+import 'package:cinetime/services/cache_policies.dart';
 import 'package:cinetime/services/storage_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:cinetime/widgets/dialogs/showtime_dialog.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fetcher/fetcher_bloc.dart';
@@ -37,7 +41,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
           },
           child: ClearFocusBackground(
             child: Scaffold(    // Needed for themed background color & for FetchBuilder error widget display
-              body: FetchBuilder<MoviesShowTimes>(
+              body: FetchBuilderWithParameter<FetchMode, MoviesShowTimes>(
                 controller: bloc.fetchController,
                 fetchAtInit: false,
                 task: bloc.fetch,
@@ -174,27 +178,35 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                         body: Column(
                           children: [
                             // Content
+                            // Refresh indicator is above the list, which is recreated on data refresh: it must survive it.
                             Expanded(
-                              child: () {
-                                if (moviesShowtimesData.moviesShowTimes.isEmpty)
-                                  return const IconMessage(
-                                    icon: Icons.theaters,
-                                    message: 'Aucune séance',
-                                  );
-
-                                return DataStreamBuilder<UnmodifiableSetView<String>>(
-                                  stream: AppService.instance.hiddenMoviesIds,
-                                  builder: (context, hiddenMoviesIds) {
-                                    return _FilteredMovieListView(
-                                      key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
-                                      moviesShowTimes: moviesShowtimesData.moviesShowTimes,
-                                      showTheaterName: moviesShowtimesData.theaters.length > 1,
-                                      filterSort: filterSortData,
-                                      hiddenMoviesIds: hiddenMoviesIds,
+                              child: RefreshIndicator(
+                                key: bloc.refreshIndicatorKey,
+                                onRefresh: bloc.pullToRefresh,
+                                child: () {
+                                  if (moviesShowtimesData.moviesShowTimes.isEmpty)
+                                    return const FillRemainsScrollView(   // Scrollable, so it can be pulled to refresh
+                                      physics: AlwaysScrollableScrollPhysics(),
+                                      child: IconMessage(
+                                        icon: Icons.theaters,
+                                        message: 'Aucune séance',
+                                      ),
                                     );
-                                  },
-                                );
-                              } (),
+
+                                  return DataStreamBuilder<UnmodifiableSetView<String>>(
+                                    stream: AppService.instance.hiddenMoviesIds,
+                                    builder: (context, hiddenMoviesIds) {
+                                      return _FilteredMovieListView(
+                                        key: ObjectKey(moviesShowtimesData),    // Force complete rebuild on data refresh
+                                        moviesShowTimes: moviesShowtimesData.moviesShowTimes,
+                                        showTheaterName: moviesShowtimesData.theaters.length > 1,
+                                        filterSort: filterSortData,
+                                        hiddenMoviesIds: hiddenMoviesIds,
+                                      );
+                                    },
+                                  );
+                                } (),
+                              ),
                             ),
 
                             // Bottom data
@@ -425,10 +437,15 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
 
   @override
   Widget build(BuildContext context) {
+    // Always scrollable, so it can be pulled to refresh
     if (filteredMoviesShowTimes.isEmpty)
-      return EmptySearchResultMessage.noResult;
+      return FillRemainsScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: EmptySearchResultMessage.noResult,
+      );
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: filteredMoviesShowTimes.length,
       itemExtent: 100 * max(MediaQuery.textScalerOf(context).scale(1), 1.0),
       itemBuilder: (context, index) {
@@ -516,6 +533,10 @@ class MoviesPageBloc with Disposable {
     // Initial fetch, after widget is initialised
     WidgetsBinding.instance.addPostFrameCallback((_) => refresh());
 
+    // Automatic refresh
+    _lifecycleListener = AppLifecycleListener(onResume: _onResume);
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(_onConnectivityChanged);
+
     // Listen for search changes
     searchController.addListener(() => filterSortData.add(filterSortData.value.copyWith(textFilter: searchController.text)));
 
@@ -528,24 +549,55 @@ class MoviesPageBloc with Disposable {
   }
 
   UnmodifiableSetView<Theater> _theaters = const UnmodifiableSetView.empty();
-  final fetchController = FetchBuilderController<MoviesShowTimes>();
+  final fetchController = FetchBuilderWithParameterController<FetchMode, MoviesShowTimes>();
+  final refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  late final AppLifecycleListener _lifecycleListener;
+  late final StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+
   final isSearchVisible = DataStream(false);
   final searchController = TextEditingController();
   late final filterSortData = DataStream<_FilterSortData>(_FilterSortData(sortType: StorageService.readMovieSorting() ?? MovieSortType.usersRating));
 
-  Future<MoviesShowTimes> fetch() async {
+  /// Last fetched data
+  MoviesShowTimes? _data;
+
+  Future<MoviesShowTimes> fetch(FetchMode? mode) async {
+    mode ??= FetchMode.normal;
+
     // Fetch data
-    final moviesShowTimes = await AppService.api.getMoviesList(_theaters.toList(growable: false)..sort());
+    final moviesShowTimes = _data = await AppService.api.getMoviesList(_theaters.toList(growable: false)..sort(), mode: mode);
 
     // Analytics
     AnalyticsService.trackEvent('Movie list displayed', {
       'resultCount': moviesShowTimes.moviesShowTimes.length,
       'theaterCount': _theaters.length,
       'theatersId': _theaters.toIdListString(),
+      'mode': mode.name,
     });
 
     // Return data
     return moviesShowTimes;
+  }
+
+  /// Refresh data while keeping it displayed. Called by the refresh indicator (pulled by the user, or shown automatically).
+  /// Errors are displayed as a message, over the current data.
+  Future<void> pullToRefresh() => fetchController.refresh(param: FetchMode.pullToRefresh, clearDataFirst: false, errorDisplayMode: FetchErrorDisplayMode.onDisplay);
+
+  /// Refresh data automatically, showing the refresh indicator.
+  /// Does nothing if a refresh is already running, or if data isn't displayed (loading or error).
+  void _autoRefresh() => refreshIndicatorKey.currentState?.show();
+
+  void _onResume() {
+    final data = _data;
+    if (data == null) return;
+
+    // Retry when data couldn't be updated last time, otherwise wait for it to be outdated
+    if (data.isFallback || DateTime.now().difference(data.updatedAt) >= CachePolicies.showtimes.freshFor) _autoRefresh();
+  }
+
+  void _onConnectivityChanged(List<ConnectivityResult> results) {
+    // Retry when data couldn't be updated last time and network is back
+    if (_data?.isFallback == true && !results.contains(ConnectivityResult.none)) _autoRefresh();
   }
 
   void refresh({bool userAsked = false}) {
@@ -564,7 +616,7 @@ class MoviesPageBloc with Disposable {
     _theaters = AppService.instance.selectedTheaters.value;
 
     // Refresh data
-    fetchController.refresh(clearDataFirst: true);
+    fetchController.refresh(param: FetchMode.normal, clearDataFirst: true);
   }
 
   void onSortChanged(MovieSortType value) {
@@ -585,6 +637,8 @@ class MoviesPageBloc with Disposable {
 
   @override
   void dispose() {
+    _lifecycleListener.dispose();
+    _connectivitySubscription.cancel();
     isSearchVisible.close();
     searchController.dispose();
     filterSortData.close();
