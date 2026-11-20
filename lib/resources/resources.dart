@@ -24,6 +24,7 @@ class AppResources {
   static const borderRadiusTiny = BorderRadius.all(Radius.circular(5));
   static const borderRadiusSmall = BorderRadius.all(Radius.circular(10));
   static const borderRadiusMedium = BorderRadius.all(Radius.circular(15));
+  static const borderRadiusCard = BorderRadius.all(Radius.circular(8));
 
   // Duration
   static const durationAnimationShort = Duration(milliseconds: 150);

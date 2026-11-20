@@ -734,7 +734,7 @@ class _DayShowTimes extends StatelessWidget {
         if (isEven) return Theme.of(context).scaffoldBackgroundColor;
         return context.colorScheme.surfaceContainerLow;
       } (),
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: AppResources.borderRadiusCard,
       child: Container(
         margin: const EdgeInsets.all(6),
         width: width,   // Ensure uniform width (may be empty or smaller than others)

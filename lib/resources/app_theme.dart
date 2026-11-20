@@ -25,6 +25,12 @@ ThemeData appTheme(Brightness brightness) {
         statusBarIconBrightness: Brightness.light,
       ),
     ),
+    cardTheme: const CardThemeData(
+      shape: RoundedRectangleBorder(borderRadius: AppResources.borderRadiusCard),
+    ),
+    dialogTheme: const DialogThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+    ),
     textSelectionTheme: const TextSelectionThemeData(
       cursorColor: Colors.white,
       selectionColor: AppResources.colorLightRed,
