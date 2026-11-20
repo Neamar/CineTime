@@ -5,11 +5,12 @@ import 'package:flutter/services.dart';
 ThemeData appTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
   final scheme = ColorScheme.fromSeed(
-    seedColor: AppResources.colorRed,
+    seedColor: AppResources.colorDarkBlue,      // Seed tints surfaces: a dark blue gives near-neutral greys (a red seed gives pink)
     brightness: brightness,
-  ).copyWith(
     primary: AppResources.colorRed,
     onPrimary: Colors.white,
+    primaryContainer: AppResources.colorLightRed,
+    onPrimaryContainer: AppResources.colorDarkRed,
     surface: isDark ? Colors.black : null,      // True black on dark mode (OLED)
   );
 

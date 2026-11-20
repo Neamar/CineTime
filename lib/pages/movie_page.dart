@@ -256,6 +256,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                     stream: bloc.selectedSpec,
                     builder: (context, filter) {
                       return Material(
+                        color: context.colorScheme.surfaceContainerLow,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
@@ -730,7 +731,8 @@ class _DayShowTimes extends StatelessWidget {
     return Material(
       color: () {
         if (day == AppService.now.toDate) return AppResources.colorLightRed;
-        if (isEven) return context.colorScheme.surfaceContainerLow;
+        if (isEven) return Theme.of(context).scaffoldBackgroundColor;
+        return context.colorScheme.surfaceContainerLow;
       } (),
       borderRadius: BorderRadius.circular(8),
       child: Container(
