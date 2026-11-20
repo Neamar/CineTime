@@ -69,7 +69,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                       height: kToolbarHeight,
                                       child: Theme(
                                         data: Theme.of(context).copyWith(
-                                          iconTheme: const IconThemeData(color: Colors.white),
+                                          iconTheme: IconThemeData(color: context.colorScheme.onPrimary),
                                         ),
                                         child: Row(
                                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -97,7 +97,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                                                   1 => 'Films pour ${theaters.first.name}',
                                                                   _ => 'Films dans $theatersCount cinémas',
                                                                 },
-                                                                style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                                                                style: context.textTheme.bodyMedium?.copyWith(color: context.colorScheme.onPrimary),
                                                                 overflow: TextOverflow.ellipsis,
                                                                 maxLines: 1,
                                                               );
@@ -111,7 +111,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                                                 final timePart = fromTime != null ? ' à partir de ${fromTime.toHourMinuteString()}' : '';
                                                                 return '$dayPart$timePart';
                                                               } (),
-                                                              style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
+                                                              style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onPrimary.withValues(alpha: 0.8)),
                                                             ),
                                                           ],
                                                         ),
@@ -178,7 +178,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                     ),
                                   ),
                                   autofocus: true,
-                                  style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+                                  style: context.textTheme.titleMedium?.copyWith(color: context.colorScheme.onPrimary),
                                   textInputAction: TextInputAction.search,
                                 ),
                               );
@@ -391,12 +391,12 @@ class _FallbackBanner extends StatelessWidget implements PreferredSizeWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),    // Mimic default AppBar spacing
         child: Row(
           children: [
-            const Icon(Icons.cloud_off, size: 14, color: AppResources.colorGrey),
+            Icon(Icons.cloud_off, size: 14, color: context.colorScheme.onPrimary.withValues(alpha: 0.8)),
             AppResources.spacerTiny,
             Expanded(
               child: Text(
                 "Mise à jour impossible · horaires d'${timeago.format(updatedAt)}",
-                style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
+                style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onPrimary.withValues(alpha: 0.8)),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

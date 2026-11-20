@@ -2,7 +2,6 @@ import 'package:cinetime/models/theater.dart';
 import 'package:cinetime/pages/movies_page.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/services/app_service.dart';
-import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/widgets/corner_border.dart';
 import 'package:fetcher/fetcher_bloc.dart';
 import 'package:flutter/material.dart';
@@ -53,9 +52,9 @@ class TheaterCard extends StatelessWidget {
                           },
                         ),
                       )
-                    : const Icon(
+                    : Icon(
                         Icons.theaters_outlined,
-                        color: AppResources.colorDarkRed,
+                        color: context.colorScheme.primary,
                       ),
                 ),
 
@@ -110,7 +109,7 @@ class TheaterCard extends StatelessWidget {
               stream: AppService.instance.favoriteTheaters,
               builder: (context, favoriteTheaters) {
                 return Material(
-                  color: favoriteTheaters.contains(theater) ? context.colorScheme.primary : AppResources.colorGrey,
+                  color: favoriteTheaters.contains(theater) ? context.colorScheme.primary : context.colorScheme.outlineVariant,
                   shape: const CornerBorder(CornerBorderPosition.topRight),
                   clipBehavior: Clip.antiAlias,
                   elevation: 2,

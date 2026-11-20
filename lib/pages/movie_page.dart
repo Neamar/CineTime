@@ -278,7 +278,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                                       AppResources.spacerExtraTiny,
                                       Text(
                                         _getShowTimesCountLabel(filter),
-                                        style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
+                                        style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onSurfaceVariant),
                                       ),
                                     ],
                                   ),
@@ -658,7 +658,7 @@ class TheaterShowTimesWidget extends StatelessWidget {
         if (showTimes.every((dst) => dst.showTimes.isEmpty))
           Padding(
             padding: padding,
-            child: Text('Aucune séance en $filterName', style: const TextStyle(color: AppResources.colorGrey)),
+            child: Text('Aucune séance en $filterName', style: TextStyle(color: context.colorScheme.onSurface.withValues(alpha: 0.38))),
           )
         else
           () {
@@ -725,12 +725,12 @@ class _DayShowTimes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Theme
-    final headerForegroundColor = showtimes.isEmpty ? AppResources.colorGrey : null;
+    final headerForegroundColor = showtimes.isEmpty ? context.colorScheme.onSurface.withValues(alpha: 0.38) : null;
 
     // Build widget
     return Material(
       color: () {
-        if (day == AppService.now.toDate) return AppResources.colorLightRed;
+        if (day == AppService.now.toDate) return context.colorScheme.primaryContainer;
         if (isEven) return Theme.of(context).scaffoldBackgroundColor;
         return context.colorScheme.surfaceContainerLow;
       } (),

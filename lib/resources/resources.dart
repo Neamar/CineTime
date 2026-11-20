@@ -6,12 +6,8 @@ class AppResources {
   static const colorRed = Color(0xFFD32F2F);
   static const colorLightRed = Color(0xFFFF6659);
   static const colorDarkRed = Color(0xFF9A0007);
-
   static const colorDarkBlue = Color(0xFF101E39);
-
   static const colorLightGrey = Color(0xFFFAFAFA);
-  static const colorGrey = Color(0xFFC7C7C7);
-  static const colorDarkGrey = Color(0xFF1E1E1E);
 
   // Spacer
   static const spacerLarge = SizedBox(width: 20, height: 20);

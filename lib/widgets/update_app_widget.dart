@@ -23,9 +23,9 @@ class UpdateAppWidget extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.tips_and_updates_outlined,
-                    color: AppResources.colorRed,
+                    color: context.colorScheme.primary,
                     size: 40,
                   ),
                   AppResources.spacerSmall,

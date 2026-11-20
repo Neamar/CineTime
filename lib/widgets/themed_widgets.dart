@@ -1,5 +1,4 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
-import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +54,7 @@ class CtCachedImage extends StatelessWidget {
         ),
       ),
       placeholder: (_, url) => Container(
-        color: placeHolderBackground ? AppResources.colorGrey : null,
+        color: placeHolderBackground ? context.colorScheme.surfaceContainerHighest : null,
         child: CtProgressIndicator(),
       ),
       errorBuilder: (_, url, error) => errorWidget,
