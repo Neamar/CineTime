@@ -26,6 +26,9 @@ class AppResources {
   static const borderRadiusMedium = BorderRadius.all(Radius.circular(15));
   static const borderRadiusCard = BorderRadius.all(Radius.circular(8));
 
+  // Padding
+  static const paddingCardList = EdgeInsets.all(4);   // List of cards: complements the default Card margin (4) to get an even 8 spacing everywhere
+
   // Duration
   static const durationAnimationShort = Duration(milliseconds: 150);
   static const durationAnimationMedium = Duration(milliseconds: 250);

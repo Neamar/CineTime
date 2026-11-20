@@ -106,6 +106,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             return Scaffold(
               resizeToAvoidBottomInset: true,
               body: ListView.builder(
+                padding: AppResources.paddingCardList,
                 itemExtent: TheaterCard.height,
                 itemCount: searchResult.theaters!.length,
                 itemBuilder: (context, index) {

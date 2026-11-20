@@ -490,6 +490,7 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
 
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
+      padding: AppResources.paddingCardList,
       itemCount: filteredMoviesShowTimes.length,
       itemExtent: 100 * max(MediaQuery.textScalerOf(context).scale(1), 1.0),
       itemBuilder: (context, index) {
