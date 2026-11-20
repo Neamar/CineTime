@@ -25,8 +25,10 @@ ThemeData appTheme(Brightness brightness) {
         statusBarIconBrightness: Brightness.light,
       ),
     ),
-    cardTheme: const CardThemeData(
+    cardTheme: CardThemeData(
       shape: RoundedRectangleBorder(borderRadius: AppResources.borderRadiusCard),
+      elevation: 0,
+      color: scheme.surfaceContainer,
     ),
     dialogTheme: const DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
