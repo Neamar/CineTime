@@ -59,7 +59,7 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
       body: CustomScrollView(
         slivers: <Widget>[
           ScalingHeader(
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: context.colorScheme.primary,
             title: Text(movie.title),
             actions: [
               _MovieVisibilityToggleButton(widget.movieShowTimes.movie),
@@ -730,7 +730,7 @@ class _DayShowTimes extends StatelessWidget {
     return Material(
       color: () {
         if (day == AppService.now.toDate) return AppResources.colorLightRed;
-        if (isEven) return Theme.of(context).scaffoldBackgroundColor;
+        if (isEven) return context.colorScheme.surfaceContainerLow;
       } (),
       borderRadius: BorderRadius.circular(8),
       child: Container(

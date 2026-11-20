@@ -110,7 +110,7 @@ class TheaterCard extends StatelessWidget {
               stream: AppService.instance.favoriteTheaters,
               builder: (context, favoriteTheaters) {
                 return Material(
-                  color: favoriteTheaters.contains(theater) ? Theme.of(context).primaryColor : AppResources.colorGrey,
+                  color: favoriteTheaters.contains(theater) ? context.colorScheme.primary : AppResources.colorGrey,
                   shape: const CornerBorder(CornerBorderPosition.topRight),
                   clipBehavior: Clip.antiAlias,
                   elevation: 2,

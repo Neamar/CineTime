@@ -316,9 +316,9 @@ class _SortButton extends StatelessWidget {
         }
       },
       itemBuilder: (context) {
-        final textStyle = context.textTheme.titleMedium;
-        TextStyle? buildTextStyle(bool isSelected, {Color? color}) {
-          return textStyle?.copyWith(color: isSelected ? Theme.of(context).primaryColor : color);
+        final textStyle = context.textTheme.titleMedium;     // Popup items only use [labelTextStyle] on Material 3 (not [textStyle])
+        WidgetStateProperty<TextStyle?> buildLabelStyle(bool isSelected, {Color? color}) {
+          return WidgetStatePropertyAll(textStyle?.copyWith(color: isSelected ? context.colorScheme.primary : color));
         }
 
         return [
@@ -326,7 +326,7 @@ class _SortButton extends StatelessWidget {
           ...MovieSortType.values.map((value) {
             return PopupMenuItem<MovieSortType>(
               value: value,
-              textStyle: buildTextStyle(value == sortValue),
+              labelTextStyle: buildLabelStyle(value == sortValue),
               child: Text(value.label),
             );
           }),
@@ -344,7 +344,7 @@ class _SortButton extends StatelessWidget {
             return days.map((day) {
               return PopupMenuItem<Date>(
                 value: day,
-                textStyle: buildTextStyle(day == dayFilterValue, color: daysWithShow.contains(day) ? null : textStyle?.color?.withValues(alpha: 0.5)),
+                labelTextStyle: buildLabelStyle(day == dayFilterValue, color: daysWithShow.contains(day) ? null : textStyle?.color?.withValues(alpha: 0.5)),
                 child: Text(day.toDayString().capitalized),
               );
             });
@@ -354,7 +354,7 @@ class _SortButton extends StatelessWidget {
           const PopupMenuDivider(),
           PopupMenuItem<TimeOfDay>(
             value: TimeOfDay(hour: 0, minute: 0),   // Dummy time, just to have a value of correct type for action handling
-            textStyle: buildTextStyle(fromTime != null),
+            labelTextStyle: buildLabelStyle(fromTime != null),
             child: Text('À partir de ${fromTime != null ? fromTime!.toHourMinuteString() : '...'}'),
           ),
 
@@ -363,7 +363,7 @@ class _SortButton extends StatelessWidget {
             const PopupMenuDivider(),
             PopupMenuItem<bool>(
               value: showHiddenMovies,
-              textStyle: buildTextStyle(showHiddenMovies),
+              labelTextStyle: buildLabelStyle(showHiddenMovies),
               child: const Text('Incl. films cachés'),
             ),
 

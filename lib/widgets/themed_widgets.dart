@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/services/app_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -11,7 +12,7 @@ class CtProgressIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SpinKitCubeGrid(
-        color: Theme.of(context).primaryColor,
+        color: context.colorScheme.primary,
       )
     );
   }

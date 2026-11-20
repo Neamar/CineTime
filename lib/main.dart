@@ -2,7 +2,7 @@ import 'package:cached_network_image_ce/cached_network_image.dart' show CachedNe
 import 'package:cinetime/pages/_pages.dart';
 import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
-import 'package:cinetime/utils/utils.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/error_widget.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fetcher/fetcher.dart';
@@ -114,15 +114,15 @@ class App extends StatelessWidget {
         onError: reportError,
         onDisplayError: showError,
         fetchingBuilder: (context) => SpinKitFadingCube(
-          color: Theme.of(context).primaryColor,
+          color: context.colorScheme.primary,
           size: 25.0,
         ),
         fetchErrorBuilder: (context, errorData) => CtErrorWidget(error: errorData.error, onRetry: errorData.retry, isDense: errorData.isDense),
       ),
       child: MaterialApp(
         title: 'CinéTime',
-        theme: appTheme(),
-        darkTheme: appTheme(darkMode: true),
+        theme: appTheme(Brightness.light),
+        darkTheme: appTheme(Brightness.dark),
         navigatorKey: _navigatorKey,
         home: AppService.instance.selectedTheaters.value.isEmpty
           ? const TheaterSearchPage()

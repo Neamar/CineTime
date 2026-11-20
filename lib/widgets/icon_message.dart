@@ -1,4 +1,5 @@
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -35,7 +36,7 @@ class IconMessage extends StatelessWidget {
       children: <Widget>[
         Icon(
           icon,
-          color: redIcon ? Theme.of(context).primaryColor : null,
+          color: redIcon ? context.colorScheme.primary : null,
           size: inline ? 25 : 50,
         ),
         AppResources.spacerLarge,
