@@ -51,6 +51,7 @@ ThemeData appTheme(Brightness brightness) {
   );
   final inputDecorationIconColor = WidgetStateColor.resolveWith((states) => states.contains(WidgetState.focused) ? Colors.white : AppResources.colorDarkRed);
   return theme.copyWith(
+    textTheme: theme.textTheme.apply(displayColor: scheme.onSurface),     // material2014 display/headline styles are semi-transparent
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: theme.textTheme.bodyMedium?.copyWith(color: AppResources.colorDarkRed),
       prefixIconColor: inputDecorationIconColor,
