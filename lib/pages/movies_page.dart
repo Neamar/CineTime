@@ -69,7 +69,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                       height: kToolbarHeight,
                                       child: Theme(
                                         data: Theme.of(context).copyWith(
-                                          iconTheme: const IconThemeData(color: Colors.white),
+                                          iconTheme: IconThemeData(color: context.colorScheme.onPrimary),
                                         ),
                                         child: Row(
                                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -97,7 +97,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                                                   1 => 'Films pour ${theaters.first.name}',
                                                                   _ => 'Films dans $theatersCount cinémas',
                                                                 },
-                                                                style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                                                                style: context.textTheme.bodyMedium?.copyWith(color: context.colorScheme.onPrimary),
                                                                 overflow: TextOverflow.ellipsis,
                                                                 maxLines: 1,
                                                               );
@@ -111,7 +111,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                                                 final timePart = fromTime != null ? ' à partir de ${fromTime.toHourMinuteString()}' : '';
                                                                 return '$dayPart$timePart';
                                                               } (),
-                                                              style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
+                                                              style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onPrimary.withValues(alpha: 0.8)),
                                                             ),
                                                           ],
                                                         ),
@@ -178,7 +178,7 @@ class _MoviesPageState extends State<MoviesPage> with BlocProvider<MoviesPage, M
                                     ),
                                   ),
                                   autofocus: true,
-                                  style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+                                  style: context.textTheme.titleMedium?.copyWith(color: context.colorScheme.onPrimary),
                                   textInputAction: TextInputAction.search,
                                 ),
                               );
@@ -316,9 +316,9 @@ class _SortButton extends StatelessWidget {
         }
       },
       itemBuilder: (context) {
-        final textStyle = context.textTheme.titleMedium;
-        TextStyle? buildTextStyle(bool isSelected, {Color? color}) {
-          return textStyle?.copyWith(color: isSelected ? Theme.of(context).primaryColor : color);
+        final textStyle = context.textTheme.titleMedium;     // Popup items only use [labelTextStyle] on Material 3 (not [textStyle])
+        WidgetStateProperty<TextStyle?> buildLabelStyle(bool isSelected, {Color? color}) {
+          return WidgetStatePropertyAll(textStyle?.copyWith(color: isSelected ? context.colorScheme.primary : color));
         }
 
         return [
@@ -326,7 +326,7 @@ class _SortButton extends StatelessWidget {
           ...MovieSortType.values.map((value) {
             return PopupMenuItem<MovieSortType>(
               value: value,
-              textStyle: buildTextStyle(value == sortValue),
+              labelTextStyle: buildLabelStyle(value == sortValue),
               child: Text(value.label),
             );
           }),
@@ -344,7 +344,7 @@ class _SortButton extends StatelessWidget {
             return days.map((day) {
               return PopupMenuItem<Date>(
                 value: day,
-                textStyle: buildTextStyle(day == dayFilterValue, color: daysWithShow.contains(day) ? null : textStyle?.color?.withValues(alpha: 0.5)),
+                labelTextStyle: buildLabelStyle(day == dayFilterValue, color: daysWithShow.contains(day) ? null : textStyle?.color?.withValues(alpha: 0.5)),
                 child: Text(day.toDayString().capitalized),
               );
             });
@@ -354,7 +354,7 @@ class _SortButton extends StatelessWidget {
           const PopupMenuDivider(),
           PopupMenuItem<TimeOfDay>(
             value: TimeOfDay(hour: 0, minute: 0),   // Dummy time, just to have a value of correct type for action handling
-            textStyle: buildTextStyle(fromTime != null),
+            labelTextStyle: buildLabelStyle(fromTime != null),
             child: Text('À partir de ${fromTime != null ? fromTime!.toHourMinuteString() : '...'}'),
           ),
 
@@ -363,7 +363,7 @@ class _SortButton extends StatelessWidget {
             const PopupMenuDivider(),
             PopupMenuItem<bool>(
               value: showHiddenMovies,
-              textStyle: buildTextStyle(showHiddenMovies),
+              labelTextStyle: buildLabelStyle(showHiddenMovies),
               child: const Text('Incl. films cachés'),
             ),
 
@@ -391,12 +391,12 @@ class _FallbackBanner extends StatelessWidget implements PreferredSizeWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),    // Mimic default AppBar spacing
         child: Row(
           children: [
-            const Icon(Icons.cloud_off, size: 14, color: AppResources.colorGrey),
+            Icon(Icons.cloud_off, size: 14, color: context.colorScheme.onPrimary.withValues(alpha: 0.8)),
             AppResources.spacerTiny,
             Expanded(
               child: Text(
                 "Mise à jour impossible · horaires d'${timeago.format(updatedAt)}",
-                style: context.textTheme.bodySmall?.copyWith(color: AppResources.colorGrey),
+                style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onPrimary.withValues(alpha: 0.8)),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -490,6 +490,7 @@ class _FilteredMovieListViewState extends State<_FilteredMovieListView> {
 
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
+      padding: AppResources.paddingCardList,
       itemCount: filteredMoviesShowTimes.length,
       itemExtent: 100 * max(MediaQuery.textScalerOf(context).scale(1), 1.0),
       itemBuilder: (context, index) {

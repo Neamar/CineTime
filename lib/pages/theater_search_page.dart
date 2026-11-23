@@ -63,7 +63,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             decoration: const InputDecoration(
               hintText: 'Nom ou adresse',
             ),
-            style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+            style: context.textTheme.titleMedium?.copyWith(color: context.colorScheme.onPrimary),
             textInputAction: TextInputAction.search,
             onSubmitted: (_) => bloc.startQuerySearch(),
           ),
@@ -106,6 +106,7 @@ class _TheaterSearchPageState extends State<TheaterSearchPage> with BlocProvider
             return Scaffold(
               resizeToAvoidBottomInset: true,
               body: ListView.builder(
+                padding: AppResources.paddingCardList,
                 itemExtent: TheaterCard.height,
                 itemCount: searchResult.theaters!.length,
                 itemBuilder: (context, index) {

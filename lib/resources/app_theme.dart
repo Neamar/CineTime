@@ -2,56 +2,46 @@ import 'package:cinetime/resources/_resources.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-ThemeData appTheme({bool darkMode = false}) {
-  final backgroundColor = darkMode ? Colors.black : AppResources.colorLightGrey;
-  final backgroundLightColor = darkMode ? AppResources.colorDarkGrey : Colors.white;
-  final foregroundColor = darkMode ? Colors.white : AppResources.colorDarkGrey;
+ThemeData appTheme(Brightness brightness) {
+  final isDark = brightness == Brightness.dark;
+  final scheme = ColorScheme.fromSeed(
+    seedColor: AppResources.colorDarkBlue,      // Seed tints surfaces: a dark blue gives near-neutral greys (a red seed gives pink)
+    brightness: brightness,
+    primary: AppResources.colorRed,
+    onPrimary: Colors.white,
+    primaryContainer: AppResources.colorLightRed,
+    onPrimaryContainer: AppResources.colorDarkRed,
+    tertiaryContainer: AppResources.colorLightRed,      // Used by the selected AM/PM of the time picker: the blue seed would make it purple
+    onTertiaryContainer: AppResources.colorDarkRed,
+    surface: isDark ? Colors.black : null,      // True black on dark mode (OLED)
+  );
 
   final theme = ThemeData(
-    useMaterial3: false,      // TODO migrate
-    primarySwatch: _createMaterialColor(AppResources.colorRed),
-    scaffoldBackgroundColor: backgroundColor,
-    canvasColor: backgroundLightColor,
+    colorScheme: scheme,
+    typography: Typography.material2014(),      // Denser than the M3 default (material2021): app layouts are tuned for it
     appBarTheme: AppBarTheme(
+      backgroundColor: scheme.primary,
+      foregroundColor: scheme.onPrimary,
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarBrightness: Brightness.light,
         statusBarIconBrightness: Brightness.light,
       ),
     ),
-    iconTheme: IconThemeData(
-      color: foregroundColor,
+    cardTheme: CardThemeData(
+      shape: RoundedRectangleBorder(borderRadius: AppResources.borderRadiusCard),
+      elevation: 0,
+      color: scheme.surfaceContainer,
+    ),
+    dialogTheme: const DialogThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+    ),
+    timePickerTheme: TimePickerThemeData(
+      hourMinuteTextStyle: Typography.englishLike2021.displayLarge,      // Sized for the picker (57): material2014 displayLarge (112) is clipped
     ),
     textSelectionTheme: const TextSelectionThemeData(
       cursorColor: Colors.white,
       selectionColor: AppResources.colorLightRed,
       selectionHandleColor: Colors.white,
-    ),
-    cardTheme: CardThemeData(
-      color: backgroundLightColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: AppResources.borderRadiusTiny,
-      ),
-    ),
-    checkboxTheme: CheckboxThemeData(
-      side: BorderSide(
-        width: 2,
-        color: foregroundColor,
-      ),
-    ),
-    popupMenuTheme: PopupMenuThemeData(
-      color: backgroundLightColor,
-    ),
-    dividerTheme: DividerThemeData(
-      color: foregroundColor,
-      thickness: 1,
-    ),
-    toggleButtonsTheme: ToggleButtonsThemeData(
-      borderColor: AppResources.colorGrey,
-      selectedBorderColor: AppResources.colorGrey,
-      color: foregroundColor,
-    ),
-    dialogTheme: DialogThemeData(
-      backgroundColor: backgroundLightColor,
     ),
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
@@ -61,10 +51,7 @@ ThemeData appTheme({bool darkMode = false}) {
   );
   final inputDecorationIconColor = WidgetStateColor.resolveWith((states) => states.contains(WidgetState.focused) ? Colors.white : AppResources.colorDarkRed);
   return theme.copyWith(
-    textTheme: theme.textTheme.apply(
-      bodyColor: foregroundColor,
-      displayColor: foregroundColor,
-    ),
+    textTheme: theme.textTheme.apply(displayColor: scheme.onSurface),     // material2014 display/headline styles are semi-transparent
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: theme.textTheme.bodyMedium?.copyWith(color: AppResources.colorDarkRed),
       prefixIconColor: inputDecorationIconColor,
@@ -85,27 +72,4 @@ ThemeData appTheme({bool darkMode = false}) {
       contentPadding: const EdgeInsets.all(10),
     ),
   );
-}
-
-/// Copied from https://medium.com/@filipvk/creating-a-custom-color-swatch-in-flutter-554bcdcb27f3
-MaterialColor _createMaterialColor(Color color) {
-  List strengths = <double>[.05];
-  final swatch = <int, Color>{};
-  final int r = (color.r * 255.0).round().clamp(0, 255),
-      g = (color.g * 255.0).round().clamp(0, 255),
-      b = (color.b * 255.0).round().clamp(0, 255);
-
-  for (int i = 1; i < 10; i++) {
-    strengths.add(0.1 * i);
-  }
-  for (final strength in strengths) {
-    final double ds = 0.5 - strength;
-    swatch[(strength * 1000).round()] = Color.fromRGBO(
-      r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-      g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-      b + ((ds < 0 ? b : (255 - b)) * ds).round(),
-      1,
-    );
-  }
-  return MaterialColor(color.toARGB32(), swatch);
 }

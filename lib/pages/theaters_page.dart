@@ -49,6 +49,7 @@ class _TheatersPageState extends State<TheatersPage> with BlocProvider<TheatersP
             );
 
           return ListView.builder(
+            padding: AppResources.paddingCardList,
             itemExtent: TheaterCard.height,
             itemCount: theaters.length,
             itemBuilder: (context, index) {

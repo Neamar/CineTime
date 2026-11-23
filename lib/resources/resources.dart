@@ -6,12 +6,8 @@ class AppResources {
   static const colorRed = Color(0xFFD32F2F);
   static const colorLightRed = Color(0xFFFF6659);
   static const colorDarkRed = Color(0xFF9A0007);
-
   static const colorDarkBlue = Color(0xFF101E39);
-
   static const colorLightGrey = Color(0xFFFAFAFA);
-  static const colorGrey = Color(0xFFC7C7C7);
-  static const colorDarkGrey = Color(0xFF1E1E1E);
 
   // Spacer
   static const spacerLarge = SizedBox(width: 20, height: 20);
@@ -24,6 +20,10 @@ class AppResources {
   static const borderRadiusTiny = BorderRadius.all(Radius.circular(5));
   static const borderRadiusSmall = BorderRadius.all(Radius.circular(10));
   static const borderRadiusMedium = BorderRadius.all(Radius.circular(15));
+  static const borderRadiusCard = BorderRadius.all(Radius.circular(8));
+
+  // Padding
+  static const paddingCardList = EdgeInsets.all(4);   // List of cards: complements the default Card margin (4) to get an even 8 spacing everywhere
 
   // Duration
   static const durationAnimationShort = Duration(milliseconds: 150);

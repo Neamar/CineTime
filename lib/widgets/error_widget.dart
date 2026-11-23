@@ -1,3 +1,4 @@
+import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/resources/_resources.dart';
 import 'package:cinetime/widgets/update_app_widget.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class CtErrorWidget extends StatelessWidget {
               message: error.toString().replaceAll('all' + 'ocine', '***').replaceAll('dh' + 'net', '***'),
               child: Icon(
                 Icons.error_outline,
-                color: AppResources.colorRed,
+                color: context.colorScheme.primary,
                 size: isDense ? null : 40,
               ),
             ),

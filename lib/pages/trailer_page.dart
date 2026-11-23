@@ -3,6 +3,7 @@ import 'package:chewie/src/notifiers/player_notifier.dart';   // ignore: impleme
 import 'package:cinetime/models/api_id.dart';
 import 'package:cinetime/services/api_client.dart';
 import 'package:cinetime/services/app_service.dart';
+import 'package:cinetime/utils/_utils.dart';
 import 'package:cinetime/widgets/_widgets.dart';
 import 'package:fetcher/fetcher_bloc.dart';
 import 'package:flutter/material.dart';
@@ -188,7 +189,7 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
     if (chewieController == null) {
       return Center(
         child: SpinKitFadingCube(
-          color: Theme.of(context).primaryColor,
+          color: context.colorScheme.primary,
           size: 25.0,
         ),
       );

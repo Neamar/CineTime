@@ -24,7 +24,7 @@ class PosterPage extends StatelessWidget {
           // Back button
           Positioned(
             child: SafeArea(
-              child: BackButton(),
+              child: BackButton(color: Colors.white),
             ),
           ),
         ],

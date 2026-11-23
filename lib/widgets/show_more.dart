@@ -25,7 +25,7 @@ class _ShowMoreTextState extends State<ShowMoreText> {
           style: context.textTheme.bodyMedium,
           children: [
             if (widget.header != null)...[
-              TextSpan(text: '${widget.header!}\n', style: const TextStyle(color: AppResources.colorDarkRed, fontWeight: FontWeight.w500)),
+              TextSpan(text: '${widget.header!}\n', style: TextStyle(color: context.colorScheme.primary, fontWeight: FontWeight.w500)),
               const TextSpan(text: '\n', style: TextStyle(fontSize: 5)),
             ],
             TextSpan(text: widget.text),

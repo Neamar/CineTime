@@ -1,3 +1,4 @@
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
 /// Based on https://github.com/figengungor/scaling_header/blob/9cab2415f1478f23c76ab7f5cc2ac2bce5c1d971/lib/scaling_header.dart
@@ -125,7 +126,7 @@ class _ScalingHeaderState extends State<ScalingHeader> with SingleTickerProvider
       elevation: widget.elevation,
       backgroundColor: widget.backgroundColor != null
           ? widget.backgroundColor!.withValues(alpha: _animationController.value)
-          : Theme.of(context).primaryColor.withValues(alpha: _animationController.value),
+          : context.colorScheme.primary.withValues(alpha: _animationController.value),
       iconTheme: widget.iconTheme,
       primary: widget.primary,
       centerTitle: widget.centerTitle,

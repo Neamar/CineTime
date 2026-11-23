@@ -1,3 +1,4 @@
+import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
 typedef _RatingChangeCallback = void Function(double rating);
@@ -36,19 +37,19 @@ class SmoothStarRating extends StatelessWidget {
     if (index >= rating) {
       icon = Icon(
         defaultIconData ?? Icons.star_border,
-        color: borderColor ?? Theme.of(context).primaryColor,
+        color: borderColor ?? context.colorScheme.primary,
         size: size,
       );
     } else if (index > rating - (allowHalfRating ? 0.5 : 1.0) && index < rating) {
       icon = Icon(
         halfFilledIconData ?? Icons.star_half,
-        color: color ?? Theme.of(context).primaryColor,
+        color: color ?? context.colorScheme.primary,
         size: size,
       );
     } else {
       icon = Icon(
         filledIconData ?? Icons.star,
-        color: color ?? Theme.of(context).primaryColor,
+        color: color ?? context.colorScheme.primary,
         size: size,
       );
     }

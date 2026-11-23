@@ -26,147 +26,163 @@ class MovieCard extends StatelessWidget {
     // Build widget
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => navigateTo(context, (_) => MoviePage(moviesShowTimes, movieIndex)),
-        child: LayoutBuilder(
-          builder: (context, box) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
+      child: MergeSemantics(     // The ink overlay is a sibling of the content: merge to keep the card exposed as a single button
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
 
-                // Poster
-                SizedBox(
-                  width: box.maxHeight * 0.75,
-                  child: HeroPoster(
-                    heroTag: movieShowTimes.movie.id,
-                    posterPath: movieShowTimes.movie.poster,
-                    borderRadius: BorderRadius.only(
-                      topLeft: AppResources.borderRadiusTiny.topLeft,
-                      bottomLeft: AppResources.borderRadiusTiny.bottomLeft,
+            // Content
+            LayoutBuilder(
+              builder: (context, box) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+
+                    // Poster
+                    SizedBox(
+                      width: box.maxHeight * 0.75,
+                      child: HeroPoster(
+                        heroTag: movieShowTimes.movie.id,
+                        posterPath: movieShowTimes.movie.poster,
+                        borderRadius: BorderRadius.only(
+                          topLeft: AppResources.borderRadiusTiny.topLeft,
+                          bottomLeft: AppResources.borderRadiusTiny.bottomLeft,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-                // Content
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-
-                        // Info line 1
-                        Row(
+                    // Content
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
-                            Expanded(
-                              child: Row(
-                                textBaseline: TextBaseline.alphabetic,
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                children: <Widget>[
 
-                                  // Movie name
-                                  Flexible(
-                                    child: Text(
-                                      movieShowTimes.movie.title,
-                                      style: context.textTheme.titleLarge,
-                                      overflow: TextOverflow.fade,
-                                      softWrap: false,
-                                    ),
+                            // Info line 1
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Row(
+                                    textBaseline: TextBaseline.alphabetic,
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    children: <Widget>[
+
+                                      // Movie name
+                                      Flexible(
+                                        child: Text(
+                                          movieShowTimes.movie.title,
+                                          style: context.textTheme.titleLarge,
+                                          overflow: TextOverflow.fade,
+                                          softWrap: false,
+                                        ),
+                                      ),
+
+                                      // Release year
+                                      if (movieShowTimes.movie.releaseYearDisplay != null)
+                                        Text('  ${movieShowTimes.movie.releaseYearDisplay}'),
+                                    ],
                                   ),
+                                ),
 
-                                  // Release year
-                                  if (movieShowTimes.movie.releaseYearDisplay != null)
-                                    Text('  ${movieShowTimes.movie.releaseYearDisplay}'),
+                                // Rating
+                                if (rating != null && rating > 0)...[
+                                  AppResources.spacerLarge,
+                                  StarRating(rating),
+                                ]
+
+                                // Country
+                                else if (movieShowTimes.movie.countryDisplay != null)...[
+                                  AppResources.spacerLarge,
+                                  Text(movieShowTimes.movie.countryDisplay!),
                                 ],
+                              ],
+                            ),
+
+                            // Info line 2
+                            AppResources.spacerTiny,
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: () {
+                                    final genres = movieShowTimes.movie.genres;
+                                    if (genres != null) {
+                                      return Text(
+                                        genres,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      );
+                                    }
+                                    final actors = movieShowTimes.movie.actors;
+                                    if (actors != null) {
+                                      return TextWithLabel(
+                                        label: 'avec',
+                                        text: actors,
+                                        singleLine: true,
+                                      );
+                                    }
+                                    return const SizedBox();
+                                  } (),
+                                ),
+                                if (movieShowTimes.movie.durationDisplay != null)...[
+                                  AppResources.spacerSmall,
+                                  Text(movieShowTimes.movie.durationDisplay!),
+                                ],
+                              ],
+                            ),
+
+                            // Show time summary
+                            const Spacer(),
+                            AppResources.spacerTiny,
+                            for (var i = 0; i < math.min(movieShowTimes.theatersShowTimes.length, 2); i++)
+                              Builder(
+                                builder: (context) {
+                                  final theaterShowTimes = movieShowTimes.theatersShowTimes[i];
+
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+
+                                      // Theater name
+                                      Flexible(
+                                        child: Text(
+                                          showTheaterName ? theaterShowTimes.theater.name : '',
+                                          style: context.textTheme.bodySmall,
+                                          softWrap: false,
+                                          overflow: TextOverflow.fade,
+                                        ),
+                                      ),
+
+                                      // Show time summary
+                                      AppResources.spacerMedium,
+                                      Text(
+                                        theaterShowTimes.showTimesSummary,
+                                        style: context.textTheme.bodySmall,
+                                      ),
+
+                                    ],
+                                  );
+                                }
                               ),
-                            ),
-
-                            // Rating
-                            if (rating != null && rating > 0)...[
-                              AppResources.spacerLarge,
-                              StarRating(rating),
-                            ]
-
-                            // Country
-                            else if (movieShowTimes.movie.countryDisplay != null)...[
-                              AppResources.spacerLarge,
-                              Text(movieShowTimes.movie.countryDisplay!),
-                            ],
                           ],
                         ),
+                      ),
+                    )
+                  ],
+                );
+              }
+            ),
 
-                        // Info line 2
-                        AppResources.spacerTiny,
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: () {
-                                final genres = movieShowTimes.movie.genres;
-                                if (genres != null) {
-                                  return Text(
-                                    genres,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  );
-                                }
-                                final actors = movieShowTimes.movie.actors;
-                                if (actors != null) {
-                                  return TextWithLabel(
-                                    label: 'avec',
-                                    text: actors,
-                                    singleLine: true,
-                                  );
-                                }
-                                return const SizedBox();
-                              } (),
-                            ),
-                            if (movieShowTimes.movie.durationDisplay != null)...[
-                              AppResources.spacerSmall,
-                              Text(movieShowTimes.movie.durationDisplay!),
-                            ],
-                          ],
-                        ),
-
-                        // Show time summary
-                        const Spacer(),
-                        AppResources.spacerTiny,
-                        for (var i = 0; i < math.min(movieShowTimes.theatersShowTimes.length, 2); i++)
-                          Builder(
-                            builder: (context) {
-                              final theaterShowTimes = movieShowTimes.theatersShowTimes[i];
-
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-
-                                  // Theater name
-                                  Flexible(
-                                    child: Text(
-                                      showTheaterName ? theaterShowTimes.theater.name : '',
-                                      style: context.textTheme.bodySmall,
-                                      softWrap: false,
-                                      overflow: TextOverflow.fade,
-                                    ),
-                                  ),
-
-                                  // Show time summary
-                                  AppResources.spacerMedium,
-                                  Text(
-                                    theaterShowTimes.showTimesSummary,
-                                    style: context.textTheme.bodySmall,
-                                  ),
-
-                                ],
-                              );
-                            }
-                          ),
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            );
-          }
+            // Ink above the content (poster included): needs its own transparent Material, the Card one is painted below its children
+            Positioned.fill(
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  onTap: () => navigateTo(context, (_) => MoviePage(moviesShowTimes, movieIndex)),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
