@@ -11,6 +11,8 @@ ThemeData appTheme(Brightness brightness) {
     onPrimary: Colors.white,
     primaryContainer: AppResources.colorLightRed,
     onPrimaryContainer: AppResources.colorDarkRed,
+    tertiaryContainer: AppResources.colorLightRed,      // Used by the selected AM/PM of the time picker: the blue seed would make it purple
+    onTertiaryContainer: AppResources.colorDarkRed,
     surface: isDark ? Colors.black : null,      // True black on dark mode (OLED)
   );
 
@@ -32,6 +34,9 @@ ThemeData appTheme(Brightness brightness) {
     ),
     dialogTheme: const DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+    ),
+    timePickerTheme: TimePickerThemeData(
+      hourMinuteTextStyle: Typography.englishLike2021.displayLarge,      // Sized for the picker (57): material2014 displayLarge (112) is clipped
     ),
     textSelectionTheme: const TextSelectionThemeData(
       cursorColor: Colors.white,
