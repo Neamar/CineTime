@@ -420,15 +420,42 @@ class FranceApiClient extends ApiClient {
     // Certificate
     // Releases are sorted from newest to oldest, and a re-release often has no certificate: take the first one available
     final JsonList releasesJson = movieJson?['releases'] ?? [];
-    final certificate = releasesJson
+    final certificateLabel = releasesJson
         .map((release) => release['certificate']?['label'] as String?)
         .firstWhereOrNull((label) => label?.isNotEmpty == true);
 
     // Return data
     return MovieInfo(
       synopsis: synopsis,
-      certificate: certificate,
+      certificate: _parseCertificate(certificateLabel),
     );
+  }
+
+  static final _certificateAgeRegExp = RegExp(r'^Interdit\s*-\s*(\d+)\s*ans$');
+  static const _certificateWarningSuffix = 'avec avertissement';
+
+  /// Parse a certificate label, formatted as `<base>[ avec avertissement]`.
+  /// Examples: "Tout public", "Interdit - 12 ans avec avertissement"
+  Certificate? _parseCertificate(String? label) {
+    if (label == null) return null;
+
+    var base = label.trim();
+    final hasWarning = base.endsWith(_certificateWarningSuffix);
+    if (hasWarning) base = base.substring(0, base.length - _certificateWarningSuffix.length).trim();
+
+    AgeRating? rating;
+    if (base.startsWith('Tout public')) {
+      rating = AgeRating.all;
+    } else {
+      final age = _certificateAgeRegExp.firstMatch(base)?.group(1);
+      if (age != null) rating = AgeRating.fromAge(int.parse(age));
+    }
+
+    if (rating == null) {
+      reportError(UnimplementedError('Unknown certificate "$label"'), StackTrace.current);
+      return null;
+    }
+    return Certificate(rating: rating, hasWarning: hasWarning);
   }
 
   @override
@@ -617,6 +644,15 @@ class FranceApiClient extends ApiClient {
       }
     }
     return label;
+  }
+
+  @override
+  List<String> certificateToDisplayLines(Certificate certificate) {
+    final age = certificate.rating.age;
+    return [
+      age == null ? 'Tout public' : 'Interdit aux moins de $age ans',
+      if (certificate.hasWarning) 'Avec avertissement',
+    ];
   }
   //#endregion
 

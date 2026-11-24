@@ -136,11 +136,42 @@ class MovieInfo {
   });
 
   final String? synopsis;
-  final String? certificate;
+  final Certificate? certificate;
   final DateTime? releaseDate;
   final String? genres;
   final double? pressRating;
   final ApiId? trailerId;
+}
+
+/// Age rating of a movie, with its content warnings.
+class Certificate {
+  const Certificate({required this.rating, this.hasWarning = false, this.warnings = const []});
+
+  final AgeRating rating;
+
+  /// There is a warning, but its content is unknown (FR)
+  final bool hasWarning;
+
+  /// Content warnings, as labelled by the source (BE)
+  final List<String> warnings;
+}
+
+enum AgeRating {
+  all(null),
+  kids(null),
+  age6(6),
+  age9(9),
+  age12(12),
+  age14(14),
+  age16(16),
+  age18(18);
+
+  const AgeRating(this.age);
+
+  /// Minimum age, null when there is none
+  final int? age;
+
+  static AgeRating? fromAge(int age) => values.firstWhereOrNull((rating) => rating.age == age);
 }
 
 class MovieVideo {

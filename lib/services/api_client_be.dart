@@ -126,10 +126,8 @@ class BelgiumApiClient extends ApiClient {
         .join('\n\n');
     if (synopsis.isEmpty) synopsis = null;
 
-    // Certificate (age rating image alt text)
-    final certificateElement = document.querySelector('li.movieAudience img');
-    String? certificate = certificateElement?.attributes['alt']?.trim();
-    if (certificate?.isEmpty == true) certificate = null;
+    // Certificate
+    final certificate = _parseCertificate(document.querySelectorAll('div.audienceAndClassificationType img'));
 
     // Release date
     final releaseDate = _parseDateDayMonthYear(document.querySelector('.releaseDate a')?.text.trim());
@@ -162,6 +160,43 @@ class BelgiumApiClient extends ApiClient {
       pressRating: pressRating,
       trailerId: trailerVideoId?.isNotEmpty == true ? BelgiumApiId(trailerVideoId!) : null,
     );
+  }
+
+  static final _certificateAgeRegExp = RegExp(r'^À partir de (\d+) ans$');
+
+  /// Parse the pictograms of a movie page: one for the age (`/static/img/audience/`, absent on some movies)
+  /// and 0 to 5 for the content warnings (`/static/img/classification/`), all described by their alt text.
+  /// Files names and images order are not reliable.
+  Certificate? _parseCertificate(List<html_dom.Element> images) {
+    String? labelOf(html_dom.Element image) {
+      final label = (image.attributes['alt'] ?? image.attributes['title'])?.trim();
+      return label?.isNotEmpty == true ? label : null;
+    }
+
+    final ageLabel = images
+        .where((image) => image.attributes['src']?.contains('/static/img/audience/') == true)
+        .map(labelOf)
+        .nonNulls
+        .firstOrNull;
+    if (ageLabel == null) return null;
+
+    final age = _certificateAgeRegExp.firstMatch(ageLabel)?.group(1);
+    final rating = switch (ageLabel) {
+      'Tout public' => AgeRating.all,
+      'Jeune public' => AgeRating.kids,
+      _ => age != null ? AgeRating.fromAge(int.parse(age)) : null,
+    };
+    if (rating == null) {
+      reportError(UnimplementedError('Unknown certificate "$ageLabel"'), StackTrace.current);
+      return null;
+    }
+
+    final warnings = images
+        .where((image) => image.attributes['src']?.contains('/static/img/classification/') == true)
+        .map(labelOf)
+        .nonNulls
+        .toList(growable: false);
+    return Certificate(rating: rating, warnings: warnings);
   }
 
   @override
@@ -223,6 +258,19 @@ class BelgiumApiClient extends ApiClient {
       label += ' st ${spec.subtitles.map((s) => s.code).join('/')}';
     }
     return label;
+  }
+
+  @override
+  List<String> certificateToDisplayLines(Certificate certificate) {
+    final age = certificate.rating.age;
+    return [
+      switch (certificate.rating) {
+        AgeRating.all => 'Tout public',
+        AgeRating.kids => 'Jeune public',
+        _ => 'À partir de $age ans',
+      },
+      if (certificate.warnings.isNotEmpty) certificate.warnings.join(', '),
+    ];
   }
   //#endregion
 

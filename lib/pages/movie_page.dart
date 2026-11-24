@@ -17,6 +17,9 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 const _contentPadding = 16.0;
 const _posterHeight = 100.0;
+const _posterWidth = _posterHeight * HeroPoster.aspectRatio;
+const _badgeOverlap = 15.0;   // Max overlap of the badge on the poster (half of it), and height reserved under the poster
+const _badgeGap = 8.0;        // Max gap between the poster and the badge
 
 class MoviePage extends StatelessWidget {
   MoviePage(this.moviesShowTimes, this.initialIndex);
@@ -119,97 +122,129 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                       children: <Widget>[
 
                         // Movie info
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        // (the Stack is as big as the Row, so the age badge can adapt to the info height)
+                        Stack(
                           children: <Widget>[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
 
-                            // Poster
-                            if (poster != null)...[
-                              SizedBox(
-                                width: _posterHeight * HeroPoster.aspectRatio,
-                                height: _posterHeight,
-                                child: GestureDetector(
-                                  onTap: _openPoster,
-                                  child: HeroPoster(
-                                    heroTag: movie.id,
-                                    posterPath: poster,
-                                    borderRadius: AppResources.borderRadiusTiny,
+                                // Poster
+                                if (poster != null)...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: _badgeOverlap),    // Always reserve the min badge space, to avoid a jump once the info are loaded
+                                    child: SizedBox(
+                                      width: _posterWidth,
+                                      height: _posterHeight,
+                                      child: GestureDetector(
+                                        onTap: _openPoster,
+                                        child: HeroPoster(
+                                          heroTag: movie.id,
+                                          posterPath: poster,
+                                          borderRadius: AppResources.borderRadiusTiny,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              AppResources.spacerMedium,
-                            ],
+                                  AppResources.spacerMedium,
+                                ],
 
-                            // Info
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: <Widget>[
-                                  Text(
-                                    movie.title,
-                                    style: context.textTheme.titleLarge,
-                                  ),
-                                  if (movie.originalTitle != null)
-                                    TextWithLabel(
-                                      label: 'Original',
-                                      text: movie.originalTitle!,
-                                    ),
-                                  if (movie.country != null)
-                                    TextWithLabel(
-                                      label: 'Pays',
-                                      text: movie.country!,
-                                    ),
-                                  if (movie.directors != null)
-                                    TextWithLabel(
-                                      label: 'De',
-                                      text: movie.directors!,
-                                    ),
-                                  if (movie.actors != null)
-                                    TextWithLabel(
-                                      label: 'Avec',
-                                      text: movie.actors!,
-                                    ),
-                                  // Genres
-                                  FetchBuilder<String?>(
-                                    task: () => movie.genres ?? bloc.getMovieInfo().then((info) => info.genres),
-                                    config: FetcherConfig.silent(fadeSize: true),
-                                    builder: (context, genres) {
-                                      if (genres == null) return const SizedBox(height: 0);
-                                      return TextWithLabel(
-                                        label: 'Genres',
-                                        text: genres,
-                                      );
-                                    },
-                                  ),
-                                  if (movie.languages != null)
-                                    TextWithLabel(
-                                      label: 'Langues',
-                                      text: movie.languages!,
-                                    ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                // Info
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: <Widget>[
-                                      FetchBuilder<DateTime?>(
-                                        task: () => movie.releaseDate ?? bloc.getMovieInfo().then((info) => info.releaseDate),
+                                      Text(
+                                        movie.title,
+                                        style: context.textTheme.titleLarge,
+                                      ),
+                                      if (movie.originalTitle != null)
+                                        TextWithLabel(
+                                          label: 'Original',
+                                          text: movie.originalTitle!,
+                                        ),
+                                      if (movie.country != null)
+                                        TextWithLabel(
+                                          label: 'Pays',
+                                          text: movie.country!,
+                                        ),
+                                      if (movie.directors != null)
+                                        TextWithLabel(
+                                          label: 'De',
+                                          text: movie.directors!,
+                                        ),
+                                      if (movie.actors != null)
+                                        TextWithLabel(
+                                          label: 'Avec',
+                                          text: movie.actors!,
+                                        ),
+                                      // Genres
+                                      FetchBuilder<String?>(
+                                        task: () => movie.genres ?? bloc.getMovieInfo().then((info) => info.genres),
                                         config: FetcherConfig.silent(fadeSize: true),
-                                        builder: (context, releaseDate) {
-                                          if (releaseDate == null) return const SizedBox(height: 0);
+                                        builder: (context, genres) {
+                                          if (genres == null) return const SizedBox(height: 0);
                                           return TextWithLabel(
-                                            label: 'Sortie',
-                                            text: releaseDate.toReleaseDateDisplay(),
+                                            label: 'Genres',
+                                            text: genres,
                                           );
                                         },
                                       ),
-                                      if (movie.durationDisplay != null)
+                                      if (movie.languages != null)
                                         TextWithLabel(
-                                          label: 'Durée',
-                                          text: movie.durationDisplay!,
+                                          label: 'Langues',
+                                          text: movie.languages!,
                                         ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          FetchBuilder<DateTime?>(
+                                            task: () => movie.releaseDate ?? bloc.getMovieInfo().then((info) => info.releaseDate),
+                                            config: FetcherConfig.silent(fadeSize: true),
+                                            builder: (context, releaseDate) {
+                                              if (releaseDate == null) return const SizedBox(height: 0);
+                                              return TextWithLabel(
+                                                label: 'Sortie',
+                                                text: releaseDate.toReleaseDateDisplay(),
+                                              );
+                                            },
+                                          ),
+                                          if (movie.durationDisplay != null)
+                                            TextWithLabel(
+                                              label: 'Durée',
+                                              text: movie.durationDisplay!,
+                                            ),
+                                        ],
+                                      ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
+
+                            // Age badge
+                            // Top is clamped between the poster bottom - _badgeOverlap and the poster bottom + _badgeGap, and otherwise aligned with the bottom of the info.
+                            // The positioned area goes from the max top to the bottom of the Row, and is at least as high as the badge thanks to the poster bottom padding.
+                            if (poster != null)
+                              Positioned(
+                                left: 0,
+                                width: _posterWidth,
+                                top: _posterHeight - _badgeOverlap,
+                                bottom: 0,
+                                child: Align(
+                                  alignment: Alignment.topCenter,
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(maxHeight: _badgeOverlap + _badgeGap + _AgeBadge.size),
+                                    child: Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: _AgeBadge(
+                                        fetchCertificate: () => bloc.getMovieInfo().then((info) => info.certificate),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
                           ],
                         ),
 
@@ -362,6 +397,80 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
     AnalyticsService.trackEvent('Movie datasheet webpage displayed', {
       'movieTitle': widget.movieShowTimes.movie.title,
     });
+  }
+}
+
+/// Round badge showing the minimum age of a movie, with the details in a tooltip.
+class _AgeBadge extends StatelessWidget {
+  const _AgeBadge({required this.fetchCertificate});
+
+  static const size = 30.0;
+  static const _tapWidth = 48.0;    // Material min tap size (the height can't follow, as the badge sticks to the info bottom)
+  static const _ringWidth = 2.0;
+  static const _iconSize = 18.0;
+
+  static const _colorGreenDark = Color(0xFF3B6D11);
+  static const _colorGreenLight = Color(0xFF639922);
+  static const _colorAmber = Color(0xFFBA7517);
+  static const _colorRed = Color(0xFFA32D2D);
+  static const _colorBlack = Color(0xFF1A1A1A);
+  static const _colorBlackBorder = Color(0xFFE24B4A);
+
+  final Future<Certificate?> Function() fetchCertificate;
+
+  @override
+  Widget build(BuildContext context) {
+    return FetchBuilder<Certificate?>(
+      task: fetchCertificate,
+      config: FetcherConfig.silent(),
+      builder: (context, certificate) {
+        if (certificate == null) return const SizedBox.shrink();
+
+        final rating = certificate.rating;
+        final age = rating.age;
+        final color = switch (rating) {
+          AgeRating.all || AgeRating.kids => _colorGreenDark,
+          AgeRating.age6 || AgeRating.age9 => _colorGreenLight,
+          AgeRating.age12 || AgeRating.age14 => _colorAmber,
+          AgeRating.age16 => _colorRed,
+          AgeRating.age18 => _colorBlack,
+        };
+        const textStyle = TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold);
+
+        return Tooltip(
+          message: AppService.api.certificateToDisplayLines(certificate).join('\n'),
+          triggerMode: TooltipTriggerMode.tap,
+          showDuration: const Duration(seconds: 4),
+          child: SizedBox(
+            width: _tapWidth,
+            height: size,
+            child: Center(
+              child: Container(
+                width: size,
+                height: size,
+                padding: const EdgeInsets.all(_ringWidth),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).scaffoldBackgroundColor,    // Ring, to detach the badge from the poster
+                ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color,
+                    border: rating == AgeRating.age18 ? Border.all(color: _colorBlackBorder, width: _ringWidth) : null,
+                  ),
+                  child: Center(
+                    child: age != null
+                      ? Text(age.toString(), style: textStyle, textScaler: TextScaler.noScaling)
+                      : Icon(rating == AgeRating.kids ? Icons.child_care : Icons.family_restroom, size: _iconSize, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -539,7 +648,6 @@ class SynopsisWidget extends StatelessWidget {
         ),
         builder: (context, info) {
           return ShowMoreText(
-            header: info.certificate,
             text: info.synopsis ?? '\nAucun synopsis\n',
             collapsedHeight: collapsedHeight,
           );

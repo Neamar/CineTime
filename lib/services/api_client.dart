@@ -27,6 +27,9 @@ abstract class ApiClient {
 
   String showTimeAudioSubtitlesToDisplayString(ShowTimeSpec spec);
 
+  /// Lines describing [certificate] (age rating, then warnings if any), worded as the source does (e.g. legal ban or recommendation).
+  List<String> certificateToDisplayLines(Certificate certificate);
+
   /// Whether to log headers also or not.
   static const _logHeaders = false;
 

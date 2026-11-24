@@ -3,9 +3,8 @@ import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 
 class ShowMoreText extends StatefulWidget {
-  const ShowMoreText({super.key, this.header, required this.text, required this.collapsedHeight});
+  const ShowMoreText({super.key, required this.text, required this.collapsedHeight});
 
-  final String? header;
   final String text;
   final double collapsedHeight;
 
@@ -24,10 +23,6 @@ class _ShowMoreTextState extends State<ShowMoreText> {
         final textSpan = TextSpan(
           style: context.textTheme.bodyMedium,
           children: [
-            if (widget.header != null)...[
-              TextSpan(text: '${widget.header!}\n', style: TextStyle(color: context.colorScheme.primary, fontWeight: FontWeight.w500)),
-              const TextSpan(text: '\n', style: TextStyle(fontSize: 5)),
-            ],
             TextSpan(text: widget.text),
           ],
         );
