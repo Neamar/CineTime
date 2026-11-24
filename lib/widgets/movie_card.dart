@@ -40,7 +40,7 @@ class MovieCard extends StatelessWidget {
 
                     // Poster
                     SizedBox(
-                      width: box.maxHeight * 0.75,
+                      width: box.maxHeight * HeroPoster.aspectRatio,
                       child: HeroPoster(
                         heroTag: movieShowTimes.movie.id,
                         posterPath: movieShowTimes.movie.poster,

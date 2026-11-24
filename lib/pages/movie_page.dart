@@ -16,6 +16,7 @@ import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 const _contentPadding = 16.0;
+const _posterHeight = 100.0;
 
 class MoviePage extends StatelessWidget {
   MoviePage(this.moviesShowTimes, this.initialIndex);
@@ -125,7 +126,8 @@ class _MoviePageContentState extends State<_MoviePageContent> with BlocProvider<
                             // Poster
                             if (poster != null)...[
                               SizedBox(
-                                height: 100,
+                                width: _posterHeight * HeroPoster.aspectRatio,
+                                height: _posterHeight,
                                 child: GestureDetector(
                                   onTap: _openPoster,
                                   child: HeroPoster(
@@ -440,6 +442,9 @@ class _RatingWidget extends StatelessWidget {
 
 class HeroPoster extends StatelessWidget {
   const HeroPoster({super.key, required this.heroTag, this.posterPath, required this.borderRadius});
+
+  /// Width / height ratio of the poster box, shared by every screen showing it (so the [Hero] transition keeps the same shape)
+  static const aspectRatio = 0.75;
 
   /// Must be unique per movie: different movies can share the same poster.
   final Object heroTag;
