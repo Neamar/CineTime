@@ -30,8 +30,15 @@ class StorageService {
   static Future<void> saveCountry(Country country) => _storage.setString(_countryKey, country.name);
   static Country? readCountry() => Country.values.firstWhereOrNull((c) => c.name == _storage.getString(_countryKey));
 
+  /// Keys of the data tied to an API provider, which is not valid anymore after switching country.
+  static const _providerKeys = [_selectedTheatersKey, _favoriteTheatersKey, _hiddenMoviesIdsKey];
+
   /// Whether there is data tied to an API provider (selected/favorite theaters, hidden movies).
-  static bool get hasProviderData => [_selectedTheatersKey, _favoriteTheatersKey, _hiddenMoviesIdsKey].any(_storage.containsKey);
+  static bool get hasProviderData => _providerKeys.any(_storage.containsKey);
+
+  /// Remove the data tied to the API provider (selected/favorite theaters, hidden movies), which is not valid anymore after switching country.
+  /// Other settings are kept.
+  static Future<void> clearProviderData() => Future.wait(_providerKeys.map(_storage.remove));
   //#endregion
 
   //#region Sorting
@@ -121,10 +128,4 @@ class StorageService {
     return isStringNullOrEmpty(ids) ? [] : ids!.split(_listSeparator);    // An empty list is saved as '', that split() would read as ['']
   }
   //#endregion
-
-  /// Wipe all local storage. Used when switching country, since selected/favorite theaters and hidden movies are tied to the previous provider's data.
-  static Future<void> clear() async {
-    await _storage.clear();
-    await _storage.setBool(_migrationCompletedKey, true);   // Keep the flag, otherwise the legacy data would be re-imported on next launch
-  }
 }

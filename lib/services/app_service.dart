@@ -45,7 +45,7 @@ class AppService {
   bool get hasLocalData => selectedTheaters.value.isNotEmpty || favoriteTheaters.value.isNotEmpty || hiddenMoviesIds.value.isNotEmpty;
 
   /// Switch to another country's API provider.
-  /// Wipes all local storage, since it's tied to the previous provider's data (theater/movie ids, etc).
+  /// Wipes the local data tied to the previous provider (theater/movie ids, etc).
   void switchCountry(Country country) async {
     if (country == _country) return;
 
@@ -60,7 +60,7 @@ class AppService {
 
     // Update local storage
     () async {
-      await StorageService.clear();
+      await StorageService.clearProviderData();
       await StorageService.saveCountry(country);
     } ();
 
