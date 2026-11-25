@@ -17,6 +17,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'resources/app_theme.dart';
 import 'services/cache_interceptor.dart';
+import 'services/review_service.dart';
 import 'services/storage_service.dart';
 
 Future<void> main() async {
@@ -49,6 +50,7 @@ Future<void> main() async {
 
   // Init shared pref
   await StorageService.init();
+  await ReviewService.init();
 
   // Init API cache
   await CacheInterceptor.init();

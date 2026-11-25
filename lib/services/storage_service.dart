@@ -128,4 +128,45 @@ class StorageService {
     return isStringNullOrEmpty(ids) ? [] : ids!.split(_listSeparator);    // An empty list is saved as '', that split() would read as ['']
   }
   //#endregion
+
+  //#region Review
+  // Dates are stored as milliseconds since epoch.
+
+  /// When the app was first seen (date)
+  static const _reviewFirstSeenAtKey = 'reviewFirstSeenAt';
+
+  /// Number of positive action (int)
+  static const _reviewActionCountKey = 'reviewActionCount';
+
+  /// When a review was last requested, by the popup or a click on the banner (date)
+  static const _reviewLastRequestAtKey = 'reviewLastRequestAt';
+
+  /// When the banner was last dismissed with its cross (date)
+  static const _reviewBannerDismissedAtKey = 'reviewBannerDismissedAt';
+
+  /// When the banner was last clicked (date)
+  static const _reviewBannerClickedAtKey = 'reviewBannerClickedAt';
+
+  static DateTime? readReviewFirstSeenAt() => _readDateTime(_reviewFirstSeenAtKey);
+  static Future<void> saveReviewFirstSeenAt(DateTime value) => _saveDateTime(_reviewFirstSeenAtKey, value);
+
+  static int readReviewActionCount() => _storage.getInt(_reviewActionCountKey) ?? 0;
+  static Future<void> saveReviewActionCount(int value) => _storage.setInt(_reviewActionCountKey, value);
+
+  static DateTime? readReviewLastRequestAt() => _readDateTime(_reviewLastRequestAtKey);
+  static Future<void> saveReviewLastRequestAt(DateTime value) => _saveDateTime(_reviewLastRequestAtKey, value);
+
+  static DateTime? readReviewBannerDismissedAt() => _readDateTime(_reviewBannerDismissedAtKey);
+  static Future<void> saveReviewBannerDismissedAt(DateTime value) => _saveDateTime(_reviewBannerDismissedAtKey, value);
+
+  static DateTime? readReviewBannerClickedAt() => _readDateTime(_reviewBannerClickedAtKey);
+  static Future<void> saveReviewBannerClickedAt(DateTime value) => _saveDateTime(_reviewBannerClickedAtKey, value);
+
+  static DateTime? _readDateTime(String key) {
+    final millis = _storage.getInt(key);
+    return millis == null ? null : DateTime.fromMillisecondsSinceEpoch(millis);
+  }
+
+  static Future<void> _saveDateTime(String key, DateTime value) => _storage.setInt(key, value.millisecondsSinceEpoch);
+  //#endregion
 }
