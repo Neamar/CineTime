@@ -1,7 +1,9 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cinetime/models/_models.dart';
 import 'package:cinetime/resources/_resources.dart';
+import 'package:cinetime/services/analytics_service.dart';
 import 'package:cinetime/services/app_service.dart';
+import 'package:cinetime/services/review_service.dart';
 import 'package:cinetime/utils/_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -13,14 +15,20 @@ class ShowtimeDialog extends StatefulWidget {
     this.movie,
     required this.theater,
     required this.showtime,
+    required this.onPositiveAction,
   });
 
   final Movie? movie;
   final Theater theater;
   final ShowTime showtime;
 
-  static void open({required BuildContext context, Movie? movie, required Theater theater, required ShowTime showtime}) {
-    showDialog(
+  /// Called each time the user successfully does an action on the showtime (share, calendar, ticketing)
+  final VoidCallback onPositiveAction;
+
+  /// Open the dialog. Callers don't need to await it: it completes once the dialog is closed and the review request is handled.
+  static Future<void> open({required BuildContext context, Movie? movie, required Theater theater, required ShowTime showtime}) async {
+    var positiveAction = false;
+    await showDialog(
       context: context,
       builder: (context) {
         return Dialog(
@@ -29,10 +37,13 @@ class ShowtimeDialog extends StatefulWidget {
             movie: movie,
             theater: theater,
             showtime: showtime,
+            onPositiveAction: () => positiveAction = true,
           ),
         );
       },
     );
+
+    await ReviewService.onShowtimeDialogClosed(positiveAction: positiveAction);
   }
 
   @override
@@ -184,19 +195,40 @@ class _ShowtimeDialogState extends State<ShowtimeDialog> {
     );
   }
 
-  Future<void> _share() => SharePlus.instance.share(ShareParams(
-    text: '''$movieTitle [${AppService.api.showTimeSpecToDisplayString(widget.showtime.spec)}]
+  Future<void> _share() async {
+    final result = await SharePlus.instance.share(ShareParams(
+      text: '''$movieTitle [${AppService.api.showTimeSpecToDisplayString(widget.showtime.spec)}]
 ${widget.theater.name}
 $dateDisplay''',
-  ));
+    ));
 
-  Future<void> _openBookingUrl() => launchUrlString(widget.showtime.ticketingUrl!, mode: LaunchMode.externalApplication);
+    // When the result is unavailable, there is no way to know if the user shared, so assume they did
+    if (result.status == ShareResultStatus.success || result.status == ShareResultStatus.unavailable) {
+      _onPositiveAction('Showtime shared');
+    }
+  }
 
-  Future<void> _addToCalendar() => Add2Calendar.addEvent2Cal(Event(
-    title: 'Cinema : $movieTitle',    // Adding 'Cinema' to the title makes Google Calendar show a nice picture automatically, make it easier to find in the calendar
-    description: 'Séance de cinéma pour $movieTitle en ${AppService.api.showTimeSpecToDisplayString(widget.showtime.spec)}${widget.showtime.ticketingUrl != null ? '\n\nRéservation:\n${widget.showtime.ticketingUrl}' : ''}\n\nRemarque: ${isEndDateApprox ? 'Heure de fin de séance approximative basée sur la durée du film' : 'Heure de fin de séance donnée par le cinéma'}',
-    location: '${widget.theater.name}\n${widget.theater.fullAddress}',
-    startDate: widget.showtime.dateTime,
-    endDate: endDate ?? widget.showtime.dateTime.add(const Duration(hours: 2)),
-  ));
+  Future<void> _openBookingUrl() async {
+    final launched = await launchUrlString(widget.showtime.ticketingUrl!, mode: LaunchMode.externalApplication);
+    if (launched) _onPositiveAction('Ticketing opened');
+  }
+
+  Future<void> _addToCalendar() async {
+    final added = await Add2Calendar.addEvent2Cal(Event(
+      title: 'Cinema : $movieTitle',    // Adding 'Cinema' to the title makes Google Calendar show a nice picture automatically, make it easier to find in the calendar
+      description: 'Séance de cinéma pour $movieTitle en ${AppService.api.showTimeSpecToDisplayString(widget.showtime.spec)}${widget.showtime.ticketingUrl != null ? '\n\nRéservation:\n${widget.showtime.ticketingUrl}' : ''}\n\nRemarque: ${isEndDateApprox ? 'Heure de fin de séance approximative basée sur la durée du film' : 'Heure de fin de séance donnée par le cinéma'}',
+      location: '${widget.theater.name}\n${widget.theater.fullAddress}',
+      startDate: widget.showtime.dateTime,
+      endDate: endDate ?? widget.showtime.dateTime.add(const Duration(hours: 2)),
+    ));
+    if (added) _onPositiveAction('Showtime added to calendar');
+  }
+
+  void _onPositiveAction(String analyticsEvent) {
+    widget.onPositiveAction();
+    AnalyticsService.trackEvent(analyticsEvent, {
+      'theaterId': widget.theater.id.id,
+      if (widget.movie != null) 'movieId': widget.movie!.id.id,
+    });   // Do not await
+  }
 }
